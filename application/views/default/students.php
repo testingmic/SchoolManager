@@ -177,7 +177,7 @@ $response->html = '
                 <button id="filter_Students_List" type="submit" class="btn btn-outline-warning height-40 btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>
             <div class="col-12 col-sm-12 col-lg-12">
-                <div class="card">
+                <div class="card rounded-2xl">
                     <div class="card-body">
                         <div class="table-responsive table-student_staff_list">
                             <table class="table table-sm table-bordered table-striped datatable">

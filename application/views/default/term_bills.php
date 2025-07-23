@@ -225,15 +225,19 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
                     // display the record
                     $academic_calendar_years .= "
                         <div class=\"col-12 col-sm-6 col-md-6 col-lg-4\">
-                            <div class=\"card\">
-                                <div class=\"card-header font-20 ".($isCurrent ? "text-primary" : null)." p-2\">
-                                    {$acc_year} - YEAR
-                                    {$checked}
-                                </div>
-                                <div class=\"card-body p-2\">
-                                    <div class='d-flex justify-content-between'>
-                                        <div class='".($isCurrent ? "text-primary" : null)." font-20 text-uppercase'>{$acc_term->name} {$academicSession}</div>
-                                        <div>{$caption}</div>
+                            <div class=\"card hover:scale-105 transition-all duration-300 border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid ".($isCurrent ? 
+                                    "border-success" : (!in_array($term_year, $_previous_academic_years) ? "border-primary" : "border-warning")
+                                )."\">
+                                <div class=\"card-body pr-2 pl-3 card-type-3\">
+                                    <div class=\"card-header font-20 ".($isCurrent ? "text-primary" : null)." p-2\">
+                                        {$acc_year} - YEAR
+                                        {$checked}
+                                    </div>
+                                    <div class=\"card-body p-2\">
+                                        <div class='d-flex justify-content-between'>
+                                            <div class='".($isCurrent ? "text-primary" : null)." font-20 text-uppercase'>{$acc_term->name} {$academicSession}</div>
+                                            <div>{$caption}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

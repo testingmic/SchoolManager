@@ -98,6 +98,8 @@ load_helpers(['menu_helper']);
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/fullcalendar/fullcalendar.min.css">
     <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
     <link rel="apple-touch-icon" href="<?= $baseUrl ?>assets/img/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <meta name="theme-color" content="#2196F3">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -115,7 +117,7 @@ load_helpers(['menu_helper']);
     </script>
     <?= $myClass->google_analytics_code ?>
 </head>
-<body class="bg">
+<body class="bg-gradient-to-br from-slate-50 to-indigo-100 via-blue-50">
 	<div class="loader"></div>
     <input name="minimum_date" hidden type="hidden" disabled value="<?= date("Y-m-d", strtotime("today -100 years")) ?>">
     <input type="hidden" hidden id="todays_date" disabled value="<?= date("Y-m-d") ?>">
@@ -300,8 +302,8 @@ load_helpers(['menu_helper']);
                 <aside id="sidebar-wrapper">
 
                     <div class="sidebar-brand">
-                        <a href="<?= $baseUrl ?>dashboard" class="anchor">
-                            <img alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" />
+                        <a href="<?= $baseUrl ?>dashboard" class="anchor flex items-center">
+                            <img alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo mr-2" />
                             <span class="logo-name"><?= $appName ?></span>
                         </a>
                     </div>

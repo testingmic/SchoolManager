@@ -387,16 +387,16 @@ if(!empty($user_id)) {
             <div class="section-body">
             <div class="row">
             <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body text-center bg-amber">
+                <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
+                    <div class="card-body text-center bg-gradient-to-br from-amber-500 to-amber-300 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-bold">STUDENT ID</div>
                         <div class="font-22 font-weight-bold text-uppercase text-white">'.$data->unique_id.'</div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body text-center bg-primary">
+                <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
+                    <div class="card-body text-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-bold">CLASS</div>
                         <div class="font-22 font-weight-bold text-uppercase text-white">
                             '.($data->class_name ? $data->class_name : '-' ).'
@@ -405,8 +405,8 @@ if(!empty($user_id)) {
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body pl-0 pr-0 text-center bg-pink">
+                <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
+                    <div class="card-body pl-0 pr-0 text-center bg-gradient-to-br from-pink-500 to-pink-300 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-bold">DEPARTMENT</div>
                         <div class="font-22 font-weight-bold text-uppercase text-white">
                             '.($data->department_name ? $data->department_name : '-' ).'
@@ -415,8 +415,8 @@ if(!empty($user_id)) {
                 </div>
             </div>
             <div class="col-md-3 d-none d-sm-block">
-                <div class="card">
-                    <div class="card-body pl-0 pr-0 text-center bg-success">
+                <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
+                    <div class="card-body pl-0 pr-0 text-center bg-gradient-to-br from-green-500 to-green-300 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-bold">SECTION</div>
                         <div class="font-22 font-weight-bold text-uppercase text-white">
                             '.($data->section_name ? $data->section_name : '-' ).'
@@ -427,7 +427,7 @@ if(!empty($user_id)) {
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="card author-box">
                 <div class="card-body">
-                    <div class="author-box-center m-0 p-0">
+                    <div class="author-box-center m-0 p-0 flex justify-center">
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
                     </div>
                     <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>

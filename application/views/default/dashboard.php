@@ -582,8 +582,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 $response->html .=
                 '<div class="row">
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card">
-                            <div class="card-body bg-blue text-white card-type-3">
+                        <div class="card rounded-2xl">
+                            <div class="card-body bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Students Count</h6>
@@ -599,8 +599,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card">
-                            <div class="card-body bg-blue text-white card-type-3">
+                        <div class="card rounded-2xl">
+                            <div class="card-body bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Teaching Stafff</h6>
@@ -616,8 +616,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card">
-                            <div class="card-body bg-blue text-white card-type-3">
+                        <div class="card rounded-2xl">
+                            <div class="card-body bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Employees / Users</h6>
@@ -633,10 +633,10 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card bg-blue text-white">
-                            <div class="card-body pb-1 pt-3">
+                        <div class="card rounded-2xl">
+                            <div class="card-body inline-flex justify-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
                                 <div align="center">
-                                    <h6 class="border-bottom font-13 text-uppercase font-bold p-0 pb-2 mb-2 m-0">'.date("l, F d, Y").'</h6>
+                                    <h6 class="border-bottom font-13 text-uppercase font-bold p-0 m-0">'.date("l, F d, Y").'</h6>
                                     <h3 class="p-0 m-0"><div class="plugin-clock">'.date("h:i A").'</div></h3>
                                 </div>
                             </div>
@@ -653,7 +653,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 <div class="col-lg-12">
                     <div class="row">
                     <div class="col-lg-8 col-md-7">
-                        <div class="card">
+                        <div class="card rounded-2xl">
                             <div class="card-body school-details" style="min-height:235px">
                                 <div class="row">
                                     '.(
@@ -680,7 +680,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="col-lg-4 col-md-5">
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="card">
+                                <div class="card rounded-2xl">
                                     <div class="card-body mb-2 pl-2 pr-2 pb-2" align="center">
                                         <p class="font-16 p-0 m-0 text-primary text-uppercase">Academic Year</p>
                                         <h6 class="mt-1 pt-0">'.$defaultAcademics->academic_year.'</h6>
@@ -730,7 +730,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
             $response->html .= '
                 <div class="col-lg-4 col-md-12 col-12 col-sm-12">
-                    <div class="card">
+                    <div class="card rounded-2xl">
                         <div class="card-header pr-2">
                             <div class="row width-per-100">
                                 <div class="col-md-9">
@@ -751,7 +751,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-8">
-                    <div class="card">
+                    <div class="card rounded-2xl">
                         <div class="card-header pr-0">
                             <div class="row width-100">
                                 <div class="col-md-2">
@@ -819,7 +819,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 '.(
                     $isAdmin ?
                     '<div class="col-lg-12 col-md-12 col-12 col-sm-12">
-                        <div class="card">
+                        <div class="card rounded-2xl">
                             <div class="card-header pr-0">
                                 <div class="row width-100">
                                     <div class="col-md-7">
@@ -875,7 +875,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 // append the data
                 $response->html .= '
                     <div class="col-lg-4 col-md-6 col-12 col-sm-12">
-                        <div class="card">
+                        <div class="card rounded-2xl">
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13">Students</h4>
                             </div>
@@ -897,11 +897,11 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-12 col-sm-12 d-none d-sm-block">
-                        <div class="card">
+                        <div class="card rounded-2xl">
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13">Upcoming Events</h4>
                             </div>
-                            <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
+                            <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:355px;height:355px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
                                     '.$upcoming_events_list.'
                                 </ul>
@@ -909,11 +909,11 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-12 col-sm-12">
-                        <div class="card">
+                        <div class="card rounded-2xl">
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13">Upcoming Birthdays</h4>
                             </div>
-                            <div class="pl-1 pr-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
+                            <div class="pl-1 pr-2 trix-slim-scroll" style="max-height:355px;height:355px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
                                     '.$upcoming_birthday_list.'
                                 </ul>

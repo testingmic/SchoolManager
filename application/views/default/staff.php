@@ -324,24 +324,24 @@ if(empty($user_id)) {
             <div class="section-body">
             <div class="row">
             <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body text-center bg-amber">
+                <div class="card rounded-2xl">
+                    <div class="card-body text-center bg-gradient-to-br from-amber-500 to-amber-300 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-weight-bold">STAFF ID</div>
                         <div class="font-22 font-weight-bold text-uppercase text-white">'.$data->unique_id.'</div>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body text-center bg-info">
+                <div class="card rounded-2xl">
+                    <div class="card-body text-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-weight-bold">POSITION</div>
                         <div class="font-22 font-weight-bold text-uppercase text-white">'.($data->position ? $data->position : '-' ).'</div>
                     </div>
                 </div>
             </div>
             <div class="col-md-5">
-                <div class="card">
-                    <div class="card-body text-center bg-success">
+                <div class="card rounded-2xl">
+                    <div class="card-body text-center bg-gradient-to-br from-green-500 to-green-300 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-weight-bold">DEPARTMENT</div>
                         <div class="font-22 font-weight-bold text-uppercase text-white">
                             '.($data->section_name ? $data->section_name : '-' ).'
@@ -352,7 +352,7 @@ if(empty($user_id)) {
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="card author-box">
                     <div class="card-body">
-                        <div class="author-box-center m-0 p-0">
+                        <div class="author-box-center m-0 p-0 flex justify-center">
                             <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
                         </div>
                         <div class="author-box-center">

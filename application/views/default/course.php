@@ -269,27 +269,27 @@ if(!empty($item_id)) {
             </div>
             <div class="section-body">
             <div class="row mt-sm-4">
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body p-3 text-center bg-info">
-                        <div class="text-uppercase font-25 font-weight-bolder text-white">'.$data->name.'</div>
-                        <div class="font-18 font-weight-bold text-uppercase text-white">('.$data->course_code.')</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-9 d-none d-sm-block">
-                <div class="card">
-                    <div class="card-body p-0">
-                        <div class="card-header">
-                            <h4>SUBJECT DESCRIPTION</h4>
-                        </div>
-                        <div class="p-3 pt-0">
-                        '.(!empty($data->description) ? $data->description : "<div class='text-center'>Description Not Set</div>").'
+                <div class="col-md-3">
+                    <div class="card rounded-2xl">
+                        <div class="card-body p-3 text-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
+                            <div class="text-uppercase font-25 font-weight-bolder text-white">'.$data->name.'</div>
+                            <div class="font-18 font-weight-bold text-uppercase text-white">('.$data->course_code.')</div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-12 col-md-12 col-lg-3">
+                <div class="col-md-9 d-none d-sm-block">
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <div class="card-header">
+                                <h4>SUBJECT DESCRIPTION</h4>
+                            </div>
+                            <div class="p-3 pt-0">
+                            '.(!empty($data->description) ? $data->description : "<div class='text-center'>Description Not Set</div>").'
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-12 col-lg-3">
                 <div class="mb-3">
                     <button onclick="load(\'gradebook/'.$data->item_id.'/attendance?class_id='.trim($class_ids_list, ",").'\');" class="btn btn-block btn-primary"><i class="fa fa-book-open"></i> GRADEBOOK</button>
                 </div>
