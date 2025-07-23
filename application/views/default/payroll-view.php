@@ -126,7 +126,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                 <div class="section-body">
                 <div class="row mt-sm-4">
                     <div class="col-md-3">
-                        <div class="card rounded-2xl">
+                        <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                             <div class="card-body text-center bg-gradient-to-br from-amber-500 to-amber-300 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="font-18 text-white">STAFF ID</div>
                                 <div class="font-22 font-weight-bold text-uppercase text-white">'.$data->unique_id.'</div>
@@ -134,7 +134,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card rounded-2xl">
+                        <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                             <div class="card-body text-center bg-gradient-to-br from-pink-500 to-pink-300 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="font-18 text-white">APPOINTMENT DATE</div>
                                 <div class="font-22 font-weight-bold text-uppercase text-white">
@@ -144,7 +144,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card rounded-2xl">
+                        <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                             <div class="card-body text-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="font-18 text-white">POSITION</div>
                                 <div class="font-22 font-weight-bold text-uppercase text-white">'.($data->position ? $data->position : '-' ).'</div>
@@ -152,7 +152,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card rounded-2xl">
+                        <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                             <div class="card-body text-center bg-gradient-to-br from-green-500 to-green-300 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="font-18 text-white">DEPARTMENT</div>
                                 <div class="font-22 font-weight-bold text-uppercase text-white">

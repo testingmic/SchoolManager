@@ -1135,7 +1135,7 @@ class Auth extends Myschoolgh {
 
             // gift 10 sms messages to the client
             $sms_stmt = $this->db->prepare("INSERT INTO smsemail_balance SET client_id = ?, sms_balance = ?");
-            $sms_stmt->execute([$client_id, 10]);
+            $sms_stmt->execute([$client_id, 100]);
 
             // insert the academic terms information for the client
             $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}', name='1st', description='1st Term'");

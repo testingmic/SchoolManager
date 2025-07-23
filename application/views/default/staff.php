@@ -324,7 +324,7 @@ if(empty($user_id)) {
             <div class="section-body">
             <div class="row">
             <div class="col-md-3">
-                <div class="card rounded-2xl">
+                <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                     <div class="card-body text-center bg-gradient-to-br from-amber-500 to-amber-300 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-weight-bold">STAFF ID</div>
                         <div class="font-22 font-weight-bold text-uppercase text-white">'.$data->unique_id.'</div>
@@ -332,7 +332,7 @@ if(empty($user_id)) {
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card rounded-2xl">
+                <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                     <div class="card-body text-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-weight-bold">POSITION</div>
                         <div class="font-22 font-weight-bold text-uppercase text-white">'.($data->position ? $data->position : '-' ).'</div>
@@ -340,7 +340,7 @@ if(empty($user_id)) {
                 </div>
             </div>
             <div class="col-md-5">
-                <div class="card rounded-2xl">
+                <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                     <div class="card-body text-center bg-gradient-to-br from-green-500 to-green-300 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-weight-bold">DEPARTMENT</div>
                         <div class="font-22 font-weight-bold text-uppercase text-white">
