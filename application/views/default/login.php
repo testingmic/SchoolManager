@@ -26,6 +26,7 @@ if(loggedIn()) {
   <link id="current_url" name="current_url" value="<?= $baseUrl ?>main">
   <link rel="apple-touch-icon" href="<?= $baseUrl ?>assets/img/favicon.ico">
   <meta name="theme-color" content="#2196F3">
+  <script src="https://cdn.tailwindcss.com"></script>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -47,52 +48,61 @@ if(loggedIn()) {
       <div class="container mt-5">
         <div class="row">
           <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
-            <div class="text-left mb-2 p-2 bg-white">
+            <div class="text-left mb-2 p-2 bg-white  rounded-2xl">
                 <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="70px" /></div>
                 <div>
                     <div class="font-25px text-center font-weight-bold text-dark"><?= config_item('site_name') ?></div> 
                     <div class="text-dark text-center">Your advanced school management system.</div>
                 </div>
             </div>
-            <div class="card card-primary">
-              <div class="card-header">
-                <h4>Login</h4>
+            <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+              <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-2">
+                <h4 class="text-white text-2xl font-bold text-center">Welcome Back</h4>
+                <p class="text-blue-100 text-center">Sign in to your account</p>
               </div>
-              <div class="card-body">
+              <div class="p-8 pb-0">
                   <?= form_loader(); ?>
-                <form method="POST" autocomplete="Off" action="<?= $baseUrl ?>api/auth/login" id="auth-form" class="needs-validation" novalidate="">
-                  <div class="form-group">
-                    <label for="username">Username</label>
-                    <input id="username" type="text" autocomplete="Off" class="form-control" name="username" tabindex="1" required autofocus>
-                    <div class="invalid-feedback">
+                <form method="POST" autocomplete="Off" action="<?= $baseUrl ?>api/auth/login" id="auth-form" class="needs-validation space-y-6" novalidate="">
+                  <div class="space-y-2">
+                    <label for="username" class="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+                    <div class="relative">
+                      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-user text-gray-400"></i>
+                      </div>
+                      <input id="username" type="text" autocomplete="Off" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white" name="username" tabindex="1" required autofocus placeholder="Enter your username">
+                    </div>
+                    <div class="invalid-feedback text-red-500 text-sm mt-1">
                       Please fill in your username
                     </div>
                   </div>
-                  <div class="form-group">
-                    <div class="d-block">
-                      <label for="password" class="control-label">Password</label>
-                      <div class="float-right">
-                        <a href="<?= $baseUrl ?>forgot-password" class="text-small">
-                          Forgot Password?
-                        </a>
-                      </div>
+                  <div class="space-y-2">
+                    <div class="flex justify-between items-center mb-2">
+                      <label for="password" class="block text-sm font-semibold text-gray-700">Password</label>
+                      <a href="<?= $baseUrl ?>forgot-password" class="text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                        Forgot Password?
+                      </a>
                     </div>
-                    <input id="password" type="password" autocomplete="Off" class="form-control" name="password" tabindex="2" required>
-                    <div class="invalid-feedback">
-                      please fill in your password
+                    <div class="relative">
+                      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-gray-400"></i>
+                      </div>
+                      <input id="password" type="password" autocomplete="Off" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white" name="password" tabindex="2" required placeholder="Enter your password">
+                    </div>
+                    <div class="invalid-feedback text-red-500 text-sm mt-1">
+                      Please fill in your password
                     </div>
                   </div>
-                  <div class="form-group">
-                    <button type="submit" class="btn btn-primary btn-lg btn-block" tabindex="4">
-                      Login
+                  <div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-2 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" tabindex="4">
+                      <i class="fas fa-sign-in-alt mr-2"></i>
+                      Sign In
                     </button>
                   </div>
                 </form>
-                <div class="text-center mt-4 mb-3"></div>
-                <div class="form-results"></div>
+                <div class="form-results mt-4"></div>
               </div>
             </div>
-            <div class="mt-3 mb-3 text-dark p-3 bg-white text-center">
+            <div class="mt-3 mb-3 text-dark p-3 bg-white text-center  rounded-2xl">
               Don't have an account? <a href="<?= $baseUrl ?>register">Create One</a>
             </div>
           </div>

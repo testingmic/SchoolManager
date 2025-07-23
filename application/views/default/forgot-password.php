@@ -26,7 +26,9 @@ if(loggedIn()) {
   <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
   <link id="current_url" name="current_url" value="<?= $user_current_url ?>">
   <link rel="apple-touch-icon" href="<?= $baseUrl ?>assets/img/favicon.ico">
+  <meta name="description" content="Seamlessly reset your password with <?= $myClass->appName ?>">
   <meta name="theme-color" content="#2196F3">
+  <script src="https://cdn.tailwindcss.com"></script>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
