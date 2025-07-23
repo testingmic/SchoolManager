@@ -1019,11 +1019,11 @@ class Auth extends Myschoolgh {
 
         // check if the user has registered an account with the past 5 minutes
         if(!$this->check_time("clients_accounts", 5)) {
-            return ["code" => 201, "data" => "Sorry! You are prohibited from registering multiple accounts within a short space of time."];
+            return ["code" => 201, "result" => "Sorry! You are prohibited from registering multiple accounts within a short space of time."];
         }
 
         if(!filter_var($params->email, FILTER_VALIDATE_EMAIL)) {
-            return ["code" => 201, "data" => "Sorry! Please provide a valid email address."];
+            return ["code" => 201, "result" => "Sorry! Please provide a valid email address."];
         }
         
         $username = explode("@", $params->email)[0];
@@ -1031,11 +1031,11 @@ class Auth extends Myschoolgh {
         $contact_2 = isset($params->school_contact_2) ? $this->format_contact($params->school_contact_2) : null;
 
         if(empty($contact)) {
-            return ["code" => 201, "data" => "Sorry! The contact number is required."];
+            return ["code" => 201, "result" => "Sorry! The contact number is required."];
         }
 
         if($contact === $contact_2) {
-            return ["code" => 201, "data" => "Sorry! The contact numbers cannot be the same."];
+            return ["code" => 201, "result" => "Sorry! The contact numbers cannot be the same."];
         }
         
         try {
@@ -1049,9 +1049,9 @@ class Auth extends Myschoolgh {
             // perform the checks
             if(!empty($a_check)) {
                 if($a_check[0]->client_status == 0) {
-                    return ["code" => 201, "data" => "Sorry! You already have an account pending verification. Please wait while we complete the verification process."];
+                    return ["code" => 201, "result" => "Sorry! You already have an account pending verification. Please wait while we complete the verification process."];
                 } elseif($a_check[0]->client_status == 1) {
-                    return ["code" => 201, "data" => "Sorry! You already have an account. Please try to login instead or use the reset password option if you have forgotten your password."];
+                    return ["code" => 201, "result" => "Sorry! You already have an account. Please try to login instead or use the reset password option if you have forgotten your password."];
                 }
             }
 
@@ -1223,7 +1223,7 @@ class Auth extends Myschoolgh {
             // create the account
             return [
                 "code" => 200,
-                "data" => "Your account has successfully been created. Please check your email for the Verification Link.",
+                "result" => "Your account has successfully been created. Please check your email for the Verification Link.",
                 "clear" => true
             ];
 
@@ -1231,7 +1231,7 @@ class Auth extends Myschoolgh {
             // reverse any transaction
             $this->db->rollBack();
             // return the error message
-            return ["code" => 201, "data" => "Sorry! An error occured while processing the request."];
+            return ["code" => 201, "result" => "Sorry! An error occured while processing the request."];
         }
 
     }

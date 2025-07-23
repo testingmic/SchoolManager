@@ -229,8 +229,10 @@ class Myschoolgh extends Models {
 			($defaultUser->user_status == "Pending")
 		) {
 			return "
-			<div class=\"alert alert-danger p-2 mb-2 text-center\">
-				Your Account has not yet been activated. Please check your email for the verification link.
+			<div class=\"font-18 bg-red-50 border border-red-200 dark:border-red-800 p-2 mb-2 text-center rounded-2xl\">
+				<p class=\"text-red-600\">
+					Your Account has not yet been activated. Please check your email for the verification link.
+				</p>
 			</div>";
 		}
 	}

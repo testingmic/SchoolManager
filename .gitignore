@@ -13,3 +13,4 @@ assets/img/accounts/*
 !assets/uploads/index.html
 assets/img/library/*
 vendor/
+assets/css/clients/*

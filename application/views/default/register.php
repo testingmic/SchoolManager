@@ -70,7 +70,7 @@ if(loggedIn()) {
                       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-school text-gray-400"></i>
                       </div>
-                      <input id="school_name" type="text" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white" name="school_name" tabindex="1" required autofocus placeholder="Enter school name">
+                      <input id="school_name" type="text" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900" name="school_name" tabindex="1" required autofocus placeholder="Enter school name">
                     </div>
                     <div class="invalid-feedback text-red-500 text-sm mt-1">
                       Please enter your school name
@@ -83,7 +83,7 @@ if(loggedIn()) {
                       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-map-marker-alt text-gray-400"></i>
                       </div>
-                      <input id="school_address" type="text" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white" name="school_address" tabindex="2" required placeholder="Enter school address">
+                      <input id="school_address" type="text" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900" name="school_address" tabindex="2" required placeholder="Enter school address">
                     </div>
                     <div class="invalid-feedback text-red-500 text-sm mt-1">
                       Please enter your school address
@@ -97,7 +97,7 @@ if(loggedIn()) {
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <i class="fas fa-phone text-gray-400"></i>
                         </div>
-                        <input id="school_contact" type="text" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white" name="school_contact" tabindex="3" required placeholder="Primary contact number">
+                        <input id="school_contact" type="text" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900" name="school_contact" tabindex="3" required placeholder="Primary contact number">
                       </div>
                       <div class="invalid-feedback text-red-500 text-sm mt-1">
                         Please enter primary contact
@@ -110,7 +110,7 @@ if(loggedIn()) {
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <i class="fas fa-phone text-gray-400"></i>
                         </div>
-                        <input id="school_contact_2" type="text" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white" name="school_contact_2" tabindex="4" placeholder="Secondary contact number (optional)">
+                        <input id="school_contact_2" type="text" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900" name="school_contact_2" tabindex="4" placeholder="Secondary contact number (optional)">
                       </div>
                     </div>
                   </div>
@@ -122,7 +122,7 @@ if(loggedIn()) {
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <i class="fas fa-envelope text-gray-400"></i>
                         </div>
-                        <input id="email" type="email" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white" name="email" tabindex="5" required placeholder="Enter email address">
+                        <input id="email" type="email" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900" name="email" tabindex="5" required placeholder="Enter email address">
                       </div>
                       <div class="invalid-feedback text-red-500 text-sm mt-1">
                         Please enter a valid email address
@@ -135,7 +135,7 @@ if(loggedIn()) {
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <i class="fas fa-lock text-gray-400"></i>
                         </div>
-                        <input id="password" type="password" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white" name="password" tabindex="6" required placeholder="Create a password">
+                        <input id="password" type="password" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900" name="password" tabindex="6" required placeholder="Create a password">
                       </div>
                       <div class="invalid-feedback text-red-500 text-sm mt-1">
                         Please create a password
@@ -147,7 +147,7 @@ if(loggedIn()) {
                   <input type="hidden" name="portal_registration" value="true" id="portal_registration" hidden>
                   
                   <div class="space-y-2">
-                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-2 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" tabindex="7">
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-2 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 " tabindex="7">
                       <i class="fas fa-user-plus mr-2"></i>
                       Create Account
                     </button>

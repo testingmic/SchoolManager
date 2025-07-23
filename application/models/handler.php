@@ -169,6 +169,9 @@ class Handler {
 
         $response = [];
 
+        // remove the trailing slash from the endpoint
+        $endpoint = rtrim($endpoint, "/");
+
         // control
         if(in_array($endpoint, $samplePath)) {
 
@@ -216,7 +219,7 @@ class Handler {
                 $response["data"] = $logObj->reset_user_password($this->params);
             }
             // if the user is creating a new portal account
-            elseif(isset($this->params->portal_registration, $this->params->school_name, $this->params->school_address, $this->params->school_contact, $this->params->email)) {
+            elseif(isset($this->params->portal_registration)) {
                 // request password reset
                 $response["data"] = $logObj->create($this->params);
             }

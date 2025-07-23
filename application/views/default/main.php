@@ -80,12 +80,12 @@ if(empty($urlParse['path']) || !empty($urlParse['path']) && strlen($urlParse['pa
         ?>
         <div class="main-content" id="pagecontent">
             <?= $myClass->async_notification(); ?>
-            <div class="card">
+            <div class="card bg-gradient-to-br from-blue-500 to-purple-600 pb-3">
                 <div class="card-body mb-0 pb-0">
-                    <h1 class="text-center text-info text-uppercase"><?= $clientData->client_name ?></h1>
+                    <h1 class="text-center font-25 text-white text-uppercase"><?= $clientData->client_name ?></h1>
                 </div>
                 <div class="col-lg-12">
-                    <p class="text-center text-success font-18px">Thank you for creating an account with <strong><?= $appName ?></strong>.
+                    <p class="text-center text-white font-20">Thank you for creating an account with <strong><?= $appName ?></strong>.
                         Please take a moment to complete the account setup process.
                     </p>
                 </div>

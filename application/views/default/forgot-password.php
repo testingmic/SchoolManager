@@ -71,7 +71,7 @@ if(loggedIn()) {
                       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-envelope text-gray-400"></i>
                       </div>
-                      <input id="email" type="email" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white" name="email" tabindex="1" required autofocus placeholder="Enter your email address">
+                      <input id="email" type="email" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900" name="email" tabindex="1" required autofocus placeholder="Enter your email address">
                     </div>
                     <div class="invalid-feedback text-red-500 text-sm mt-1">
                       Please enter a valid email address

@@ -33,7 +33,7 @@ $(`form[id="auth-form"]`).on("submit", function(evt) {
                 if ($(`link[name="current_url"]`).length) {
                     setTimeout(() => {
                         window.location.href = $(`link[name="current_url"]`).attr("value");
-                    }, response.data?.refresh);
+                    }, 3000);
                 }
                 if (typeof response.data?.clear !== 'undefined') {
                     $(`form[id="auth-form"] *`).val("");
@@ -52,7 +52,7 @@ $(`form[id="auth-form"]`).on("submit", function(evt) {
             if(typeof response.data?.refresh_page !== 'undefined') {
                 setTimeout(() => {
                     window.location.href = baseUrl;
-                }, response.data?.refresh);
+                }, 3000);
             }
         } else {
             $(`form[id="auth-form"] *`).prop("disabled", false);

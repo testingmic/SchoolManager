@@ -69,7 +69,7 @@ if(loggedIn()) {
                       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-user text-gray-400"></i>
                       </div>
-                      <input id="username" type="text" autocomplete="Off" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white" name="username" tabindex="1" required autofocus placeholder="Enter your username">
+                      <input id="username" type="text" autocomplete="Off" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900" name="username" tabindex="1" required autofocus placeholder="Enter your username">
                     </div>
                     <div class="invalid-feedback text-red-500 text-sm mt-1">
                       Please fill in your username
@@ -86,7 +86,7 @@ if(loggedIn()) {
                       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-lock text-gray-400"></i>
                       </div>
-                      <input id="password" type="password" autocomplete="Off" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white" name="password" tabindex="2" required placeholder="Enter your password">
+                      <input id="password" type="password" autocomplete="Off" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900" name="password" tabindex="2" required placeholder="Enter your password">
                     </div>
                     <div class="invalid-feedback text-red-500 text-sm mt-1">
                       Please fill in your password
@@ -99,7 +99,7 @@ if(loggedIn()) {
                     </button>
                   </div>
                 </form>
-                <div class="form-results mt-4"></div>
+                <div class="form-results mt-4 pb-4"></div>
               </div>
             </div>
             <div class="mt-3 mb-3 text-dark p-3 bg-white text-center  rounded-2xl">
