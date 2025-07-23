@@ -220,7 +220,7 @@ if(!empty($user_id) && ($user_id !== "add")) {
                     <div class="card author-box pt-2">
                         <div class="card-body pl-1 pr-1">
                             '.(!empty($data) ? '
-                                <div class="author-box-center m-0 p-0">
+                                <div class="author-box-center m-0 p-0 flex justify-center">
                                     <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
                                 </div>
                                 <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>

@@ -226,7 +226,7 @@ $response->html = '
         </div>
         
         '.($feesReport ?
-        '<div class="col-xl-3 col-lg-3 col-md-6">
+        '<div class="col-xl-3 col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
             <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-blue">
                 <div class="card-body pr-2 pl-3 card-type-3">
                     <div class="row">
@@ -244,7 +244,7 @@ $response->html = '
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-3 col-md-6">
+        <div class="col-xl-3 col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
             <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-success">
                 <div class="card-body pr-2 pl-3 card-type-3">
                     <div class="row">
@@ -262,7 +262,7 @@ $response->html = '
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-3 col-md-6">
+        <div class="col-xl-3 col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
             <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-danger">
                 <div class="card-body pr-2 pl-3 card-type-3">
                     <div class="row">
@@ -280,7 +280,7 @@ $response->html = '
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-3 col-md-6">
+        <div class="col-xl-3 col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
             <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-warning">
                 <div class="card-body pr-2 pl-2 card-type-3">
                     <div class="row">
