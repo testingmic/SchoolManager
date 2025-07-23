@@ -1,4 +1,5 @@
 <?php
+$appName = "MySchoolGH";
 $appUrl = "https://app.myschoolgh.com";
 $registerUrl = "https://app.myschoolgh.com/register";
 ?>
@@ -11,6 +12,17 @@ $registerUrl = "https://app.myschoolgh.com/register";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MySchoolGH - Modern School Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="theme-color" content="#2196F3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="App - <?= $appName ?>">
+    <meta name="description" content="MySchoolGH is a modern school management system that helps schools manage their students, staff, and finances.">
+    <meta name="keywords" content="school management, school management system, school management software, school management solution, school management app, school management platform, school management system, school management software, school management solution, school management app, school management platform">
+    <meta name="author" content="MySchoolGH">
+    <meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow">
+    <meta name="google" content="notranslate">
+    <link rel='shortcut icon' type='image/x-icon' href='<?= $appUrl ?>/assets/img/favicon.ico' />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
