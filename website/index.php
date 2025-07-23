@@ -941,9 +941,26 @@ $registerUrl = "https://app.myschoolgh.com/register";
                 display: none;
             }
 
+            .nav-container {
+                max-width: 100%;
+                padding: 0 1rem;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .logo-img {
+                width: 30px;
+                height: 30px;
+                margin-right: 0.5rem;
+            }
+
             .hero {
                 min-height: 100vh;
                 padding: 2rem 0 0 0;
+                padding-top: 6rem;
+                padding-bottom: 3rem;
             }
 
             .hero-container {
@@ -957,6 +974,12 @@ $registerUrl = "https://app.myschoolgh.com/register";
 
             .hero p {
                 font-size: 1.1rem;
+            }
+
+            .hero-stats {
+                display: block;
+                padding: 1.5rem;
+                background: rgba(37, 99, 235, 0.05);
             }
 
             .hero-buttons {
@@ -1056,8 +1079,8 @@ $registerUrl = "https://app.myschoolgh.com/register";
     <nav class="navbar" id="navbar">
         <div class="nav-container">
             <a href="#" class="logo">
-                <i class="fas fa-graduation-cap"></i>
-                MySchoolGH
+                <img src="<?= $appUrl ?>/assets/img/logo.png" width="50" height="50" alt="<?= $appName ?>" class="logo-img">
+                <?= $appName ?>
             </a>
             <ul class="nav-center">
                 <li><a href="#home">Home</a></li>
@@ -1083,7 +1106,7 @@ $registerUrl = "https://app.myschoolgh.com/register";
         </div>
         <div class="hero-container">
             <div class="hero-content">
-                <h1>Simplify School <span class="highlight">Administration</span> with MySchoolGH</h1>
+                <h1>Simplify School <span class="highlight">Administration</span> with <?= $appName ?></h1>
                 <p>All-in-one school management solution tailored for Ghanaian schools. Handle student records, staff, finances, and more with our robust web and mobile app.</p>
                 <div class="hero-buttons">
                     <a href="<?= $registerUrl ?>?plan=trial" class="btn-primary">Start Your Free Trial</a>
