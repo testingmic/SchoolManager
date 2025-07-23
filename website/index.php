@@ -161,7 +161,7 @@ $registerUrl = "https://app.myschoolgh.com/register";
 
         /* Hero Section */
         .hero {
-            min-height: 90vh;
+            min-height: 80vh;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             display: flex;
             align-items: center;
@@ -929,6 +929,11 @@ $registerUrl = "https://app.myschoolgh.com/register";
                 display: none;
             }
 
+            .hero {
+                min-height: 100vh;
+                padding: 2rem 0 0 0;
+            }
+
             .hero-container {
                 grid-template-columns: 1fr;
                 gap: 2rem;
@@ -1069,6 +1074,7 @@ $registerUrl = "https://app.myschoolgh.com/register";
                 <h1>Simplify School <span class="highlight">Administration</span> with MySchoolGH</h1>
                 <p>All-in-one school management solution tailored for Ghanaian schools. Handle student records, staff, finances, and more with our robust web and mobile app.</p>
                 <div class="hero-buttons">
+                    <a href="<?= $registerUrl ?>?plan=trial" class="btn-primary">Start Your Free Trial</a>
                     <a href="#pricing" class="btn-secondary">View Pricing Plans</a>
                 </div>
                 <div class="hero-features">
