@@ -1,10 +1,11 @@
-<?php 
+<?php
 $appUrl = "https://app.myschoolgh.com";
 $registerUrl = "https://app.myschoolgh.com/register";
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -160,12 +161,13 @@ $registerUrl = "https://app.myschoolgh.com/register";
 
         /* Hero Section */
         .hero {
-            min-height: 80vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 90vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             display: flex;
             align-items: center;
             position: relative;
             overflow: hidden;
+            padding: 1rem 0 0 0;
         }
 
         .hero::before {
@@ -175,14 +177,29 @@ $registerUrl = "https://app.myschoolgh.com/register";
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            opacity: 0.3;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            animation: gradientShift 8s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
         }
 
         .hero-container {
             max-width: 80%;
             margin: 0 auto;
-            padding: 0 0rem;
+            padding: 0 2rem;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 4rem;
@@ -193,35 +210,68 @@ $registerUrl = "https://app.myschoolgh.com/register";
 
         .hero-content {
             color: white;
+            position: relative;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 4rem;
             font-weight: 800;
             margin-bottom: 1.5rem;
             opacity: 0;
             transform: translateY(30px);
             animation: fadeInUp 1s ease forwards 0.5s;
-            line-height: 1.2;
+            line-height: 1.1;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
         .hero h1 .highlight {
-            color: var(--secondary-color);
+            background: linear-gradient(45deg, var(--secondary-color), #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .hero h1 .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(45deg, var(--secondary-color), #ffd700);
+            border-radius: 2px;
+            animation: underlineGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes underlineGlow {
+
+            0%,
+            100% {
+                opacity: 0.7;
+                transform: scaleX(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scaleX(1);
+            }
         }
 
         .hero p {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
             opacity: 0;
             transform: translateY(30px);
             animation: fadeInUp 1s ease forwards 0.8s;
-            line-height: 1.6;
+            line-height: 1.7;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .hero-buttons {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
             opacity: 0;
             transform: translateY(30px);
             animation: fadeInUp 1s ease forwards 1.1s;
@@ -230,7 +280,7 @@ $registerUrl = "https://app.myschoolgh.com/register";
         .hero-features {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+            gap: 1.5rem;
             opacity: 0;
             transform: translateY(30px);
             animation: fadeInUp 1s ease forwards 1.4s;
@@ -239,14 +289,28 @@ $registerUrl = "https://app.myschoolgh.com/register";
         .hero-feature {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
             color: white;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .hero-feature:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
 
         .hero-feature i {
             color: var(--secondary-color);
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .affiliate-box {
@@ -286,63 +350,132 @@ $registerUrl = "https://app.myschoolgh.com/register";
         }
 
         .hero-card {
-            background: white;
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
             padding: 2.5rem;
-            box-shadow: var(--shadow-lg);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.2);
             text-align: center;
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(30px) scale(0.95);
             animation: fadeInUp 1s ease forwards 1s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                left: -100%;
+            }
+
+            100% {
+                left: 100%;
+            }
         }
 
         .hero-card-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: 16px;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), #f093fb);
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1.5rem;
-            font-size: 2.5rem;
+            margin: 0 auto 2rem;
+            font-size: 3rem;
             color: white;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         .hero-card h3 {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 700;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             color: var(--text-dark);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .hero-card p {
             color: var(--text-light);
-            margin-bottom: 2rem;
-            line-height: 1.6;
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+            font-size: 1.1rem;
         }
 
         .hero-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(37, 99, 235, 0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(37, 99, 235, 0.1);
         }
 
         .hero-stat {
             text-align: center;
+            position: relative;
+        }
+
+        .hero-stat::after {
+            content: '';
+            position: absolute;
+            right: -0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 60%;
+            background: linear-gradient(to bottom, transparent, rgba(37, 99, 235, 0.2), transparent);
+        }
+
+        .hero-stat:last-child::after {
+            display: none;
         }
 
         .hero-stat-number {
-            font-size: 1.5rem;
+            font-size: 2rem;
             font-weight: 800;
             color: var(--primary-color);
             display: block;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
         }
 
         .hero-stat-label {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: var(--text-light);
-            font-weight: 500;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .btn-primary {
@@ -390,33 +523,59 @@ $registerUrl = "https://app.myschoolgh.com/register";
 
         .floating-element {
             position: absolute;
-            background: rgba(255, 255, 255, 0.1);
             border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
+            animation: float 8s ease-in-out infinite;
+            filter: blur(1px);
         }
 
         .floating-element:nth-child(1) {
-            width: 80px;
-            height: 80px;
-            top: 20%;
-            left: 10%;
+            width: 100px;
+            height: 100px;
+            top: 15%;
+            left: 8%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
             animation-delay: 0s;
+            animation-duration: 10s;
         }
 
         .floating-element:nth-child(2) {
-            width: 120px;
-            height: 120px;
-            top: 60%;
-            right: 15%;
+            width: 150px;
+            height: 150px;
+            top: 55%;
+            right: 12%;
+            background: radial-gradient(circle, rgba(255, 105, 180, 0.25) 0%, transparent 70%);
             animation-delay: 2s;
+            animation-duration: 12s;
         }
 
         .floating-element:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            bottom: 15%;
+            left: 15%;
+            background: radial-gradient(circle, rgba(135, 206, 250, 0.3) 0%, transparent 70%);
+            animation-delay: 4s;
+            animation-duration: 8s;
+        }
+
+        .floating-element:nth-child(4) {
             width: 60px;
             height: 60px;
-            bottom: 20%;
-            left: 20%;
-            animation-delay: 4s;
+            top: 35%;
+            right: 25%;
+            background: radial-gradient(circle, rgba(50, 205, 50, 0.25) 0%, transparent 70%);
+            animation-delay: 6s;
+            animation-duration: 9s;
+        }
+
+        .floating-element:nth-child(5) {
+            width: 120px;
+            height: 120px;
+            bottom: 35%;
+            right: 8%;
+            background: radial-gradient(circle, rgba(255, 165, 0, 0.2) 0%, transparent 70%);
+            animation-delay: 1s;
+            animation-duration: 11s;
         }
 
         /* Features Section */
@@ -753,9 +912,12 @@ $registerUrl = "https://app.myschoolgh.com/register";
         }
 
         @keyframes float {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translateY(0px);
             }
+
             50% {
                 transform: translateY(-20px);
             }
@@ -856,11 +1018,17 @@ $registerUrl = "https://app.myschoolgh.com/register";
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body>
     <!-- Loading Screen -->
     <div class="loading" id="loading">
@@ -893,6 +1061,8 @@ $registerUrl = "https://app.myschoolgh.com/register";
             <div class="floating-element"></div>
             <div class="floating-element"></div>
             <div class="floating-element"></div>
+            <div class="floating-element"></div>
+            <div class="floating-element"></div>
         </div>
         <div class="hero-container">
             <div class="hero-content">
@@ -908,11 +1078,7 @@ $registerUrl = "https://app.myschoolgh.com/register";
                     </div>
                     <div class="hero-feature">
                         <i class="fas fa-check"></i>
-                        <span>Real-time Analytics</span>
-                    </div>
-                    <div class="hero-feature">
-                        <i class="fas fa-check"></i>
-                        <span>24/7 Support</span>
+                        <span>Real-time Analytics & Support</span>
                     </div>
                 </div>
             </div>
@@ -921,20 +1087,19 @@ $registerUrl = "https://app.myschoolgh.com/register";
                     <i class="fas fa-graduation-cap"></i>
                 </div>
                 <h3>Complete School Management</h3>
-                <div class="absolute -top-6 -left-6 w-12 h-12 bg-yellow-400 rounded-full opacity-80 animate-pulse"></div>
                 <p>Everything required for efficient school management, from student data to financial operations.</p>
                 <div class="hero-stats">
                     <div class="hero-stat">
-                        <span class="hero-stat-number">10K+</span>
+                        <span class="hero-stat-number">99%</span>
+                        <span class="hero-stat-label">Uptime</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-number">3K+</span>
                         <span class="hero-stat-label">Students</span>
                     </div>
                     <div class="hero-stat">
-                        <span class="hero-stat-number">50+</span>
+                        <span class="hero-stat-number">5</span>
                         <span class="hero-stat-label">Schools</span>
-                    </div>
-                    <div class="hero-stat">
-                        <span class="hero-stat-number">99%</span>
-                        <span class="hero-stat-label">Uptime</span>
                     </div>
                 </div>
             </div>
@@ -962,6 +1127,13 @@ $registerUrl = "https://app.myschoolgh.com/register";
                     </div>
                     <h3>Teacher Portal</h3>
                     <p>Empower teachers with tools for lesson planning, grade management, and parent communication.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <h3>Parent & Student Portal</h3>
+                    <p>Dedicated portals for parents and students to access grades, attendance, fees, and communicate with teachers.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
@@ -1193,7 +1365,9 @@ $registerUrl = "https://app.myschoolgh.com/register";
                     statsObserver.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.5 });
+        }, {
+            threshold: 0.5
+        });
 
         const statsSection = document.getElementById('stats');
         if (statsSection) {
@@ -1202,7 +1376,7 @@ $registerUrl = "https://app.myschoolgh.com/register";
 
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+            anchor.addEventListener('click', function(e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
@@ -1218,7 +1392,7 @@ $registerUrl = "https://app.myschoolgh.com/register";
         window.addEventListener('scroll', function() {
             const scrolled = window.pageYOffset;
             const parallax = document.querySelectorAll('.floating-element');
-            
+
             parallax.forEach((element, index) => {
                 const speed = 0.5 + (index * 0.1);
                 element.style.transform = `translateY(${scrolled * speed}px)`;
@@ -1230,7 +1404,7 @@ $registerUrl = "https://app.myschoolgh.com/register";
             card.addEventListener('mouseenter', function() {
                 this.style.transform = 'translateY(-10px) scale(1.02)';
             });
-            
+
             card.addEventListener('mouseleave', function() {
                 this.style.transform = 'translateY(0) scale(1)';
             });
@@ -1240,7 +1414,7 @@ $registerUrl = "https://app.myschoolgh.com/register";
         function typeWriter(element, text, speed = 100) {
             let i = 0;
             element.innerHTML = '';
-            
+
             function type() {
                 if (i < text.length) {
                     element.innerHTML += text.charAt(i);
@@ -1263,4 +1437,5 @@ $registerUrl = "https://app.myschoolgh.com/register";
         });
     </script>
 </body>
+
 </html>
