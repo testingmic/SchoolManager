@@ -568,7 +568,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
     <section class="section">
         <div class="default_period" data-current_period="'.$global_period.'">
         <div class="d-flex mt-3 justify-content-between" '.$data_stream.'></div>
-        <h4 class="border-bottom border-primary mb-2">Hello '.(!empty($defaultUser->name) ? trim($defaultUser->name) : "User").', </h4>';
+        <h4 class="border-bottom border-primary mb-3">Hello '.(!empty($defaultUser->name) ? trim($defaultUser->name) : "User").', </h4>';
         
         // load this section for admins and accountants
         if($isAdminAccountant) {
@@ -680,19 +680,19 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="col-lg-4 col-md-5">
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="card rounded-2xl">
-                                    <div class="card-body mb-2 pl-2 pr-2 pb-2" align="center">
+                                <div class="card rounded-2xl  bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900">
+                                    <div class="card-body mb-2 pl-2 pr-2 pb-2 bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-blue-500/20" align="center">
                                         <p class="font-16 p-0 m-0 text-primary text-uppercase">Academic Year</p>
                                         <h6 class="mt-1 pt-0">'.$defaultAcademics->academic_year.'</h6>
-                                        <span class="font-16 font-bold">
+                                        <span class="font-16 font-bold text-white">
                                             '.date("jS M, Y", strtotime($defaultAcademics->year_starts)).' 
                                                 &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
                                             '.date("jS M, Y", strtotime($defaultAcademics->year_ends)).'
                                         </span>
                                         <hr>
-                                        <p class="font-16 p-0 m-0 text-primary text-uppercase">'.($academicSession ?? null).'</p>
-                                        <h6 class="mt-0 pt-0 text-uppercase">'.($defaultAcademics->current_term_name ?? $defaultAcademics->academic_term).'</h6>
-                                        <span class="font-16 font-bold">
+                                        <p class="font-16 p-0 m-0 text-uppercase text-primary">'.($academicSession ?? null).'</p>
+                                        <h6 class="mt-0 pt-0 text-uppercase text-primary">'.($defaultAcademics->current_term_name ?? $defaultAcademics->academic_term).'</h6>
+                                        <span class="font-16 font-bold text-white">
                                             '.date("jS M, Y", strtotime($defaultAcademics->term_starts)).' 
                                                 &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
                                             '.date("jS M, Y", strtotime($defaultAcademics->term_ends)).'
@@ -875,9 +875,9 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 // append the data
                 $response->html .= '
                     <div class="col-lg-4 col-md-6 col-12 col-sm-12">
-                        <div class="card rounded-2xl">
+                        <div class="card rounded-2xl bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500">
                             <div class="card-header">
-                                <h4 class="text-uppercase font-13">Students</h4>
+                                <h4 class="text-uppercase text-white font-13">Students</h4>
                             </div>
                             <div class="card-body pb-2" data-chart="male_female_comparison">
                                 <canvas style="max-height:225px;height:225px;" id="male_female_comparison"></canvas>
@@ -885,11 +885,11 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card-footer">
                                 <div class="student-report">
                                     <div class="student-count pseudo-bg-blue">
-                                        <h4 class="item-title">Female Students</h4>
+                                        <h4 class="item-title text-white">Female Students</h4>
                                         <div class="item-number" data-sex_count="Female"></div>
                                     </div>
                                     <div class="student-count pseudo-bg-yellow">
-                                        <h4 class="item-title">Male Students</h4>
+                                        <h4 class="item-title text-white">Male Students</h4>
                                         <div class="item-number" data-sex_count="Male"></div>
                                     </div>
                                 </div>
