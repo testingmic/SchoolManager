@@ -350,12 +350,13 @@ class Assignments extends Myschoolgh {
                 <a href='#' onclick='return load(\"assessment/{$each->item_id}\");'>
                     {$each->assignment_title}
                 </a> 
-                <strong class='badge p-1 pr-2 pl-2 badge-{$lableBadge}'>{$each->assignment_type}</strong>
+                <div>
                 ".($hasUpdate ? 
-                    "<br>Class: <strong>{$each->class_name}</strong>
-                    <br>Subject: <strong>{$each->course_name}</strong>" : 
-                    "<br>Subject: <strong> {$each->course_name}</strong>"
-                )."</td>";
+                    "Class: <strong>{$each->class_name}</strong>
+                    <br><strong>{$each->course_name}</strong>" : "<br><strong> {$each->course_name}</strong>"
+                )."
+                </div>
+                <div><strong class='badge p-1 pr-2 pl-2 badge-{$lableBadge}'>{$each->assignment_type}</strong></div></td>";
             $assignments_list .= "<td>{$each->due_date} ".(!empty($each->due_time) ? "@ {$each->due_time}" : null)."</td>";
     
             // show this section if the user has the necessary permissions
