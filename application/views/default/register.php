@@ -61,7 +61,7 @@ if(loggedIn()) {
                 <h4 class="text-white text-2xl font-bold text-center">Create New Account</h4>
                 <p class="text-blue-100 text-center">Join our school management platform</p>
               </div>
-              <div class="p-8">
+              <div class="p-8 relative">
                 <?= form_loader(); ?>
                 <form method="POST" autocomplete="Off" action="<?= $baseUrl ?>api/auth" id="auth-form" class="needs-validation space-y-6" novalidate="">
                   <div class="space-y-2">
@@ -156,7 +156,7 @@ if(loggedIn()) {
                 <div class="form-results mt-4"></div>
               </div>
             </div>
-            <div class="mt-3 mb-3 text-dark p-3 bg-white text-center rounded-2xl">
+            <div class="mt-3 mb-20 text-dark p-3 bg-white text-center rounded-2xl">
               Already have an account? <a href="<?= $baseUrl ?>login" class="text-blue-600 hover:text-blue-800 transition-colors duration-200">Login</a>
             </div>
           </div>

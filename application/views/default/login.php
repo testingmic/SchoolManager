@@ -60,8 +60,8 @@ if(loggedIn()) {
                 <h4 class="text-white text-2xl font-bold text-center">Welcome Back</h4>
                 <p class="text-blue-100 text-center">Sign in to your account</p>
               </div>
-              <div class="p-8 pb-0">
-                  <?= form_loader(); ?>
+              <div class="p-8 pb-0 relative">
+                <?= form_loader(); ?>
                 <form method="POST" autocomplete="Off" action="<?= $baseUrl ?>api/auth/login" id="auth-form" class="needs-validation space-y-6" novalidate="">
                   <div class="space-y-2">
                     <label for="username" class="block text-sm font-semibold text-gray-700 mb-2">Username</label>
@@ -102,8 +102,8 @@ if(loggedIn()) {
                 <div class="form-results mt-4 pb-4"></div>
               </div>
             </div>
-            <div class="mt-3 mb-3 text-dark p-3 bg-white text-center  rounded-2xl">
-              Don't have an account? <a href="<?= $baseUrl ?>register">Create One</a>
+            <div class="mt-3 mb-10 text-dark p-3 bg-white text-center  rounded-2xl">
+              Don't have an account? <a class="text-blue-600 hover:text-blue-800 transition-colors duration-200" href="<?= $baseUrl ?>register">Create One</a>
             </div>
           </div>
         </div>

@@ -62,7 +62,7 @@ if(loggedIn()) {
                 <h4 class="text-white text-2xl font-bold text-center">Reset Password</h4>
                 <p class="text-blue-100 text-center">Enter your email to receive reset instructions</p>
               </div>
-              <div class="p-8">
+              <div class="p-8 relative">
                 <?= form_loader(); ?>
                 <form method="POST" action="<?= $baseUrl ?>api/auth/forgotten" id="auth-form" class="needs-validation space-y-6" novalidate="">
                   <div class="space-y-2">
@@ -95,7 +95,7 @@ if(loggedIn()) {
                 <div class="form-results mt-4"></div>
               </div>
             </div>
-            <div class="mt-3 mb-3 text-dark p-3 bg-white text-center rounded-2xl">
+            <div class="mt-3 mb-3 text-dark p-3 mb-10 bg-white text-center rounded-2xl">
               Remember your password? <a href="<?= $baseUrl ?>login" class="text-blue-600 hover:text-blue-800 transition-colors duration-200">Login</a>
             </div>
           </div>

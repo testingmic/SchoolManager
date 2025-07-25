@@ -237,7 +237,7 @@ $response->html = '
                                                                     <h4>Revenue</h4>
                                                                 </div>
                                                                 <div align="right" class="col-md-10">
-                                                                    <div class="btn-group" data-filter="quick_summary_filter" role="group" aria-label="Filter Attendance">
+                                                                    <div class="btn-group" data-filter="quick_summary_filter" id="quick_summary_filter" role="group" aria-label="Filter Attendance">
                                                                         <button type="button" data-stream="summary_report" data-period="today" class="btn '.($session->reportPeriod == "today" ? "active" : null).' btn-info">Today</button>
                                                                         <button type="button" data-stream="summary_report" data-period="this_week" class="btn '.($session->reportPeriod == "this_week" ? "active" : null).' btn-info">This Week</button>
                                                                         <button type="button" data-stream="summary_report" data-period="last_week" class="btn '.($session->reportPeriod == "last_week" ? "active" : null).' btn-info">Last Week</button>

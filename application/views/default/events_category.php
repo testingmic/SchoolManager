@@ -61,8 +61,8 @@ if(!empty($session->clientId)) {
                     <div class='card-footer p-2'>
                         ".($type->slug !== "public-holiday" ? 
                             "<div class='d-flex justify-content-between'>
-                                ".($hasEventUpdate ? "<div><button onclick='return update_Event_Type(\"{$type->item_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</button></div>": "")."
-                                ".($hasEventDelete ? "<div><button onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button></div>" : "")."
+                                ".($hasEventUpdate ? "<div><button onclick='return update_Event_Type(\"{$type->item_id}\")' class='text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 shadow-lg shadow-green-500/50 dark:shadow-lg dark:shadow-green-800/80 font-medium rounded-lg text-sm px-3 py-2.5 text-center me-2'><i class='fa fa-edit'></i> Edit</button></div>": "")."
+                                ".($hasEventDelete ? "<div><button onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 shadow-lg shadow-red-500/50 dark:shadow-lg dark:shadow-red-800/80 font-medium rounded-lg text-sm px-3 py-2.5 text-center me-2'><i class='fa fa-trash'></i></button></div>" : "")."
                             </div>" : ""
                         )."
                     </div>
@@ -92,7 +92,7 @@ if(!empty($session->clientId)) {
                             <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
                         </div>
                         <div id="modalBody2" class="modal-body">
-                            <form>
+                            <form id="eventTypeForm">
                                 <div class="form-group">
                                     <label>Event Category Name <span class="required">*</span></label>
                                     <input type="text" class="form-control" name="name">
@@ -100,7 +100,17 @@ if(!empty($session->clientId)) {
                                 </div>
                                 <div class="form-group">
                                     <label>Color Code</label>
-                                    <input type="color" class="form-control" id="color_code" name="color_code">
+                                    <select class="form-control" id="color_code" name="color_code">
+                                        <option value="">Select Color</option>
+                                        <option value="black">Black</option>
+                                        <option value="red">Red</option>
+                                        <option value="green">Green</option>
+                                        <option value="blue">Blue</option>
+                                        <option value="yellow">Yellow</option>
+                                        <option value="purple">Purple</option>
+                                        <option value="orange">Orange</option>
+                                        <option value="pink">Pink</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
                                     <label for="formGroupExampleInput2">Description</label>
@@ -109,8 +119,8 @@ if(!empty($session->clientId)) {
                             </form>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            <button onclick="return save_Event_Type()" class="btn btn-primary">Add</button>
+                            <button type="button" class="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 shadow-lg shadow-red-500/50 dark:shadow-lg dark:shadow-red-800/80 font-medium rounded-lg text-sm px-3 py-2.5 text-center me-2" data-dismiss="modal">Close</button>
+                            <button onclick="return save_Event_Type()" class="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 shadow-lg shadow-green-500/50 dark:shadow-lg dark:shadow-green-800/80 font-medium rounded-lg text-sm px-3 py-2.5 text-center me-2">Add</button>
                         </div>
                     </div>
                 </div>
@@ -127,7 +137,13 @@ if(!empty($session->clientId)) {
             </div>
             <div class="row">
                 <div class="col-sm-12">
-                    <h5><span><button onclick="return add_Event_Type()" class="btn btn-sm btn-outline-primary"><i class="fa fa-plus"></i> Add New</button></span></h5>
+                    <h5>
+                        <span>
+                            <button onclick="return add_Event_Type()" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-3 py-2.5 text-center me-2">
+                                <i class="fa fa-plus"></i> Add New
+                            </button>
+                        </span>
+                    </h5>
                 </div>
                 <div class="col-sm-12 col-lg-12">
                     <div class="mt-3" id="events_types_list">

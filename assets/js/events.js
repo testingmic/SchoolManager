@@ -1,5 +1,6 @@
 var add_Event_Type = () => {
     $(`div[id="createEventTypeModal"]`).modal("show");
+    $(`div[id="modalBody2"] form[id="eventTypeForm"]`)[0].reset();
     $(`div[id="createEventTypeModal"] input[name="type_id"]`).val("");
     $(`div[id="createEventTypeModal"] [class="modal-title"]`).html("Add Event Type");
 }
@@ -13,7 +14,7 @@ var update_Event_Type = (item_id) => {
             $(`div[id="createEventTypeModal"] [class="modal-title"]`).html("Update Event Type");
             $(`div[id="createEventTypeModal"] input[name="name"]`).val(type.name);
             $(`div[id="createEventTypeModal"] input[name="type_id"]`).val(item_id);
-            $(`div[id="createEventTypeModal"] input[name="color_code"]`).val(type.color_code);
+            $(`div[id="createEventTypeModal"] select[name="color_code"]`).val(type.color_code).trigger("change");
             $(`div[id="createEventTypeModal"] textarea[name="description"]`).val(type.description);
         }
     }
@@ -23,7 +24,7 @@ var save_Event_Type = () => {
     let url = "",
         name = $(`div[id="createEventTypeModal"] input[name="name"]`).val(),
         type_id = $(`div[id="createEventTypeModal"] input[name="type_id"]`).val(),
-        color_code = $(`div[id="createEventTypeModal"] input[name="color_code"]`).val(),
+        color_code = $(`div[id="createEventTypeModal"] select[name="color_code"]`).val(),
         description = $(`div[id="createEventTypeModal"] textarea[name="description"]`).val();
     if (type_id.length > 10) {
         url = `${baseUrl}api/events/update_type`;

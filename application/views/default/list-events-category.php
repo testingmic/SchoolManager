@@ -92,7 +92,7 @@ if(!empty($session->clientId)) {
                             <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
                         </div>
                         <div id="modalBody2" class="modal-body">
-                            <form>
+                            <form id="eventTypeForm">
                                 <div class="form-group">
                                     <label>Event Type Name <span class="required">*</span></label>
                                     <input type="text" class="form-control" name="name">
@@ -100,7 +100,17 @@ if(!empty($session->clientId)) {
                                 </div>
                                 <div class="form-group">
                                     <label>Color Code</label>
-                                    <input type="color" class="form-control" id="color_code" name="color_code">
+                                    <select class="form-control" id="color_code" name="color_code">
+                                        <option value="">Select Color</option>
+                                        <option value="black">Black</option>
+                                        <option value="red">Red</option>
+                                        <option value="green">Green</option>
+                                        <option value="blue">Blue</option>
+                                        <option value="yellow">Yellow</option>
+                                        <option value="purple">Purple</option>
+                                        <option value="orange">Orange</option>
+                                        <option value="pink">Pink</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
                                     <label for="formGroupExampleInput2">Description</label>

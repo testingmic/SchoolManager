@@ -131,9 +131,28 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
         // loop through the array list
         foreach($reversed_array_list as $event) {
+
+            $isHoliday = (bool) ($event["event_group"] === "holidays_list");
+
+            $textStartBg = $isHoliday ? "bg-green-50" : "bg-{$event['backgroundColor']}-50";
+            $textFullBg = $isHoliday ? "border-green-500" : "border-{$event['backgroundColor']}-500";
+            $textColor = $isHoliday ? "text-green-500" : "text-{$event['backgroundColor']}-500";
+
             // append to the events list
             $upcoming_events_list .= "
-                <li class='media'>
+                <div class='flex items-center space-x-3 p-3 {$textStartBg} mb-2 border rounded-xl border-l-4 {$textFullBg}'>
+                    <i class='fas fa-check-circle {$textColor}'></i>
+                    <div class='flex items-center justify-between w-100'>
+                        <div class='flex-1'>
+                            <p class='text-sm font-medium text-gray-900'>{$event["title"]}</p>
+                            <p class='text-xs text-gray-600'>".date("jS M Y", strtotime($event["start"]))."</p>
+                        </div>
+                        <div>
+                            <span onclick='return view_Event_Details(\"{$event["event_group"]}\", \"{$event["item_id"]}\")' class='badge cursor badge-primary'>Detail</span>
+                        </div>
+                    </div>
+                </div>
+                <li class='media hidden'>
                     <div class='media-body' style='flex: 2;'>
                         <div class='media-title'>
                             {$event["title"]} ".($event["event_group"] === "holidays_list" ? "<span class='badge p-1 badge-success'>Holiday</span>" : "")."
@@ -764,7 +783,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     <h4 class="text-uppercase font-13">Revenue</h4>
                                 </div>
                                 <div align="right" class="col-md-10">
-                                    <div class="btn-group" data-filter="quick_summary_filter" role="group" aria-label="Filter Revenue">
+                                    <div class="btn-group" data-filter="quick_summary_filter" id="quick_summary_filter" role="group" aria-label="Filter Revenue">
                                         <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="yesterday" class="btn sm-hide btn-info">Yesterday</button>
                                         <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="today" class="btn btn-info">Today</button>
                                         <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_week" class="btn active btn-info">This Week</button>
@@ -832,7 +851,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                         <h4 class="text-uppercase font-13">Attendance Logs</h4>
                                     </div>
                                     <div align="right" class="col-md-5">
-                                        <div class="btn-group" data-filter="quick_attendance_filter" role="group" aria-label="Filter Attendance">
+                                        <div class="btn-group" data-filter="quick_attendance_filter" id="quick_attendance_filter" role="group" aria-label="Filter Attendance">
                                             <button type="button" data-stream="attendance_report" data-period="last_week" class="btn btn-info">Last Week</button>
                                             <button type="button" data-stream="attendance_report" data-period="this_week" class="btn active btn-info">This Week</button>
                                             <button type="button" data-stream="attendance_report" data-period="this_month" class="btn btn-info">This Month</button>
