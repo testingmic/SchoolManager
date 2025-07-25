@@ -164,8 +164,7 @@ load_helpers(['menu_helper']);
                 <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-pink-400 to-purple-400 opacity-20 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
             </div>
             <div class="progress-bar"></div>
-            <nav class="navbar navbar-expand-lg main-navbar overflow-hidden fixed">
-                <div class="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-br from-blue-400 to-cyan-400 opacity-20 rounded-full translate-y-12 -translate-x-12 animate-pulse" style="animation-delay: -2s;"></div>
+            <nav class="navbar navbar-expand-lg main-navbar fixed">
                 <div class="form-inline mr-auto">
                     <ul class="mb-3 navbar-nav mr-3">
                         <li><a href="#" data-toggle="sidebar" title="Hide/Display the Side Menubar" class="nav-link mt-2 nav-link-lg collapse-btn"><i class="fas fa-bars"></i></a></li>
