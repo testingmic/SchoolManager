@@ -626,7 +626,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                         <span data-count="total_teachers_count" class="font-bold font-25 mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
-                                        <div class="card-circle l-bg-cyan text-white">
+                                        <div class="card-circle bg-gradient-to-br from-blue-600 to-purple-800 text-white">
                                             <i class="fas fa-user-secret"></i>
                                         </div>
                                     </div>
