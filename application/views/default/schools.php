@@ -230,7 +230,7 @@ if(!empty($client_id)) {
                     <div class="card author-box pt-2">
                         <div class="card-body">
                             '.(!empty($data->client_logo) ? 
-                                '<div class="author-box-center m-0 p-0">
+                                '<div class="author-box-center m-0 p-0 flex justify-center">
                                     <img alt="image" src="'.$baseUrl.''.$data->client_logo.'" class="profile-picture">
                                 </div>' : null
                             ).'
