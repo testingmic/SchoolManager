@@ -895,15 +895,21 @@ class Users extends Myschoolgh {
 			// convert to object
             $ward = (object) $ward;
 
+			$imageToUse = "<img src=\"{$this->baseUrl}{$ward->image}\" class='rounded-circle cursor author-box-picture' width='50px'>";
+			if($ward->image == "assets/img/avatar.png") {
+				$imageToUse = "
+				<div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+					<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-user h-6 w-6 text-white' aria-hidden='true'><path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'></path><circle cx='12' cy='7' r='4'></circle></svg>
+				</div>";
+			}
+
 			// append to the list
 			$wards_list .= "
 				<div class=\"col-12 col-md-6 load_ward_information col-lg-6\" data-id=\"{$ward->student_guid}\">
 					<div class=\"card card-success\">
 						<div class=\"card-header pr-2 pl-2\" style=\"border-bottom:0px;\">
-							<div class=\"d-flex justify-content-start\">
-								<div class='mr-2'>
-									<img src=\"{$this->baseUrl}{$ward->image}\" class='rounded-circle cursor author-box-picture' width='50px'>
-								</div>
+							<div class=\"d-flex gap-4 justify-content-start\">
+								<div class='mr-2'>{$imageToUse}</div>
 								<div>
 									<h4 class=\"mb-0 pb-0 font-16 pr-0 mr-0 text-uppercase\">".limit_words($ward->name, 3)."</h4>
 									<span class=\"text-primary\">{$ward->unique_id}</span><br>
