@@ -1232,7 +1232,7 @@ $registerUrl = "https://app.myschoolgh.com/register";
                     <div class="pricing-price">
                         <div class="pricing-amount">
                             <span class="pricing-currency">₵</span>
-                            <span>1,500</span>
+                            <span>2,500</span>
                         </div>
                         <div class="pricing-period">flat fee / term</div>
                     </div>
@@ -1255,7 +1255,7 @@ $registerUrl = "https://app.myschoolgh.com/register";
                     <div class="pricing-price">
                         <div class="pricing-amount">
                             <span class="pricing-currency">₵</span>
-                            <span>3,000</span>
+                            <span>4,000</span>
                         </div>
                         <div class="pricing-period">flat fee / term</div>
                     </div>
@@ -1278,7 +1278,7 @@ $registerUrl = "https://app.myschoolgh.com/register";
                     <div class="pricing-price">
                         <div class="pricing-amount">
                             <span class="pricing-currency">₵</span>
-                            <span>5,000</span>
+                            <span>8,000</span>
                         </div>
                         <div class="pricing-period">flat fee / term</div>
                     </div>
