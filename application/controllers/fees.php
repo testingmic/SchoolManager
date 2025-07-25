@@ -2461,7 +2461,7 @@ class Fees extends Myschoolgh {
                 window.onfocus = (evt) => {window.close();}
                 window.onafterprint = (evt) => { window.close(); }
             }
-            // print_receipt();
+            print_receipt();
             </script>";
         }
 
