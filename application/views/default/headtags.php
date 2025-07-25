@@ -160,7 +160,7 @@ load_helpers(['menu_helper']);
     <?php } ?>
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
-            <div class="navbar-bg bg-gradient-to-r from-blue-600 to-blue-500 text-white"></div>
+            <div class="navbar-bg bg-gradient-to-r from-purple-600 to-purple-500 text-white"></div>
             <div class="progress-bar"></div>
             <nav class="navbar navbar-expand-lg main-navbar">
                 <div class="form-inline mr-auto">
@@ -248,38 +248,38 @@ load_helpers(['menu_helper']);
                         <img alt="image" src="<?= $baseUrl ?><?= $userData->image ?>" class="user-img-radious-style">
                         <span class="d-sm-none d-lg-inline-block"></span>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right">
+                    <div class="dropdown-menu dropdown-menu-right mt-1">
                     <div class="dropdown-title"><?= !empty($userData->name) ? $userData->name : $clientData->client_name ?></div>
                     <?php if($isActiveAccount) { ?>
-                        <a href="<?= $baseUrl ?>profile" class="dropdown-item has-icon">
+                        <a href="<?= $baseUrl ?>profile" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
                             <i class="far fa-user"></i> Profile
                         </a>
                         <?php if($accessObject->hasAccess("activities", "settings")) { ?>
-                        <a href="<?= $baseUrl ?>timeline" class="dropdown-item has-icon">
+                        <a href="<?= $baseUrl ?>timeline" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
                             <i class="fas fa-align-left"></i> Activities
                         </a>
                         <?php } ?>
                         <?php if($accessObject->hasAccess("login_history", "settings")) { ?>
-                        <a href="<?= $baseUrl ?>login-history" class="dropdown-item has-icon">
+                        <a href="<?= $baseUrl ?>login-history" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
                             <i class="fas fa-lock"></i> Login History
                         </a>
                         <?php } ?>
                         <?php if($accessObject->hasAccess("manage", "settings") && !$isSupport) { ?>
-                        <a href="<?= $baseUrl ?>settings" class="dropdown-item has-icon">
+                        <a href="<?= $baseUrl ?>settings" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
                             <i class="fas fa-cog"></i> Settings
                         </a>
                         <?php } ?>
                         <?php if($changePassword) { ?>
-                        <a href="<?= $baseUrl ?>password_manager" class="dropdown-item has-icon">
+                        <a href="<?= $baseUrl ?>password_manager" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
                             <i class="fas fa-key"></i> Password Manager
                         </a>
                         <?php } ?>
                     <?php } ?>
-                    <a title="Knowledge Base" href="<?= $baseUrl ?>knowledgebase" class="dropdown-item has-icon">
+                    <a title="Knowledge Base" href="<?= $baseUrl ?>knowledgebase" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
                         <i class="fa fa-book-open"></i> Knowledge Base
                     </a>
                     <?php if($accessObject->hasAccess("manage", "settings") && !$isSupport) { ?>
-                        <a href="<?= $baseUrl ?>schools" class="dropdown-item has-icon">
+                        <a href="<?= $baseUrl ?>schools" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
                             <i class="fas fa-wrench"></i> <span class="mr-3">Account Setup</span> 
                             <?= $endPermission && isset($defaultUser->appPrefs) && !empty($defaultUser->appPrefs->termEnded) ? '<span class="notification beep"></span>' : null ?>
                         </a>

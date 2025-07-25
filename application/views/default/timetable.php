@@ -110,7 +110,7 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
                                     $response->html .= '
                                     <div class="col-lg-3 p-0">
                                         <div class="form-group p-2 mb-0">
-                                            <h5 class="text-white bg-gradient-to-br from-green-500 to-green-300 p-2">CREATED TIMETABLES LIST</h5>
+                                            <h5 class="text-white bg-gradient-to-br from-purple-600 to-purple-500 p-2">CREATED TIMETABLES LIST</h5>
                                         </div>
                                         <div class="trix-slim-scroll p-2" style="max-height:750px; overflow-y:auto;">';
 

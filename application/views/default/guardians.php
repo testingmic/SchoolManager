@@ -53,7 +53,7 @@ foreach($guardian_list as $kkey => $each) {
             // convert to object
             $ward = (object) $ward;
 
-            $imageToUse = "<img src=\"{$baseUrl}{$ward->image}\" class='rounded-2xl cursor author-box-picture' width='40px' height='40px'>";
+            $imageToUse = "<img src=\"{$baseUrl}{$ward->image}\" class='rounded-2xl cursor author-box-picture' width='50px' height='50px'>";
 			if($ward->image == "assets/img/avatar.png") {
 				$imageToUse = "
 				<div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>

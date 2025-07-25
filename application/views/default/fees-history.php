@@ -128,13 +128,18 @@ foreach($item_list["data"] as $key => $fees) {
         $action = "<span class='badge font-bold badge-danger'>REVERSED</span>";
     }
 
+    $useTheImage = strpos($fees->student_info->image, "assets/img/avatar.png") !== false;
+
     $fees_history .= "<tr data-row_id=\"{$fees->payment_id}\">";
-    $fees_history .= "<td>".($key+1)."</td>";
     $fees_history .= "
         <td>
-            <div class='d-flex text-uppercase justify-content-start'>
-                ".(!empty($fees->student_info->image) ? "
-                <div class='mr-2'><img src='{$baseUrl}{$fees->student_info->image}' width='40px' height='40px'></div>" : "")."
+            <div class='d-flex text-uppercase justify-content-start space-x-2'>
+                ".(!$useTheImage ? "
+                    <div class='mr-2'><img src='{$baseUrl}{$fees->student_info->image}' width='50px' height='50px'></div>" : "
+                    <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-user h-6 w-6 text-white' aria-hidden='true'><path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'></path><circle cx='12' cy='7' r='4'></circle></svg>
+                    </div>"
+                )."
                 <div>
                     <a href='#' class='user_name' onclick='load(\"student/{$fees->student_info->user_id}\");'>{$fees->student_info->name}</a> <br>
                     <strong>ID:</strong>
@@ -305,7 +310,6 @@ $response->html = '
                         <table data-empty="" class="table table-bordered table-sm table-striped datatable">
                             <thead>
                                 <tr>
-                                    <th width="5%" class="text-center">#</th>
                                     <th>Student Name</th>
                                     <th>Class</th>
                                     <th>Amount</th>
