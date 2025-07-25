@@ -756,11 +756,11 @@ class Attendance extends Myschoolgh {
             // set the table content
             $table_content = (!$final && !empty($attendance["attendance"][0]["record"]["users_list"]) ? "
             <div class='row'>
-                <div class='col-md-8' id='attendance_search_input'>
+                <div class='col-lg-9 col-md-8' id='attendance_search_input'>
                     <label>Filter by Name or Registration ID</label>
                     <input type='search' autocomplete='Off' placeholder='Search by fullname' name='attendance_fullname' class='form-control'>
                 </div>
-                <div class='col-md-4 pr-4 attendance_control_buttons'>
+                <div class='col-lg-3 col-md-4 pr-4 attendance_control_buttons'>
                     <div class='form-group'>
                         <label class='font-bold'>Select for Everyone</label>
                         <select data-width='100%' class='form-control cursor selectpicker' id='select_for_all'>

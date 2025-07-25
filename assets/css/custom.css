@@ -785,6 +785,10 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0px 1px 2px rgb(59, 59, 59);
 }
 
+.form-control {
+    border-radius: 0.5rem;
+}
+
 .swal-button {
     border-radius: 0px!important;
 }

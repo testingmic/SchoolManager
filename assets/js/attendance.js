@@ -31,6 +31,7 @@ var list_userAttendance = (query = "") => {
             attendance_log_summary.html(response.data.result.bottom_data);
             checkAllState();
         }
+        $('.selectpicker').select2();
         $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "none" });
         $(`button[class~="refresh"]`).html(`<i class='fa fa-notch'></i> Refresh`).prop("disabled", false);
         fullname_search();
