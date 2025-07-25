@@ -160,36 +160,39 @@ load_helpers(['menu_helper']);
     <?php } ?>
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
-            <div class="navbar-bg bg-gradient-to-r from-purple-600 to-purple-500 text-white"></div>
+            <div class="navbar-bg bg-gradient-to-r fixed top-0 left-0 right-0 z-10 from-purple-900 via-blue-900 to-indigo-900 text-white">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-pink-400 to-purple-400 opacity-20 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
+            </div>
             <div class="progress-bar"></div>
-            <nav class="navbar navbar-expand-lg main-navbar">
+            <nav class="navbar navbar-expand-lg main-navbar overflow-hidden fixed">
+                <div class="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-br from-blue-400 to-cyan-400 opacity-20 rounded-full translate-y-12 -translate-x-12 animate-pulse" style="animation-delay: -2s;"></div>
                 <div class="form-inline mr-auto">
-                <ul class="mb-3 navbar-nav mr-3">
-                    <li><a href="#" data-toggle="sidebar" title="Hide/Display the Side Menubar" class="nav-link mt-2 nav-link-lg collapse-btn"><i class="fas fa-bars"></i></a></li>
-                    <!-- <li><a href="#" class="nav-link nav-link-lg mt-2 fullscreen-btn" title="Maximize to Fullscreen Mode"><i class="fas fa-expand"></i></a></li> -->
-                    <li><a href="#" class="nav-link nav-link-lg mt-2 hidden" id="history-refresh" title="Reload Page"><i class="fas fa-redo-alt"></i></a></li>
-                    <?php if($isActiveAccount) { ?>
-                    <li class="border-left text-white d-none d-md-block">
-                        <?php if(!$isSupport) { ?>
-                        <a class="nav-link text-white nav-link-lg mt-1">
-                            <strong class="font-18px">
-                                <span><?= $clientPrefs->academics->academic_year ?></span> 
-                                <span>|</span>
-                                <span class="text-uppercase"><?= $clientPrefs->academics->academic_term ?> <?= $academicSession; ?></span>
-                                <?= ($endPermission && isset($defaultUser->appPrefs) && !empty($defaultUser->appPrefs->termEnded) ? 
-                                    "<span class='badge badge-danger notification cursor' title='This academic year and term has been closed and forwarded to the next academic year and term.'>Term Ended</span>" : 
-                                    ($endPermission ? "<span class='badge badge-success'>Active</span>" : null)); ?>
-                                <br><span class="font-weight-light font-17 text-uppercase"><?= $defaultUser->name; ?> / <?= ucwords($defaultUser->user_type); ?></span>
-                            </strong>
-                        </a>
-                        <?php } else { ?>
-                            <a href="#" class="nav-link text-white nav-link-lg">
-                                <strong class="font-20px"><?= $clientName ?> - SUPPORT PANEL</strong>
+                    <ul class="mb-3 navbar-nav mr-3">
+                        <li><a href="#" data-toggle="sidebar" title="Hide/Display the Side Menubar" class="nav-link mt-2 nav-link-lg collapse-btn"><i class="fas fa-bars"></i></a></li>
+                        <!-- <li><a href="#" class="nav-link nav-link-lg mt-2 fullscreen-btn" title="Maximize to Fullscreen Mode"><i class="fas fa-expand"></i></a></li> -->
+                        <li><a href="#" class="nav-link nav-link-lg mt-2 hidden" id="history-refresh" title="Reload Page"><i class="fas fa-redo-alt"></i></a></li>
+                        <?php if($isActiveAccount) { ?>
+                        <li class="border-left text-white d-none d-md-block">
+                            <?php if(!$isSupport) { ?>
+                            <a class="nav-link text-white nav-link-lg mt-1">
+                                <strong class="font-18px">
+                                    <span><?= $clientPrefs->academics->academic_year ?></span> 
+                                    <span>|</span>
+                                    <span class="text-uppercase"><?= $clientPrefs->academics->academic_term ?> <?= $academicSession; ?></span>
+                                    <?= ($endPermission && isset($defaultUser->appPrefs) && !empty($defaultUser->appPrefs->termEnded) ? 
+                                        "<span class='badge badge-danger notification cursor' title='This academic year and term has been closed and forwarded to the next academic year and term.'>Term Ended</span>" : 
+                                        ($endPermission ? "<span class='badge badge-success'>Active</span>" : null)); ?>
+                                    <br><span class="font-weight-light font-17 text-uppercase"><?= $defaultUser->name; ?> / <?= ucwords($defaultUser->user_type); ?></span>
+                                </strong>
                             </a>
+                            <?php } else { ?>
+                                <a href="#" class="nav-link text-white nav-link-lg">
+                                    <strong class="font-20px"><?= $clientName ?> - SUPPORT PANEL</strong>
+                                </a>
+                            <?php } ?>
+                        </li>
                         <?php } ?>
-                    </li>
-                    <?php } ?>
-                </ul>
+                    </ul>
                 </div>
                 <ul class="navbar-nav navbar-right items-center">
                 <?php if($isActiveAccount) { ?>
