@@ -79,7 +79,7 @@ if(!empty($item_id)) {
             $books_list .= "<tr class='each_book_item' data-request_id='{$item_id}' data-book_id='{$book->book_id}'>";
             $books_list .= "<td>
                 <div class='d-flex justify-content-start'>
-                    <div class='mr-2'>".(!empty($book->book_image) ? "<img class='rounded-circle author-box-picture' src='{$baseUrl}{$book->book_image}' width='40px' height='40px'>" : "")."</div>
+                    <div class='mr-2'>".(!empty($book->book_image) ? "<img class='rounded-2xl author-box-picture' src='{$baseUrl}{$book->book_image}' width='40px' height='40px'>" : "")."</div>
                     <div><a href='#' onclick='return load(\"book/{$book->book_id}\");'>{$book->title}</a> <br> <strong>{$book->isbn}</strong></div>
                 </div>
             </td>";

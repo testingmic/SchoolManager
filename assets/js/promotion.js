@@ -287,7 +287,7 @@ $(`button[id="filter_Promotion_Students_List"]`).on("click", function() {
                         <td>
                             <div class="d-flex justify-content-start">
                                 <div class="mr-2">
-                                    <img title='Click to view student details' class='rounded-circle cursor author-box-picture' width='40px' src="${baseUrl}${value.image}">
+                                    <img title='Click to view student details' class='rounded-2xl cursor author-box-picture' width='40px' src="${baseUrl}${value.image}">
                                 </div>
                                 <div>
                                     <span class="font-bold">${value.name.toUpperCase()}</span><br>

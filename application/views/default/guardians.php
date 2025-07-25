@@ -53,11 +53,19 @@ foreach($guardian_list as $kkey => $each) {
             // convert to object
             $ward = (object) $ward;
 
+            $imageToUse = "<img src=\"{$baseUrl}{$ward->image}\" class='rounded-2xl cursor author-box-picture' width='40px' height='40px'>";
+			if($ward->image == "assets/img/avatar.png") {
+				$imageToUse = "
+				<div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+					<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-user h-6 w-6 text-white' aria-hidden='true'><path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'></path><circle cx='12' cy='7' r='4'></circle></svg>
+				</div>";
+			}
+
             // append to the list
             $wards_list .= "
                 <div class='d-flex justify-content-start".($key+1 !== count($each->wards_list) ? "border-bottom mb-2 pb-2" : "")."'>
                     <div class='mr-2'>
-                        <img src=\"{$baseUrl}{$ward->image}\" class='author-box-picture' width='40px' height='40px'>
+                        {$imageToUse}
                     </div>
                     <div> 
                         <a href='{$baseUrl}student/{$ward->student_guid}' class='user_name' title='View the details of {$ward->name}'>

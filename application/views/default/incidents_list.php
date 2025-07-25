@@ -67,7 +67,7 @@ foreach($item_list["data"] as $key => $each) {
     $incidents .= "<td>
         <div class='d-flex justify-content-start'>
             <div class='mr-2'>
-                <img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->user_information->image}\">
+                <img class='rounded-2xl author-box-picture' width='40px' src=\"{$baseUrl}{$each->user_information->image}\">
             </div>
             <div>
                 <a class='user_name' href='{$baseUrl}{$url_link}'>{$each->user_information->name}</a><br>

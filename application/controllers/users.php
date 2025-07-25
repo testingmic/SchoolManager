@@ -895,7 +895,7 @@ class Users extends Myschoolgh {
 			// convert to object
             $ward = (object) $ward;
 
-			$imageToUse = "<img src=\"{$this->baseUrl}{$ward->image}\" class='rounded-circle cursor author-box-picture' width='50px'>";
+			$imageToUse = "<img src=\"{$this->baseUrl}{$ward->image}\" class='rounded-2xl cursor author-box-picture' width='50px'>";
 			if($ward->image == "assets/img/avatar.png") {
 				$imageToUse = "
 				<div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
@@ -915,7 +915,7 @@ class Users extends Myschoolgh {
 									<span class=\"text-primary\">{$ward->unique_id}</span><br>
 									".(!empty($ward->class_name) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-home'></i> {$ward->class_name}</p>" : "")."
 									".(!empty($ward->gender) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-user'></i> {$ward->gender}</p>" : "")."
-									".(!empty($ward->date_of_birth) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-calendar-check'></i> {$ward->date_of_birth}</p>" : "")."
+									<p class=\"mb-0 pb-0\"><i class='fa fa-calendar-check'></i>".(!empty($ward->date_of_birth) ? " {$ward->date_of_birth} " : " N/A ")."</p>
 								</div>
 							</div>
 						</div>

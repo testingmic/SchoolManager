@@ -551,7 +551,7 @@ class Events extends Myschoolgh {
                                 </div>    
                             </div>
                             <div class='col-md-2'>
-                                <img class='rounded-circle cursor author-box-picture' width='60px' src='{$this->baseUrl}{$user->image}'>
+                                <img class='rounded-2xl cursor author-box-picture' width='60px' src='{$this->baseUrl}{$user->image}'>
                             </div>
                         </div>
                         <div class='modal-footer p-0'>

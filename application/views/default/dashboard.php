@@ -180,7 +180,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 // format the upcoming birthday list
                 $upcoming_birthday_list .= "
                     <li class='media'>
-                        <img title='Click to view student details' class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$event["description"]->image}\">
+                        <img title='Click to view student details' class='rounded-2xl cursor author-box-picture' width='40px' src=\"{$baseUrl}{$event["description"]->image}\">
                         <div class='media-body ml-2' style='flex: 2;'>
                             <div class='media-title'>
                                 <span class='user_name' onclick='return load(\"{$event["link"]}/{$event["description"]->item_id}\");'>

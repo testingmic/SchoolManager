@@ -77,7 +77,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
         $staff_list .= "<td>".($key+1)."</td>";
         $staff_list .= "<td>
             <div class='d-flex justify-content-start'>
-                <div class='mr-2'><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"></div>
+                <div class='mr-2'><img class='rounded-2xl author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"></div>
                 <div class='text-uppercase'><a href='#' onclick='return load(\"payroll-view/{$each->user_id}\");'>{$each->name}</a> <br><span class='p-1 badge badge-{$color[$each->user_type]}'>{$each->user_type}</span></div>
             </div></td>";
         $staff_list .= "<td>{$each->position}</td>";
