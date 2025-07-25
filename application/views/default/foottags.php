@@ -47,7 +47,7 @@
                                 <div class="layout-color">
                                     <div class="d-flex justify-content-between">
                                         <div>
-                                            <label for="system">Search for a user account <small class="text-success">(hit enter to search)</small></label>
+                                            <label for="system">Search for a user or receipt <small class="text-success">(hit enter to search)</small></label>
                                         </div>
                                         <div>
                                             <span onclick="return clear_quick_search_form('system')" class="cursor text-danger" title="Click to reset form">Clear</span>

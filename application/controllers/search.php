@@ -36,11 +36,13 @@ class Search extends Myschoolgh {
 			$params->group_by_user_type = true;
 			$params->minified = "no_status_filters";
 			$params->lookup = $params->term ?? null;
+			
+			$params->lookup = trim($params->lookup);
 
 			// exempt the
 			$data = [];
 			$exemption_list = [];
-			$params->limit = 250;
+			$params->limit = 50;
 			
 			// replace the keys parsed with its equivalent table column
 			$queryString = [
@@ -83,33 +85,24 @@ class Search extends Myschoolgh {
 			$param_array = (array) $params;
 			$param_array = array_keys($param_array);
 
-			// If the title param was not parsed
-			if(empty(array_intersect(["title", "isbn", "author", "receipt_id", "payment_id"], $param_array))) {
-				// SEARCH FOR USERS AND GROUP THEM
-				$data["users_list"] = $usersClass->quick_list($params)["data"];
-			}
+			// SEARCH FOR USERS AND GROUP THEM
+			$data["users_list"] = $usersClass->quick_list($params)["data"];
 
-			// if the title, isbn or author are not empty
-			if(!empty(array_intersect(["title", "isbn", "author"], $param_array))) {
-				// set a new limit of rows to return
-				$params->limit = 50;
+			// set the book title and author
+			$params->title = !empty($params->title) && is_array($params->title) ? $params->title[0] : null;
+			$params->bookauthor = !empty($params->bookauthor) && is_array($params->bookauthor) ? $params->bookauthor[0] : null;
+			$data["library_books_list"] = load_class("library", "controllers")->list($params)["data"] ?? [];
 
-				// set the book title and author
-				$params->title = !empty($params->title) && is_array($params->title) ? $params->title[0] : null;
-				$params->bookauthor = !empty($params->bookauthor) && is_array($params->bookauthor) ? $params->bookauthor[0] : null;
-				$data["library_books_list"] = load_class("library", "controllers")->list($params)["data"] ?? [];
-			}
+			// set the academic year and term to null
+			$params->academic_year = null;
+			$params->academic_term = null;
+			$params->query = '';
 
-			// download fees receipt
-			if(!empty(array_intersect(["receipt_id", "payment_id"], $param_array))) {
-				// set a new limit of rows to return
-				$params->limit = 20;
+			// get the payment id
+			$params->receipt_id = $params->lookup;
+			$data["fees_payment_receipt"] = load_class("fees", "controllers")->list($params)["data"] ?? [];;
 
-				// get the payment id
-				$params->payment_id = !empty($params->payment_id) && is_array($params->payment_id) ? $params->payment_id[0] : null;
-				$data["fees_payment_receipt"] = load_class("fees", "controllers")->list($params)["data"] ?? [];;
-			}
-
+			// return the data
 			return $data;
 
 		} catch(PDOException $e) {}

@@ -2251,6 +2251,7 @@ class Fees extends Myschoolgh {
                                         <div class="invoice-title">
                                             <h2 style="margin-top:5px;margin-bottom:5px;">'.(!$isPDF ? "Official Receipt" : "Payment History").'</h2>
                                             <span style="font-size:16px;"><strong>Date & Time:</strong> '.date("d-m-Y h:iA").'</span>
+                                            <div><strong>Receipt ID:</strong> <strong>'.$data[0]->receipt_id.'</strong></div>
                                         </div>
                                     </td>
                                     <td align="right">
@@ -2338,7 +2339,7 @@ class Fees extends Myschoolgh {
                                                 <th '.(!$isPDF ? 'style="width: 40px;"' : null).'>#</th>
                                                 '.(empty($student_data) || (!$studentIsset && $isPDF) ? '<th>Name</th>' : '').'
                                                 <th>Item</th>
-                                                <th>Payment Method</th>
+                                                <th>Method</th>
                                                 <th>Description</th>
                                                 <th>Record Date</th>
                                                 <td align="right"><strong>Amount</strong></td>
@@ -2367,8 +2368,8 @@ class Fees extends Myschoolgh {
                                                                 '.($isPDF ? "<br>- {$record->class_name}" : null).'
                                                             </td>' : ''
                                                         ).'
-                                                        <td width="15%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.($record->category_name ? $record->category_name : $record->category_id).'</td>
-                                                        <td width="15%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
+                                                        <td width="17%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.($record->category_name ? $record->category_name : $record->category_id).'</td>
+                                                        <td width="12%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
                                                             <strong>'.$record->payment_method.'</strong>
                                                             '.(
                                                                 $record->payment_method === "Cheque" ? 
@@ -2380,7 +2381,7 @@ class Fees extends Myschoolgh {
                                                             '.($record->description ? $record->description : null).'
                                                             '.($isReversed ? "<span class='badge p-1 badge-danger'>Reversed</span>" : null).'
                                                         </td>
-                                                        <td width="18%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.date("jS M, Y h:iA", strtotime($record->recorded_date)).'</td>
+                                                        <td  '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.date("jS M, Y h:iA", strtotime($record->recorded_date)).'</td>
                                                         <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).' width="10%" align="right"><strong>'.number_format($record->amount_paid, 2).'</strong></td>
                                                     </tr>';
                                                 }
@@ -2460,7 +2461,7 @@ class Fees extends Myschoolgh {
                 window.onfocus = (evt) => {window.close();}
                 window.onafterprint = (evt) => { window.close(); }
             }
-            print_receipt();
+            // print_receipt();
             </script>";
         }
 
