@@ -302,7 +302,7 @@ load_helpers(['menu_helper']);
                 <aside id="sidebar-wrapper">
 
                     <div class="sidebar-brand">
-                        <a href="<?= $baseUrl ?>dashboard" class="anchor flex items-center">
+                        <a href="<?= $baseUrl ?>dashboard" class="anchor justify-content-center flex items-center">
                             <img alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo mr-2" />
                             <span class="logo-name"><?= $appName ?></span>
                         </a>
