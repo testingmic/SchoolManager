@@ -606,7 +606,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Students Count</h6>
-                                        <span  data-count="total_students_count" class="font-bold font-20 mb-0">0</span>
+                                        <span  data-count="total_students_count" class="font-bold font-25 mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
                                         <div class="card-circle l-bg-orange text-white">
@@ -623,7 +623,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Teaching Stafff</h6>
-                                        <span data-count="total_teachers_count" class="font-bold font-20 mb-0">0</span>
+                                        <span data-count="total_teachers_count" class="font-bold font-25 mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
                                         <div class="card-circle l-bg-cyan text-white">
@@ -640,7 +640,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Employees / Users</h6>
-                                        <span data-count="total_employees_count" class="font-bold font-20 mb-0">0</span>
+                                        <span data-count="total_employees_count" class="font-bold font-25 mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
                                         <div class="card-circle l-bg-green text-white">
@@ -762,7 +762,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     <h4 class="text-uppercase font-13">Students Per Class Count</h4>
                                 </div>
                                 <div class="col-md-3 text-success text-right p-0">
-                                    Total: <span data-count="total_students_count" class="font-bold font-20 mb-0">0</span>
+                                    Total: <span data-count="total_students_count" class="font-bold font-25 mb-0">0</span>
                                 </div>
                             </div>
                         </div>
@@ -1251,7 +1251,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">REGISTERED SCHOOLS</h6>
-                                        <span class="font-bold font-20 mb-0">'.count($load_schools_list).'</span>
+                                        <span class="font-bold font-25 mb-0">'.count($load_schools_list).'</span>
                                     </div>
                                     <div class="col-auto">
                                         <div class="card-circle l-bg-orange text-white">
@@ -1268,7 +1268,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">ACTIVE SCHOOLS</h6>
-                                        <span class="font-bold font-20 mb-0">'.($counter["Active"] + $counter["Propagation"] + $counter["Complete"] + $counter["Activated"]).'</span>
+                                        <span class="font-bold font-25 mb-0">'.($counter["Active"] + $counter["Propagation"] + $counter["Complete"] + $counter["Activated"]).'</span>
                                     </div>
                                     <div class="col-auto">
                                         <div class="card-circle l-bg-green text-white">
@@ -1285,7 +1285,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">INACTIVE SCHOOLS</h6>
-                                        <span class="font-bold font-20 mb-0">'.
+                                        <span class="font-bold font-25 mb-0">'.
                                             ($counter["Expired"] + $counter["Pending"] + $counter["Suspended"])
                                         .'</span>
                                     </div>
@@ -1304,7 +1304,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">SUPPORT USERS</h6>
-                                        <span class="font-bold font-20 mb-0">0</span>
+                                        <span class="font-bold font-25 mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
                                         <div class="card-circle l-bg-orange text-white">
