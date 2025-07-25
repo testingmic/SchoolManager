@@ -1031,6 +1031,7 @@ var setActiveNavLink = () => {
             if ($(el)[0].href == location) {
                 let parentDropdown = $(el).parent("li").parent("ul");
                 parentDropdown.css("display", "block");
+                $(el).parent("a").addClass("bg-gradient-to-r from-blue-600 to-blue-500 text-white")
             } else {}
         });
     }

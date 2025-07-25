@@ -117,7 +117,7 @@ if(!empty($clientId)) {
                     </div>
                 </div>'
                 ).'
-                <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="'.($isAdminAccountant ? 'col-lg-4' : 'col-lg-3').' col-md-6 col-sm-6">
                     <div class="card">
                         <div class="card-wrap">
                             <div class="padding-20 pt-2 quick_loader pb-1" style="height:100px">

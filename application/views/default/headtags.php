@@ -160,7 +160,7 @@ load_helpers(['menu_helper']);
     <?php } ?>
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
-            <div class="navbar-bg"></div>
+            <div class="navbar-bg bg-gradient-to-r from-blue-600 to-blue-500 text-white"></div>
             <div class="progress-bar"></div>
             <nav class="navbar navbar-expand-lg main-navbar">
                 <div class="form-inline mr-auto">

@@ -1189,7 +1189,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                         <h4>'.($isWardParent ? "Today's Timetable": "Today's Lessons to Teach").'</h4>
                                     </div>
                                     <div class="col-md-3 p-0">
-                                        '.(($isWardParent && $session->student_id) || $isTutor ? '<button onclick="load(\'gradebook\');" class="btn btn-block btn-primary"><i class="fa fa-book-open"></i> LESSON MANAGER</button>' : null).'
+                                        '.(($isWardParent && $session->student_id) || $isTutor ? '<button onclick="load(\'gradebook\');" class="btn btn-block btn-primary"><i class="fa fa-book-open"></i> Grade Book</button>' : null).'
                                     </div>
                                 </div>
                             </div>

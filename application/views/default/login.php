@@ -38,6 +38,16 @@ if(loggedIn()) {
     background-attachment: fixed;
     background-size: cover;
   }
+  
+  /* Remove focus outlines for all interactive elements */
+  input:focus,
+  button:focus,
+  select:focus,
+  textarea:focus,
+  a:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
   </style>
   <?= $myClass->google_analytics_code ?>
 </head>
@@ -86,7 +96,10 @@ if(loggedIn()) {
                       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-lock text-gray-400"></i>
                       </div>
-                      <input id="password" type="password" autocomplete="Off" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900" name="password" tabindex="2" required placeholder="Enter your password">
+                      <input id="password" type="password" autocomplete="Off" class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900" name="password" tabindex="2" required placeholder="Enter your password">
+                      <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                        <i class="fas fa-eye" id="eyeIcon"></i>
+                      </button>
                     </div>
                     <div class="invalid-feedback text-red-500 text-sm mt-1">
                       Please fill in your password

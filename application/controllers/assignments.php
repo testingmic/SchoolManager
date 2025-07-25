@@ -345,18 +345,34 @@ class Assignments extends Myschoolgh {
             $lableBadge = $this->assessment_color_group[$each->assignment_type] ?? "warning";
 
             $assignments_list .= "<tr data-row_id=\"{$each->id}\">";
-            $assignments_list .= "<td class='text-center'>".($key+1)."</td>";
             $assignments_list .= "<td>
-                <a href='#' onclick='return load(\"assessment/{$each->item_id}\");'>
-                    {$each->assignment_title}
-                </a> 
-                <div>
-                ".($hasUpdate ? 
-                    "Class: <strong>{$each->class_name}</strong>
-                    <br><strong>{$each->course_name}</strong>" : "<br><strong> {$each->course_name}</strong>"
-                )."
+                <div class='flex items-center space-x-4'>
+                    <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'
+                            stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'
+                            class='lucide lucide-clipboard-list h-6 w-6 text-white' aria-hidden='true'>
+                            <rect width='8' height='4' x='8' y='2' rx='1' ry='1'></rect>
+                            <path d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'></path>
+                            <path d='M12 11h4'></path>
+                            <path d='M12 16h4'></path>
+                            <path d='M8 11h.01'></path>
+                            <path d='M8 16h.01'></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <a href='#' onclick='return load(\"assessment/{$each->item_id}\");'>
+                            {$each->assignment_title}
+                        </a> 
+                        <div>
+                        ".($hasUpdate ? 
+                            "Class: <strong>{$each->class_name}</strong>
+                            <br><strong>{$each->course_name}</strong>" : "<br><strong> {$each->course_name}</strong>"
+                        )."
+                        </div>
+                        <div><strong class='badge p-1 pr-2 pl-2 badge-{$lableBadge}'>{$each->assignment_type}</strong></div>
+                    </div>
                 </div>
-                <div><strong class='badge p-1 pr-2 pl-2 badge-{$lableBadge}'>{$each->assignment_type}</strong></div></td>";
+            </td>";
             $assignments_list .= "<td>{$each->due_date} ".(!empty($each->due_time) ? "@ {$each->due_time}" : null)."</td>";
     
             // show this section if the user has the necessary permissions

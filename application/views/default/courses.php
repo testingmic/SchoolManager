@@ -55,9 +55,22 @@ foreach($item_list["data"] as $key => $each) {
     }
 
     $courses .= "<tr data-row_id=\"{$each->id}\">";
-    $courses .= "<td>".($key+1)."</td>";
-    $courses .= "<td><span onclick='return load(\"course/{$each->id}\");' class='user_name'>{$each->name}</span></td>";
-    $courses .= "<td>{$each->course_code}</td>";
+    $courses .= "<td class='text-center'>".($key+1)."</td>";
+    $courses .= "<td>
+    <div class='flex items-center space-x-4'>
+        <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+            <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-book-open h-6 w-6 text-white' aria-hidden='true'>
+                <path d='M12 7v14'></path>
+                <path d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'>
+                </path>
+            </svg>
+        </div>
+        <div>
+            <span onclick='return load(\"course/{$each->id}\");' class='user_name'>{$each->name}</span>
+            <p class='text-xs text-gray-500'>{$each->course_code}</p>
+        </div>
+    </div>
+    </td>";
     $courses .= "<td>{$each->credit_hours}</td>";
     
     if(!$isWardParent) {
@@ -149,7 +162,6 @@ $response->html = '
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
                                         <th>Subject Title</th>
-                                        <th>Subject Code</th>
                                         <th>Credit Hours</th>
                                         '.(!$isWardParent ? '<th width="12%">Class Name</th>' : null).'
                                         <th>Subject Tutor</th>

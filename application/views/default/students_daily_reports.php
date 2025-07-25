@@ -146,7 +146,7 @@ $response->html = '
                                 <div>Log Form</div>
                                 <div>
                                     <button onclick="return load_quick_form(\'daily_report_log_form\');" class="btn btn-outline-primary">
-                                        <i class="fa fa-plus"></i> Add
+                                        <i class="fa fa-plus"></i> New Report
                                     </button>
                                 </div>
                             </div>

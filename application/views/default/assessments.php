@@ -155,8 +155,7 @@ $response->html = '
                             <table data-empty="" class="table table-sm table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
-                                        <th width="5%" class="text-center">#</th>
-                                        <th>Title</th>
+                                        <th width="25%">Title</th>
                                         <th>Due Date</th>
                                         '.($hasUpdate ? '
                                             <th class="text-center" width="10%">Assigned</th>

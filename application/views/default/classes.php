@@ -49,9 +49,26 @@ foreach($item_list["data"] as $key => $each) {
     }
 
     $classes .= "<tr data-row_id=\"{$each->id}\">";
-    $classes .= "<td>".($key+1)."</td>";
-    $classes .= "<td><span class='bold_cursor text-uppercase underline text-info' onclick='return load(\"class/{$each->item_id}\");'>{$each->name}</span></td>";
-    $classes .= "<td>{$each->class_code}</td>";
+    $classes .= "<td>
+    <div class='flex items-center space-x-4'>
+        <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+                <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'
+                    stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'
+                    class='lucide lucide-clipboard-list h-6 w-6 text-white' aria-hidden='true'>
+                    <rect width='8' height='4' x='8' y='2' rx='1' ry='1'></rect>
+                    <path d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'></path>
+                    <path d='M12 11h4'></path>
+                    <path d='M12 16h4'></path>
+                    <path d='M8 11h.01'></path>
+                    <path d='M8 16h.01'></path>
+                </svg>
+            </div>
+            <div>
+                <span class='bold_cursor text-uppercase text-info' onclick='return load(\"class/{$each->item_id}\");'>{$each->name}</span>
+                <p class='text-xs text-gray-500'>{$each->class_code}</p>
+            </div>
+        </div>
+    </td>";
     $classes .= "<td>{$each->department_name}</td>";
     $classes .= "<td>{$each->class_size}</td>";
     $classes .= "<td>{$each->students_count}</td>";
@@ -81,15 +98,13 @@ $response->html = '
                             <table data-empty="" class="table table-sm table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
-                                        <th width="5%" class="text-center">#</th>
-                                        <th>Class Name</th>
-                                        <th>Code</th>
+                                        <th width="22%">Class Name</th>
                                         <th>Department</th>
                                         <th>Class Size</th>
                                         <th width="15%">Students Count</th>
                                         <th>Class Teacher</th>
                                         <th>Class Prefect</th>
-                                        <th align="center" width="13%"></th>
+                                        <th align="center" width="18%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$classes.'</tbody>

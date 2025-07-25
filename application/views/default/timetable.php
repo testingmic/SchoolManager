@@ -123,7 +123,7 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
                                     } else {
                                         foreach($timetable_list as $key => $value) {
                                             $response->html .= "
-                                                <div data-row_id=\"{$value->item_id}\" class='mb-3 rounded-2xl p-2 rounded-2xl shadow-xl border border-blue-500 overflow-hidden mb-3'>
+                                                <div data-row_id=\"{$value->item_id}\" class='mb-3 rounded-2xl p-2 rounded-2xl shadow-xl border overflow-hidden mb-3 transition-all duration-300 hover:shadow-xl hover:-translate-y-1'>
                                                     <p class='clearfix pb-0 mb-0'>
                                                         <span class='float-left font-weight-bolder'>Name</span>
                                                         <span class='float-right'>{$value->name}</span>

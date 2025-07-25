@@ -204,7 +204,9 @@ if(!empty($item_id)) {
                 <div class="card author-box">
                 <div class="card-body">
                     <div class="author-box-center">
-                        <img width="100%" alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
+                        <div class="flex w-100 justify-center">
+                            <img width="100%" alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
+                        </div>
                         <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
                     </div>
                 </div>

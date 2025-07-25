@@ -72,12 +72,27 @@ foreach($api_staff_list["data"] as $i => $each) {
         $action .= "&nbsp;<span title='Delete Staff Record' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
     }
 
+    if(is_file($each->image) && file_exists($each->image)) {
+        $image = $baseUrl.$each->image;
+        $image = "<img class='author-box-picture' width='40px' src=\"{$image}\">";
+    } else {
+        $image = "
+        <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+            <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-user h-6 w-6 text-white' aria-hidden='true'>
+                <path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'></path>
+                <circle cx='12' cy='7' r='4'></circle>
+            </svg>
+        </div>";
+    }
+
 
     $staff_list .= "<tr data-row_id=\"{$each->user_id}\">";
     $staff_list .= "<td>{$counter}</td>";
     $staff_list .= "<td>
         <div class='d-flex justify-content-start'>
-            <div class='mr-2'><img class='author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"></div>
+            <div class='mr-2'>
+                {$image}
+            </div>
             <div>
                 <span class='user_name' onclick='return load(\"staff/{$each->user_id}/documents\");'>{$each->name}</span>
                 <br><span class='badge badge-{$myClass->user_colors[$each->user_type]} p-1'>".strtoupper($each->user_type)."</span>

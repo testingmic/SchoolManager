@@ -78,11 +78,17 @@ foreach($student_list["data"] as $key => $each) {
     
     $count++;
     $students .= "<tr data-row_id=\"{$each->user_id}\">";
-    $students .= "<td>{$count}</td>";
     $students .= "
     <td>
-        <span title='View Details' class='user_name' onclick='load(\"student/{$each->user_id}\");'>{$each->name}</span><br>
-        {$each->unique_id}{$t_status}{$scholarship_status}
+        <div class='flex items-center space-x-4'>
+            <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+                <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-user h-6 w-6 text-white' aria-hidden='true'><path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'></path><circle cx='12' cy='7' r='4'></circle></svg>
+            </div>
+            <div>
+                <span title='View Details' class='user_name' onclick='load(\"student/{$each->user_id}\");'>{$each->name}</span><br>
+                {$each->unique_id}{$t_status}{$scholarship_status}
+            </div>
+        </div>
     </td>";
     $students .= "<td>".(!empty($each->class_name) ? strtoupper($each->class_name) : null)."</td>";
     $students .= "<td>".(!empty($each->gender) ? strtoupper($each->gender) : null)."</td>";
@@ -183,7 +189,6 @@ $response->html = '
                             <table class="table table-sm table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
-                                        <th width="5%" class="text-center">#</th>
                                         <th>Student Name</th>
                                         <th>Class</th>
                                         <th>Gender</th>

@@ -41,8 +41,23 @@ foreach($item_list["data"] as $key => $each) {
     }
 
     $departments .= "<tr data-row_id=\"{$each->id}\">";
-    $departments .= "<td>".($count)."</td>";
-    $departments .= "<td><a href='#' class='text-uppercase font-weight-bold' onclick='return load(\"department/{$each->id}\");'>{$each->name}</a></td>";
+    $departments .= "<td>
+    <div class='flex items-center space-x-4'>
+        <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+            <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'
+                stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'
+                class='lucide lucide-tag h-6 w-6 text-white' aria-hidden='true'>
+                <path
+                    d='M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z'></path>
+                <circle cx='7.5' cy='7.5' r='.5' fill='currentColor'></circle>
+            </svg>
+        </div>
+        <div>
+            <span class='bold_cursor text-uppercase text-info' onclick='return load(\"department/{$each->id}\");'>{$each->name}</span>
+            <p class='text-xs text-gray-500'>{$each->department_code}</p>
+        </div>
+    </div>
+    </td>";
     $departments .= "<td>{$each->department_code}</td>";
     $departments .= "<td>{$each->students_count}</td>";
     $departments .= "<td><span class='underline'>".($each->department_head_info->name ?? null)."</span></td>";
@@ -67,7 +82,6 @@ $response->html = '
                             <table data-empty="" data-rows_count="20" class="table table-bordered table-striped table-sm datatable">
                                 <thead>
                                     <tr>
-                                        <th width="5%" class="text-center">#</th>
                                         <th>Department Name</th>
                                         <th>Department Code</th>
                                         <th width="15%">Students Count</th>

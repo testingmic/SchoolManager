@@ -12,7 +12,7 @@ body .btn {
 }
 
 .navbar-bg {
-    background: #0071f3;
+    /* background: #0071f3; */
 }
 
 .bg-blue {
@@ -427,6 +427,15 @@ textarea.custom_form-control {
 
 .select2-container--default .select2-selection--single .select2-selection__rendered {
     line-height: 40px;
+}
+
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+    border-color: #e4e6fc;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: #95a0f4;
 }
 
 .main-footer {
@@ -1088,7 +1097,7 @@ body.dark .nav-tabs .nav-link.active {
 
 body.dark .main-sidebar,
 body.dark .modal-content,
-body.dark .navbar-bg, 
+body.dark,
 body.dark .card {
     background: rgb(3, 18, 24);
     color: #96a2b4;
