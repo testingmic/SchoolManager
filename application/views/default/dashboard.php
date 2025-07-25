@@ -954,64 +954,60 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             <div class="row default_period" data-current_period="'.$global_period.'">
                 '.(
                     $isTutorStudent || $isEmployee ?
-                    '<div class="col-lg-12">
-                        '.($data_stream ? 
-                            '<div class="row">
-                                <div class="col-md-3 col-sm-12">
-                                    <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-green border-left-solid bg-gradient-to-br from-green-500 to-green-200">
-                                        <i class="fas fa-user-check card-icon text-white col-green"></i>
-                                        <div class="card-wrap">
-                                            <div class="padding-20">
-                                                <div class="text-right">
-                                                    <h3 data-attendance_count="Present" class="font-light mb-0">0</h3>
-                                                    <span class="text-dark">Days Present</span>
-                                                </div>
-                                            </div>
+                    ''.($data_stream ? '
+                        <div class="col-md-3 col-sm-12">
+                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-green border-left-solid bg-gradient-to-br from-green-600 to-green-300">
+                                <i class="fas fa-user-check card-icon text-white col-green"></i>
+                                <div class="card-wrap">
+                                    <div class="padding-20">
+                                        <div class="text-right">
+                                            <h3 data-attendance_count="Present" class="font-light text-white mb-0">0</h3>
+                                            <span class="text-dark">Days Present</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3 col-sm-12">
-                                    <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-danger border-left-solid bg-gradient-to-br from-red-500 to-red-200">
-                                        <i class="fas fa-user-alt-slash card-icon text-white col-red"></i>
-                                        <div class="card-wrap">
-                                            <div class="padding-20">
-                                                <div class="text-right">
-                                                    <h3 data-attendance_count="Absent" class="font-light mb-0">0</h3>
-                                                    <span class="text-dark">Days Absent</span>
-                                                </div>
-                                            </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-12">
+                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-danger border-left-solid bg-gradient-to-br from-red-600 to-red-300">
+                                <i class="fas fa-user-alt-slash card-icon text-white col-red"></i>
+                                <div class="card-wrap">
+                                    <div class="padding-20">
+                                        <div class="text-right">
+                                            <h3 data-attendance_count="Absent" class="font-light text-white mb-0">0</h3>
+                                            <span class="text-dark">Days Absent</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3 col-sm-12">
-                                    <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-500 to-purple-200">
-                                        <i class="fas fa-user-edit card-icon text-white col-purple"></i>
-                                        <div class="card-wrap">
-                                            <div class="padding-20">
-                                                <div class="text-right">
-                                                    <h3 data-attendance_count="logs_count" class="font-light mb-0">0</h3>
-                                                    <span class="text-dark">Logs Counter</span>
-                                                </div>
-                                            </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-12">
+                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-600 to-purple-300">
+                                <i class="fas fa-user-edit card-icon text-white col-purple"></i>
+                                <div class="card-wrap">
+                                    <div class="padding-20">
+                                        <div class="text-right">
+                                            <h3 data-attendance_count="logs_count" class="font-light text-white mb-0">0</h3>
+                                            <span class="text-dark">Logs Counter</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3 col-sm-12">
-                                    <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-blue border-left-solid bg-gradient-to-br from-blue-500 to-blue-200">
-                                        <i class="fas fa-list card-icon text-white col-blue"></i>
-                                        <div class="card-wrap">
-                                            <div class="padding-20">
-                                                <div class="text-right">
-                                                    <h3 data-attendance_count="Term" class="font-light mb-0">0</h3>
-                                                    <span class="text-dark">'.$academicSession.' Days</span>
-                                                </div>
-                                            </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-12">
+                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-blue border-left-solid bg-gradient-to-br from-blue-600 to-blue-400">
+                                <i class="fas fa-list card-icon text-white col-blue"></i>
+                                <div class="card-wrap">
+                                    <div class="padding-20">
+                                        <div class="text-right">
+                                            <h3 data-attendance_count="Term" class="font-light text-white mb-0">0</h3>
+                                            <span class="text-dark">'.$academicSession.' Days</span>
                                         </div>
                                     </div>
                                 </div>
-                            </div>' : ''
-                        ).'
-                    </div>' : null
+                            </div>
+                        </div>' : ''
+                    ).'' : null
                 ).'
                 '.($isWardTutorParent || $isEmployee ?
                 '<div class="col-lg-4 col-md-12">
@@ -1131,7 +1127,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>' : null).'
                 </div>
-                <div class="col-lg-8 p-0 col-md-12">
+                <div class="col-lg-8 col-md-12">
                     <div class="row">
                         '.($isParent ?                             
                             '<div class="col-lg-4 col-md-6 col-sm-6 col-12">
