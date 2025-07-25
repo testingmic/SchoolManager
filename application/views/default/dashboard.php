@@ -602,7 +602,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 '<div class="row">
                     <div class="col-xl-3 col-lg-6 col-md-6">
                         <div class="card rounded-2xl">
-                            <div class="card-body bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
+                            <div class="card-body bg-gradient-to-br from-amber-500 to-amber-300 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Students Count</h6>
@@ -619,7 +619,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
                         <div class="card rounded-2xl">
-                            <div class="card-body bg-gradient-to-br from-amber-500 to-amber-300 rounded-2xl shadow-lg text-white card-type-3">
+                            <div class="card-body bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Teaching Stafff</h6>
