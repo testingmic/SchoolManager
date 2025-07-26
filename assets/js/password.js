@@ -16,6 +16,7 @@ var cancel_ChangePassword = (request_id) => {
                     if(response.data.additional.request == "cancel") {
                         $(`span[id="change_status_${request_id}"]`).html(`ANNULED`).removeClass(`text-primary`).addClass(`text-danger`);
                         $(`div[class="change_password_${request_id}"]`).remove();
+                        $(`tr[data-row_id="${request_id}"]`).remove();
                     }
                 }
                 swal({

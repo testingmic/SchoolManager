@@ -944,11 +944,11 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 <div class="student-report">
                                     <div class="student-count pseudo-bg-blue">
                                         <h4 class="item-title text-white">Female Students</h4>
-                                        <div class="item-number" data-sex_count="Female"></div>
+                                        <div class="font-25 font-bold text-white" data-sex_count="Female"></div>
                                     </div>
                                     <div class="student-count pseudo-bg-yellow">
                                         <h4 class="item-title text-white">Male Students</h4>
-                                        <div class="item-number" data-sex_count="Male"></div>
+                                        <div class="font-25 font-bold text-white" data-sex_count="Male"></div>
                                     </div>
                                 </div>
                             </div>

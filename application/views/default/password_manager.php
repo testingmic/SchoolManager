@@ -61,7 +61,7 @@ $color = [
 // loop through the requests
 foreach($password_requests as $key => $request) {
     $change_requests .= "
-        <tr>
+        <tr data-row_id='{$request->item_id}'>
             <td>".($key+1)."</td>
             <td>{$request->fullname} 
                 <span class='badge p-1 badge-{$color[$request->user_role]}'>".ucwords($request->user_role)."</span>

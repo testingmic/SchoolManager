@@ -1316,7 +1316,7 @@ class Auth extends Myschoolgh {
             // if the request is cancel
             if($request == "cancel") {
                 // cancel request token
-                $this->db->query("UPDATE users_reset_request SET request_token = NULL, token_status = 'ANNULED' WHERE item_id = '{$request_id}' LIMIT 1");
+                $this->db->query("DELETE FROM users_reset_request WHERE item_id = '{$request_id}' LIMIT 1");
                 
                 // add a new notification
                 $notice_param->message = "Your password reset request was cancelled by <strong>{$params->userData->name}.";
