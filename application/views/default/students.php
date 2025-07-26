@@ -76,14 +76,20 @@ foreach($student_list["data"] as $key => $each) {
     $t_status = in_array($each->user_status, ["Active"]) ? null : "<br>{$each->the_status_label}";
     $scholarship_status = $each->scholarship_status == 1 ? "<br><span class='badge p-1 badge-success'>Full Scholarship</span>" : null;
     
+    $imageToUse = "<img src=\"{$baseUrl}{$each->image}\" class='rounded-2xl cursor author-box-picture' width='50px' height='50px'>";
+    if($each->image == "assets/img/avatar.png") {
+        $imageToUse = "
+        <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+            <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-user h-6 w-6 text-white' aria-hidden='true'><path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'></path><circle cx='12' cy='7' r='4'></circle></svg>
+        </div>";
+    }
+
     $count++;
     $students .= "<tr data-row_id=\"{$each->user_id}\">";
     $students .= "
     <td>
         <div class='flex items-center space-x-4'>
-            <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
-                <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-user h-6 w-6 text-white' aria-hidden='true'><path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'></path><circle cx='12' cy='7' r='4'></circle></svg>
-            </div>
+            {$imageToUse}
             <div>
                 <span title='View Details' class='user_name' onclick='load(\"student/{$each->user_id}\");'>{$each->name}</span><br>
                 {$each->unique_id}{$t_status}{$scholarship_status}

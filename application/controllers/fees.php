@@ -559,7 +559,10 @@ class Fees extends Myschoolgh {
                             $_class = "class='btn mb-1 btn-sm text-uppercase btn-outline-success'";
                             $student_allocation_list .= $isParent ? "
                                 <a {$_class} href='{$this->baseUrl}pay/{$defaultUser->client_id}/fees/{$student->checkout_url}/checkout' target='_blank'>Pay Fee</a>
-                            " : "<button onclick='return load(\"fees-payment?".($groupBy ? "student_id={$student->student_id}&class_id={$student->class_id}{$url}" : "checkout_url={$student->checkout_url}{$url}")."\");' {$_class}>Pay</button>";
+                            " : "
+                            <button onclick='return load(\"fees-payment?".($groupBy ? "student_id={$student->student_id}&class_id={$student->class_id}{$url}" : "checkout_url={$student->checkout_url}{$url}")."\");' {$_class}>
+                                <i class='fa fa-adjust'></i> Pay Fees
+                            </button>";
                         }
                         // delete the record if possible => that is allowed only if the student has not already made an payment
                         if(!empty($params->canAllocate) && empty($student->amount_paid)) {
@@ -572,7 +575,12 @@ class Fees extends Myschoolgh {
                 // if the show print button was parsed
                 if($showPrintButton) {
                     $add_current_term = $add_current_term ? "&current_bal=true" : null;
-                    $student_allocation_list .= '&nbsp;<span><a href="'.$this->baseUrl.'download/student_bill/'.$student->student_id.'?print=1&academic_year='.$params->academic_year.'&academic_term='.$params->academic_term.''.$add_current_term.'" target="_blank" class="btn mb-1 btn-sm btn-primary text-uppercase"><i class="fa fa-print"></i> Print Bill</a></span>';
+                    $student_allocation_list .= '&nbsp;
+                    <span>
+                        <a href="'.$this->baseUrl.'download/student_bill/'.$student->student_id.'?print=1&academic_year='.$params->academic_year.'&academic_term='.$params->academic_term.''.$add_current_term.'" target="_blank" class="btn mb-1 btn-sm btn-primary text-uppercase">
+                            <i class="fa fa-print"></i> Print Bill
+                        </a>
+                    </span>';
                 }
                 $student_allocation_list .= "</td>";
 

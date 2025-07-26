@@ -279,7 +279,7 @@ elseif(!empty($user_id)) {
                         <div class="card author-box pt-2">
                             <div class="card-body pl-1 pr-1">
                                 <div class="text-center">
-                                    <div class="author-box-center m-0 p-0">
+                                    <div class="author-box-center m-0 p-0 flex justify-center">
                                         <img id="avatar" alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
                                     </div>
                                     '.($hasUpdate ?
@@ -314,7 +314,7 @@ elseif(!empty($user_id)) {
                                             '.($pay_button ? 
                                                 '&nbsp;
                                                 <a href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'" class="btn mb-2 btn-outline-success">
-                                                <i class="fa fa-adjust"></i> PAY FEES
+                                                    <i class="fa fa-adjust"></i> PAY FEES
                                                 </a>' : null
                                             ).'' : null
                                         ).'

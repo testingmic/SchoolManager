@@ -362,7 +362,7 @@ if(!empty($user_id)) {
         // set the scholarship status
         $scholarship_status = $data->scholarship_status == 1 ? 0 : 1;
         $scholarship_class = $data->scholarship_status == 1 ? "btn-outline-danger" : "btn-outline-success";
-        $scholarship_title = $data->scholarship_status == 1 ? "<i class='fa fa-ankh'></i> Remove Scholarship</span>" : "<i class='fa fa-ankh'></i> Award Full Scholarship";
+        $scholarship_title = $data->scholarship_status == 1 ? "<i class='fa fa-ankh'></i> Remove Scholarship</span>" : "<i class='fa fa-ankh'></i> Award Scholarship";
 
         // the default data to stream
         $data_stream = "attendance_report&label[student_id]={$user_id}";
@@ -426,7 +426,7 @@ if(!empty($user_id)) {
             </div>
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="card author-box">
-                <div class="card-body">
+                <div class="card-body pr-0 pl-0">
                     <div class="author-box-center m-0 p-0 flex justify-center">
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
                     </div>
@@ -684,7 +684,7 @@ if(!empty($user_id)) {
                                             <th>Due</th>
                                             <th>Paid</th>
                                             <th>Balance</th>
-                                            '.($receivePayment ? '<th width="10%" align="center"></th>' : '').'
+                                            '.($receivePayment ? '<th width="20%" align="center"></th>' : '').'
                                         </tr>
                                     </thead>
                                     <tbody>'.$student_allocation_list["list"].'</tbody>

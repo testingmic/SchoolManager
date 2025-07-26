@@ -98,20 +98,36 @@ if(!empty($item_id)) {
 
             // show the payment button if the user has the permission to receive fees payment
             if($receivePayment && $student->debt > 0) {
-                $action .= "&nbsp;<button title='Pay Fees' onclick='return load(\"fees-payment?student_id={$student->user_id}&class_id={$student->class_id}\");' class='btn btn-sm btn-outline-success'>Pay</button>";
+                $action .= "&nbsp;<button title='Pay Fees' onclick='return load(\"fees-payment?student_id={$student->user_id}&class_id={$student->class_id}\");' class='btn btn-sm btn-outline-success'><i class='fa fa-adjust'></i> Pay Fees</button>";
             }
 
+            $imageToUse = "<img src=\"{$baseUrl}{$student->image}\" class='rounded-2xl cursor author-box-picture' width='50px' height='50px'>";
+			if($student->image == "assets/img/avatar.png") {
+				$imageToUse = "
+				<div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+                    <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-user h-6 w-6 text-white' aria-hidden='true'><path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'></path><circle cx='12' cy='7' r='4'></circle></svg>
+                </div>";
+			}
+
             $students .= "<tr data-row_id=\"{$student->user_id}\">";
-            $students .= "<td>".($count)."</td>";
             $students .= "<td>
-                <div class='d-flex justify-content-start'>
+
+                <div class='flex items-center space-x-4'>
+                    {$imageToUse}
+                    <div>
+                        <span title='View Details' class='user_name' onclick='load(\"student/{$student->user_id}\");'>{$student->name}</span><br>
+                        {$student->unique_id}{$t_status}{$scholarship_status}
+                    </div>
+                </div>
+
+                <div class='d-flex hidden justify-content-start'>
                     <div class='font-bold'>
                         <span onclick='return load(\"student/{$student->user_id}\");' class='user_name'>{$student->name}</span>
                         {$scholarship_status}
                     </div>
+                    {$student->unique_id}
                 </div>
             </td>";
-            $students .= "<td>{$student->unique_id}</td>";
             $students .= "<td>{$student->gender}</td>";
             $students .= $viewAllocation ? "<td>{$defaultCurrency} {$debt_formated}</td>" : null;
             $students .= "<td align='center'>{$action}</td>";
@@ -124,12 +140,10 @@ if(!empty($item_id)) {
             <table data-empty="" class="table table-sm table-bordered table-striped raw_datatable">
                 <thead>
                     <tr>
-                        <th width="5%" class="text-center">#</th>
                         <th>NAME</th>
-                        <th>REG. ID</th>
                         <th>GENDER</th>
                         '.($viewAllocation ? "<th>DEBT</th>" : null).'
-                        <th width="12%"></th>
+                        <th width="24%"></th>
                     </tr>
                 </thead>
                 <tbody>'.$students.'</tbody>
