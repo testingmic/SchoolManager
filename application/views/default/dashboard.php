@@ -1037,7 +1037,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 ).'
                 '.($isWardTutorParent || $isEmployee ?
                 '<div class="col-lg-4 col-md-12">
-                    '.($isStudent ? '
+                    '.($isStudent || $isTutor ? '
                         <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-yellow border-left-solid">
                             <div class="card-wrap">
                                 <div class="padding-20">
