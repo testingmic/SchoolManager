@@ -146,13 +146,13 @@ if(!empty($item_id)) {
 
             <div class="col-md-3">
                 <div class="card">
-                    <div class="card-body card-body pt-3 pb-3 pr-2 pl-2 text-center bg-danger">
-                        <div class="font-23 font-weight-bolder text-white">'.strtoupper($data->name).'</div>
-                        <div class="font-18 font-weight-bold text-uppercase text-white">'.$data->section_code.'</div>
+                    <div class="card-body card-body pt-3 pb-3 pr-2 pl-2 text-center bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 shadow-lg text-white">
+                        <div class="font-23 font-weight-bolder">'.strtoupper($data->name).'</div>
+                        <div class="font-18 font-weight-bold text-uppercase">'.$data->section_code.'</div>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="col-xl-3 col-lg-6 col-md-6 hover:scale-105 transition-all duration-300">
                 <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-green border-left-solid">
                     <div class="card-body card-type-3">
                         <div class="row">
@@ -169,7 +169,7 @@ if(!empty($item_id)) {
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="col-xl-3 col-lg-6 col-md-6 hover:scale-105 transition-all duration-300">
                 <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-blue border-left-solid">
                     <div class="card-body card-type-3">
                         <div class="row">
@@ -186,7 +186,7 @@ if(!empty($item_id)) {
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="col-xl-3 col-lg-6 col-md-6 hover:scale-105 transition-all duration-300">
                 <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple border-left-solid">
                     <div class="card-body card-type-3">
                         <div class="row">
@@ -207,8 +207,10 @@ if(!empty($item_id)) {
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="card author-box">
                 <div class="card-body">
-                    <div class="author-box-center">
+                    <div class="author-box-center flex justify-center">
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
+                    </div>
+                    <div>
                         <div class="clearfix"></div>
                         <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
                     </div>

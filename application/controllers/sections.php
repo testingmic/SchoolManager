@@ -129,6 +129,7 @@ class Sections extends Myschoolgh {
                 ".(isset($params->section_code) ? ", section_code = '{$params->section_code}'" : null)."
                 ".(isset($params->section_leader) ? ", section_leader = '{$params->section_leader}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(!empty($params->color_code) ? ", color_code = '{$params->color_code}'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId]);
             
@@ -219,6 +220,7 @@ class Sections extends Myschoolgh {
                 ".(isset($params->section_code) ? ", section_code = '{$params->section_code}'" : null)."
                 ".(isset($params->section_leader) ? ", section_leader = '{$params->section_leader}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(!empty($params->color_code) ? ", color_code = '{$params->color_code}'" : null)."
                 WHERE id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([$params->section_id, $params->clientId]);

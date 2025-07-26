@@ -197,7 +197,7 @@ $response->html = '
                                         '<th class="text-center">Term Bill</th>
                                         <th class="text-center">Arrears</th>
                                         <th class="text-center">Total</th>' : '<th>Email</th>').'
-                                        <th width="14%"></th>
+                                        <th width="18%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$students.'</tbody>

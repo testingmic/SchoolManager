@@ -41,9 +41,20 @@ foreach($department_list["data"] as $key => $each) {
         $action .= "&nbsp;<a href='#' title='Click to delete this Section' onclick='return delete_record(\"{$each->id}\", \"section\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
+    $color = !empty($each->color_code) ? $each->color_code : "blue";
+
     $sections .= "<tr data-row_id=\"{$each->id}\">";
-    $sections .= "<td>".($key+1)."</td>";
-    $sections .= "<td><a href='#' class='text-uppercase font-weight-bold' onclick='return load(\"section/{$each->id}\");'>{$each->name}</a></td>";
+    $sections .= "<td>
+    <div class='flex items-center space-x-4'>
+        <div class='h-12 w-12 bg-gradient-to-br from-{$color}-500 via-{$color}-600 to-{$color}-300 rounded-xl flex items-center justify-center shadow-lg'>
+            <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-users h-6 w-6 text-white' aria-hidden='true'><path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'></path><path d='M16 3.128a4 4 0 0 1 0 7.744'></path><path d='M22 21v-2a4 4 0 0 0-3-3.87'></path><circle cx='9' cy='7' r='4'></circle></svg>
+        </div>
+        <div>
+            <span onclick='return load(\"section/{$each->id}\");' class='user_name'>{$each->name}</span>
+            <p class='text-xs text-gray-500'>{$each->section_code}</p>
+        </div>
+    </div>
+    </td>";
     $sections .= "<td>{$each->section_code}</td>";
     $sections .= "<td>{$each->students_count}</td>";
     $sections .= "<td><span ".(isset($each->section_leader_info->name) ? "onclick='return load(\"student/{$each->section_leader_info->user_id}\")'" : null)." class='user_name'>".($each->section_leader_info->name ?? null)."</span></td>";
@@ -68,12 +79,11 @@ $response->html = '
                             <table data-empty="" class="table table-sm table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
-                                        <th width="5%" class="text-center">#</th>
                                         <th>Section Name</th>
                                         <th>Section Code</th>
                                         <th width="15%">Students Count</th>
                                         <th>Section Leader</th>
-                                        <th align="center" width="12%"></th>
+                                        <th align="center" width="14%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$sections.'</tbody>

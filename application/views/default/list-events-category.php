@@ -101,15 +101,7 @@ if(!empty($session->clientId)) {
                                 <div class="form-group">
                                     <label>Color Code</label>
                                     <select class="form-control" id="color_code" name="color_code">
-                                        <option value="">Select Color</option>
-                                        <option value="black">Black</option>
-                                        <option value="red">Red</option>
-                                        <option value="green">Green</option>
-                                        <option value="blue">Blue</option>
-                                        <option value="yellow">Yellow</option>
-                                        <option value="purple">Purple</option>
-                                        <option value="orange">Orange</option>
-                                        <option value="pink">Pink</option>
+                                        '.color_code_picker().'
                                     </select>
                                 </div>
                                 <div class="form-group">

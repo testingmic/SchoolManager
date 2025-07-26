@@ -2641,6 +2641,14 @@ class Forms extends Myschoolgh {
                         <input type="text" value="'.($itemData->section_code ?? null).'" name="section_code" id="section_code" class="form-control text-uppercase">
                     </div>
                 </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="color_code">Color Code</label>
+                        <select data-width="100%" class="form-control selectpicker" id="color_code" name="color_code">
+                            '.color_code_picker($itemData->color_code ?? 'blue').'
+                        </select>
+                    </div>
+                </div>
                 <div class="col-lg-8 col-md-8">
                     <div class="form-group">
                         <label for="name">Section Name<span class="required">*</span></label>

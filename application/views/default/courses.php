@@ -165,7 +165,7 @@ $response->html = '
                                         <th>Credit Hours</th>
                                         '.(!$isWardParent ? '<th width="12%">Class Name</th>' : null).'
                                         <th>Subject Tutor</th>
-                                        <th align="center" width="12%"></th>
+                                        <th align="center" width="14%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$courses.'</tbody>

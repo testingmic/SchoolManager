@@ -175,6 +175,28 @@ function replies_modal($auto_close_modal, $modal_id = "repliesModal") {
     return $html;
 }
 
+/**
+ * Color code picker
+ * 
+ * @return array
+ */
+function color_code_picker($selected = null) {
+    $colors = [
+        "black" => "Black",
+        "red" => "Red",
+        "green" => "Green",
+        "blue" => "Blue",
+        "yellow" => "Yellow",
+        "purple" => "Purple",
+        "orange" => "Orange",
+        "pink" => "Pink",
+    ];
+    $html = "<option value=\"\">Select Color</option>";
+    foreach($colors as $key => $value) {
+        $html .= "<option ".($selected == $key ? "selected" : null)." value=\"{$key}\">{$value}</option>";
+    }
+    return $html;
+}
 
 /**
  * Modal for general purpose
@@ -541,7 +563,14 @@ function ajax_form_button() {
     return $html;
 }
 
-/** Add new button */
+/**
+ * Add new button
+ * 
+ * @param string $item_id
+ * @param string $label
+ * 
+ * @return string
+ */
 function add_new_item($item_id = null, $label = null) {
 	global $accessObject;
 	$buttons = "
