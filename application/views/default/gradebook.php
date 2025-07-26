@@ -487,7 +487,6 @@ elseif($url === "assessment") {
             <table class=\"table table-bordered table-striped raw_datatable\">
                 <thead>
                     <tr>
-                        <th width=\"5%\" class=\"text-center\">#</th>
                         <th>Title</th>
                         <th>Due Date</th>
                         ".($hasUpdate ? '

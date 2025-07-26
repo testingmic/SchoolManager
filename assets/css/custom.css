@@ -59,6 +59,10 @@ table.dataTable.table-sm>thead>tr>th {
     background-color: #fff;
 }
 
+.z-200 {
+    z-index: 200;
+}
+
 .input-group-text, select.form-control:not([size]):not([multiple]), .form-control:not(.form-control-sm):not(.form-control-lg) {
     padding: 10px 10px;
 }

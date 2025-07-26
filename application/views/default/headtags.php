@@ -160,7 +160,7 @@ load_helpers(['menu_helper']);
     <?php } ?>
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
-            <div class="navbar-bg bg-gradient-to-r fixed top-0 left-0 right-0 z-10 from-purple-900 via-blue-900 to-indigo-900 text-white">
+            <div class="navbar-bg bg-gradient-to-r fixed top-0 left-0 right-0 z-200 from-purple-900 via-blue-900 to-indigo-900 text-white">
                 <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-pink-400 to-purple-400 opacity-20 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
             </div>
             <div class="progress-bar"></div>
