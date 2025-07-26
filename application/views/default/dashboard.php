@@ -243,7 +243,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
             $assigments_list .= "<tr data-row_id=\"{$each->id}\">";
             $assigments_list .= "<td>".($key+1)."</td>";
-            $assigments_list .= "<td><a  href='#' onclick='return load(\"assessment/{$each->item_id}/view\");'>{$each->assignment_title}</a> ".(
+            $assigments_list .= "<td width='30%'><a href='#' onclick='return load(\"assessment/{$each->item_id}/view\");'>{$each->assignment_title}</a> ".(
                 $can_Update_Assign ? 
                     "<br>Class: <strong>{$each->class_name}</strong>
                     <br>Course: <strong>{$each->course_name}</strong>" : 
@@ -255,9 +255,18 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
             // show this section if the user has the necessary permissions
             if($can_Update_Assign) {
-                $assigments_list .= "<td>{$each->students_assigned}</td>";
-                $assigments_list .= "<td>{$each->students_handed_in}</td>";
-                $assigments_list .= "<td>{$each->students_graded}</td>";
+                $percentage = $each->students_assigned > 0 ? ($each->students_graded / $each->students_assigned) * 100 : 0;
+                $assigments_list .= "<td>
+                <div>
+                    <div class='flex mb-2 justify-between space-x-2'><span>Assigned</span> <span>{$each->students_assigned}</span></div>
+                    <div class='w-full mb-2 bg-gray-200 rounded-full h-2.5 dark:bg-gray-700'>
+                        <div class='bg-blue-600 h-2.5 rounded-full' style='width: {$percentage}%'></div>
+                    </div>
+                    <div class='flex justify-between space-x-2'><span class='text-success'>Graded</span> <span>{$each->students_graded}</span></div>
+                </div>
+                </td>";
+                // $assigments_list .= "<td>{$each->students_handed_in}</td>";
+                // $assigments_list .= "<td>{$each->students_graded}</td>";
             }
             
             if(!$can_Update_Assign) {
@@ -516,9 +525,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                         <th>Title</th>
                                         <th>Due Date</th>
                                         '.($can_Update_Assign ? '
-                                            <th width="10%">Assigned</th>
-                                            <th>Handed In</th>
-                                            <th>Marked</th>' : '<th>Awarded Mark</th>'
+                                            <th width="20%">Participation</th>' : '<th>Awarded Mark</th>'
                                         ).'
                                         <th align="center"></th>
                                     </tr>
