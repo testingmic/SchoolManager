@@ -103,12 +103,31 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
         // list of summary content
         $summary_list = [
-            ["label" => "This week", "title" => "Overall Income", "favicon" => "fa-money-bill", "border" => "success", "sum_tag" => "total_income_received", "left-border" => "border-green"],
-            ["label" => "This week", "title" => "Expenditure", "favicon" => "fa-money-bill-alt", "border" => "danger", "sum_tag" => "total_expenditure", "left-border" => "border-danger"],
-            ["label" => "This week", "title" => "Bank Deposits", "favicon" => "fa-desktop", "border" => "info", "sum_tag" => "Bank_Deposit", "left-border" => "border-blue"],
-            ["label" => "This week", "title" => "Bank Withdrawals", "favicon" => "fa-wind", "border" => "warning", "sum_tag" => "Bank_Withdrawal", "left-border" => "border-orange"],
-            // ["label" => "This week", "title" => "Bank Reconciliation", "favicon" => "fa-balance-scale", "border" => "dark", "sum_tag" => "Bank_Recons", "left-border" => "border-black"],
-            ["label" => "Overall", "title" => "Account Balance", "favicon" => "fa-balance-scale", "border" => "primary", "sum_tag" => "account_balance", "left-border" => "border-purple"]
+            [
+                "label" => "This week", "title" => "Overall Income", "favicon" => "fa-money-bill", 
+                "border" => "success", "sum_tag" => "total_income_received", "left-border" => "border-green", 
+                "background" => "bg-green-50"
+            ],
+            [
+                "label" => "This week", "title" => "Expenditure", "favicon" => "fa-money-bill-alt", 
+                "border" => "danger", "sum_tag" => "total_expenditure", "left-border" => "border-danger",
+                "background" => "bg-red-50"
+            ],
+            [
+                "label" => "This week", "title" => "Bank Deposits", "favicon" => "fa-desktop", 
+                "border" => "info", "sum_tag" => "Bank_Deposit", "left-border" => "border-blue",
+                "background" => "bg-blue-50"
+            ],
+            [
+                "label" => "This week", "title" => "Bank Withdrawals", "favicon" => "fa-wind", 
+                "border" => "warning", "sum_tag" => "Bank_Withdrawal", "left-border" => "border-orange", 
+                "background" => "bg-orange-50"
+            ],
+            [
+                "label" => "Overall", "title" => "Account Balance", "favicon" => "fa-balance-scale", 
+                "border" => "primary", "sum_tag" => "account_balance", "left-border" => "border-purple",
+                "background" => "bg-purple-50"
+            ]
         ];
 
         // include the scripts to load
@@ -727,29 +746,32 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 </div>';
             }
 
+            $financialSummary = '';
+            if($isAdminAccountant && !empty($summary_list)) {
+                // loop through the summary array listing
+                foreach($summary_list as $item) {
+                    $financialSummary .= '
+                    <div class="">
+                        <div class="card border-top-0 hover:scale-105 transition-all duration-300 '.($item["background"] ?? null).' border-bottom-0 border-right-0 border-left-lg border-left-solid '.$item["left-border"].'">
+                            <div class="card-header border-'.($item["border"] ?? null).' p-2">
+                                <i class="fa text-'.($item["border"] ?? null).' '.$item["favicon"].'"></i> 
+                                &nbsp; '.$item["title"].'
+                            </div>
+                            <div class="card-body pl-2 p-0 font-25"><span data-count="'.$item["sum_tag"].'">0.00</span></div>
+                            <div class="card-footer pl-2 pt-0 p-0">
+                                <em><span class="text-primary font-14" '.($item["label"] !== "Overall" ? 'data-filter="current_period"' : null).'>
+                                    '.$item["label"].'
+                                </span></em>
+                            </div>
+                        </div>
+                    </div>';
+                }
+            }
+
             // if an account is logged in
             if($isAccountant) {
-                $response->html .= '
-                <div class="col-lg-12">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">';
-                    // loop through the summary array listing
-                    foreach($summary_list as $item) {
-                        $response->html .= '
-                        <div class="">
-                            <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid '.$item["left-border"].'">
-                                <div class="card-header border-'.($item["border"] ?? null).' p-2">
-                                    <i class="fa text-'.($item["border"] ?? null).' '.$item["favicon"].'"></i> 
-                                    &nbsp; '.$item["title"].'
-                                </div>
-                                <div class="card-body pl-2 p-0 font-25"><span data-count="'.$item["sum_tag"].'">0.00</span></div>
-                                <div class="card-footer pl-2 pt-0 p-0">
-                                    <em><span class="text-primary font-14" '.($item["label"] !== "Overall" ? 'data-filter="current_period"' : null).'>
-                                        '.$item["label"].'
-                                    </span></em>
-                                </div>
-                            </div>
-                        </div>';
-                    }
+                $response->html .= '<div class="col-lg-12"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">';
+                $response->html .= $financialSummary;
                 $response->html .= '</div></div>';
             }
 
@@ -843,7 +865,11 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 </div>
                 '.(
                     $isAdmin ?
-                    '<div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                    '
+                    <div class="col-lg-12"><div class="grid grid-cols-1 hidden md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    '.$financialSummary.'
+                    </div></div>
+                    <div class="col-lg-12 col-md-12 col-12 col-sm-12">
                         <div class="card rounded-2xl">
                             <div class="card-header pr-0">
                                 <div class="row width-100">

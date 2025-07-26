@@ -117,7 +117,7 @@ if(!empty($session->userId) && empty($argv)) {
         $isSupport = (bool) ($defaultUser->user_type == "support");
         $isSchool = "School";
 
-        // $defaultUser->user_type = "student";
+        $defaultUser->user_type = "accountant";
         // set the user type
         if(empty($session->user_type)) {
             $session->set("user_type", $defaultUser->user_type);

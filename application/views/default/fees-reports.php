@@ -140,12 +140,12 @@ $response->html = '
                                             <div class="row">
 
                                                 <div class="col-lg-3 col-md-6">
-                                                    <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-blue">
+                                                    <div class="card border-top-0 border-bottom-0 border-right-0 hover:scale-105 transition-all duration-300 border-left-lg border-left-solid border-blue">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
                                                                 <div class="col pr-0">
                                                                     <h6 class="font-14 text-uppercase font-bold mb-0">TOTAL FEES DUE</h6>
-                                                                    <span data-summary="amount_due" class="font-bold text-primary font-17 mb-0">'.$defaultCurrency.' '.number_format(0, 2).'</span>
+                                                                    <span data-summary="amount_due" class="font-bold text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format(0, 2).'</span>
                                                                 </div>
                                                                 <div class="col-auto">
                                                                     <div class="bg-info text-white card-circle">
@@ -158,12 +158,12 @@ $response->html = '
                                                 </div>
                                 
                                                 <div class="col-lg-3 col-md-6">
-                                                    <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-success">
+                                                    <div class="card border-top-0 border-bottom-0 border-right-0 hover:scale-105 transition-all duration-300 border-left-lg border-left-solid border-success">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
                                                                 <div class="col">
                                                                     <h6 class="font-14 text-uppercase font-bold mb-0">TOTAL FEES PAID</h6>
-                                                                    <span data-summary="amount_paid" class="font-bold text-success font-17 mb-0">'.$defaultCurrency.' '.number_format(0, 2).'</span>
+                                                                    <span data-summary="amount_paid" class="font-bold text-success font-20 mb-0">'.$defaultCurrency.' '.number_format(0, 2).'</span>
                                                                 </div>
                                                                 <div class="col-auto">
                                                                     <div class="bg-success text-white card-circle">
@@ -176,12 +176,12 @@ $response->html = '
                                                 </div>
                                 
                                                 <div class="col-lg-3 col-md-6">
-                                                    <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-danger">
+                                                    <div class="card border-top-0 border-bottom-0 border-right-0 hover:scale-105 transition-all duration-300 border-left-lg border-left-solid border-danger">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
                                                                 <div class="col">
                                                                     <h6 class="font-14 text-uppercase font-bold mb-0">BALANCE</h6>
-                                                                    <span data-summary="balance" class="font-bold text-danger font-17 mb-0">'.$defaultCurrency.' '.number_format(0, 2).'</span>
+                                                                    <span data-summary="balance" class="font-bold text-danger font-20 mb-0">'.$defaultCurrency.' '.number_format(0, 2).'</span>
                                                                 </div>
                                                                 <div class="col-auto">
                                                                     <div class="bg-danger text-white card-circle">
@@ -194,12 +194,12 @@ $response->html = '
                                                 </div>
 
                                                 <div class="col-lg-3 col-md-6">
-                                                    <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-warning">
+                                                    <div class="card border-top-0 border-bottom-0 border-right-0 hover:scale-105 transition-all duration-300 border-left-lg border-left-solid border-warning">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
                                                                 <div class="col">
                                                                     <h6 class="font-14 text-uppercase font-bold mb-0">ARREARS PAID</h6>
-                                                                    <span data-summary="arrears_paid" class="font-bold text-warning font-17 mb-0">'.$defaultCurrency.' '.number_format(0, 2).'</span>
+                                                                    <span data-summary="arrears_paid" class="font-bold text-warning font-20 mb-0">'.$defaultCurrency.' '.number_format(0, 2).'</span>
                                                                 </div>
                                                                 <div class="col-auto">
                                                                     <div class="bg-warning text-white card-circle">
@@ -217,7 +217,7 @@ $response->html = '
                                                             <div class="row">
                                                                 <div class="col">
                                                                     <h6 class="font-14 text-uppercase font-bold mb-0">FEES ARREARS</h6>
-                                                                    <span data-summary="arrears_total" class="font-bold font-17 mb-0">'.$defaultCurrency.''.number_format(0, 2).'</span>
+                                                                    <span data-summary="arrears_total" class="font-bold font-20 mb-0">'.$defaultCurrency.''.number_format(0, 2).'</span>
                                                                 </div>
                                                                 <div class="col-auto">
                                                                     <div class="bg-amber text-white card-circle">
