@@ -185,7 +185,7 @@ load_helpers(['menu_helper']);
                                 </strong>
                             </a>
                             <?php } else { ?>
-                                <a href="#" class="nav-link text-white nav-link-lg">
+                                <a href="#" class="nav-link mt-2 text-white nav-link-lg">
                                     <strong class="font-20px"><?= $clientName ?> - SUPPORT PANEL</strong>
                                 </a>
                             <?php } ?>
