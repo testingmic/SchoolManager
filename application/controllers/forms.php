@@ -2645,7 +2645,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="color_code">Color Code</label>
                         <select data-width="100%" class="form-control selectpicker" id="color_code" name="color_code">
-                            '.color_code_picker($itemData->color_code ?? 'blue').'
+                            '.color_code_picker($itemData->color_code ?? '').'
                         </select>
                     </div>
                 </div>

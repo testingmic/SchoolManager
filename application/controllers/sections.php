@@ -94,6 +94,11 @@ class Sections extends Myschoolgh {
             $params->section_code = $defaultClientData->client_preferences->labels->{"section_label"}.$counter;
         }
 
+        // confirm that the color code is valid
+        if(!empty($params->color_code) && !in_array($params->color_code, color_code_picker(null, true))) {
+            return ["code" => 400, "data" => "Sorry! An invalid color code was supplied."];
+        }
+
         // convert the code to uppercase
         $params->section_code = strtoupper($params->section_code);
         
@@ -185,6 +190,11 @@ class Sections extends Myschoolgh {
                 // generate a new class code
                 $counter = $this->append_zeros(($this->itemsCount("sections", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
                 $params->section_code = $defaultClientData->client_preferences->labels->{"section_label"}.$counter;
+            }
+
+            // confirm that the color code is valid
+            if(!empty($params->color_code) && !in_array($params->color_code, color_code_picker(null, true))) {
+                return ["code" => 400, "data" => "Sorry! An invalid color code was supplied."];
             }
 
             // convert the code to uppercase

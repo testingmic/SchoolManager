@@ -180,7 +180,7 @@ function replies_modal($auto_close_modal, $modal_id = "repliesModal") {
  * 
  * @return array
  */
-function color_code_picker($selected = null) {
+function color_code_picker($selected = null, $colorsOnly = false) {
     $colors = [
         "black" => "Black",
         "red" => "Red",
@@ -191,6 +191,9 @@ function color_code_picker($selected = null) {
         "orange" => "Orange",
         "pink" => "Pink",
     ];
+    if($colorsOnly) {
+       return array_keys($colors);
+    }
     $html = "<option value=\"\">Select Color</option>";
     foreach($colors as $key => $value) {
         $html .= "<option ".($selected == $key ? "selected" : null)." value=\"{$key}\">{$value}</option>";
