@@ -313,7 +313,7 @@ class Assignments extends Myschoolgh {
             // set the assignment label
             $each->assignment_type_label = $this->assessment_color_group[$each->assignment_type] ?? $each->assignment_type;
             $assessment_array[$each->item_id] = $each;
-            $action = "<a title='View Assessment record' href='#' onclick='return load(\"assessment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $action = "<a title='View Assessment record' href='#' onclick='return load(\"assessment/{$each->item_id}/instructions\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
     
             // manage questions button
             if($hasUpdate && $each->questions_type == "multiple_choice") {

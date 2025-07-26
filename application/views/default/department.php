@@ -43,6 +43,9 @@ if(!empty($item_id)) {
         $response->html = page_not_found();
     } else {
 
+        // set the url
+        $url_link = $SITEURL[2] ?? null;
+
         // set the first key
         $amount_paid = 0;
         $amount_due = 0;
@@ -69,6 +72,9 @@ if(!empty($item_id)) {
         $count = 0;
         $students = "";
         $studentUpdate = $accessObject->hasAccess("update", "student");
+
+        // set the user_id id in the console
+        $response->array_stream['url_link'] = "department/{$item_id}/";
 
         // loop through the students list
         foreach($student_list["data"] as $key => $student) {
@@ -291,13 +297,13 @@ if(!empty($item_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">Student List</a>
+                        <a class="nav-link '.(empty($url_link) || $url_link === "students" ? "active" : null).'" onclick="return appendToUrl(\'students\')" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">Student List</a>
                     </li>';
 
                     if($hasUpdate) {
                         $response->html .= '
                         <li class="nav-item">
-                            <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
+                            <a class="nav-link '.($url_link === "update" ? "active" : null).'" id="profile-tab2" onclick="return appendToUrl(\'update\')" data-toggle="tab" href="#settings" role="tab"
                             aria-selected="false">Update Details</a>
                         </li>';
                     }
@@ -305,10 +311,10 @@ if(!empty($item_id)) {
                     $response->html .= '
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
-                        <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
+                        <div class="tab-pane fade '.(empty($url_link) || $url_link === "students" ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
                             '.$student_listing.'
                         </div>
-                        <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
+                        <div class="tab-pane fade '.($url_link === "update" ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
                         
                         if($hasUpdate) {
                             $response->html .= $the_form;

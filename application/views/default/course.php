@@ -39,6 +39,9 @@ if(!empty($item_id)) {
         "limit" => 1
     ];
 
+    // set the url
+    $url_link = $SITEURL[2] ?? null;
+
     // if user is a tutor
     if($isTutor) {
         $item_param->course_tutor = $userId;
@@ -162,6 +165,9 @@ if(!empty($item_id)) {
         // lesson planner display
         $lessons_list = "";
         $attachments_list = "";
+
+        // set the user_id id in the console
+        $response->array_stream['url_link'] = "course/{$item_id}/";
 
         // if the attachment parameter is not empty
         if(!empty($data->attachment)) {
@@ -340,19 +346,19 @@ if(!empty($item_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem && !$lessonPlanner ? "active" : null).'" id="classes-tab2" data-toggle="tab" href="#classes" role="tab" aria-selected="true">Classes List</a>
+                        <a class="nav-link '.(empty($url_link) || $url_link === "classes" ? "active" : null).'" onclick="return appendToUrl(\'classes\')" id="classes-tab2" data-toggle="tab" href="#classes" role="tab" aria-selected="true">Classes List</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link '.($lessonPlanner ? "active" : null).'" id="lessons-tab2" data-toggle="tab" href="#lessons" role="tab" aria-selected="true">Lesson Planner</a>
+                        <a class="nav-link '.($url_link === "lessons" ? "active" : null).'" onclick="return appendToUrl(\'lessons\')" id="lessons-tab2" data-toggle="tab" href="#lessons" role="tab" aria-selected="true">Lesson Planner</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="resources-tab2" data-toggle="tab" href="#resources" role="tab" aria-selected="true">Materials</a>
+                        <a class="nav-link '.($url_link === "resources" ? "active" : null).'" onclick="return appendToUrl(\'resources\')" id="resources-tab2" data-toggle="tab" href="#resources" role="tab" aria-selected="true">Materials</a>
                     </li>';
 
                     if($hasUpdate) {
                         $response->html .= '
                         <li class="nav-item">
-                            <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
+                            <a class="nav-link '.($url_link === "update" ? "active" : null).'" id="profile-tab2" onclick="return appendToUrl(\'update\')" data-toggle="tab" href="#settings" role="tab"
                             aria-selected="false">Update Details</a>
                         </li>';
                     }
@@ -361,7 +367,7 @@ if(!empty($item_id)) {
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         
-                        <div class="tab-pane fade '.(!$updateItem && !$lessonPlanner ? "show active" : null).'" id="classes" role="tabpanel" aria-labelledby="classes-tab2">
+                        <div class="tab-pane fade '.(empty($url_link) || $url_link === "classes" ? "show active" : null).'" id="classes" role="tabpanel" aria-labelledby="classes-tab2">
                             <div class="row">';
 
                             // if the class list is not empty
@@ -375,7 +381,7 @@ if(!empty($item_id)) {
                             </div>
                         </div>
 
-                        <div class="tab-pane fade '.($lessonPlanner ? "show active" : null).'" id="lessons" role="tabpanel" aria-labelledby="lessons-tab2">
+                        <div class="tab-pane fade '.($url_link === "lessons" ? "show active" : null).'" id="lessons" role="tabpanel" aria-labelledby="lessons-tab2">
                             <div class="d-flex justify-content-between">
                                 <div><h5>LESSON PLANNER</h5></div>
                                 <div class="text-right">
@@ -392,7 +398,7 @@ if(!empty($item_id)) {
                             ).'
                         </div>
                         
-                        <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab2">
+                        <div class="tab-pane fade '.($url_link === "resources" ? "show active" : null).'" id="resources" role="tabpanel" aria-labelledby="resources-tab2">
                             <div class="d-flex justify-content-between">
                                 <div><h5>MATERIALS</h5></div>
                                 '.($hasPlanner ? 
@@ -411,7 +417,7 @@ if(!empty($item_id)) {
                                 ).'
                             </div>
                         </div>
-                        <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
+                        <div class="tab-pane fade '.($url_link === "update" ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
                         
                         if($hasUpdate) {
                             $response->html .= $the_form;

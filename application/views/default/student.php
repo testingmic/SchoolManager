@@ -60,6 +60,7 @@ if(!empty($user_id)) {
 
         // set the user_id id in the console
         $response->array_stream['user_id'] = $user_id;
+        $response->array_stream['url_link'] = "student/{$user_id}/";
         
         // user permissions
         $hasUpdate = $accessObject->hasAccess("update", "student");
@@ -574,32 +575,32 @@ if(!empty($user_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(empty($url_link) ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab" aria-selected="true">Data</a>
+                        <a class="nav-link '.(empty($url_link) || $url_link === "about" ? "active" : null).'" onclick="return appendToUrl(\'about\')" id="home-tab2" data-toggle="tab" href="#about" role="tab" aria-selected="true">Data</a>
                     </li>
                     '.($viewAllocation ? 
                     '<li class="nav-item">
-                        <a class="nav-link '.($url_link === "fees" ? "active" : null).'" id="fees-tab2" data-toggle="tab" href="#fees" role="tab" aria-selected="true">Fees</a>
+                        <a class="nav-link '.($url_link === "fees" ? "active" : null).'" onclick="return appendToUrl(\'fees\')" id="fees-tab2" data-toggle="tab" href="#fees" role="tab" aria-selected="true">Fees</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="fees_payments-tab2" data-toggle="tab" href="#fees_payments" role="tab" aria-selected="true">Payments</a>
+                        <a class="nav-link '.($url_link === "payments" ? "active" : null).'" onclick="return appendToUrl(\'payments\')" id="fees_payments-tab2" data-toggle="tab" href="#fees_payments" role="tab" aria-selected="true">Payments</a>
                     </li>' : '').'
                     <li class="nav-item d-none d-sm-block">
-                        <a class="nav-link '.($url_link === "documents" ? "active" : null).'" id="documents-tab2" data-toggle="tab" href="#documents" role="tab" aria-selected="true">Documents</a>
+                        <a class="nav-link '.($url_link === "documents" ? "active" : null).'" onclick="return appendToUrl(\'documents\')" id="documents-tab2" data-toggle="tab" href="#documents" role="tab" aria-selected="true">Documents</a>
                     </li>
                     <li class="nav-item '.(!in_array("attendance", $clientFeatures) ? "hidden" : null).'">
-                        <a class="nav-link '.($url_link === "attendance" ? "active" : null).'" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab" aria-selected="true">Attendance</a>
+                        <a class="nav-link '.($url_link === "attendance" ? "active" : null).'" onclick="return appendToUrl(\'attendance\')" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab" aria-selected="true">Attendance</a>
                     </li>
                     <li class="nav-item '.(!in_array("incidents", $clientFeatures) ? "hidden" : null).'">
-                        <a class="nav-link '.($url_link === "incidents" ? "active" : null).'" id="incident-tab2" data-toggle="tab" href="#incident" role="tab" aria-selected="true">Incidents</a>
+                        <a class="nav-link '.($url_link === "incidents" ? "active" : null).'" onclick="return appendToUrl(\'incidents\')" id="incident-tab2" data-toggle="tab" href="#incident" role="tab" aria-selected="true">Incidents</a>
                     </li>
                     <li class="nav-item '.(!in_array("timetable", $clientFeatures) ? "hidden" : null).'">
-                        <a class="nav-link '.($url_link === "timetable" ? "active" : null).'" id="timetable-tab2" data-toggle="tab" href="#timetable" role="tab" aria-selected="true">Timetable</a>
+                        <a class="nav-link '.($url_link === "timetable" ? "active" : null).'" onclick="return appendToUrl(\'timetable\')" id="timetable-tab2" data-toggle="tab" href="#timetable" role="tab" aria-selected="true">Timetable</a>
                     </li>';
 
                     $response->html .= '
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
-                        <div class="tab-pane fade '.(empty($url_link) ? "show active" : null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
+                        <div class="tab-pane fade '.(empty($url_link) || $url_link === "about" ? "show active" : null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
                             '.($data->description ? "
                                 <div class='mb-3'>
                                     <div class='card-body p-2 pl-0'>
@@ -692,7 +693,7 @@ if(!empty($user_id)) {
                             </div>
                             '.(!empty($student_fees_arrears) ? "<div class=\"col-md-4 mt-5\"><h5>FEES ARREARS</h5></div> {$student_fees_arrears}" : null).'
                         </div>
-                        <div class="tab-pane fade" id="fees_payments" role="tabpanel" aria-labelledby="fees_payments-tab2">
+                        <div class="tab-pane '.($url_link === "payments" ? "show active" : null).' fade" id="fees_payments" role="tabpanel" aria-labelledby="fees_payments-tab2">
                             <div class="row mb-3">
                                 <div class="col-lg-4">
                                     <label>Filter by Category</label>
@@ -771,7 +772,7 @@ if(!empty($user_id)) {
                                 <div class="d-flex justify-content-between">
                                     <div><h5>STUDENT DOCUMENTS</h5></div>
                                     '.($isAdminAccountant ? 
-                                        "<div><button onclick='return show_eDocuments_Modal();' class='btn btn-outline-primary btn-sm'><i class='fa fa-plus'></i> Upload</button></div>" : null
+                                        "<div><button onclick='return show_eDocuments_Modal();' class='btn btn-outline-primary btn-sm'><i class='fa fa-upload'></i> Upload</button></div>" : null
                                     ).'
                                 </div>
                             </div>

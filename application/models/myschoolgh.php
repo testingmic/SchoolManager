@@ -513,13 +513,17 @@ class Myschoolgh extends Models {
 	 * @param string $column_to_return
 	 * @return return the number of rows counted
 	 **/
-	final function itemById($table, $column, $value, $column_to_return) {
+	final function itemById($table, $column, $value, $column_to_return = null) {
 		
 		$stmt = $this->db->query("SELECT * FROM $table WHERE $column='{$value}' AND status='1' LIMIT 1");
 
 		if($stmt->rowCount() > 0) {
 			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-				return $result->$column_to_return ?? null;
+				if(empty($column_to_return)) {
+					return $result;
+				} else {
+					return $result->$column_to_return ?? null;
+				}
 			}
 		}
 	}
@@ -618,6 +622,8 @@ class Myschoolgh extends Models {
 			return $query_style === "OBJ" ? $stmt->fetchAll(PDO::FETCH_OBJ) : $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 		} catch(PDOException $e) {
+			print $e->getMessage();
+			exit;
 			return [];
 		}
 

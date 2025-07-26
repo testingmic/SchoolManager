@@ -2564,6 +2564,15 @@ class Fees extends Myschoolgh {
                 return "Sorry! Please ensure at least the class_id or student_id has been parsed.";
             }
 
+            // load the actual class id 
+            if(!empty($params->class_id) && strlen($params->class_id) > 6) {
+                $class_id = $this->itemById("classes", "item_id", $params->class_id);
+                if(empty($class_id)) {
+                    return "An invalid class id was submitted for processing.";
+                }
+                $params->class_id = $class_id->id;
+            }
+
             // get the student information
             $students_list = $this->pushQuery("
                 a.class_id, a.item_id, a.name, a.image, a.unique_id, a.enrollment_date, a.gender, a.email, a.phone_number,

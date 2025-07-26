@@ -24,6 +24,9 @@ $response->scripts = [
     "assets/js/index.js"
 ];
 
+// set the url
+$url_link = $SITEURL[2] ?? null;
+
 // student id
 $user_id = $SITEURL[1] ?? null;
 
@@ -68,6 +71,10 @@ if(!empty($user_id)) {
             $wards_list .= $usersClass->guardian_wardlist($data->wards_list, $data->user_id, $hasUpdate);
         }
         $wards_list .= "</div>";
+
+        // set the user_id id in the console
+        $response->array_stream['user_id'] = $user_id;
+        $response->array_stream['url_link'] = "guardian/{$user_id}/";
 
         // change password url
         $change_password_url = null;
@@ -211,15 +218,13 @@ if(!empty($user_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab"
-                        aria-selected="true">Ward Information</a>
+                        <a class="nav-link '.(!$updateItem || $url_link === "about" ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab" aria-selected="true">Ward Information</a>
                     </li>';
 
                     if($hasUpdate) {
                         $response->html .= '
                         <li class="nav-item">
-                            <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
-                            aria-selected="false">Update Record</a>
+                            <a class="nav-link '.($updateItem || $url_link === "update" ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab" aria-selected="false">Update Record</a>
                         </li>';
                     }
                     

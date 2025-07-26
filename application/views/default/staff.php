@@ -53,6 +53,7 @@ if(empty($user_id)) {
 
         // set the user_id id in the console
         $response->array_stream['user_id'] = $user_id;
+        $response->array_stream['url_link'] = "staff/{$user_id}/";
         
         // load the incidents
         $incidents = load_class("incidents", "controllers")->list($staff_param);
@@ -465,7 +466,7 @@ if(empty($user_id)) {
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     '.($isCurrentUser || $isAdminAccountant ? '
                         <li class="nav-item">
-                            <a class="nav-link '.(empty($url_link) || $url_link === "documents" ? "active" : null).'" id="documents-tab2" data-toggle="tab" href="#documents" role="tab" aria-selected="true">Documents</a>
+                            <a class="nav-link '.(empty($url_link) || $url_link === "documents" ? "active" : null).'"  onclick="return appendToUrl(\'documents\')" id="documents-tab2" data-toggle="tab" href="#documents" role="tab" aria-selected="true">Documents</a>
                         </li>' : null
                     ).'
                     '.(
@@ -476,26 +477,25 @@ if(empty($user_id)) {
                         </li>' : null
                     ).'
                     <li class="nav-item">
-                        <a class="nav-link '.(empty($url_link) || $url_link === "incidents" ? "active" : null).'" id="incident-tab2" data-toggle="tab" href="#incident" role="tab"
+                        <a class="nav-link '.($url_link === "incidents" ? "active" : null).'" onclick="return appendToUrl(\'incidents\')" id="incident-tab2" data-toggle="tab" href="#incident" role="tab"
                         aria-selected="true">Incidents</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link '.($url_link === "attendance" ? "active" : null).'" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab"
+                        <a class="nav-link '.($url_link === "attendance" ? "active" : null).'" onclick="return appendToUrl(\'attendance\')" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab"
                         aria-selected="true">Attendance</a>
                     </li>';
 
                     if(($viewPermission && $defaultUser->user_id == $user_id) || ($updatePermission)) {
                         $response->html .= '
                         <li class="nav-item">
-                            <a class="nav-link" id="permissions-tab2" data-toggle="tab" href="#permissions" role="tab"
-                            aria-selected="true">Permissions</a>
+                            <a class="nav-link '.($url_link === "permissions" ? "active" : null).'" id="permissions-tab2"  onclick="return appendToUrl(\'permissions\')" data-toggle="tab" href="#permissions" role="tab" aria-selected="true">Permissions</a>
                         </li>';
                     }
 
                     if($hasUpdate) {
                         $response->html .= '
                         <li class="nav-item">
-                            <a class="nav-link '.($url_link === "update" ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
+                            <a class="nav-link '.($url_link === "update" ? "active" : null).'" id="profile-tab2" onclick="return appendToUrl(\'update\')" data-toggle="tab" href="#settings" role="tab"
                             aria-selected="false">Edit Record</a>
                         </li>';
                     }
@@ -529,10 +529,10 @@ if(empty($user_id)) {
                             </div>' : null
                         ).'
                         '.($isCurrentUser || $isAdminAccountant ? '
-                            <div class="tab-pane '.($url_link === "documents" ? "show active" : null).' fade" id="documents" role="tabpanel" aria-labelledby="documents-tab2">
+                            <div class="tab-pane '.(empty($url_link) || $url_link === "documents" ? "show active" : null).' fade" id="documents" role="tabpanel" aria-labelledby="documents-tab2">
                                 <div class="d-flex justify-content-between">
                                     <div class="mb-2 text-uppercase"><h5>Staff Documents</h5></div>
-                                    '.($hasUpdate ? "<div><button onclick='return show_eDocuments_Modal();' class='btn btn-outline-primary btn-sm'><i class='fa fa-plus'></i> Upload</button></div>" : null).'
+                                    '.($hasUpdate ? "<div><button onclick='return show_eDocuments_Modal();' class='btn btn-outline-primary btn-sm'><i class='fa fa-upload'></i> Upload</button></div>" : null).'
                                 </div>
                                 <div data-ebook_resource_list="'.$user_id.'">
                                     '.($attachment_html ? $attachment_html : "No documents uploaded yet.").'
@@ -572,7 +572,7 @@ if(empty($user_id)) {
                         </div>
                         '.(
                         $viewPermission ? '
-                            <div class="tab-pane fade" id="permissions" role="tabpanel" aria-labelledby="permissions-tab2">
+                            <div class="tab-pane '.($url_link === "permissions" ? "show active" : null).' fade" id="permissions" role="tabpanel" aria-labelledby="permissions-tab2">
                                 <div class="mb-3 pb-0 border-bottom"><h5>USER PERMISSIONS</h5></div>
                                 '.($updatePermission ? '<form class="ajaxform" id="ajaxform" '.(!$isDisabled ? 'action="'.$baseUrl.'api/users/save_permission"' : null).' method="POST">' : null).'
                                     '.$level_data.'
@@ -586,7 +586,7 @@ if(empty($user_id)) {
                                 '.($updatePermission ? '</form>' : null).'
                             </div>' : null
                         ).'
-                        <div class="tab-pane '.(empty($url_link) || $url_link === "incidents" ? "show active" : null).' fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
+                        <div class="tab-pane '.($url_link === "incidents" ? "show active" : null).' fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
                             <div class="d-flex justify-content-between">
                                 <div class="mb-2"><h5>INCIDENTS LOG</h5></div>
                                 '.($addIncident ? '

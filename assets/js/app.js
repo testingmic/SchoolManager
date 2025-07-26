@@ -1015,6 +1015,14 @@ var initPlugins = () => {
     $(`div[class~="trix-button-row"] span[class~="trix-button-group--file-tools"], div[class~="trix-button-row"] span[class~="trix-button-group-spacer"]`).remove();
 }
 
+var appendToUrl = (url) => {
+    let origin = window.location.origin;
+    let search = window.location.search;
+    let newUrl = origin + '/' + $.array_stream['url_link'] + url + search;
+    window.history.pushState({}, '', newUrl);
+    return false;
+}
+
 var setActiveNavLink = () => {
 
     let location = window.location.href,

@@ -72,6 +72,9 @@ if(!empty($item_id)) {
         $data->isGraded = $isGraded;
         $data->hasUpdate = $hasUpdate;
 
+        // set the user_id id in the console
+        $response->array_stream['url_link'] = "assessment/{$item_id}/";
+
         // is manual or auto insertion
         $isAuto = (bool) (in_array($data->insertion_mode, ["Auto", "Manual"]));
 
@@ -492,18 +495,18 @@ if(!empty($item_id)) {
                     '.($isAuto  ?
                         ($isTutorAdmin && $isMultipleChoice ? 
                             '<li class="nav-item">
-                                <a class="nav-link '.(!$updateItem ? "active" : null).'" id="questions-tab2" data-toggle="tab" href="#questions" role="tab" aria-selected="true">
+                                <a class="nav-link '.(empty($url_link) || $url_link === "questions" ? "active" : null).'" onclick="return appendToUrl(\'questions\')" id="questions-tab2" data-toggle="tab" href="#questions" role="tab" aria-selected="true">
                                     Questions Set
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link '.($url_link !== "_grading" ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
+                                <a class="nav-link '.($url_link === "instructions" ? "active" : null).'" onclick="return appendToUrl(\'instructions\')" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
                                     Instructions
                                 </a>
                             </li>
                             ' : '
                             <li class="nav-item">
-                                <a class="nav-link '.(!$updateItem && $url_link !== "_grading" ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
+                                <a class="nav-link '.($url_link === "instructions" ? "active" : null).'" onclick="return appendToUrl(\'instructions\')" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
                                     Instructions
                                 </a>
                             </li>
@@ -511,7 +514,7 @@ if(!empty($item_id)) {
                         ) : null
                     ).'
                     <li class="nav-item">
-                        <a class="nav-link '.(!$isAuto || $url_link === "_grading" ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
+                        <a class="nav-link '.($url_link === "_grading" ? "active" : null).'" onclick="return appendToUrl(\'_grading\')" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
                             '.($isTutorAdmin ? "Grading" : "Handin Answers").'
                         </a>
                     </li>';
@@ -519,7 +522,7 @@ if(!empty($item_id)) {
                     if($hasUpdate && $isAuto) {
                         $response->html .= '
                         <li class="nav-item">
-                            <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
+                            <a class="nav-link '.($url_link === "details" ? "active" : null).'" id="profile-tab2" onclick="return appendToUrl(\'details\')" data-toggle="tab" href="#settings" role="tab"
                             aria-selected="false">Details</a>
                         </li>';
                     }
@@ -536,7 +539,7 @@ if(!empty($item_id)) {
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         '.($isTutorAdmin && $isMultipleChoice ? 
-                            '<div class="tab-pane fade '.(!$updateItem || $url_link !== "_grading" ? "show active" : null).'" id="questions" role="tabpanel" aria-labelledby="questions-tab2">
+                            '<div class="tab-pane fade '.(empty($url_link) || $url_link === "questions" ? "show active" : null).'" id="questions" role="tabpanel" aria-labelledby="questions-tab2">
                                 <div class="pt-0">
                                     '.(!$isActive && !$isClosed ? '
                                     <div class="mb-2 text-right">
@@ -551,7 +554,7 @@ if(!empty($item_id)) {
                                     '.$questions_list.'
                                 </div>
                             </div>
-                            <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab2">
+                            <div class="tab-pane fade '.($url_link === "instructions" ? "show active" : null).'" id="details" role="tabpanel" aria-labelledby="details-tab2">
                                 <div class="pt-0">
                                     <div class="py-3 pt-0">
                                         '.$data->assignment_description.'
@@ -562,7 +565,7 @@ if(!empty($item_id)) {
                                 </div>
                             </div>' : 
                             ($isAuto ?
-                                '<div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="details" role="tabpanel" aria-labelledby="details-tab2">
+                                '<div class="tab-pane fade '.($url_link === "instructions" ? "show active" : null).'" id="details" role="tabpanel" aria-labelledby="details-tab2">
                                     <div class="pt-0">
                                         '.(
                                             $data->assignment_description ? 
@@ -581,7 +584,7 @@ if(!empty($item_id)) {
                                 : null
                             )
                         ).'
-                        <div class="tab-pane fade '.(!$isAuto || $url_link === "_grading" ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
+                        <div class="tab-pane fade '.($url_link === "_grading" ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
                             <div id="handin_assignment_container">
                                 <div class="form-content-loader" style="display: none; position: absolute">
                                     <div class="offline-content text-center">
