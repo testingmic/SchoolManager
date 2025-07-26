@@ -6,13 +6,14 @@ $baseUrl = $myClass->baseUrl;
 $user_current_url = current_url();
 
 // if the user is not loggedin then show the login form
-if(loggedIn()) { 
-    header("location: {$myClass->dashboardPath}");
-    exit;
+if (loggedIn()) {
+  header("location: {$myClass->dashboardPath}");
+  exit;
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
@@ -32,25 +33,44 @@ if(loggedIn()) {
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="App - <?= $appName ?>">
   <style>
-  .bg {
-    background-image: url('<?= $baseUrl; ?>assets/img/background_2.jpg');
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-size: cover;
-  }
-  
-  /* Remove focus outlines for all interactive elements */
-  input:focus,
-  button:focus,
-  select:focus,
-  textarea:focus,
-  a:focus {
-    outline: none !important;
-    box-shadow: none !important;
-  }
+    .bg {
+      background-image: url('<?= $baseUrl; ?>assets/img/background_2.jpg');
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
+    }
+
+    .glass-effect {
+      backdrop-filter: blur(80px);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    /* Remove focus outlines for all interactive elements */
+    input:focus,
+    button:focus,
+    select:focus,
+    textarea:focus,
+    a:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
   </style>
   <?= $myClass->google_analytics_code ?>
 </head>
+
 <body class="bg">
   <div class="loader"></div>
   <div id="app">
@@ -59,22 +79,25 @@ if(loggedIn()) {
         <div class="row">
           <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
             <div class="text-left mb-2 p-2 bg-white  rounded-2xl">
-                <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="70px" /></div>
-                <div>
-                    <div class="font-25px text-center font-weight-bold text-dark"><?= config_item('site_name') ?></div> 
-                    <div class="text-dark text-center">Your advanced school management system.</div>
-                </div>
+              <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="70px" /></div>
+              <div>
+                <div class="font-25px text-center font-weight-bold text-dark"><?= config_item('site_name') ?></div>
+                <div class="text-dark text-center">Your advanced school management system.</div>
+              </div>
             </div>
-            <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+            <div class="rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
               <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-2">
                 <h4 class="text-white text-2xl font-bold text-center">Welcome Back</h4>
                 <p class="text-blue-100 text-center">Sign in to your account</p>
               </div>
-              <div class="p-8 pb-0 relative">
+              <div class="p-8 pb-0 relative glass-effect">
                 <?= form_loader(); ?>
                 <form method="POST" autocomplete="Off" action="<?= $baseUrl ?>api/auth/login" id="auth-form" class="needs-validation space-y-6" novalidate="">
                   <div class="space-y-2">
-                    <label for="username" class="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+                    
+                    <label for="username" class="block text-sm font-medium text-white mb-2">
+                      <i class="fas fa-user mr-2"></i>Username or Email
+                    </label>
                     <div class="relative">
                       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-user text-gray-400"></i>
@@ -87,8 +110,10 @@ if(loggedIn()) {
                   </div>
                   <div class="space-y-2">
                     <div class="flex justify-between items-center mb-2">
-                      <label for="password" class="block text-sm font-semibold text-gray-700">Password</label>
-                      <a href="<?= $baseUrl ?>forgot-password" class="text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                      <label for="password" class="block text-sm font-medium text-white mb-2">
+                        <i class="fas fa-lock mr-2"></i>Password
+                      </label>
+                      <a href="<?= $baseUrl ?>forgot-password" class="text-sm text-white hover:text-blue-800 transition-colors duration-200">
                         Forgot Password?
                       </a>
                     </div>
@@ -125,12 +150,13 @@ if(loggedIn()) {
   </div>
   <div class="app-foottag">
     <div class="d-flex justify-content-between">
-        <div>&copy; Copyright <strong><a href="<?= $myClass->baseUrl ?>"><?= $myClass->appName ?></a></strong> &bull; All Rights Reserved</div>
-        <div>By: <strong><?= config_item("developer") ?></strong></div>
+      <div>&copy; Copyright <strong><a href="<?= $myClass->baseUrl ?>"><?= $myClass->appName ?></a></strong> &bull; All Rights Reserved</div>
+      <div>By: <strong><?= config_item("developer") ?></strong></div>
     </div>
   </div>
   <script src="<?= $baseUrl; ?>assets/js/app.min.js?v=<?= version() ?>"></script>
   <script src="<?= $baseUrl; ?>assets/js/scripts.js?v=<?= version() ?>"></script>
   <script src="<?= $baseUrl ?>assets/js/auth.js?v=<?= version() ?>"></script>
 </body>
+
 </html>

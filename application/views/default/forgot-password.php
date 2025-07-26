@@ -34,12 +34,31 @@ if(loggedIn()) {
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="App - <?= $myClass->appName ?>">
   <style>
-  .bg {
-    background-image: url('<?= $baseUrl; ?>assets/img/background_2.jpg');
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-size: cover;
-  }
+    .bg {
+      background-image: url('<?= $baseUrl; ?>assets/img/background_2.jpg');
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
+    }
+
+    .glass-effect {
+      backdrop-filter: blur(80px);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
   </style>
   <?= $myClass->google_analytics_code ?>
 </head>
@@ -57,12 +76,12 @@ if(loggedIn()) {
                     <div class="text-dark text-center">Your advanced school management system.</div>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+            <div class="rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
               <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2">
                 <h4 class="text-white text-2xl font-bold text-center">Reset Password</h4>
                 <p class="text-blue-100 text-center">Enter your email to receive reset instructions</p>
               </div>
-              <div class="p-8 relative">
+              <div class="p-8 relative glass-effect">
                 <?= form_loader(); ?>
                 <form method="POST" action="<?= $baseUrl ?>api/auth/forgotten" id="auth-form" class="needs-validation space-y-6" novalidate="">
                   <div class="space-y-2">
@@ -88,11 +107,11 @@ if(loggedIn()) {
                   </div>
                 </form>
                 <div class="text-center mt-6 mb-4">
-                  <p class="text-sm text-gray-600">
+                  <p class="text-sm text-white">
                     We'll send you an email with instructions to reset your password.
                   </p>
                 </div>
-                <div class="form-results mt-4"></div>
+                <div class="form-results"></div>
               </div>
             </div>
             <div class="mt-3 mb-3 text-dark p-3 mb-10 bg-white text-center rounded-2xl">
