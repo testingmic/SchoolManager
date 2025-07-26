@@ -209,7 +209,7 @@ class Handler {
                 $response["data"] = $logObj->login($parameters);
             }
             // if the user is requesting a password reset
-            elseif(isset($this->params->recover, $this->params->email)) {
+            elseif(isset($this->params->recover)) {
                 // request password reset
                 $response["data"] = $logObj->send_password_reset_token($this->params);
             }

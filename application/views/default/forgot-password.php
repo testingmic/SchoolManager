@@ -85,7 +85,9 @@ if(loggedIn()) {
                 <?= form_loader(); ?>
                 <form method="POST" action="<?= $baseUrl ?>api/auth/forgotten" id="auth-form" class="needs-validation space-y-6" novalidate="">
                   <div class="space-y-2">
-                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                    <label for="email" class="block text-sm font-semibold text-white mb-2">
+                      <i class="fas fa-envelope mr-2"></i>Email Address
+                    </label>
                     <div class="relative">
                       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-envelope text-gray-400"></i>

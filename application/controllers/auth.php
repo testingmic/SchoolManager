@@ -715,7 +715,7 @@ class Auth extends Myschoolgh {
 
                         // send the email
                         $emailObject = load_class("emailing", "controllers");
-                        $emailObject->send_email("Password Reset Request", $message, $params->email, $fullname);
+                        // $emailObject->send_email("Password Reset Request", $message, $params->email, $fullname);
 
                         // send a notification to the user
                         $params = (object) [
@@ -740,7 +740,7 @@ class Auth extends Myschoolgh {
                         #record the password change request
                         return [
                             "code" => 200, 
-                            "data" => "Please check your email for steps to reset password."
+                            "result" => "Please check your email for steps to reset password."
                         ];
 
                     }
@@ -1022,8 +1022,12 @@ class Auth extends Myschoolgh {
             return ["code" => 201, "result" => "Sorry! You are prohibited from registering multiple accounts within a short space of time."];
         }
 
+        if(empty($params->email)) {
+            return ["code" => 201, "data" => "Sorry! The email address is required."];
+        }
+
         if(!filter_var($params->email, FILTER_VALIDATE_EMAIL)) {
-            return ["code" => 201, "result" => "Sorry! Please provide a valid email address."];
+            return ["code" => 201, "data" => "Sorry! Please provide a valid email address."];
         }
         
         $username = explode("@", $params->email)[0];

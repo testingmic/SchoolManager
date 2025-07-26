@@ -95,7 +95,7 @@ if (loggedIn()) {
                 <form method="POST" autocomplete="Off" action="<?= $baseUrl ?>api/auth/login" id="auth-form" class="needs-validation space-y-6" novalidate="">
                   <div class="space-y-2">
                     
-                    <label for="username" class="block text-sm font-medium text-white mb-2">
+                    <label for="username" class="block text-sm font-semibold text-white mb-2">
                       <i class="fas fa-user mr-2"></i>Username or Email
                     </label>
                     <div class="relative">
@@ -110,7 +110,7 @@ if (loggedIn()) {
                   </div>
                   <div class="space-y-2">
                     <div class="flex justify-between items-center mb-2">
-                      <label for="password" class="block text-sm font-medium text-white mb-2">
+                      <label for="password" class="block text-sm font-semibold text-white mb-2">
                         <i class="fas fa-lock mr-2"></i>Password
                       </label>
                       <a href="<?= $baseUrl ?>forgot-password" class="text-sm text-white hover:text-blue-800 transition-colors duration-200">
