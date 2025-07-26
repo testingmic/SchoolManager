@@ -191,7 +191,7 @@ if(!$createAssessmentTest) {
                                         <a href="'.$baseUrl.'assessment/'.$assignment_id.'/view" class="btn btn-outline-warning btn-sm">
                                             <i class="fa fa-eye"></i> View '.($isActive ? "& Publish" : null).'
                                         </a>
-                                        <a href="'.$baseUrl.'assessment/'.$assignment_id.'/update" class="btn btn-outline-success btn-sm"><i class="fa fa-edit"></i> Update</a>
+                                        <a href="'.$baseUrl.'assessment/'.$assignment_id.'/details" class="btn btn-outline-success btn-sm"><i class="fa fa-edit"></i> Update</a>
                                     </span>
                                     '.($isActive ? '<span class="float-right"><button onclick="return clear_questionForm()" class="btn btn-sm btn-outline-primary">New Question</button></span>' : '').'
                                 </div>

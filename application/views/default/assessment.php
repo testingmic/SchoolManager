@@ -245,14 +245,16 @@ if(!empty($item_id)) {
                                 <tr data-row_search="name" data-student_fullname="'.trim($student->name).'" data-student_unique_id="'.$student->unique_id.'">
                                     '.($isUnassigned || $isMultipleChoice ? "<td width='5%'>{$counter}</td>" : null).'
                                     <td width="70%">
-                                        <div class="d-flex justify-content-start">
+                                        <div class="d-flex justify-content-start items-center">
                                             <div class="mr-2">
+                                                <div class="flex items-center space-x-4">
                                                 '.($isSubmitted ?
                                                     '<a title="Click to view document submitted by '.$student->name.'" style="text-decoration:none" class="anchor" href="javascript:void(0)" '.($isAuto ? 'onclick="return '.$function.'(\''.$student->item_id.'\',\''.$data->grading.'\',\''.$data->item_id.'\')"' : null).' data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'">
-                                                        <img class="rounded-circle cursor author-box-picture" width="40px" src="'.$baseUrl.''.$student->image.'" alt="">
+                                                        <img class="rounded-2xl cursor author-box-picture" height="40px" width="40px" src="'.$baseUrl.''.$student->image.'" alt="">
                                                     </a>' : 
-                                                    '<img class="rounded-circle cursor author-box-picture" width="40px" src="'.$baseUrl.''.$student->image.'" alt="">'
+                                                    '<img class="rounded-2xl cursor author-box-picture" height="40px" width="40px" src="'.$baseUrl.''.$student->image.'" alt="">'
                                                 ).'
+                                                </div>
                                             </div>
                                             <div>
                                                 <p class="p-0 text-uppercase m-0">
@@ -263,7 +265,7 @@ if(!empty($item_id)) {
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="input-group">
+                                        <div class="input-group flex items-center">
                                             <input '.(!$isActive || $isMultipleChoice ? 'disabled="disabled"' : 'name="test_grading" data-rvalue="'.$student->id.'" data-value="'.$student->item_id.'"').' value="'.$student->score.'" type="number" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" style="max-width:120px" class="form-control text-center font-20"> &nbsp; <span class="font-25 d-none d-sm-block">/ '.$data->grading.'</span>
                                         </div>
                                     </td>
@@ -426,7 +428,7 @@ if(!empty($item_id)) {
         $grading_info .= '</div>';
 
         // if the request is to view the student information
-        $updateItem = confirm_url_id(2, "update") ? true : false;
+        $updateItem = confirm_url_id(2, "update") || confirm_url_id(2, "details") ? true : false;
 
         // set the url
         $url_link = $SITEURL[2] ?? null;
@@ -495,7 +497,7 @@ if(!empty($item_id)) {
                     '.($isAuto  ?
                         ($isTutorAdmin && $isMultipleChoice ? 
                             '<li class="nav-item">
-                                <a class="nav-link '.(empty($url_link) || $url_link === "questions" ? "active" : null).'" onclick="return appendToUrl(\'questions\')" id="questions-tab2" data-toggle="tab" href="#questions" role="tab" aria-selected="true">
+                                <a class="nav-link '.(empty($url_link) || in_array($url_link, ["questions", "view"]) ? "active" : null).'" onclick="return appendToUrl(\'questions\')" id="questions-tab2" data-toggle="tab" href="#questions" role="tab" aria-selected="true">
                                     Questions Set
                                 </a>
                             </li>
@@ -539,7 +541,7 @@ if(!empty($item_id)) {
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         '.($isTutorAdmin && $isMultipleChoice ? 
-                            '<div class="tab-pane fade '.(empty($url_link) || $url_link === "questions" ? "show active" : null).'" id="questions" role="tabpanel" aria-labelledby="questions-tab2">
+                            '<div class="tab-pane fade '.(empty($url_link) || in_array($url_link, ["questions", "view"]) ? "show active" : null).'" id="questions" role="tabpanel" aria-labelledby="questions-tab2">
                                 <div class="pt-0">
                                     '.(!$isActive && !$isClosed ? '
                                     <div class="mb-2 text-right">

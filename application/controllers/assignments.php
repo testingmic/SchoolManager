@@ -855,7 +855,8 @@ class Assignments extends Myschoolgh {
             $keyToUse => [
                 "marks" => $student_marks,
                 "class_average" => $class_average,
-                "graded_count" => $graded_count
+                "graded_count" => $graded_count,
+                "href" => "{$this->baseUrl}assessment/{$params->assignment_id}/_grading"
             ]
         ];
     }

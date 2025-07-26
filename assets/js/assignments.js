@@ -89,6 +89,11 @@ var save_AssignmentMarks = () => {
                     text: response.data.result,
                     icon: responseCode(response.code),
                 });
+                if(response.data.additional.href !== undefined) {
+                    setTimeout(() => {
+                        loadPage(response.data.additional.href);
+                    }, refresh_seconds);
+                }
             }).catch(() => {
                 $.pageoverlay.hide();
                 swal({
