@@ -32,6 +32,14 @@ if(loggedIn()) {
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="App - <?= $myClass->appName ?>">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6YKXX6Z3QZ"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-6YKXX6Z3QZ');
+  </script>
   <style>
     .bg {
       background-image: url('<?= $baseUrl; ?>assets/img/background_2.jpg');
