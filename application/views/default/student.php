@@ -363,7 +363,7 @@ if(!empty($user_id)) {
         // set the scholarship status
         $scholarship_status = $data->scholarship_status == 1 ? 0 : 1;
         $scholarship_class = $data->scholarship_status == 1 ? "btn-outline-danger" : "btn-outline-success";
-        $scholarship_title = $data->scholarship_status == 1 ? "<i class='fa fa-ankh'></i> Remove Scholarship</span>" : "<i class='fa fa-ankh'></i> Award Scholarship";
+        $scholarship_title = $data->scholarship_status == 1 ? "<i class='fa fa-ankh'></i> Remove Scholarship</span>" : "<i class='fa fa-ankh'></i> Scholarship";
 
         // the default data to stream
         $data_stream = "attendance_report&label[student_id]={$user_id}";
@@ -437,7 +437,7 @@ if(!empty($user_id)) {
                         <div class="w-100 mt-2">
                             '.($hasUpdate  ? '
                                 '.(in_array($data->user_status, ["Active"]) ? '
-                                    <a class="btn mb-1 btn-primary" href="'.$baseUrl.'modify-student/'.$user_id.'"><i class="fa fa-edit"></i> Edit Record</a>': null
+                                    <a class="btn mb-1 btn-primary" href="'.$baseUrl.'modify-student/'.$user_id.'"><i class="fa fa-edit"></i> Edit</a>': null
                                 ).'
                                 <button onclick="return modal_popup(\'change_user_Status\')" class="btn mb-1 btn-outline-dark"><i class="fa fa-assistive-listening-systems"></i> Change State</button>' : null
                             ).'
