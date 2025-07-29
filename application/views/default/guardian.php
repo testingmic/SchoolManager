@@ -121,7 +121,7 @@ if(!empty($user_id)) {
                         <h4>PERSONAL INFORMATION</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">
-                        <div class="py-4">
+                        <div class="py-2">
                             <p class="clearfix">
                                 <span class="float-left">Occupation</span>
                                 <span class="float-right text-muted">'.$data->occupation.'</span>
@@ -191,7 +191,7 @@ if(!empty($user_id)) {
                             <h4>LOGIN INFORMATION</h4>
                         </div>
                         <div class="card-body pt-0 pb-0">
-                            <div class="py-4">
+                            <div class="py-2">
                                 <p class="clearfix">
                                     <span class="float-left">Username</span>
                                     <span class="float-right text-muted">'.$data->username.'</span>
@@ -236,7 +236,7 @@ if(!empty($user_id)) {
                                 <div class='mb-3'>
                                     <div class='card-body p-2 pl-0'>
                                         <div class='d-flex mb-3 justify-content-between'>
-                                            <div><h5>WARDS LIST</h5></div>
+                                            <div><h5></h5></div>
                                             ".($hasUpdate ? "<div><button onclick='return load_quick_form(\"modify_guardian_ward\",\"{$data->user_id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-user'></i> Add Ward</button></div>" : "")."
                                         </div>
                                         {$wards_list}

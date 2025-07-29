@@ -626,7 +626,7 @@ class Events extends Myschoolgh {
                             <div class='mt-3'>
                                 ".(!empty($event->start_date) ? "<p class='p-0 m-0'><i class='fa fa-calendar'></i> <strong>Start Date:</strong> ".date("jS F Y", strtotime($event->start_date))."</p>" : "")."
                                 ".(!empty($event->end_date) ? "<p class='p-0 m-0'><i class='fa fa-calendar-check'></i> <strong>End Date:</strong> ".date("jS F Y", strtotime($event->end_date))."</p>" : "")."
-                                ".($isAdmin ? "<p class='p-0 m-0'><i class='fa fa-users'></i>  <strong>Audience:</strong> ".strtoupper($event->audience)."</p>" : "")."
+                                ".($isAdmin ? "<p class='p-0 m-0'><i class='fa fa-users'></i>  <strong>Audience:</strong> ".ucwords($event->audience)."</p>" : "")."
                                 ".(!empty($event->type_name) ? "<p class='p-0 m-0'><i class='fa fa-home'></i> <strong>Type:</strong> ".$event->type_name."</p>" : "")."
                                 ".(!empty($event->state) ? "<p class='p-0 m-0'><i class='fa fa-air-freshener'></i> <strong>Status:</strong> ".$this->the_status_label($event->state)."</p>" : "")."
                             </div>    

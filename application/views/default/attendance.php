@@ -135,9 +135,9 @@ if(!empty($clientId)) {
                 </div>
                 <div class="col-lg-12 col-md-12 col-12 col-sm-12" id="data-report_stream" data-report_stream="'.$data_stream.'">
                     <div class="card">
-                        <div class="row p-2">
+                        <div class="row p-4 pb-0">
                             <div class="col-lg-7 col-md-5">
-                                <h4 class="text-uppercase font-20">Attendance Record</h4>
+                                <h4 class="font-20">Attendance Logs by Day</h4>
                             </div>
                             <div class="col-lg-5 col-md-7 text-right">
                                 <div class="input-group mb-3">
@@ -170,7 +170,7 @@ if(!empty($clientId)) {
                     <div class="col-lg-12 col-md-12 col-12 col-sm-12 hidden">
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="text-uppercase font-20">Attendance Logs</h4>
+                                <h4 class="font-20">Attendance Logs by Day</h4>
                             </div>
                             <div class="card-body pb-0">
                                 <div data-chart_container="attendance_log_chart">
@@ -184,9 +184,9 @@ if(!empty($clientId)) {
                     $isAdminAccountant ? '
                     <div class="col-lg-12 col-md-12 col-12 col-sm-12">
                         <div class="card">
-                            <div class="row p-2">
+                            <div class="row p-4 pb-0">
                                 <div class="col-lg-8 col-md-6">
-                                    <h4 class="text-uppercase font-20">Attendance Logs</h4>
+                                    <h4 class="font-20">Attendance Logs By Class</h4>
                                 </div>
                                 <div class="col-lg-4 col-md-6 text-right">
                                     <div class="input-group mb-3">

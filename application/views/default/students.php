@@ -96,9 +96,9 @@ foreach($student_list["data"] as $key => $each) {
             </div>
         </div>
     </td>";
-    $students .= "<td>".(!empty($each->class_name) ? strtoupper($each->class_name) : null)."</td>";
-    $students .= "<td>".(!empty($each->gender) ? strtoupper($each->gender) : null)."</td>";
-    $students .= "<td>".($each->department_name ?? null)."</td>";
+    $students .= "<td>".(!empty($each->class_name) ? ucwords(strtolower($each->class_name)) : 'N/A')."</td>";
+    $students .= "<td>".(!empty($each->gender) ? ucwords(strtolower($each->gender)) : 'N/A')."</td>";
+    $students .= "<td>".(!empty($each->department_name) ? ucwords(strtolower($each->department_name)) : 'N/A')."</td>";
 
     // if the user has permission to view the student fees allocation
     if($viewAllocation) {

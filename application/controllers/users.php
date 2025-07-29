@@ -913,7 +913,7 @@ class Users extends Myschoolgh {
 								<div>
 									<h4 class=\"mb-0 pb-0 font-16 pr-0 mr-0 text-uppercase\">".limit_words($ward->name, 3)."</h4>
 									<span class=\"text-primary\">{$ward->unique_id}</span><br>
-									".(!empty($ward->class_name) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-home'></i> {$ward->class_name}</p>" : "")."
+									".(!empty($ward->class_name) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-home'></i> ".ucwords(strtolower($ward->class_name))."</p>" : "")."
 									".(!empty($ward->gender) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-user'></i> {$ward->gender}</p>" : "")."
 									<p class=\"mb-0 pb-0\"><i class='fa fa-calendar-check'></i>".(!empty($ward->date_of_birth) ? " {$ward->date_of_birth} " : " N/A ")."</p>
 								</div>

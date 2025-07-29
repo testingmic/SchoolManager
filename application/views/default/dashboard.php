@@ -203,12 +203,12 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         <div class='media-body ml-2' style='flex: 2;'>
                             <div class='media-title'>
                                 <span class='user_name' onclick='return load(\"{$event["link"]}/{$event["description"]->item_id}\");'>
-                                ".strtoupper($event["description"]->name)."</span><br>
+                                ".ucwords($event["description"]->name)."</span><br>
                                 ".(
                                     !empty($event["description"]->class_name) ? 
-                                        "<small>".strtoupper($event["description"]->class_name)."</small><br>" : null
+                                        "<small>".ucwords($event["description"]->class_name)."</small><br>" : null
                                 )."
-                                <span class='badge badge-{$myClass->user_colors[$event["description"]->user_type]} p-1'>".strtoupper($event["description"]->user_type)."</span>
+                                <span class='badge badge-{$myClass->user_colors[$event["description"]->user_type]} p-1'>".ucwords($event["description"]->user_type)."</span>
                             </div>                    
                         </div>
                         <div class='media-progressbar'>
@@ -709,12 +709,12 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     ).'
                                     <div align="center" class="p-1 col-sm-'.(!empty($defaultClientData->client_logo) ? 9 : 12).'">
                                         <div style="align-items:center;">
-                                            <h3 class="text-uppercase">'.$defaultClientData->client_name.'</h3>
-                                            <div class="'.(!empty($defaultClientData->client_slogan) ? "mb-1" : null).' text-uppercase font-15">'.$defaultClientData->client_slogan.'</div>
-                                            <div class="font-15">'.$defaultClientData->client_email.'</div>
-                                            <div class="text-uppercase mt-2 font-17">'.$defaultClientData->client_location.'</div>
-                                            <div class="text-uppercase mt-2 font-17">
-                                                '.$defaultClientData->client_contact.'
+                                            <h3 class="font-30">'.$defaultClientData->client_name.'</h3>
+                                            <div class="'.(!empty($defaultClientData->client_slogan) ? "mb-1" : null).' font-15">'.$defaultClientData->client_slogan.'</div>
+                                            <div class="font-15 mt-1">'.$defaultClientData->client_email.'</div>
+                                            <div class="mt-1 font-17">'.$defaultClientData->client_location.'</div>
+                                            <div class="mt-1 font-17">
+                                                '.trim($defaultClientData->client_contact).'
                                             </div>
                                         </div>
                                     </div>
@@ -736,7 +736,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                         </span>
                                         <hr class="my-3">
                                         <p class="font-16 p-0 mt-2 text-uppercase text-primary">Academic '.($academicSession ?? null).'</p>
-                                        <h6 class="mt-1 pt-0 text-uppercase text-primary">'.($defaultAcademics->current_term_name ?? $defaultAcademics->academic_term).'</h6>
+                                        <h6 class="pt-0 text-uppercase text-primary">'.($defaultAcademics->current_term_name ?? $defaultAcademics->academic_term).'</h6>
                                         <span class="font-16 font-bold text-black">
                                             '.date("jS M, Y", strtotime($defaultAcademics->term_starts)).' 
                                                 &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;

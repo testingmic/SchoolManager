@@ -818,8 +818,8 @@ h4 {
     width: 200px!important;
 }
 
-.table thead th {
-    text-transform: uppercase;
+.pb-0 {
+    padding-bottom: 0px!important;
 }
 
 .main-sidebar .sidebar-menu li a {
@@ -844,8 +844,7 @@ h4 {
 
 .user_name {
     color: #0171f3;
-    font-weight: bold;
-    text-transform: uppercase;
+    text-transform: capitalize;
 }
 
 .user_name:hover {
