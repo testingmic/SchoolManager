@@ -102,7 +102,7 @@ if(!empty($item_id)) {
                 <div class='d-flex justify-content-start'>
                     <div>
                         <a href=\"#\" onclick='return load(\"student/{$student->user_id}\");'>
-                            <span class='text-uppercase font-weight-bold text-primary'>{$student->name}</span>
+                            <span class='text-uppercase text-primary'>{$student->name}</span>
                         </a>
                     </div>
                 </div>
@@ -151,7 +151,7 @@ if(!empty($item_id)) {
             <div class="col-md-3">
                 <div class="card rounded-2xl">
                     <div class="card-body rounded-2xl card-body pt-3 pb-3 pr-2 pl-2 text-center bg-gradient-to-br from-blue-300 via-blue-200 to-blue-100 shadow-lg text-white">
-                        <div class="font-23 font-weight-bolder text-black">'.strtoupper($data->name).'</div>
+                        <div class="font-23 text-black">SECTION CODE</div>
                         <div class="font-18 font-weight-bold text-uppercase text-black">'.$data->section_code.'</div>
                     </div>
                 </div>
@@ -223,7 +223,7 @@ if(!empty($item_id)) {
                 '.(!empty($data->description) ? 
                     '<div class="card">
                         <div class="card-header">
-                            <h4>DESCRIPTION</h4>
+                            <h4 class="mb-0">DESCRIPTION</h4>
                         </div>
                         <div class="card-body pt-0">
                             <div class="py-2">
@@ -234,7 +234,7 @@ if(!empty($item_id)) {
                 ).'
                 <div class="card">
                     <div class="card-header">
-                        <h4>SECTION LEADER DETAILS</h4>
+                        <h4 class="mb-0">SECTION LEADER DETAILS</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">
                         <div class="py-2">
@@ -257,7 +257,7 @@ if(!empty($item_id)) {
                     '<div class="card">
                         <div class="card-header pr-3">
                             <div class="d-flex width-per-100 justify-content-between">
-                                <div><h4>FINANCES</h4></div>
+                                <div><h4 class="mb-0">FINANCES</h4></div>
                             </div>
                         </div>
                         <div class="card-body pb-0">

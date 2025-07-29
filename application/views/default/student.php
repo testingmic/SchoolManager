@@ -456,7 +456,7 @@ if(!empty($user_id)) {
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <h4>PERSONAL INFORMATION</h4>
+                        <h4 class="pb-0 mb-0">PERSONAL INFORMATION</h4>
                     </div>
                     <div class="card-body pt-0 pb-0 bg-gradient-to-br from-blue-50 to-blue-100">
                         <div class="py-2">
@@ -536,7 +536,7 @@ if(!empty($user_id)) {
                 '.($isAdmin || $user_id == $defaultUser->user_id ?         
                     '<div class="card">
                         <div class="card-header">
-                            <h4>LOGIN INFORMATION</h4>
+                            <h4 class="mb-0">LOGIN INFORMATION</h4>
                         </div>
                         <div class="card-body pt-0 pb-0">
                             <div class="py-2">

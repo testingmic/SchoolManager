@@ -101,7 +101,7 @@ if(!empty($item_id)) {
             $students .= "<td>
                 <div class='d-flex justify-content-start'>
                     <div>
-                        <span onclick='return load(\"student/{$student->user_id}\");' class='user_name font-weight-bold text-primary'>{$student->name}</span>
+                        <span onclick='return load(\"student/{$student->user_id}\");' class='user_name text-primary'>{$student->name}</span>
                     </div>
                 </div>
             </td>";
@@ -148,7 +148,7 @@ if(!empty($item_id)) {
             <div class="col-md-3">
                 <div class="card rounded-2xl">
                     <div class="card-body pt-3 pb-3 pr-2 pl-2 text-center bg-gradient-to-br from-yellow-200 to-yellow-100 rounded-2xl">
-                        <div class="font-22 font-weight-bolder text-black">'.strtoupper($data->name).'</div>
+                        <div class="font-22 text-black">DEPARTMENT CODE</div>
                         <div class="font-18 font-weight-bold text-uppercase text-black">'.$data->department_code.'</div>
                     </div>
                 </div>
@@ -229,7 +229,7 @@ if(!empty($item_id)) {
                 ).'
                 <div class="card">
                     <div class="card-header">
-                        <h4>DEPARTMENT HEAD</h4>
+                        <h4 class="mb-0">DEPARTMENT HEAD</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">
                         <div class="py-3 pt-0">
@@ -254,7 +254,7 @@ if(!empty($item_id)) {
                     '<div class="card">
                         <div class="card-header pr-3">
                             <div class="d-flex width-per-100 justify-content-between">
-                                <div><h4>FINANCES</h4></div>
+                                <div><h4 class="mb-0">FINANCES</h4></div>
                             </div>
                         </div>
                         <div class="card-body pb-0">

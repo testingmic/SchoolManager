@@ -808,10 +808,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="card rounded-2xl">
                         <div class="card-header pr-0">
                             <div class="row width-100">
-                                <div class="col-md-2">
-                                    <h4 class="text-uppercase font-13">Revenue</h4>
-                                </div>
-                                <div align="right" class="col-md-10">
+                                <div align="right" class="col-md-12">
                                     <div class="btn-group" data-filter="quick_summary_filter" id="quick_summary_filter" role="group" aria-label="Filter Revenue">
                                         <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="yesterday" class="btn sm-hide btn-info">Yesterday</button>
                                         <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="today" class="btn btn-info">Today</button>
@@ -935,7 +932,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="col-lg-4 col-md-6 col-12 col-sm-12">
                         <div class="card rounded-2xl">
                             <div class="card-header">
-                                <h4 class="text-black font-17">Students</h4>
+                                <h4 class="text-uppercase font-13 mb-0">Students</h4>
                             </div>
                             <div class="card-body p-0 bg-gradient-to-br from-blue-100 to-blue-50">
                                 <div class="card-body pb-2" data-chart="male_female_comparison">
@@ -959,7 +956,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="col-lg-4 col-md-6 col-12 col-sm-12 d-none d-sm-block">
                         <div class="card rounded-2xl">
                             <div class="card-header">
-                                <h4 class="text-uppercase font-13">Upcoming Events</h4>
+                                <h4 class="text-uppercase font-13 mb-0">Upcoming Events</h4>
                             </div>
                             <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:355px;height:355px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
@@ -971,7 +968,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="col-lg-4 col-md-6 col-12 col-sm-12">
                         <div class="card rounded-2xl">
                             <div class="card-header">
-                                <h4 class="text-uppercase font-13">Upcoming Birthdays</h4>
+                                <h4 class="text-uppercase font-13 mb-0">Upcoming Birthdays</h4>
                             </div>
                             <div class="pl-1 pr-2 trix-slim-scroll" style="max-height:355px;height:355px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">

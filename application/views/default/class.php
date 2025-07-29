@@ -120,7 +120,7 @@ if(!empty($item_id)) {
                 <div class='flex items-center space-x-4'>
                     {$imageToUse}
                     <div>
-                        <span title='View Details' class='user_name' onclick='load(\"student/{$student->user_id}\");'>{$student->name}</span><br>
+                        <span title='View Details' class='user_name' onclick='load(\"student/{$student->user_id}\");'>{$student->name}</span>
                         {$student->unique_id}{$t_status}{$scholarship_status}
                     </div>
                 </div>
@@ -173,7 +173,7 @@ if(!empty($item_id)) {
             <div class="col-md-3">
                 <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                     <div class="card-body pt-3 pb-3 pr-2 pl-2 text-center bg-gradient-to-br from-blue-200 to-blue-100 rounded-2xl shadow-lg text-white card-type-3">
-                        <div class="font-22 font-weight-bolder text-black">'.strtoupper($data->name).'</div>
+                        <div class="font-22 text-black">CLASS CODE</div>
                         <div class="font-18 font-weight-bold text-uppercase text-black">'.$data->class_code.'</div>
                     </div>
                 </div>
@@ -244,7 +244,7 @@ if(!empty($item_id)) {
                 ).'
                 <div class="card pb-0">
                     <div class="card-header">
-                        <h4>CLASS TEACHER</h4>
+                        <h4 class="mb-0">CLASS TEACHER</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">
                     '.(empty($data->class_teacher_info) ? '<div class="py-4 pt-0 text-center">No Class Teacher Set</div>' : 
@@ -268,7 +268,7 @@ if(!empty($item_id)) {
                 </div>
                 <div class="card pb-0 d-none d-sm-block">
                     <div class="card-header">
-                        <h4>CLASS PREFECT</h4>
+                        <h4 class="mb-0">CLASS PREFECT</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">
                     '.(empty($data->class_assistant_info) ? '<div class="py-4 pt-0 text-center">No Class Prefect Set</div>' : 

@@ -287,7 +287,7 @@ if(!empty($item_id)) {
                     <div class="card">
                         <div class="card-body p-0">
                             <div class="card-header">
-                                <h4>SUBJECT DESCRIPTION</h4>
+                                <h4 class="mb-0">SUBJECT DESCRIPTION</h4>
                             </div>
                             <div class="p-3 pt-0">
                             '.(!empty($data->description) ? $data->description : "<div class='text-center'>Description Not Set</div>").'
@@ -304,7 +304,7 @@ if(!empty($item_id)) {
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <h4>CLASS NAME</h4>
+                        <h4 class="mb-0">CLASS NAME</h4>
                     </div>
                     <div class="card-body text-center">
                         '.$data->class_name.'
@@ -314,7 +314,7 @@ if(!empty($item_id)) {
             $response->html .= '
                 <div class="card d-none d-sm-block">
                     <div class="card-header">
-                        <h4>SUBJECT TUTOR DETAILS</h4>
+                        <h4 class="mb-0">SUBJECT TUTOR DETAILS</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">';
                     if(!empty($data->course_tutors)) {
@@ -322,7 +322,7 @@ if(!empty($item_id)) {
                             $response->html .= '
                             <div class="pb-2 pt-3 border-bottom">
                                 <p class="clearfix mb-2">
-                                    <span class="float-left">Fullname</span>
+                                    <span class="float-left">Name</span>
                                     <span class="float-right text-muted"><a href="'.$baseUrl.'staff/'.$tutor->item_id.'/documents">'.ucwords(($tutor->name)).'</a></span>
                                 </p>
                                 <p class="clearfix mb-2">

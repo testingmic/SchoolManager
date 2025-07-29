@@ -294,8 +294,8 @@ var summaryReporting = (t_summary, date_range) => {
             key++;
             class_count_list += `
                 <div class="m-b-20">
-                    <div class="text-small float-right font-weight-bold font-17 text-muted">${e.value}</div>
-                    <div class="font-weight-bold"><span onclick="return load('class/${e.class_id}');" class="user_name">${e.name}</span></div>
+                    <div class="text-small float-right font-17">${e.value}</div>
+                    <div><span onclick="return load('class/${e.class_id}');" class="user_name">${e.name}</span></div>
                     <div class="progress" data-height="5" style="height: 5px;">
                     <div class="progress-bar ${bg_colors[key]}" role="progressbar" data-width="${e.percentage}%" aria-valuenow="${e.percentage}" aria-valuemin="0" aria-valuemax="100" style="width: ${e.percentage}%;"></div>
                     </div>

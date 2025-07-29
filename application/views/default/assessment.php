@@ -215,7 +215,7 @@ if(!empty($item_id)) {
                     <table width="100%" class="table-hover table mb-0">
                         <thead>
                             '.($isUnassigned || $isMultipleChoice ? "<th>#</th>" : null).'
-                            <th>Assigned Students List</th>
+                            <th class="align-left">Assigned Students List</th>
                             <th></th>
                         </thead>
                     </table>
@@ -257,8 +257,8 @@ if(!empty($item_id)) {
                                                 </div>
                                             </div>
                                             <div>
-                                                <p class="p-0 text-uppercase m-0">
-                                                    '.($isSubmitted ? '<a title="Click to view document submitted by '.$student->name.'" style="text-decoration:none" class="anchor" href="javascript:void(0)" '.($isAuto ? 'onclick="return '.$function.'(\''.$student->item_id.'\',\''.$data->grading.'\',\''.$data->item_id.'\')"' : null).' data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'"><strong>'.$student->name.'</strong></a>' : "<strong>{$student->name}</strong>").'
+                                                <p class="p-0 m-0">
+                                                    '.($isSubmitted ? '<a title="Click to view document submitted by '.$student->name.'" style="text-decoration:none" class="anchor" href="javascript:void(0)" '.($isAuto ? 'onclick="return '.$function.'(\''.$student->item_id.'\',\''.$data->grading.'\',\''.$data->item_id.'\')"' : null).' data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'">'.$student->name.'</a>' : "{$student->name}").'
                                                 </p>
                                                 <p class="p-0 m-0">'.$myClass->the_status_label($student->handed_in).'</p>
                                             </div>
@@ -459,19 +459,19 @@ if(!empty($item_id)) {
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <h4>'.$data->assignment_type.' Details</h4>
+                        <h4 class="mb-0">'.$data->assignment_type.' Details</h4>
                     </div>
                     '.$assignmentClass->quick_data($data, ($isActive && $isTutorAdmin), ($isAdmin && $isAuto), $isClosed && !$data->exported).'
                 </div>
                 <div class="card">
-                    <div class="card-header"><h4>Created By Details</h4></div>
+                    <div class="card-header"><h4 class="mb-0">Created By Details</h4></div>
                     <div class="card-body pt-0 pb-0">
                         <div class="py-3 pt-0">
                             <div class="d-flex justify-content-start">
                                 <div class="mr-0">
                                     '.(isset($data->created_by_info->image) ? '<img src="'.$baseUrl.''.$data->created_by_info->image.'" class="rounded-circle cursor author-box-picture" width="50px">' : null).'
                                 </div>
-                                <div class="col-11">
+                                <div class="col-11 pr-0 mr-0">
                                     <div class="clearfix">
                                         <span class="mr-2 float-left">Fullname: </span>
                                         <span class="mr-2 float-right text-muted">'.($data->created_by_info->name ?? null).'</span>
