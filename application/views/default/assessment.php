@@ -447,13 +447,13 @@ if(!empty($item_id)) {
             <div class="section-body">
             <div class="row mt-sm-4">
             <div class="col-12 col-md-12 col-lg-4">
-                <div class="card author-box">
-                <div class="card-body">
-                    <div class="author-box-center">
+                <div class="card author-box bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl">
+                <div class="card-body rounded-2xl">
+                    <div class="author-box-center text-white">
                         <div class="clearfix"></div>
                         <div class="author-box-name text-uppercase font-20"><a href="#">'.$data->assignment_title.'</a></div>
                         <div class="author-box-name">'.$data->class_name.'</div>
-                        '.(isset($data->students_assigned) ? '<div class="author-box-job">('.$data->students_assigned.' Students)</div>' : null).'
+                        '.(isset($data->students_assigned) ? '<div class="author-box-job text-white">('.$data->students_assigned.' Students)</div>' : null).'
                     </div>
                 </div>
                 </div>

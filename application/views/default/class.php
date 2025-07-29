@@ -174,9 +174,9 @@ if(!empty($item_id)) {
             <div class="row mt-sm-4">
             <div class="col-md-3">
                 <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
-                    <div class="card-body pt-3 pb-3 pr-2 pl-2 text-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
-                        <div class="font-22 font-weight-bolder text-white">'.strtoupper($data->name).'</div>
-                        <div class="font-18 font-weight-bold text-uppercase text-white">'.$data->class_code.'</div>
+                    <div class="card-body pt-3 pb-3 pr-2 pl-2 text-center bg-gradient-to-br from-blue-200 to-blue-100 rounded-2xl shadow-lg text-white card-type-3">
+                        <div class="font-22 font-weight-bolder text-black">'.strtoupper($data->name).'</div>
+                        <div class="font-18 font-weight-bold text-uppercase text-black">'.$data->class_code.'</div>
                     </div>
                 </div>
             </div>

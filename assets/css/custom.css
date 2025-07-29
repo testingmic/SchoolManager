@@ -401,7 +401,6 @@ textarea.custom_form-control {
 
 .student-report .student-count .item-title {
     font-size: 14px;
-    color: #a5a5a5;
     margin-bottom: 2px;
 }
 
@@ -737,10 +736,6 @@ h4 {
     margin-bottom: 0;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    font-weight: 700 !important;
-}
-
 .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
     line-height: 1.2 !important;
 }
@@ -1038,7 +1033,6 @@ code {
 }
 
 .plugin-clock {
-    color: #ffffff;
     text-align: center;
     font-weight: bold;
     padding: 0;

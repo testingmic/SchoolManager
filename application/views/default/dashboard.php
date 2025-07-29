@@ -627,15 +627,15 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 $response->html .=
                 '<div class="row">
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card rounded-2xl">
-                            <div class="card-body bg-gradient-to-br from-amber-500 to-amber-300 rounded-2xl shadow-lg text-white card-type-3">
+                        <div class="card rounded-2xl transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="card-body bg-gradient-to-br from-blue-200 to-blue-100 rounded-2xl shadow-lg text-black card-type-3">
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Students Count</h6>
-                                        <span  data-count="total_students_count" class="font-bold font-25 mb-0">0</span>
+                                        <span  data-count="total_students_count" class="font-25 font-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
-                                        <div class="card-circle l-bg-orange text-white">
+                                        <div class="card-circle bg-gradient-to-br from-blue-500 to-blue-600 text-white">
                                             <i class="fas fa-users"></i>
                                         </div>
                                     </div>
@@ -644,15 +644,15 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card rounded-2xl">
-                            <div class="card-body bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
+                        <div class="card rounded-2xl transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="card-body bg-gradient-to-br from-green-200 to-green-100 rounded-2xl shadow-lg text-black card-type-3">
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Teaching Stafff</h6>
-                                        <span data-count="total_teachers_count" class="font-bold font-25 mb-0">0</span>
+                                        <span data-count="total_teachers_count" class="font-25 font-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
-                                        <div class="card-circle bg-gradient-to-br from-blue-600 to-purple-800 text-white">
+                                        <div class="card-circle bg-gradient-to-br from-green-500 to-green-600 text-white">
                                             <i class="fas fa-user-secret"></i>
                                         </div>
                                     </div>
@@ -661,15 +661,15 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card rounded-2xl">
-                            <div class="card-body bg-gradient-to-br from-green-500 to-green-300 rounded-2xl shadow-lg text-white card-type-3">
+                        <div class="card rounded-2xl transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="card-body bg-gradient-to-br from-purple-200 to-purple-100 rounded-2xl shadow-lg text-black card-type-3">
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Employees / Users</h6>
-                                        <span data-count="total_employees_count" class="font-bold font-25 mb-0">0</span>
+                                        <span data-count="total_employees_count" class="font-25 font-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
-                                        <div class="card-circle l-bg-green text-white">
+                                        <div class="card-circle bg-gradient-to-br from-purple-500 to-purple-600 text-white">
                                             <i class="fas fa-user"></i>
                                         </div>
                                     </div>
@@ -678,11 +678,11 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card rounded-2xl">
-                            <div class="card-body inline-flex justify-center bg-gradient-to-br from-red-600 to-red-400 rounded-2xl shadow-lg text-white card-type-3">
+                        <div class="card rounded-2xl transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="card-body inline-flex justify-center bg-gradient-to-br from-yellow-200 to-orange-100 rounded-2xl shadow-lg text-black card-type-3">
                                 <div align="center">
                                     <h6 class="border-bottom font-13 text-uppercase font-bold p-0 m-0">'.date("l, F d, Y").'</h6>
-                                    <h3 class="p-0 m-0"><div class="plugin-clock">'.date("h:i A").'</div></h3>
+                                    <h3 class="p-0 m-0"><div class="plugin-clock text-black">'.date("h:i A").'</div></h3>
                                 </div>
                             </div>
                         </div>
@@ -725,19 +725,19 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="col-lg-4 col-md-5">
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="relative card overflow-hidden rounded-2xl  bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900">
-                                    <div class="card-body mb-2 pl-2 pr-2 pb-2 bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-blue-500/20" align="center">
+                                <div class="relative card overflow-hidden rounded-2xl  bg-gradient-to-br from-yellow-200 to-red-50">
+                                    <div class="card-body mb-2 pl-2 pr-2 pb-2" align="center">
                                         <p class="font-16 p-0 m-0 text-primary text-uppercase">Academic Year</p>
                                         <h6 class="mt-1 pt-0">'.$defaultAcademics->academic_year.'</h6>
-                                        <span class="font-16 font-bold text-white">
+                                        <span class="font-16 font-bold text-black">
                                             '.date("jS M, Y", strtotime($defaultAcademics->year_starts)).' 
                                                 &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
                                             '.date("jS M, Y", strtotime($defaultAcademics->year_ends)).'
                                         </span>
-                                        <hr>
-                                        <p class="font-16 p-0 m-0 text-uppercase text-primary">'.($academicSession ?? null).'</p>
-                                        <h6 class="mt-0 pt-0 text-uppercase text-primary">'.($defaultAcademics->current_term_name ?? $defaultAcademics->academic_term).'</h6>
-                                        <span class="font-16 font-bold text-white">
+                                        <hr class="my-3">
+                                        <p class="font-16 p-0 mt-2 text-uppercase text-primary">Academic '.($academicSession ?? null).'</p>
+                                        <h6 class="mt-1 pt-0 text-uppercase text-primary">'.($defaultAcademics->current_term_name ?? $defaultAcademics->academic_term).'</h6>
+                                        <span class="font-16 font-bold text-black">
                                             '.date("jS M, Y", strtotime($defaultAcademics->term_starts)).' 
                                                 &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
                                             '.date("jS M, Y", strtotime($defaultAcademics->term_ends)). '
@@ -933,22 +933,24 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 // append the data
                 $response->html .= '
                     <div class="col-lg-4 col-md-6 col-12 col-sm-12">
-                        <div class="card rounded-2xl bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500">
+                        <div class="card rounded-2xl">
                             <div class="card-header">
-                                <h4 class="text-uppercase text-white font-13">Students</h4>
+                                <h4 class="text-black font-17">Students</h4>
                             </div>
-                            <div class="card-body pb-2" data-chart="male_female_comparison">
-                                <canvas style="max-height:225px;height:225px;" id="male_female_comparison"></canvas>
+                            <div class="card-body p-0 bg-gradient-to-br from-blue-100 to-blue-50">
+                                <div class="card-body pb-2" data-chart="male_female_comparison">
+                                    <canvas style="max-height:225px;height:225px;" id="male_female_comparison"></canvas>
+                                </div>
                             </div>
-                            <div class="card-footer">
+                            <div class="card-footer pb-1 mt-1">
                                 <div class="student-report">
                                     <div class="student-count pseudo-bg-blue">
-                                        <h4 class="item-title text-white">Female Students</h4>
-                                        <div class="font-25 font-bold text-white" data-sex_count="Female"></div>
+                                        <h4 class="item-title text-black mb-1">Female Students</h4>
+                                        <div class="font-25 font-bold text-black" data-sex_count="Female"></div>
                                     </div>
                                     <div class="student-count pseudo-bg-yellow">
-                                        <h4 class="item-title text-white">Male Students</h4>
-                                        <div class="font-25 font-bold text-white" data-sex_count="Male"></div>
+                                        <h4 class="item-title text-black mb-1">Male Students</h4>
+                                        <div class="font-25 font-bold text-black" data-sex_count="Male"></div>
                                     </div>
                                 </div>
                             </div>
@@ -988,54 +990,54 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 '.(
                     $isTutorStudent || $isEmployee ?
                     ''.($data_stream ? '
-                        <div class="col-md-3 col-sm-12">
-                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-green border-left-solid bg-gradient-to-br from-green-600 to-green-300">
-                                <i class="fas fa-user-check card-icon text-white col-green"></i>
-                                <div class="card-wrap">
-                                    <div class="padding-20">
-                                        <div class="text-right">
-                                            <h3 data-attendance_count="Present" class="font-light text-white mb-0">0</h3>
-                                            <span class="text-dark">Days Present</span>
-                                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-green border-left-solid bg-gradient-to-br from-green-300 to-green-100">
+                                <div class="flex items-center justify-between p-4">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                        <i class="fas fa-user-check text-white text-xl"></i>
+                                    </div>
+                                    <div class="card-wrap text-right">
+                                        <h3 data-attendance_count="Present" class="font-light text-black mb-0">0</h3>
+                                        <span class="text-dark">Days Present</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-12">
-                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-danger border-left-solid bg-gradient-to-br from-red-600 to-red-300">
-                                <i class="fas fa-user-alt-slash card-icon text-white col-red"></i>
-                                <div class="card-wrap">
-                                    <div class="padding-20">
-                                        <div class="text-right">
-                                            <h3 data-attendance_count="Absent" class="font-light text-white mb-0">0</h3>
-                                            <span class="text-dark">Days Absent</span>
-                                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-danger border-left-solid bg-gradient-to-br from-red-300 to-red-100">
+                                <div class="flex items-center justify-between p-4">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-red-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                        <i class="fas fa-user-alt-slash text-white text-xl"></i>
+                                    </div>
+                                    <div class="card-wrap text-right">
+                                        <h3 data-attendance_count="Absent" class="font-light text-black mb-0">0</h3>
+                                        <span class="text-dark">Days Absent</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-12">
-                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-600 to-purple-300">
-                                <i class="fas fa-user-edit card-icon text-white col-purple"></i>
-                                <div class="card-wrap">
-                                    <div class="padding-20">
-                                        <div class="text-right">
-                                            <h3 data-attendance_count="logs_count" class="font-light text-white mb-0">0</h3>
-                                            <span class="text-dark">Logs Counter</span>
-                                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
+                                <div class="flex items-center justify-between p-4">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                        <i class="fas fa-user-edit text-white text-xl"></i>
+                                    </div>
+                                    <div class="card-wrap text-right">
+                                        <h3 data-attendance_count="logs_count" class="font-light text-black mb-0">0</h3>
+                                        <span class="text-dark">Logs Counter</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-12">
-                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-blue border-left-solid bg-gradient-to-br from-blue-600 to-blue-400">
-                                <i class="fas fa-list card-icon text-white col-blue"></i>
-                                <div class="card-wrap">
-                                    <div class="padding-20">
-                                        <div class="text-right">
-                                            <h3 data-attendance_count="Term" class="font-light text-white mb-0">0</h3>
-                                            <span class="text-dark">'.$academicSession.' Days</span>
-                                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-blue border-left-solid bg-gradient-to-br from-blue-300 to-blue-100">
+                                <div class="flex items-center justify-between p-4">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                        <i class="fas fa-list text-white text-xl"></i>
+                                    </div>
+                                    <div class="card-wrap text-right">
+                                        <h3 data-attendance_count="Term" class="font-light text-black mb-0">0</h3>
+                                        <span class="text-dark">'.$academicSession.' Days</span>
                                     </div>
                                 </div>
                             </div>
@@ -1045,28 +1047,26 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 '.($isWardTutorParent || $isEmployee ?
                 '<div class="col-lg-4 col-md-12">
                     '.($isStudent || $isTutor ? '
-                        <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-yellow border-left-solid">
-                            <div class="card-wrap">
-                                <div class="padding-20">
-                                    <div class="text-center">
-                                        <p class="font-16 p-0 m-0 text-primary text-uppercase">Academic Year</p>
-                                        <h5 class="mt-1 pt-0">'.$defaultAcademics->academic_year.'</h5>
-                                        <span class="font-16 font-bold">
-                                            '.date("F d, Y", strtotime($defaultAcademics->year_starts)).' 
-                                                &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
-                                            '.date("F d, Y", strtotime($defaultAcademics->year_ends)).'
-                                        </span>
-                                        <hr>
-                                        <p class="font-16 p-0 m-0 text-primary text-uppercase">'.($academicSession ?? null).'</p>
-                                        <h5 class="mt-0 pt-0 text-uppercase">'.($defaultAcademics->current_term_name ?? $defaultAcademics->academic_term).'</h5>
-                                        <span class="font-16 font-bold">
-                                            '.date("F d, Y", strtotime($defaultAcademics->term_starts)).' 
-                                                &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
-                                            '.date("F d, Y", strtotime($defaultAcademics->term_ends)).'
-                                        </span>
-                                    </div>
-                                </div>
+                        <div class="relative card overflow-hidden rounded-2xl  bg-gradient-to-br from-yellow-200 to-red-50">
+                            <div class="card-body mb-2 pl-2 pr-2 pb-2" align="center">
+                                <p class="font-16 p-0 m-0 text-primary text-uppercase">Academic Year</p>
+                                <h6 class="mt-1 pt-0">'.$defaultAcademics->academic_year.'</h6>
+                                <span class="font-16 font-bold text-black">
+                                    '.date("jS M, Y", strtotime($defaultAcademics->year_starts)).' 
+                                        &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
+                                    '.date("jS M, Y", strtotime($defaultAcademics->year_ends)).'
+                                </span>
+                                <hr class="my-2">
+                                <p class="font-16 p-0 mt-1 text-uppercase text-primary">Academic '.($academicSession ?? null).'</p>
+                                <h6 class="mt-1 pt-0 text-uppercase text-primary">'.($defaultAcademics->current_term_name ?? $defaultAcademics->academic_term).'</h6>
+                                <span class="font-16 font-bold text-black">
+                                    '.date("jS M, Y", strtotime($defaultAcademics->term_starts)).' 
+                                        &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
+                                    '.date("jS M, Y", strtotime($defaultAcademics->term_ends)). '
+                                </span>
                             </div>
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-400 to-purple-400 opacity-20 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
+                            <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-blue-400 to-cyan-400 opacity-20 rounded-full translate-y-12 -translate-x-12 animate-pulse" style="animation-delay: -2s;"></div>
                         </div>' : null
                     ).'
                     <div class="card">
@@ -1163,29 +1163,29 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 <div class="col-lg-8 col-md-12">
                     <div class="row">
                         '.($isParent ?                             
-                            '<div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                                <div class="card card-statistic-1">
-                                    <i class="fas fa-users card-icon col-red"></i>
-                                    <div class="card-wrap">
-                                        <div class="padding-20">
-                                            <div class="text-right">
-                                                <h3 class="font-light mb-0">'.$wards_count.'</h3>
-                                                <span class="text-muted">Wards</span>
-                                            </div>
+                            '<div class="col-lg-4 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
+                                <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-green border-left-solid bg-gradient-to-br from-green-300 to-green-100">
+                                    <div class="flex items-center justify-between p-4">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                            <i class="fas fa-users text-white text-xl"></i>
+                                        </div>
+                                        <div class="card-wrap text-right">
+                                            <h3 data-attendance_count="Wards" class="font-light text-black mb-0">'.$wards_count.'</h3>
+                                            <span class="text-dark">Wards</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                                <div class="card card-statistic-1">
-                                    <i class="fas fa-money-alt card-icon col-green"></i>
-                                    <div class="card-wrap">
-                                    <div class="padding-20">
-                                        <div class="text-right">
-                                            <h3 class="font-light mb-0">'.number_format($total_expenditure, 2).'</h3>
-                                            <span class="text-muted">Total Payments</span>
+                            <div class="col-lg-4 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
+                                <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
+                                    <div class="flex items-center justify-between p-4">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                            <i class="fas fa-money-bill text-white text-xl"></i>
                                         </div>
-                                    </div>
+                                        <div class="card-wrap text-right">
+                                            <h3 data-attendance_count="Payments" class="font-light text-black mb-0">'.number_format($total_expenditure, 2).'</h3>
+                                            <span class="text-dark">Total Payments</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>' : null

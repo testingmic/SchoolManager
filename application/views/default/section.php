@@ -151,10 +151,10 @@ if(!empty($item_id)) {
             <div class="row">
 
             <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body card-body pt-3 pb-3 pr-2 pl-2 text-center bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 shadow-lg text-white">
-                        <div class="font-23 font-weight-bolder">'.strtoupper($data->name).'</div>
-                        <div class="font-18 font-weight-bold text-uppercase">'.$data->section_code.'</div>
+                <div class="card rounded-2xl">
+                    <div class="card-body rounded-2xl card-body pt-3 pb-3 pr-2 pl-2 text-center bg-gradient-to-br from-blue-300 via-blue-200 to-blue-100 shadow-lg text-white">
+                        <div class="font-23 font-weight-bolder text-black">'.strtoupper($data->name).'</div>
+                        <div class="font-18 font-weight-bold text-uppercase text-black">'.$data->section_code.'</div>
                     </div>
                 </div>
             </div>

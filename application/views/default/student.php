@@ -389,17 +389,17 @@ if(!empty($user_id)) {
             <div class="row">
             <div class="col-md-3">
                 <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
-                    <div class="card-body text-center bg-gradient-to-br from-amber-500 to-amber-300 rounded-2xl shadow-lg text-white card-type-3">
+                    <div class="card-body text-center bg-gradient-to-br from-amber-200 to-amber-100 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-bold">STUDENT ID</div>
-                        <div class="font-22 font-weight-bold text-uppercase text-white">'.$data->unique_id.'</div>
+                        <div class="font-22 font-weight-bold text-uppercase text-black">'.$data->unique_id.'</div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
-                    <div class="card-body text-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
+                    <div class="card-body text-center bg-gradient-to-br from-blue-200 to-blue-100 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-bold">CLASS</div>
-                        <div class="font-22 font-weight-bold text-uppercase text-white">
+                        <div class="font-22 font-weight-bold text-uppercase text-black">
                             '.($data->class_name ? $data->class_name : '-' ).'
                         </div>
                     </div>
@@ -407,9 +407,9 @@ if(!empty($user_id)) {
             </div>
             <div class="col-md-3">
                 <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
-                    <div class="card-body pl-0 pr-0 text-center bg-gradient-to-br from-pink-500 to-pink-300 rounded-2xl shadow-lg text-white card-type-3">
+                    <div class="card-body pl-0 pr-0 text-center bg-gradient-to-br from-pink-200 to-pink-100 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-bold">DEPARTMENT</div>
-                        <div class="font-22 font-weight-bold text-uppercase text-white">
+                        <div class="font-22 font-weight-bold text-uppercase text-black">
                             '.($data->department_name ? $data->department_name : '-' ).'
                         </div>
                     </div>
@@ -417,9 +417,9 @@ if(!empty($user_id)) {
             </div>
             <div class="col-md-3 d-none d-sm-block">
                 <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
-                    <div class="card-body pl-0 pr-0 text-center bg-gradient-to-br from-green-500 to-green-300 rounded-2xl shadow-lg text-white card-type-3">
+                    <div class="card-body pl-0 pr-0 text-center bg-gradient-to-br from-green-200 to-green-100 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-18 text-dark font-bold">SECTION</div>
-                        <div class="font-22 font-weight-bold text-uppercase text-white">
+                        <div class="font-22 font-weight-bold text-uppercase text-black">
                             '.($data->section_name ? $data->section_name : '-' ).'
                         </div>
                     </div>
