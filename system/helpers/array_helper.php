@@ -413,8 +413,8 @@ function format_bus_item($value, $no_container = false, $no_buttons = false, $wi
                     </div>
                 </div>
             </div>
-            <div title='{$item_name}' ".($permissions["hasModify"] ? "onclick='return update_bus(\"{$value->item_id}\");'" : null)." class='title cursor'>
-                <h3>{$value->brand}</h3>
+            <div title='{$item_name}' class='cursor font-20 bg-primary text-white p-2'>
+                <p>{$value->brand}</p>
             </div>
         </div>";
     $html .= (!$no_container ? "</div>" : null);

@@ -213,7 +213,7 @@ function color_code_picker($selected = null, $colorsOnly = false) {
  */
 function no_record_found($title = null, $caption = null, $url_link = null, $record = null, $no_button = false) {
     return "
-    <div class='backdrop-blur-xl mb-4 backdrop-saturate-150 rounded-2xl border shadow-[0_0_1px_1px_rgba(0,0,0,0.1)] dark:shadow-[0_0_1px_1px_rgba(255,255,255,0.05)] dark:bg-opacity-20 transition-all duration-300 p-6 bg-white dark:bg-gray-900/50 border-white/10 dark:border-gray-700/50'>
+    <div id='no_record_found_container' class='backdrop-blur-xl ".($no_button ? "mt-2" : null)." backdrop-saturate-150 rounded-2xl border shadow-[0_0_1px_1px_rgba(0,0,0,0.1)] dark:shadow-[0_0_1px_1px_rgba(255,255,255,0.05)] dark:bg-opacity-20 transition-all duration-300 p-6 bg-white dark:bg-gray-900/50 border-white/10 dark:border-gray-700/50'>
         <div class='dark:text-gray-300'>
             <div class='text-center py-12'>
                 <div
@@ -233,7 +233,7 @@ function no_record_found($title = null, $caption = null, $url_link = null, $reco
                     <span class='btn btn-outline-primary font-13' onclick='return loadPage(\"".$_SERVER['REQUEST_URI']."\");'><i class='fa fa-redo-alt'></i>  Reload Page</span> |
                     <span class='btn btn-outline-primary font-13' onclick='javascript:history.back()' class='anchor'><i class='fa fa-arrow-left'></i> Go Back</span>
                 </div>
-                " : "
+                " : (!empty($url_link) ? "
                     <a href='{$url_link}'>
                         <button
                         class='inline-flex items-center justify-center font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 hover:scale-105 transition-all duration-300 bg-primary-600 hover:bg-primary-700 focus:ring-primary-500 px-4 py-2 text-sm bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white shadow-lg'><svg
@@ -243,8 +243,8 @@ function no_record_found($title = null, $caption = null, $url_link = null, $reco
                             <path d='M5 12h14'></path>
                             <path d='M12 5v14'></path>
                         </svg>Add {$record}</button>
-                    </a>
-                ")."
+                    </a>" : null)
+                )."
             </div>
         </div>
     </div>";

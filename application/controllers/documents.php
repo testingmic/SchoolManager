@@ -151,8 +151,8 @@ class Documents extends Myschoolgh {
 				// if isset
 				if(isset($result->description)) {
 					// clean the content
-					$result->content = htmlspecialchars_decode($result->content);
-					$result->description = htmlspecialchars_decode($result->description);
+					$result->content = !empty($result->content) ? htmlspecialchars_decode($result->content) : null;
+					$result->description = !empty($result->description) ? htmlspecialchars_decode($result->description) : null;
 				}
 
 				// if the attachment variable was parsed
@@ -329,8 +329,8 @@ class Documents extends Myschoolgh {
 				// if isset
 				if(isset($result->description)) {
 					// clean the content
-					$result->content = htmlspecialchars_decode($result->content);
-					$result->description = htmlspecialchars_decode($result->description);
+					$result->content = !empty($result->content) ? htmlspecialchars_decode($result->content) : null;
+					$result->description = !empty($result->description) ? htmlspecialchars_decode($result->description) : null;
 				}
 
 				// isOwner
@@ -364,9 +364,6 @@ class Documents extends Myschoolgh {
 	 */
 	public function folders(stdClass $params) {
 
-		// call the global variable for the user access information
-		global $accessObject;
-
 		// if the request is to create a new document
 		if($params->request === "save") {
 
@@ -375,7 +372,7 @@ class Documents extends Myschoolgh {
 
 			// clean the description 
 			$params->description = !empty($params->description) ? custom_clean(htmlspecialchars_decode($params->description)) : null;
-			$params->description = htmlspecialchars($params->description);
+			$params->description = !empty($params->description) ? htmlspecialchars($params->description) : null;
 
 			// save the document into the database
 			$this->_save("documents", [
@@ -385,7 +382,7 @@ class Documents extends Myschoolgh {
 
 			// load the record
 			$record = $this->pushQuery("*", "documents", "item_id='{$unique_id}' AND client_id='{$params->clientId}' LIMIT 1")[0];
-			$record->description = htmlspecialchars_decode($record->description);
+			$record->description = !empty($record->description) ? htmlspecialchars_decode($record->description) : null;
 
 			// return the success message
 			return [
@@ -424,7 +421,7 @@ class Documents extends Myschoolgh {
 
 			// load the record
 			$record = $this->pushQuery("*", "documents", "item_id='{$params->unique_id}' AND client_id='{$params->clientId}' LIMIT 1")[0];
-			$record->description = htmlspecialchars_decode($record->description);
+			$record->description = !empty($record->description) ? htmlspecialchars_decode($record->description) : null;
 
 			// return the success message
 			return [
@@ -485,7 +482,7 @@ class Documents extends Myschoolgh {
 
 			// load the record
 			$record = $this->pushQuery("*, item_id AS unique_id", "documents", "item_id='{$unique_id}' AND client_id='{$params->clientId}' LIMIT 1")[0];
-			$record->description = htmlspecialchars_decode($record->description);
+			$record->description = !empty($record->description) ? htmlspecialchars_decode($record->description) : null;
 
 			// set the favicon
 		    $record->favicon = $this->favicon_array["pdf"] ?? "fa fa-file-alt";
@@ -519,8 +516,8 @@ class Documents extends Myschoolgh {
 
 			// clean the description 
 			if(!empty($params->description)) {
-				$params->description = custom_clean(htmlspecialchars_decode($params->description));
-				$params->description = htmlspecialchars($params->description);
+				$params->description = !empty($params->description) ? custom_clean(htmlspecialchars_decode($params->description)) : null;
+				$params->description = !empty($params->description) ? htmlspecialchars($params->description) : null;
 			}
 
 			// load the record
@@ -552,7 +549,7 @@ class Documents extends Myschoolgh {
 
 			// load the record
 			$record = $this->pushQuery("*, item_id AS unique_id", "documents", "item_id='{$params->unique_id}' AND client_id='{$params->clientId}' LIMIT 1")[0];
-			$record->description = htmlspecialchars_decode($record->description);
+			$record->description = !empty($record->description) ? htmlspecialchars_decode($record->description) : null;
 			
 			// set the favicon
 		    $record->favicon = $this->favicon_array[$record->file_type] ?? "fa fa-file-alt";

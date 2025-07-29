@@ -346,22 +346,21 @@ class Models {
 
         // app features list
         $this->features_list = [
-            "front_office" => "Front Office",
-            "library" => "Library Management",
-            "e_learning" => "E-Learning",
-            "class_assessment" => "Online Class Assessment",
+            "class_assessment" => "Class Assessment",
             "reports_promotion" => "Terminal Reports / Promotion",
-            "attendance" => "Attendance Manager",
+            "e_learning" => "E-Learning",
+            "library" => "Library Management",
             "timetable" => "Timetable",
-            "leave" => "Leave Management",
+            "attendance" => "Attendance Manager",
             "incidents" => "Incident Manager",
             "payroll" => "Payroll Manager",
+            "leave" => "Leave Management",
+            "front_office" => "Front Office",
             "bus_manager" => "Bus Management",
             "documents_manager" => "Documents Management",
             "events" => "Events Management",
-            "inventory" => "Inventory Manager",
-            "bulk_action" => "Bulk Action",
             "live_chat" => "Live Chat",
+            "bulk_action" => "Bulk Action",
             "online_applications" => "Online Applications",         
         ];
 

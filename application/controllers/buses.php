@@ -92,7 +92,8 @@ class Buses extends Myschoolgh {
 			$data = [
 				"brand" => $params->brand, "item_id" => $bus_id, "client_id" => $params->clientId, 
 				"reg_number" => $reg_number, "created_by" => $params->userId,
-				"insurance_company" => $params->insurance_company, 
+				"insurance_company" => $params->insurance_company,
+				"annual_premium" => $params->annual_premium ?? 0,
 				"insurance_date" => date("Y-m-d", strtotime($params->insurance_date))
 			];
 

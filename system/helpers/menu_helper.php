@@ -16,18 +16,6 @@
         </li>
     <?php } ?>
 <?php } ?>
-<?php function incidents_menu() { global $baseUrl, $accessObject, $clientFeatures; ?>
-    <?php if(in_array("incidents", $clientFeatures)) { ?>
-        <?php if($accessObject->hasAccess("view", "incident")) { ?>
-            <li class="dropdown">
-                <a href="#" class="nav-link has-dropdown"><i class="fas fa-list"></i><span>Incidents</span></a>
-                <ul class="dropdown-menu">
-                    <li><a class="nav-link" href="<?= $baseUrl ?>incidents_list">List Incidents</a></li>
-                </ul>
-            </li>
-        <?php } ?>
-    <?php } ?>
-<?php } ?>
 <?php function general_menu($isAdmin = false) { global $baseUrl, $accessObject, $clientFeatures, $academicSession, $isReadOnly; ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>Students</span></a>
@@ -75,7 +63,6 @@
     </li>
     <?php } ?>
     <?php } ?>
-    <?php incidents_menu(); ?>
     <?php if(in_array("bulk_action", $clientFeatures)) { ?>
         <?php if(!$accessObject->hasAccess("change_status", "settings") && 
                 !$accessObject->hasAccess("assign_class", "settings") && 
@@ -102,7 +89,7 @@
                 <?php } ?>
                 <?php if($accessObject->hasAccess("modify_student", "settings")) { ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>assign_modify_student">Modify Student Record</a></li>
-            <?php } ?>
+                <?php } ?>
             </ul>
         </li>
         <?php } ?>
@@ -320,7 +307,6 @@
         </li>
     <?php } ?>
     <li class="menu-header">Communication</li>
-    <li><a href="<?= $baseUrl ?>notifications" class="nav-link"><i class="far fa-bell"></i><span>Notifications</span></a></li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <?php if($accessObject->hasAccess("update", "events")) { ?>
         <li class="dropdown">
@@ -364,7 +350,6 @@
         </ul>
     </li>
     <?php } ?>
-    <?php incidents_menu(); ?> 
     <li class="menu-header">Academics</li>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Subjects Manager</span></a>
@@ -440,7 +425,6 @@
         <li><a href="<?= $baseUrl ?>leave" class="nav-link"><i class="far fa-check-square"></i><span>Leave Applications</span></a></li>
     <?php } ?>
     <li class="menu-header">Communication</li>
-    <li><a href="<?= $baseUrl ?>notifications" class="nav-link"><i class="far fa-bell"></i><span>Notifications</span></a></li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>
@@ -494,7 +478,6 @@
     <li class="menu-header">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
     <li class="menu-header">Communication</li>
-    <li><a href="<?= $baseUrl ?>notifications" class="nav-link"><i class="far fa-bell"></i><span>Notifications</span></a></li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>
@@ -571,7 +554,6 @@
     <li><a href="<?= $baseUrl ?>fees_bill" class="nav-link"><i class="fas fa-money-bill"></i><span>This <?= $academicSession; ?> Bill</span></a></li>
     
     <li class="menu-header">Communication</li>
-    <li><a href="<?= $baseUrl ?>notifications" class="nav-link"><i class="far fa-bell"></i><span>Notifications</span></a></li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>
@@ -636,7 +618,6 @@
         </li>
     <?php } ?>
     <li class="menu-header">Communication</li>
-    <li><a href="<?= $baseUrl ?>notifications" class="nav-link"><i class="far fa-bell"></i><span>Notifications</span></a></li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>

@@ -78,7 +78,7 @@ if(empty($bus_id)) {
         foreach($buses as $bus) {
             // append to the array
             $buses_array_list[$bus->item_id] = $bus;
-            $pageTitle = $pageTitle . ": ".$bus->brand;
+            $pageTitle = $pageTitle;
             // format the bus
             $buses_list .= format_bus_item($bus, false, true, "col-12", $permissions);
         }

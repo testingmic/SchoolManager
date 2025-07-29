@@ -66,11 +66,9 @@ if(!in_array("bus_manager", $clientFeatures)) {
     // buses list
     if(empty($buses) || !is_array($buses)) {
         // no bus information found
-        $buses_list .= "
-        <div data-element_type='bus' class='text-center empty_div_container col-lg-12 p-2 text-danger'>
-            You have not yet added any buses yet
-        </div><div data-element_type='bus'></div>";
-        
+        $buses_list .= "<div class='col-lg-12' id='no_record_found_main_container'>";
+        $buses_list .= no_record_found("No Bus Found", "No bus has been created yet. Get started by creating your first bus.", null, "Bus");    
+        $buses_list .= "</div>";
         // convert the buses_array_list to an object
         $buses_array_list = (object) [];
     } else {
