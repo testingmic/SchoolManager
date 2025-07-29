@@ -202,6 +202,55 @@ function color_code_picker($selected = null, $colorsOnly = false) {
 }
 
 /**
+ * No record found
+ * 
+ * @param String $title
+ * @param String $caption
+ * @param String $url_link
+ * @param String $record
+ * 
+ * @return String
+ */
+function no_record_found($title = null, $caption = null, $url_link = null, $record = null, $no_button = false) {
+    return "
+    <div class='backdrop-blur-xl mb-4 backdrop-saturate-150 rounded-2xl border shadow-[0_0_1px_1px_rgba(0,0,0,0.1)] dark:shadow-[0_0_1px_1px_rgba(255,255,255,0.05)] dark:bg-opacity-20 transition-all duration-300 p-6 bg-white dark:bg-gray-900/50 border-white/10 dark:border-gray-700/50'>
+        <div class='dark:text-gray-300'>
+            <div class='text-center py-12'>
+                <div
+                    class='w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4'>
+                    <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'
+                        fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'
+                        stroke-linejoin='round' class='w-8 h-8 text-gray-400 dark:text-gray-500'>
+                        <circle cx='11' cy='11' r='8'></circle>
+                        <path d='m21 21-4.3-4.3'></path>
+                    </svg>
+                </div>
+                <h3 class='text-lg font-medium text-gray-900 dark:text-white mb-2'>{$title}</h3>
+                <p class='text-gray-600 dark:text-gray-400 mb-6'>{$caption}</p>
+                ".($no_button ? "
+                <div class='mt-3'>
+                    <span class='btn btn-outline-primary font-13' onclick='return loadPage(\"/dashboard\");'><i class='fa fa-home'></i> Back to Home</span> | 
+                    <span class='btn btn-outline-primary font-13' onclick='return loadPage(\"".$_SERVER['REQUEST_URI']."\");'><i class='fa fa-redo-alt'></i>  Reload Page</span> |
+                    <span class='btn btn-outline-primary font-13' onclick='javascript:history.back()' class='anchor'><i class='fa fa-arrow-left'></i> Go Back</span>
+                </div>
+                " : "
+                    <a href='{$url_link}'>
+                        <button
+                        class='inline-flex items-center justify-center font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 hover:scale-105 transition-all duration-300 bg-primary-600 hover:bg-primary-700 focus:ring-primary-500 px-4 py-2 text-sm bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white shadow-lg'><svg
+                            xmlns='http://www.w3.org/2000/svg' width='24' height='24'
+                            viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'
+                            stroke-linecap='round' stroke-linejoin='round' class='w-5 h-5 mr-2'>
+                            <path d='M5 12h14'></path>
+                            <path d='M12 5v14'></path>
+                        </svg>Add {$record}</button>
+                    </a>
+                ")."
+            </div>
+        </div>
+    </div>";
+}
+
+/**
  * Modal for general purpose
  * 
  * @return String
@@ -262,43 +311,9 @@ function page_not_found($request = "not_found", $string = "The resource you tryi
 
     $notFound = (bool) ($request == "not_found");
     $message = $notFound ? $string : "You don't have permission to access the requested object. It is either read-protected or not readable on this server.";
-    $title = $notFound ? "404" : "403";
+    $title = $notFound ? "Record Not Found" : "Permission Denied";
 
-    return '
-    <section class="section">
-        <div class="container bg-white border-2px mt-3">
-            <div class="page-error">
-            <div class="page-inner">
-                <h1 class="text-warning">'.$title.'</h1>
-                <div class="page-description text-danger">'.$message.'</div>
-                <div class="page-search">
-                <form method="GET" autocomplete="Off" class="ajaxform" action="'.$baseUrl.'api/search/list">
-                    <div class="form-group floating-addon floating-addon-not-append">
-                    '.($notFound ? '
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                            <div class="input-group-text">
-                                <i class="fas fa-search"></i>
-                            </div>
-                            </div>
-                            <input type="text" name="q" class="form-control" placeholder="Search">
-                            <div class="input-group-append">
-                                <button class="btn btn-primary btn-lg" type="submit">Search</button>
-                            </div>
-                        </div>' : ''
-                    ).'
-                    </div>
-                </form>
-                <div class="mt-3">
-                    <span class="user_name font-13" onclick="return load(\'dashboard\');"><i class="fa fa-home"></i> Back to Home</span> | 
-                    <span class="user_name font-13" onclick="return loadPage(\''.$_SERVER["REQUEST_URI"].'\');"><i class="fa fa-redo-alt"></i>  Reload Page</span> |
-                    <span class="user_name font-13" onclick="javascript:history.back()" class="anchor"><i class="fa fa-arrow-left"></i> Go Back</span>
-                </div>
-                </div>
-            </div>
-            </div>
-        </div>
-    </section>';
+    return no_record_found($title, $message, $baseUrl."dashboard", "Home", true);
 }
 
 /**

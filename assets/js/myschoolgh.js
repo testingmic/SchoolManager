@@ -292,10 +292,9 @@ var delete_record = (record_id, resource, action = "delete") => {
                                 $(`span[data-status-item="${record_id}"]`).html(active);
                                 $(`span[data-action-item="${record_id}"]`).html(`${deleteBtn}`);
                             }
-                        } else {
-                            $(`[data-row_id='${record_id}']`).remove();
                         }
                     }
+                    $(`[data-row_id="${record_id}"]`).remove();
                 }
                 swal({
                     position: "top",

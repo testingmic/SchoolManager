@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $clientFeatures;
+global $myClass, $clientFeatures, $defaultUser;
 
 // initial variables
 $appName = $myClass->appName;
@@ -103,127 +103,67 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
             </div>
             <div class="row">
                 <div class="col-12 col-sm-12 col-lg-12">
-                    <div class="card">
-                        <div class="card-body">
+                    <div class="text-right mb-2">
+                        <a class="btn btn-outline-primary" href="'.$baseUrl.'timetable-manage"><i class="fa fa-plus"></i> Create New Timetable</a>
+                    </div>
+                    <div class="cared">
+                        <div class="bg-gradient-to-br from-slate-50 to-indigo-100 via-blue-50">
                             <div class="row" id="timetable_form">';
                                 if(!$timetable_found) {
                                     $response->html .= '
-                                    <div class="col-lg-3 p-0">
-                                        <div class="form-group p-2 mb-0">
-                                            <h5 class="text-white bg-gradient-to-br from-purple-600 to-purple-500 p-2">CREATED TIMETABLES LIST</h5>
-                                        </div>
-                                        <div class="trix-slim-scroll p-2" style="max-height:750px; overflow-y:auto;">';
+                                    <div class="col-lg-12">';
 
                                     if(empty($timetable_list)) {
-                                        $response->html .= "
-                                        <div class='text-center text-danger font-italic'>
-                                            Sorry! You have currently not added any timetable yet.
-                                            Kindly complete the form to add a new timetable.
-                                        </div>";
+                                        $response->html .= no_record_found("No Timetable Found", "No timetable has been created yet. Get started by creating your first timetable.", $baseUrl."timetable-manage", "Timetable");
                                     } else {
+                                        $response->html .= '<div class="row">';
                                         foreach($timetable_list as $key => $value) {
                                             $response->html .= "
-                                                <div data-row_id=\"{$value->item_id}\" class='mb-3 rounded-2xl p-2 rounded-2xl shadow-xl border overflow-hidden mb-3 transition-all duration-300 hover:shadow-xl hover:-translate-y-1'>
-                                                    <p class='clearfix pb-0 mb-0'>
-                                                        <span class='float-left font-weight-bolder'>Name</span>
-                                                        <span class='float-right'>{$value->name}</span>
-                                                    </p>
-                                                    ".($value->class_name ? 
-                                                        "<p class='clearfix pb-0 mb-0'>
-                                                            <span class='float-left font-weight-bolder'>Class</span>
-                                                            <span class='float-right'>{$value->class_name}</span>
-                                                        </p>" : ""
-                                                    )."
-                                                    <p class='clearfix pb-0 mb-0'>
-                                                        <span class='float-left font-weight-bolder'>Slots</span>
-                                                        <span class='float-right'>{$value->slots}</span>
-                                                    </p>
-                                                    <p class='clearfix pb-0 mb-0'>
-                                                        <span class='float-left font-weight-bolder'>Days</span>
-                                                        <span class='float-right'>{$value->days}</span>
-                                                    </p>
-                                                    <p class='clearfix pb-0 mb-0'>
-                                                        <span class='float-left font-weight-bolder'>Start Time</span>
-                                                        <span class='float-right'>{$value->start_time}</span>
-                                                    </p>
-                                                    <p class='clearfix pb-0 mb-0'>
-                                                        <span class='float-left font-weight-bolder'>Duration</span>
-                                                        <span class='float-right'>{$value->duration} minutes</span>
-                                                    </p>
-                                                    <p class='clearfix pb-0 mb-2 text-right'>
-                                                        <a href='#' onclick='return delete_record(\"{$value->item_id}\", \"timetable\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a>
-                                                        ".($isPermitted ? "<a href='{$baseUrl}timetable-allocate/{$value->item_id}' title='Allocate subjects / courses to each time.' class='btn btn-outline-warning btn-sm'><i class='fa fa-copy'></i> Allocate</a>" : null)."
-                                                        <a class='btn btn-outline-primary btn-sm' href='{$baseUrl}timetable/{$value->item_id}' title='Modify the timetable structure.'><i class='fa fa-edit'></i> Modify</a>
-                                                    </p>
+                                            <div data-row_id=\"{$value->item_id}\" class='col-lg-3 col-md-4 col-sm-6 col-12 rounded-2xl transition-all duration-300 hover:-translate-y-1'>
+                                                <div class='card'>
+                                                    <div class='card-body'>
+                                                        <div data-row_id=\"{$value->item_id}\">
+                                                            <p class='clearfix pb-0 mb-0'>
+                                                                <span class='float-left font-weight-bolder'>Name</span>
+                                                                <span class='float-right'>{$value->name}</span>
+                                                            </p>
+                                                            ".($value->class_name ? 
+                                                                "<p class='clearfix pb-0 mb-0'>
+                                                                    <span class='float-left font-weight-bolder'>Class</span>
+                                                                    <span class='float-right'>{$value->class_name}</span>
+                                                                </p>" : ""
+                                                            )."
+                                                            <p class='clearfix pb-0 mb-0'>
+                                                                <span class='float-left font-weight-bolder'>Slots</span>
+                                                                <span class='float-right'>{$value->slots}</span>
+                                                            </p>
+                                                            <p class='clearfix pb-0 mb-0'>
+                                                                <span class='float-left font-weight-bolder'>Days</span>
+                                                                <span class='float-right'>{$value->days}</span>
+                                                            </p>
+                                                            <p class='clearfix pb-0 mb-0'>
+                                                                <span class='float-left font-weight-bolder'>Start Time</span>
+                                                                <span class='float-right'>{$value->start_time}</span>
+                                                            </p>
+                                                            <p class='clearfix pb-0 mb-0'>
+                                                                <span class='float-left font-weight-bolder'>Duration</span>
+                                                                <span class='float-right'>{$value->duration} minutes</span>
+                                                            </p>
+                                                            <p class='clearfix pb-0 mb-2 mt-2 text-right'>
+                                                                <a href='#' onclick='return delete_record(\"{$value->item_id}\", \"timetable\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a>
+                                                                ".($isPermitted ? "<a href='{$baseUrl}timetable-allocate/{$value->item_id}' title='Allocate subjects / courses to each time.' class='btn btn-outline-warning btn-sm'><i class='fa fa-copy'></i> Allocate</a>" : null)."
+                                                                <a class='btn btn-outline-primary btn-sm' href='{$baseUrl}timetable-manage/{$value->item_id}' title='Modify the timetable structure.'><i class='fa fa-edit'></i> Modify</a>
+                                                            </p>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            ";
+                                            </div>";
                                         }
+                                        $response->html .= '</div>';
                                     }
                                     $response->html .= '
-                                        </div>
                                     </div>';
                                 }
-                                $response->html .= '
-                                <div class="col-lg-'.($timetable_found ? 12 : 9).' mb-3">
-                                    <div class="row">
-                                        <div class="col-xl-4 col-md-4 col-12 form-group">
-                                            <div class="mb-1">
-                                                <select class="form-control selectpicker" data-width="100%" name="class_id">
-                                                    <option value="">Please Select Class</option>';
-                                                    foreach($class_list as $each) {
-                                                        $response->html .= "<option ".($class_id == $each->item_id ? "selected" : "")." value=\"{$each->item_id}\">".strtoupper($each->name)."</option>";
-                                                    }
-                                                    $response->html .= '
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <div class="input-group mb-3" title="Timetable name eg. JHS 4 Timetable">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Name<span class="required">*</span></span>
-                                                </div>
-                                                <input autocomplete="Off" type="text" value="'.($d_name ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="name" id="name">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="input-group mb-3" title="Start time for lesson each day.">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Start Time<span class="required">*</span></span>
-                                                </div>
-                                                <input max="22:00" type="time" value="'.($d_time ?? "08:00").'" class="form-control" style="border-radius:0px; height:42px;" name="start_time" id="start_time">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="input-group mb-3" title="Number of Slots / Lessons per day">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Slots<span class="required">*</span></span>
-                                                </div>
-                                                <input type="number" pattern="[0-9]{1,2}" value="'.($d_slots ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="slots" id="slots">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="input-group mb-3" title="Number of Days in the Week for Class">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Days<span class="required">*</span></span>
-                                                </div>
-                                                <input type="number" pattern="[0-7]{1,2}" value="'.($d_days ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="days" id="days">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="input-group mb-3" title="Duration for each lesson in minutes">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Duration<span class="required">*</span></span>
-                                                </div>
-                                                <input type="number" pattern="[0-9]{2,}" value="'.($d_duration ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="duration" id="duration">
-                                            </div>
-                                        </div>
-                                        '.(!$timetable_found ? 
-                                            '<div class="col-lg-12 text-right">
-                                                <button onclick="return save_Timetable_Record()" class="btn btn-outline-success">Save Timetable</button>
-                                            </div>' : ''
-                                        ).'
-                                    </div>
-                                </div>';
                                 if($timetable_found) {
                                     $response->html .= '
                                     <div class="col-lg-12">

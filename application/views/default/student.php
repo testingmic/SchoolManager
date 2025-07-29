@@ -43,7 +43,7 @@ if(!empty($user_id)) {
     
     // if no record was found
     if(empty($data["data"])) {
-        $response->html = page_not_found();
+        $response->html = page_not_found('Student');
     } else {
 
         // load the scripts

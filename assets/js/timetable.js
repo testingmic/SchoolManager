@@ -66,7 +66,7 @@ var save_Timetable_Record = () => {
                     icon: responseCode(response.code),
                 });
                 if (response.code === 200) {
-                    loadPage(`${baseUrl}timetable/${response.data.additional.timetable_id}`)
+                    loadPage(`${baseUrl}timetable-manage/${response.data.additional.timetable_id}`)
                 }
             });
         }
