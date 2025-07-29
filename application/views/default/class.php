@@ -121,20 +121,13 @@ if(!empty($item_id)) {
                     {$imageToUse}
                     <div>
                         <span title='View Details' class='user_name' onclick='load(\"student/{$student->user_id}\");'>{$student->name}</span>
-                        {$student->unique_id}{$t_status}{$scholarship_status}
+                        <br>{$student->unique_id}{$t_status}{$scholarship_status}
                     </div>
-                </div>
-                <div class='d-flex hidden justify-content-start'>
-                    <div class='font-bold'>
-                        <span onclick='return load(\"student/{$student->user_id}\");' class='user_name'>{$student->name}</span>
-                        {$scholarship_status}
-                    </div>
-                    {$student->unique_id}
                 </div>
             </td>";
             $students .= "<td>{$student->gender}</td>";
             $students .= $viewAllocation ? "<td>{$defaultCurrency} {$debt_formated}</td>" : null;
-            $students .= "<td align='center' width='22%'>{$action}</td>";
+            $students .= "<td align='center' width='24%'>{$action}</td>";
             $students .= "</tr>";
         }
 
