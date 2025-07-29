@@ -98,9 +98,6 @@ class Sections extends Myschoolgh {
         if(!empty($params->color_code) && !in_array($params->color_code, color_code_picker(null, true))) {
             return ["code" => 400, "data" => "Sorry! An invalid color code was supplied."];
         }
-
-        // convert the code to uppercase
-        $params->section_code = strtoupper($params->section_code);
         
         // confirm that a logo was parsed
         if(isset($params->image)) {
@@ -196,9 +193,6 @@ class Sections extends Myschoolgh {
             if(!empty($params->color_code) && !in_array($params->color_code, color_code_picker(null, true))) {
                 return ["code" => 400, "data" => "Sorry! An invalid color code was supplied."];
             }
-
-            // convert the code to uppercase
-            $params->section_code = strtoupper($params->section_code);
 
             // confirm that a logo was parsed
             if(isset($params->image)) {

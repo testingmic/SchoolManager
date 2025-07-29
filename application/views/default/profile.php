@@ -46,6 +46,11 @@ if(!empty($user_id)) {
         $response->html = page_not_found();
     } else {
 
+        // set the url
+        $url_link = $SITEURL[2] ?? null;
+
+        $response->array_stream['url_link'] = "profile/{$user_id}/";
+
         // set the first key
         $data = $data["data"][0];
         $student_allocation_list = null;
@@ -90,8 +95,8 @@ if(!empty($user_id)) {
                             </div>
                             <div class="author-box-center">
                                 <div class="clearfix"></div>
-                                <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
-                                <div class="author-box-job"><strong>'.strtoupper($data->user_type).'</strong></div>
+                                <div class="author-box-center mt-2 font-25 mb-0 p-0">'.$data->name.'</div>
+                                <div class="author-box-job"><strong>'.ucwords($data->user_type).'</strong></div>
                                 '.($data->department_name ? '<div class="author-box-job">('.$data->department_name.')</div>' : '').'
                             </div>
                         </div>
@@ -101,7 +106,7 @@ if(!empty($user_id)) {
                         <h4>PERSONAL INFORMATION</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">
-                        <div class="py-4">
+                        <div class="py-2">
                             <p class="clearfix">
                                 <span class="float-left">Unique ID</span>
                                 <span class="float-right text-muted">'.$data->unique_id.'</span>
@@ -158,20 +163,20 @@ if(!empty($user_id)) {
                         <div class="padding-20">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link '.(!$isSecurity ? "active": null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab"
+                                    <a class="nav-link '.(empty($url_link) || $url_link == "summary" ? "active": null).'" onclick="return appendToUrl(\'summary\')" id="home-tab2" data-toggle="tab" href="#about" role="tab"
                                     aria-selected="true">Summary Description</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="profile-tab2" data-toggle="tab" href="#profile" role="tab"
+                                    <a class="nav-link '.($url_link == "profile" ? "active": null).'" id="profile-tab2" data-toggle="tab" onclick="return appendToUrl(\'profile\')" href="#profile" role="tab"
                                     aria-selected="false">Update Record</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link '.($isSecurity ? "active": null).'" id="settings-tab2" data-toggle="tab" href="#settings" role="tab"
+                                    <a class="nav-link '.($url_link == "settings" ? "active": null).'" onclick="return appendToUrl(\'settings\')" id="settings-tab2" data-toggle="tab" href="#settings" role="tab"
                                     aria-selected="true">Security / Settings</a>
                                 </li>
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">
-                                <div class="tab-pane fade '.(!$isSecurity ? "show active": null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
+                                <div class="tab-pane fade '.(empty($url_link) || $url_link == "summary" ? "show active": null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
                                     '.($data->description ? "
                                         <div class='mb-4 border-bottom'>
                                             <div class='card-body p-2 pl-0'>
@@ -203,10 +208,10 @@ if(!empty($user_id)) {
                                         </div>' : null
                                     ).'
                                 </div>
-                                <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab2">
+                                <div class="tab-pane fade '.($url_link == "profile" ? "show active": null).'" id="profile" role="tabpanel" aria-labelledby="profile-tab2">
                                     '.$user_form.'
                                 </div>
-                                <div class="tab-pane fade '.($isSecurity ? "show active": null).'" id="settings" role="tabpanel" aria-labelledby="settings-tab2">
+                                <div class="tab-pane fade '.($url_link == "settings" ? "show active": null).'" id="settings" role="tabpanel" aria-labelledby="settings-tab2">
                                     <form autocomplete="Off" method="POST" class="ajaxform" id="ajaxform" action="'.$baseUrl.'api/auth/change_password">
                                         <div>
                                             <h5 class="border-bottom pb-2">Change Password</h5>

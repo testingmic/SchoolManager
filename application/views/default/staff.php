@@ -371,7 +371,7 @@ if(empty($user_id)) {
                             <h4>PERSONAL INFORMATION</h4>
                         </div>
                         <div class="card-body pt-0 pb-0 bg-gradient-to-br from-blue-50 to-blue-100">
-                            <div class="py-4">
+                            <div class="py-2">
                                 <p class="clearfix">
                                     <span class="float-left">Date of Employment</span>
                                     <span class="float-right text-muted">'.$data->enrollment_date.'</span>
@@ -438,7 +438,7 @@ if(empty($user_id)) {
                                 <h4>LOGIN INFORMATION</h4>
                             </div>
                             <div class="card-body pt-0 pb-0">
-                                <div class="py-4">
+                                <div class="py-2">
                                     <p class="clearfix">
                                         <span class="float-left">Username</span>
                                         <span class="float-right text-muted">'.$data->username.'</span>
@@ -507,7 +507,7 @@ if(empty($user_id)) {
                             $isTeacher ? '
                                 <div class="tab-pane fade" id="course_list" role="tabpanel" aria-labelledby="course_list-tab2">
                                     <div class="d-flex justify-content-between mb-4">
-                                        <div class="mb-2"><h5>SUBJECTS LIST</h5></div>
+                                        <div class="mb-2"></div>
                                         '.($addCourse ? '
                                             <div>
                                                 <a href="'.$baseUrl.'course_add" class="btn btn-primary"><i class="fa fa-plus"></i> Add Subject</a>
@@ -531,7 +531,7 @@ if(empty($user_id)) {
                             '.($isCurrentUser || $isAdminAccountant ? '
                                 <div class="tab-pane '.(empty($url_link) || $url_link === "documents" ? "show active" : null).' fade" id="documents" role="tabpanel" aria-labelledby="documents-tab2">
                                     <div class="d-flex justify-content-between">
-                                        <div class="mb-2 text-uppercase"><h5>Staff Documents</h5></div>
+                                        <div class="mb-2 text-uppercase"></div>
                                         '.($hasUpdate ? "<div><button onclick='return show_eDocuments_Modal();' class='btn btn-outline-primary btn-sm'><i class='fa fa-upload'></i> Upload</button></div>" : null).'
                                     </div>
                                     <div data-ebook_resource_list="'.$user_id.'">
@@ -544,7 +544,7 @@ if(empty($user_id)) {
                                     <div id="data-report_stream" data-report_stream="attendance_report&label[staff_id]='.$user_id.'">
                                         <div class="row p-2">
                                             <div class="col-lg-6 col-md-5">
-                                                <h4 class="text-uppercase font-20">Attendance Record</h4>
+                                                <h4 class="text-uppercase font-20"></h4>
                                             </div>
                                             <div class="col-lg-6 col-md-7 text-right">
                                                 <div class="input-group mb-3">
@@ -588,7 +588,7 @@ if(empty($user_id)) {
                             ).'
                             <div class="tab-pane '.($url_link === "incidents" ? "show active" : null).' fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
                                 <div class="d-flex justify-content-between">
-                                    <div class="mb-2"><h5>INCIDENTS LOG</h5></div>
+                                    <div class="mb-2"></div>
                                     '.($addIncident ? '
                                         <div>
                                             <button type="button" onclick="return load_quick_form(\'incident_log_form\',\''.$user_id.'\');" class="btn btn-primary"><i class="fa fa-plus"></i> Log Incident</button>

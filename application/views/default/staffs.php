@@ -95,7 +95,7 @@ foreach($api_staff_list["data"] as $i => $each) {
             </div>
             <div>
                 <span class='user_name' onclick='return load(\"staff/{$each->user_id}/documents\");'>{$each->name}</span>
-                <br><span class='badge badge-{$myClass->user_colors[$each->user_type]} p-1'>".strtoupper($each->user_type)."</span>
+                <br><span class='badge badge-{$myClass->user_colors[$each->user_type]} p-1'>".ucwords($each->user_type)."</span>
                 <br><span class='font-17'>".strtoupper($each->unique_id)."</span>
             </div>
         </div></td>";

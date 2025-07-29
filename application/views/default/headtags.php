@@ -177,11 +177,11 @@ load_helpers(['menu_helper']);
                                 <strong class="font-18px">
                                     <span><?= $clientPrefs->academics->academic_year ?></span> 
                                     <span>|</span>
-                                    <span class="text-uppercase"><?= $clientPrefs->academics->academic_term ?> <?= $academicSession; ?></span>
+                                    <span class=""><?= $clientPrefs->academics->academic_term ?> <?= $academicSession; ?></span>
                                     <?= ($endPermission && isset($defaultUser->appPrefs) && !empty($defaultUser->appPrefs->termEnded) ? 
                                         "<span class='badge badge-danger notification cursor' title='This academic year and term has been closed and forwarded to the next academic year and term.'>Term Ended</span>" : 
                                         ($endPermission ? "<span class='badge badge-success'>Active</span>" : null)); ?>
-                                    <br><span class="font-weight-light font-17 text-uppercase"><?= $defaultUser->name; ?> / <?= ucwords($defaultUser->user_type); ?></span>
+                                    <br><span class="font-weight-light font-17"><?= $defaultUser->name; ?> / <?= ucwords($defaultUser->user_type); ?></span>
                                 </strong>
                             </a>
                             <?php } else { ?>

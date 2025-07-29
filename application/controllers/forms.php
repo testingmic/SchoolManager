@@ -2572,7 +2572,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="department_code">Department Code (optional)</label>
-                        <input type="text" value="'.($itemData->department_code ?? null).'" name="department_code" id="department_code" class="form-control text-uppercase">
+                        <input type="text" value="'.($itemData->department_code ?? null).'" name="department_code" id="department_code" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2638,7 +2638,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="section_code">Section Code (optional)</label>
-                        <input type="text" value="'.($itemData->section_code ?? null).'" name="section_code" id="section_code" class="form-control text-uppercase">
+                        <input type="text" value="'.($itemData->section_code ?? null).'" name="section_code" id="section_code" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2712,7 +2712,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-3 col-md-3">
                     <div class="form-group">
                         <label for="class_code">Class Code (optional)</label>
-                        <input type="text" value="'.($itemData->class_code ?? null).'" name="class_code" id="class_code" class="form-control text-uppercase">
+                        <input type="text" value="'.($itemData->class_code ?? null).'" name="class_code" id="class_code" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-3">
@@ -3553,7 +3553,7 @@ class Forms extends Myschoolgh {
         <form autocomplete="Off" class="ajax-data-form" id="'.$form_id.'" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12">
-                    <h5>BIO INFORMATION</h5>
+                    
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">

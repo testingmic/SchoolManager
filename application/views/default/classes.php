@@ -64,7 +64,7 @@ foreach($item_list["data"] as $key => $each) {
                 </svg>
             </div>
             <div>
-                <span class='bold_cursor text-uppercase text-info' onclick='return load(\"class/{$each->item_id}\");'>{$each->name}</span>
+                <span class='bold_cursor text-info' onclick='return load(\"class/{$each->item_id}\");'>{$each->name}</span>
                 <p class='text-xs text-gray-500'>{$each->class_code}</p>
             </div>
         </div>

@@ -459,7 +459,7 @@ if(!empty($user_id)) {
                         <h4>PERSONAL INFORMATION</h4>
                     </div>
                     <div class="card-body pt-0 pb-0 bg-gradient-to-br from-blue-50 to-blue-100">
-                        <div class="py-4">
+                        <div class="py-2">
                             <p class="clearfix">
                                 <span class="float-left">Enrollment Date</span>
                                 <span class="float-right text-muted">'.$data->enrollment_date.'</span>
@@ -539,7 +539,7 @@ if(!empty($user_id)) {
                             <h4>LOGIN INFORMATION</h4>
                         </div>
                         <div class="card-body pt-0 pb-0">
-                            <div class="py-4">
+                            <div class="py-2">
                                 <p class="clearfix">
                                     <span class="float-left">Username</span>
                                     <span class="float-right text-muted">'.$data->username.'</span>
@@ -741,7 +741,7 @@ if(!empty($user_id)) {
                                 <div id="data-report_stream" class="width-100" data-report_stream="attendance_report&label[student_id]='.$user_id.'">
                                     <div class="row p-2">
                                         <div class="col-lg-6 col-md-5">
-                                            <h4 class="text-uppercase font-20">Attendance Record</h4>
+                                            <h4 class="text-uppercase font-20"></h4>
                                         </div>
                                         <div class="col-lg-6 col-md-7 text-right">
                                             <div class="input-group mb-3">
@@ -787,7 +787,7 @@ if(!empty($user_id)) {
                         </div>
                         <div class="tab-pane fade '.($url_link === "incidents" ? "show active" : null).'" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
                             <div class="d-flex justify-content-between">
-                                <div class="mb-2"><h5>INCIDENTS LOG</h5></div>
+                                <div class="mb-2"><h5></h5></div>
                                 '.($addIncident ? '
                                     <div>
                                         <button type="button" onclick="return load_quick_form(\'incident_log_form\',\''.$user_id.'\');" class="btn btn-primary"><i class="fa fa-plus"></i> Log Incident</button>

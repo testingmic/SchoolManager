@@ -198,9 +198,6 @@ class Classes extends Myschoolgh {
 			    $room_ids = $this->append_class_rooms($params->room_id, $item_id, $params->clientId);
             }
 
-            // convert the code to uppercase
-            $params->class_code = strtoupper($params->class_code);
-
             // execute the statement
             $stmt = $this->db->prepare("
                 INSERT INTO classes SET client_id = ?, created_by = ?, rooms_list = ?, item_id = ?
@@ -271,9 +268,6 @@ class Classes extends Myschoolgh {
                 $counter = $this->append_zeros(($prevData[0]->id), 2);
                 $params->class_code = $defaultClientData->client_preferences->labels->{"class_label"}.$counter;
             }
-
-            // convert the code to uppercase
-            $params->class_code = strtoupper($params->class_code);
 
             // init
 			$room_ids = [];

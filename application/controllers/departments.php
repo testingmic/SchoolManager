@@ -106,9 +106,6 @@ class Departments extends Myschoolgh {
             $counter = $this->append_zeros(($this->itemsCount("departments", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
             $params->department_code = $defaultClientData->client_preferences->labels->{"department_label"}.$counter;
         }
-
-        // convert the code to uppercase
-        $params->department_code = strtoupper($params->department_code);
         
         // confirm that a logo was parsed
         if(isset($params->image)) {
@@ -204,9 +201,6 @@ class Departments extends Myschoolgh {
                 $counter = $this->append_zeros(($this->itemsCount("departments", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
                 $params->department_code = $defaultClientData->client_preferences->labels->{"department_label"}.$counter;
             }
-
-            // convert the code to uppercase
-            $params->department_code = strtoupper($params->department_code);
 
             // confirm that a logo was parsed
             if(isset($params->image)) {

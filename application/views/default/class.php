@@ -117,7 +117,6 @@ if(!empty($item_id)) {
 
             $students .= "<tr data-row_id=\"{$student->user_id}\">";
             $students .= "<td>
-
                 <div class='flex items-center space-x-4'>
                     {$imageToUse}
                     <div>
@@ -125,7 +124,6 @@ if(!empty($item_id)) {
                         {$student->unique_id}{$t_status}{$scholarship_status}
                     </div>
                 </div>
-
                 <div class='d-flex hidden justify-content-start'>
                     <div class='font-bold'>
                         <span onclick='return load(\"student/{$student->user_id}\");' class='user_name'>{$student->name}</span>
@@ -186,7 +184,7 @@ if(!empty($item_id)) {
                         <div class="row">
                             <div class="col">
                                 <h6 class="font-14 text-uppercase font-weight-bold mb-0">STUDENTS</h6>
-                                <h2 class="font-weight-bold mb-0">'.$data->students_count.'</h2>
+                                <h2 class="mb-0">'.$data->students_count.'</h2>
                             </div>
                             <div class="col-auto">
                                 <div class="card-circle l-bg-green text-white">
@@ -203,7 +201,7 @@ if(!empty($item_id)) {
                         <div class="row">
                             <div class="col">
                                 <h6 class="font-14 text-uppercase font-weight-bold mb-0">BOYS</h6>
-                                <h2 class="font-weight-bold mb-0">'.$data->students_male_count.'</h2>
+                                <h2 class="mb-0">'.$data->students_male_count.'</h2>
                             </div>
                             <div class="col-auto">
                                 <div class="card-circle l-bg-cyan text-white">
@@ -220,7 +218,7 @@ if(!empty($item_id)) {
                         <div class="row">
                             <div class="col">
                                 <h6 class="font-14 text-uppercase font-weight-bold mb-0">GIRLS</h6>
-                                <h2 class="font-weight-bold mb-0">'.$data->students_female_count.'</h2>
+                                <h2 class="mb-0">'.$data->students_female_count.'</h2>
                             </div>
                             <div class="col-auto">
                                 <div class="card-circle l-bg-red text-white">
@@ -304,26 +302,26 @@ if(!empty($item_id)) {
                                 <div class="col-md-12">
                                     <div class="mb-3 border-bottom pb-2">
                                         <div class="col">
-                                            <h6 class="font-14 text-uppercase font-bold mb-0">TOTAL FEES DUE</h6>
-                                            <span class="font-bold text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($amount_due, 2).'</span>
+                                            <h6 class="font-14 text-uppercase mb-0">TOTAL FEES DUE</h6>
+                                            <span class="text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($amount_due, 2).'</span>
                                         </div>
                                     </div>
                                     <div class="mb-3 border-bottom pb-2">
                                         <div class="col">
-                                            <h6 class="font-14 text-uppercase font-bold mb-0">TOTAL FEES PAID</h6>
-                                            <span class="font-bold text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($amount_paid, 2).'</span>
+                                            <h6 class="font-14 text-uppercase mb-0">TOTAL FEES PAID</h6>
+                                            <span class="text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($amount_paid, 2).'</span>
                                         </div>
                                     </div>
                                     <div class="mb-3 border-bottom pb-2">
                                         <div class="col">
-                                            <h6 class="font-14 text-uppercase font-bold mb-0">TOTAL BALANCE</h6>
-                                            <span class="font-bold text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($balance, 2).'</span>
+                                            <h6 class="font-14 text-uppercase mb-0">TOTAL BALANCE</h6>
+                                            <span class="text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($balance, 2).'</span>
                                         </div>
                                     </div>
                                     <div class="mb-2 pb-0">
                                         <div class="col">
-                                            <h6 class="font-14 text-uppercase font-bold mb-0">OUTSTANDING FEES ARREARS</h6>
-                                            <span class="font-bold text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($arrears, 2).'</span>
+                                            <h6 class="font-14 text-uppercase mb-0">OUTSTANDING FEES ARREARS</h6>
+                                            <span class="text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($arrears, 2).'</span>
                                         </div>
                                     </div>
                                 </div>

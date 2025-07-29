@@ -553,8 +553,11 @@ textarea.custom_form-control {
     border: solid 1px #ff4000;
 }
 
-label {
-    font-weight: bold;
+.form-group .control-label, .form-group>label {
+    font-weight: normal;
+    color: #000000;
+    font-size: 13px;
+    letter-spacing: .5px;
 }
 
 .settings-form label {
@@ -898,8 +901,11 @@ h4 {
 }
 
 .bold_cursor {
-    font-weight: bold;
     cursor: pointer;
+}
+
+.section .section-header h1 {
+    font-weight: normal;
 }
 
 .dashboard_revenue {
