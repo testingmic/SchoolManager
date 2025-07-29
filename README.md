@@ -1,7 +1,7 @@
-MySchoolGH Management System
+MySchoolGH Management Software
 ======
 
-**MySchoolGH is a PHP Web School Management System suitable for all purposes**
+**MySchoolGH is a PHP Web School Management Software suitable for all purposes**
 
 At its heart, MySchoolGH is (mostly) a [PHP 8.1] compliant
 HTML layout and rendering engine written in PHP. It is a style-driven renderer:

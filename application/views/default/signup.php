@@ -52,7 +52,7 @@ $schools = $myClass->clients_list();
                 <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="70px" /></div>
                 <div>
                     <div class="font-25px text-center font-weight-bold text-dark"><?= config_item('site_name') ?></div> 
-                    <div class="text-dark text-center">Your advanced school management system.</div>
+                    <div class="text-dark text-center">Your advanced school management software.</div>
                 </div>
             </div>
             <div class="card card-primary">

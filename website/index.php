@@ -10,14 +10,14 @@ $registerUrl = "https://app.myschoolgh.com/register";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySchoolGH - Modern School Management System</title>
+    <title>MySchoolGH - Modern School Management Software</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="theme-color" content="#2196F3">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="App - <?= $appName ?>">
-    <meta name="description" content="MySchoolGH is a modern school management system that helps schools manage their students, staff, and finances.">
-    <meta name="keywords" content="school management, school management system, school management software, school management solution, school management app, school management platform, school management system, school management software, school management solution, school management app, school management platform">
+    <meta name="description" content="MySchoolGH is a modern school management software that helps schools manage their students, staff, and finances.">
+    <meta name="keywords" content="school management, school management software, school management solution, school management app, school management platform, school management system, school management software, school management solution, school management app, school management platform">
     <meta name="author" content="MySchoolGH">
     <meta name="robots" content="index, follow">
     <meta name="googlebot" content="index, follow">
@@ -1210,7 +1210,7 @@ $registerUrl = "https://app.myschoolgh.com/register";
                         <i class="fas fa-mobile-alt"></i>
                     </div>
                     <h3>Mobile Access</h3>
-                    <p>Access your school management system anywhere, anytime with our responsive mobile-friendly platform.</p>
+                    <p>Access your school management software anywhere, anytime with our responsive mobile-friendly platform.</p>
                 </div>
             </div>
         </div>

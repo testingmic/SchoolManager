@@ -89,7 +89,7 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 10) ? xss_clean($_GE
                 <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="70px" /></div>
                 <div>
                     <div class="font-25px text-center font-weight-bold text-dark"><?= $myClass->appName ?></div> 
-                    <div class="text-dark text-center">Your advanced school management system.</div>
+                    <div class="text-dark text-center">Your advanced school management software.</div>
                 </div>
             </div>
             <div class="card card-primary">
