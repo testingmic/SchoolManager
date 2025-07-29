@@ -431,7 +431,7 @@ if(!empty($user_id)) {
                     <div class="author-box-center m-0 p-0 flex justify-center">
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
                     </div>
-                    <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
+                    <div class="author-box-center mt-2 text-uppercase font-20 mb-0 p-0">'.$data->name.'</div>
                     <div class="text-center">
                         <div class="author-box-description mt-0">'.$data->the_status_label.'</div>
                         <div class="w-100 mt-2">
