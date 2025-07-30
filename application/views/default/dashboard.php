@@ -626,53 +626,41 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
                 $response->html .=
                 '<div class="row">
-                    <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card rounded-2xl transition-all duration-300 transform hover:-translate-y-1">
-                            <div class="card-body bg-gradient-to-br from-blue-200 to-blue-100 rounded-2xl shadow-lg text-black card-type-3">
-                                <div class="row">
-                                    <div class="col">
-                                        <h6 class="font-14 text-uppercase font-bold mb-0">Students Count</h6>
-                                        <span  data-count="total_students_count" class="font-25 font-bold mb-0">0</span>
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class="card-circle bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                                            <i class="fas fa-users"></i>
-                                        </div>
-                                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-primary border-left-solid bg-gradient-to-br from-blue-200 to-blue-100">
+                            <div class="flex items-center justify-between p-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                    <i class="fas fa-users text-white text-xl"></i>
+                                </div>
+                                <div class="card-wrap text-right">
+                                    <h3 data-count="total_students_count" class="font-light text-black mb-0">0</h3>
+                                    <span class="text-dark">Students Count</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card rounded-2xl transition-all duration-300 transform hover:-translate-y-1">
-                            <div class="card-body bg-gradient-to-br from-green-200 to-green-100 rounded-2xl shadow-lg text-black card-type-3">
-                                <div class="row">
-                                    <div class="col">
-                                        <h6 class="font-14 text-uppercase font-bold mb-0">Teaching Stafff</h6>
-                                        <span data-count="total_teachers_count" class="font-25 font-bold mb-0">0</span>
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class="card-circle bg-gradient-to-br from-green-500 to-green-600 text-white">
-                                            <i class="fas fa-user-secret"></i>
-                                        </div>
-                                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-success border-left-solid bg-gradient-to-br from-green-300 to-green-100">
+                            <div class="flex items-center justify-between p-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                    <i class="fas fa-user-secret text-white text-xl"></i>
+                                </div>
+                                <div class="card-wrap text-right">
+                                    <h3 data-count="total_teachers_count" class="font-light text-black mb-0">0</h3>
+                                    <span class="text-dark">Teaching Staff</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card rounded-2xl transition-all duration-300 transform hover:-translate-y-1">
-                            <div class="card-body bg-gradient-to-br from-purple-200 to-purple-100 rounded-2xl shadow-lg text-black card-type-3">
-                                <div class="row">
-                                    <div class="col">
-                                        <h6 class="font-14 text-uppercase font-bold mb-0">Employees / Users</h6>
-                                        <span data-count="total_employees_count" class="font-25 font-bold mb-0">0</span>
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class="card-circle bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-                                            <i class="fas fa-user"></i>
-                                        </div>
-                                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
+                            <div class="flex items-center justify-between p-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                    <i class="fas fa-user text-white text-xl"></i>
+                                </div>
+                                <div class="card-wrap text-right">
+                                    <h3 data-count="total_employees_count" class="font-light text-black mb-0">0</h3>
+                                    <span class="text-dark">Employees / Users</span>
                                 </div>
                             </div>
                         </div>
