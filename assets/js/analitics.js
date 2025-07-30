@@ -235,10 +235,10 @@ var summaryReporting = (t_summary, date_range) => {
     if (summary.users_record_count !== undefined) {
         let user = summary.users_record_count;
         let employees = parseInt(user.count.total_employees_count) + parseInt(user.count.total_accountants_count) + parseInt(user.count.total_admins_count);
-        $(`span[data-count="total_employees_count"]`).html(employees);
-        $(`span[data-count="total_students_count"]`).html(user.count.total_students_count);
-        $(`span[data-count="total_teachers_count"]`).html(user.count.total_teachers_count);
-        $(`span[data-count="total_parents_count"]`).html(user.count.total_parents_count);
+        $(`[data-count="total_employees_count"]`).html(employees);
+        $(`[data-count="total_students_count"]`).html(user.count.total_students_count);
+        $(`[data-count="total_teachers_count"]`).html(user.count.total_teachers_count);
+        $(`[data-count="total_parents_count"]`).html(user.count.total_parents_count);
 
         let male_student = parseInt(user.gender_count.Male.total_students_count),
             female_student = parseInt(user.gender_count.Female.total_students_count);
@@ -350,8 +350,8 @@ var summaryReporting = (t_summary, date_range) => {
                     currentValues.push(parseFloat(summary.fees_record_count.comparison.amount.current[i].value));
                 });
 
-                $(`span[data-count="total_revenue_received"]`).html(format_currency(total_revenue));
-                $(`span[data-count="previous_amount_received"]`).html(format_currency(previous_amount));
+                $(`[data-count="total_revenue_received"]`).html(format_currency(total_revenue));
+                $(`[data-count="previous_amount_received"]`).html(format_currency(previous_amount));
 
                 var options = {
                     chart: {
@@ -410,23 +410,23 @@ var summaryReporting = (t_summary, date_range) => {
         if (fees.summation !== undefined) {
             let t_balance = fees.summation.balance !== null ? fees.summation.balance : 0;
             let t_arrears_total = fees.summation.arrears_total !== null ? fees.summation.arrears_total : 0;
-            $(`span[data-count="total_balance"]`).html(format_currency(t_balance));
-            $(`span[data-count="arrears_total"]`).html(format_currency(t_arrears_total));
+            $(`[data-count="total_balance"]`).html(format_currency(t_balance));
+            $(`[data-count="arrears_total"]`).html(format_currency(t_arrears_total));
         }
 
         $.each(summary.fees_record_count.summation, function(i, e) {
             let amount = e !== null ? format_currency(e) : "0.00";
-            $(`span[data-summary="${i}"]`).html(`${amount}`);
+            $(`[data-summary="${i}"]`).html(`${amount}`);
         });
 
         if(summary.transaction_revenue_flow !== undefined) {
             let transaction = summary.transaction_revenue_flow;
-            $(`span[data-count="total_income_received"]`).html(format_currency(transaction.category_total.current.Deposit));
-            $(`span[data-count="total_expenditure"]`).html(format_currency(transaction.category_total.current.Expense));
-            $(`span[data-count="Bank_Deposit"]`).html(format_currency(transaction.category_total.current.Bank_Deposit));
-            $(`span[data-count="Bank_Withdrawal"]`).html(format_currency(transaction.category_total.current.Bank_Withdrawal));
-            $(`span[data-count="Bank_Recons"]`).html(format_currency(transaction.category_total.current.Bank_Recons));
-            $(`span[data-count="account_balance"]`).html(format_currency(transaction.account_balance));
+            $(`[data-count="total_income_received"]`).html(format_currency(transaction.category_total.current.Deposit));
+            $(`[data-count="total_expenditure"]`).html(format_currency(transaction.category_total.current.Expense));
+            $(`[data-count="Bank_Deposit"]`).html(format_currency(transaction.category_total.current.Bank_Deposit));
+            $(`[data-count="Bank_Withdrawal"]`).html(format_currency(transaction.category_total.current.Bank_Withdrawal));
+            $(`[data-count="Bank_Recons"]`).html(format_currency(transaction.category_total.current.Bank_Recons));
+            $(`[data-count="account_balance"]`).html(format_currency(transaction.account_balance));
         }
 
         if ($(`canvas[id="revenue_category_group"]`).length) {
