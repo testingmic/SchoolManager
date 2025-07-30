@@ -958,9 +958,13 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13 mb-0">Upcoming Events</h4>
                             </div>
-                            <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:355px;height:355px;overflow-y:auto;">
+                            <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:355px;height:355px;'.(!empty($upcoming_events_list) ? "overflow-y:auto;" : null).'">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
-                                    '.$upcoming_events_list.'
+                                    '.(
+                                        !empty($upcoming_events_list) ? 
+                                            $upcoming_events_list : 
+                                            no_record_found("No Events Found", "No events have been created yet.", null, "Event")
+                                    ).'
                                 </ul>
                             </div>
                         </div>
