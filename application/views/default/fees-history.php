@@ -176,7 +176,7 @@ if(!$isAdminAccountant) {
 $response->html = '
 <section class="section">
     <div class="section-header">
-        <h1>Fees Payment History</h1>
+        <h1><i class="fa fa-money-bill"></i> Fees Payment History</h1>
         <div class="section-header-breadcrumb">
             <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
             <div class="breadcrumb-item">Fees Payment History</div>
@@ -290,7 +290,7 @@ $response->html = '
                 <div class="card-body pr-2 pl-2 card-type-3">
                     <div class="row">
                         <div class="col">
-                            <h6 class="font-14 text-uppercase font-bold mb-0">ARREARS OUTSTANDING</h6>
+                            <h6 class="font-14 text-uppercase font-bold mb-0">ARREARS</h6>
                             <span class="font-bold text-warning font-20 mb-0">'.$defaultCurrency.' '.number_format($total_arrears, 2).'</span>
                         </div>
                         <div class="col-auto">

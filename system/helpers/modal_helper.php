@@ -229,9 +229,9 @@ function no_record_found($title = null, $caption = null, $url_link = null, $reco
                 <p class='text-gray-600 dark:text-gray-400 mb-6'>{$caption}</p>
                 ".($no_button ? "
                 <div class='mt-3'>
-                    <span class='btn btn-outline-primary font-13' onclick='return loadPage(\"/dashboard\");'><i class='fa fa-home'></i> Back to Home</span> | 
-                    <span class='btn btn-outline-primary font-13' onclick='return loadPage(\"".$_SERVER['REQUEST_URI']."\");'><i class='fa fa-redo-alt'></i>  Reload Page</span> |
-                    <span class='btn btn-outline-primary font-13' onclick='javascript:history.back()' class='anchor'><i class='fa fa-arrow-left'></i> Go Back</span>
+                    <span class='btn btn-outline-primary font-13 mb-2' onclick='return loadPage(\"/dashboard\");'><i class='fa fa-home'></i> Back to Home</span> | 
+                    <span class='btn btn-outline-primary font-13 mb-2' onclick='return loadPage(\"".$_SERVER['REQUEST_URI']."\");'><i class='fa fa-redo-alt'></i>  Reload Page</span> |
+                    <span class='btn btn-outline-primary font-13 mb-2' onclick='javascript:history.back()' class='anchor'><i class='fa fa-arrow-left'></i> Go Back</span>
                 </div>
                 " : (!empty($url_link) ? "
                     <a href='{$url_link}'>
@@ -310,8 +310,9 @@ function page_not_found($request = "not_found", $string = "The resource you tryi
     global $baseUrl, $_SERVER;
 
     $notFound = (bool) ($request == "not_found");
-    $message = $notFound ? $string : "You don't have permission to access the requested object. It is either read-protected or not readable on this server.";
-    $title = $notFound ? "Record Not Found" : "Permission Denied";
+    $featureDisabled = (bool) ($request == "feature_disabled");
+    $message = $notFound ? $string : ($featureDisabled ? "The feature you are trying to access is disabled. Please contact the administrator." : "You don't have permission to access the requested object. It is either read-protected or not readable on this server.");
+    $title = $notFound ? "Record Not Found" : ($featureDisabled ? "Feature Disabled" : "Permission Denied");
 
     return no_record_found($title, $message, $baseUrl."dashboard", "Home", true);
 }

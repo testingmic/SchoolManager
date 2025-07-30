@@ -46,7 +46,7 @@ $urlLink = $isTrash ? "trash" : "folders";
 if(!in_array("documents_manager", $clientFeatures)) {
 
 	// permission denied
-	$response->html = page_not_found("not_found");
+	$response->html = page_not_found("feature_disabled");
 
 } else {
 	// permission check

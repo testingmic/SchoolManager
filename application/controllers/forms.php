@@ -5965,13 +5965,13 @@ class Forms extends Myschoolgh {
                         </div>
                         <div class="modal-body">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-8">
                                     <div class="form-group">
                                         <label for="name">Brand Name <span class="required">*</span></label>
                                         <input type="text" maxlength="100" name="brand" id="brand" class="form-control">
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="registration_number">Registration Number <span class="required">*</span></label>
                                         <input type="text" maxlength="14" name="registration_number" class="form-control text-uppercase">

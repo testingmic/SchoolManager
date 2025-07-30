@@ -98,7 +98,7 @@ if(!empty($item_id)) {
                     <div class="card-body pr-1 pl-1">
                         <div class="author-box-center">
                             '.(!empty($data->book_image) ? 
-                            '<div class="text-center">
+                            '<div class="text-center flex items-center justify-center">
                                 <img alt="image" src="'.$baseUrl.''.$data->book_image.'" class="profile-picture">
                             </div>' : '').'
                             <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->title.'</div>

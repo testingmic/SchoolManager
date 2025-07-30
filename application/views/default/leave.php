@@ -172,7 +172,7 @@ if($isWardParent) {
     $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1>'.$pageTitle.' 
+                <h1><i class="fa fa-calendar-check"></i> '.$pageTitle.' 
                     '.(!$isApply ? '
                         <span onclick="load(\'leave/apply\')" class="btn btn-sm btn-primary">
                             Apply for Leave

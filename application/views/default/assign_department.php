@@ -36,7 +36,7 @@ $department_list = $myClass->pushQuery("name, id", "departments", "client_id='{$
 $response->html = '
     <section class="section list_Students_By_Class">
         <div class="section-header">
-            <h1><i class="fa fa-user-graduate"></i> Assign Student Department</h1>
+            <h1><i class="fa fa-users"></i> Assign Student Department</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item"><a href="'.$baseUrl.'students">List Students</a></div>

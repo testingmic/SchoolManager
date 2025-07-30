@@ -58,7 +58,7 @@ $response->array_stream["fees_category_array_list"] = $category_array_list;
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>Fees Category List</h1>
+            <h1><i class="fa fa-money-check-alt"></i> Fees Category List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item">Fees Category List</div>

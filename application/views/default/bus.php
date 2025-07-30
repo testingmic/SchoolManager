@@ -93,13 +93,13 @@ if(empty($bus_id)) {
     $the_bus_form = load_class("forms", "controllers")->bus_form();
 
     // uploads script
-    $response->scripts = ["assets/js/comments.js", "assets/js/buses.js"];
+    $response->scripts = ["assets/js/comments.js", "assets/js/buses.js", "assets/js/upload.js"];
 
     // document information
     $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1>'.$pageTitle.'</h1>
+                <h1><i class="fa fa-bus"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'buses">Buses List</a></div>
@@ -109,11 +109,7 @@ if(empty($bus_id)) {
             <div class="row">
 
                 <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-body">
-                            '.$buses_list.'
-                        </div>
-                    </div>
+                    '.$buses_list.'
                 </div>
 
                 <div class="col-md-8">

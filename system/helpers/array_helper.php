@@ -382,14 +382,13 @@ function format_bus_item($value, $no_container = false, $no_buttons = false, $wi
         }
     }
     // set the content
-    $html = (!$no_container ? "<div class='{$width} p-1 mb-3' data-element_type='bus' data-element_id='{$value->item_id}'>" : null);
+    $html = (!$no_container ? "<div class='{$width} transition-all duration-300 transform hover:-translate-y-1' data-element_type='bus' data-element_id='{$value->item_id}'>" : null);
     $html .= "
-        <div class='bus-item' data-parameter_type='bus' data-parameter_url='{$value->item_id}' data-parameter='bus'>
+    <div class='card'>
+        <div class='card-body' data-parameter_type='bus' data-parameter_url='{$value->item_id}' data-parameter='bus'>
             <div class='item_loader'></div>
-            <div class='img-container cursor'>
-                ".(empty($value->attachment) ? "<img src='{$myClass->baseUrl}{$image}' width='100%'>" : 
-                    "<img src='{$myClass->baseUrl}{$image}' width='100%'>"
-                    )."
+            <div class='img-container cursor bus-img-container' ".(!$no_buttons && !empty($permissions["hasModify"]) ? "onclick='return load(\"bus/{$value->item_id}\");'" : null).">
+                <img src='{$myClass->baseUrl}{$image}' class='bus-img' width='100%'>
             </div>
             <div class='text-left p-2 description'>
                 <div class='mb-2'><span class='font-bold text-primary'>Color:</span><span class='float-right'>".(!empty($value->color) ? "<span style='Background:{$value->color}' class='badge'>&nbsp;</span>" : "-")."</span></div>
@@ -416,7 +415,8 @@ function format_bus_item($value, $no_container = false, $no_buttons = false, $wi
             <div title='{$item_name}' class='cursor font-20 bg-primary text-white p-2'>
                 <p>{$value->brand}</p>
             </div>
-        </div>";
+        </div>
+    </div>";
     $html .= (!$no_container ? "</div>" : null);
 
     return $html;

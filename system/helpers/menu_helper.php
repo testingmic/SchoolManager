@@ -284,9 +284,9 @@
     <?php } ?>
     <?php if(in_array("documents_manager", $clientFeatures)) { ?>
         <?php if($accessObject->hasAccess("view", "documents") || $accessObject->hasAccess("add", "documents")) { ?>
-        <li class="dropdown">
-            <a href="<?= $baseUrl ?>documents" class="nav-link"><i class="fas fa-folder"></i><span>My Documents</span></a>
-        </li>
+            <li class="dropdown">
+                <a href="<?= $baseUrl ?>documents" class="nav-link"><i class="fas fa-folder"></i><span>My Documents</span></a>
+            </li>
         <?php } ?>
     <?php } ?>
     <?php if(in_array("bus_manager", $clientFeatures)) { ?>
@@ -408,9 +408,11 @@
     </li>
     <?php } ?>
     <?php if(in_array("documents_manager", $clientFeatures)) { ?>
-        <li class="dropdown">
-            <a href="<?= $baseUrl ?>documents" class="nav-link"><i class="fas fa-folder"></i><span>My Documents</span></a>
-        </li>
+        <?php if($accessObject->hasAccess("view", "documents") || $accessObject->hasAccess("add", "documents")) { ?>
+            <li class="dropdown">
+                <a href="<?= $baseUrl ?>documents" class="nav-link"><i class="fas fa-folder"></i><span>My Documents</span></a>
+            </li>
+        <?php } ?>
     <?php } ?>
     <li class="menu-header">Finance / HR Management</li>
     <?php if(in_array("payroll", $clientFeatures)) { ?>
@@ -613,9 +615,11 @@
         <li><a href="<?= $baseUrl ?>leave" class="nav-link"><i class="far fa-check-square"></i><span>Leave Applications</span></a></li>
     <?php } ?>
     <?php if(in_array("documents_manager", $clientFeatures)) { ?>
-        <li class="dropdown">
-            <a href="<?= $baseUrl ?>documents" class="nav-link"><i class="fas fa-folder"></i><span>My Documents</span></a>
-        </li>
+        <?php if($accessObject->hasAccess("view", "documents") || $accessObject->hasAccess("add", "documents")) { ?>
+            <li class="dropdown">
+                <a href="<?= $baseUrl ?>documents" class="nav-link"><i class="fas fa-folder"></i><span>My Documents</span></a>
+            </li>
+        <?php } ?>
     <?php } ?>
     <li class="menu-header">Communication</li>
     <?php if(in_array("events", $clientFeatures)) { ?>

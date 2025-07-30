@@ -94,7 +94,7 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
     $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1>'.$pageTitle.'</h1>
+                <h1><i class="fa fa-clock"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     '.($timetable_found ? '<div class="breadcrumb-item"><a href="'.$baseUrl.'timetable">Timetable List</a></div>' : null).'

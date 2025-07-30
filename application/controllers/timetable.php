@@ -618,7 +618,9 @@ class Timetable extends Myschoolgh {
             // end the query if no course was found
             if(empty($courses_list) && $format) {
                 // return error message
-                $lessons_list .= "<div class='col-lg-12 text-center'>You do not have any lessons to teach today.</div>";
+                $lessons_list .= "<div class='col-lg-12 text-center'>";
+                $lessons_list .= no_record_found("No Lessons Found", "You do not have any lessons to teach today.", null, "Lesson");
+                $lessons_list .= "</div>";
             } else {
                 // get only the unique course ids
                 $course_ids = array_unique($t_course_ids);

@@ -96,7 +96,7 @@ if(!in_array("bus_manager", $clientFeatures)) {
     $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1>'.$pageTitle.'</h1>
+                <h1><i class="fa fa-bus"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
@@ -112,10 +112,8 @@ if(!in_array("bus_manager", $clientFeatures)) {
                             </a>
                         </div>' : null
                     ).'
-                    <div class="card">
-                        <div class="card-body">
-                            '.$buses_list.'
-                        </div>
+                    <div class="card-card">
+                        '.$buses_list.'
                     </div>
                 </div>
 

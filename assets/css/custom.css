@@ -813,6 +813,20 @@ h4 {
     border-radius: 5px;
 }
 
+.bus-img-container {
+    min-height: 250px;
+    max-height: 250px;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.bus-img {
+    border-radius: 10px;
+    max-height: 250px;
+    border: 1px solid #ccc;
+    object-fit: cover;
+}
+
 .width-150 {
     width: 150px!important;
 }

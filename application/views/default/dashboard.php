@@ -1219,7 +1219,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body pt-2 trix-slim-scroll table-responsive">
+                            <div class="card-body trix-slim-scroll table-responsive">
                                 '.$timetable.'
                             </div>
                         </div>

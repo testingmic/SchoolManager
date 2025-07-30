@@ -360,7 +360,7 @@ class Assignments extends Myschoolgh {
                         </svg>
                     </div>
                     <div>
-                        <a href='#' onclick='return load(\"assessment/{$each->item_id}\");'>
+                        <a href='#' onclick='return load(\"assessment/{$each->item_id}/instructions\");'>
                             {$each->assignment_title}
                         </a> 
                         <div>
