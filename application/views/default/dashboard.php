@@ -627,9 +627,9 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 $response->html .=
                 '<div class="row">
                     <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
-                        <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-primary border-left-solid bg-gradient-to-br from-blue-200 to-blue-100">
+                        <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-success border-left-solid bg-gradient-to-br from-green-200 to-green-100">
                             <div class="flex items-center justify-between p-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                     <i class="fas fa-user-graduate text-white text-xl"></i>
                                 </div>
                                 <div class="card-wrap text-right">
@@ -640,9 +640,9 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
-                        <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-success border-left-solid bg-gradient-to-br from-green-300 to-green-100">
+                        <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-primary border-left-solid bg-gradient-to-br from-blue-300 to-blue-100">
                             <div class="flex items-center justify-between p-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                     <i class="fas fa-user-secret text-white text-xl"></i>
                                 </div>
                                 <div class="card-wrap text-right">
