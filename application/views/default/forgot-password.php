@@ -89,7 +89,7 @@ if(loggedIn()) {
                 <h4 class="text-white text-2xl font-bold text-center">Reset Password</h4>
                 <p class="text-blue-100 text-center">Enter your email to receive reset instructions</p>
               </div>
-              <div class="p-8 relative glass-effect">
+              <div class="p-6 relative glass-effect">
                 <?= form_loader(); ?>
                 <form method="POST" action="<?= $baseUrl ?>api/auth/forgotten" id="auth-form" class="needs-validation space-y-6" novalidate="">
                   <div class="space-y-2">

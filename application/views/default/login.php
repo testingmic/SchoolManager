@@ -90,7 +90,7 @@ if (loggedIn()) {
                 <h4 class="text-white text-2xl font-bold text-center">Welcome Back</h4>
                 <p class="text-blue-100 text-center">Sign in to your account</p>
               </div>
-              <div class="p-8 pb-0 relative glass-effect">
+              <div class="p-6 pb-0 relative glass-effect">
                 <?= form_loader(); ?>
                 <form method="POST" autocomplete="Off" action="<?= $baseUrl ?>api/auth/login" id="auth-form" class="needs-validation space-y-6" novalidate="">
                   <div class="space-y-2">
