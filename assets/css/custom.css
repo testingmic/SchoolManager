@@ -1059,7 +1059,6 @@ code {
 
 .plugin-clock {
     text-align: center;
-    font-weight: bold;
     padding: 0;
 }
 
@@ -1290,6 +1289,10 @@ body.dark table.dataTable img {
         height: 100%;
     }
 }
+
+/* .col-sm-6 {
+    width: 50%!important;
+} */
 
 @media(max-width:425px) {
     .bus-item img {
