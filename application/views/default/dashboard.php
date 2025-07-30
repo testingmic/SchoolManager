@@ -619,7 +619,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
         if($isAdminAccountant) {
 
             // if an admin is logged in
-            if($isAdmin) {
+            if($isAdmin || $isAccountant) {
 
                 // if the term has ended
                 $response->html .= top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl);
@@ -752,13 +752,13 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 foreach($summary_list as $item) {
                     $financialSummary .= '
                     <div class="">
-                        <div class="card border-top-0 hover:scale-105 transition-all duration-300 '.($item["background"] ?? null).' border-bottom-0 border-right-0 border-left-lg border-left-solid '.$item["left-border"].'">
+                        <div class="card border-top-0 transition-all duration-300 transform hover:-translate-y-1 '.($item["background"] ?? null).' border-bottom-0 border-right-0 border-left-lg border-left-solid '.$item["left-border"].'">
                             <div class="card-header border-'.($item["border"] ?? null).' p-2">
                                 <i class="fa text-'.($item["border"] ?? null).' '.$item["favicon"].'"></i> 
                                 &nbsp; '.$item["title"].'
                             </div>
                             <div class="card-body pl-2 p-0 font-25"><span data-count="'.$item["sum_tag"].'">0.00</span></div>
-                            <div class="card-footer pl-2 pt-0 p-0">
+                            <div class="card-footer pl-2 pt-0 pb-2 p-0">
                                 <em><span class="text-primary font-14" '.($item["label"] !== "Overall" ? 'data-filter="current_period"' : null).'>
                                     '.$item["label"].'
                                 </span></em>
@@ -766,13 +766,6 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>';
                 }
-            }
-
-            // if an account is logged in
-            if($isAccountant) {
-                $response->html .= '<div class="col-lg-12"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">';
-                $response->html .= $financialSummary;
-                $response->html .= '</div></div>';
             }
 
             $response->html .= '
@@ -891,6 +884,13 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>' : null
                 );
+
+            // if an account is logged in
+            if($isAccountant) {
+                $response->html .= '<div class="col-lg-12"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">';
+                $response->html .= $financialSummary;
+                $response->html .= '</div></div>';
+            }
             
             // load the class payment information by class only
             if($isAccountant) {

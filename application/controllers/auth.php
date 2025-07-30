@@ -44,6 +44,10 @@ class Auth extends Myschoolgh {
             // begin transaction
             $this->db->beginTransaction();
 
+            // trim the username and password
+            $params->username = trim($params->username);
+            $params->password = trim($params->password);
+
             // make a query for the username
             $stmt = $this->db->prepare("
                 SELECT 
