@@ -76,9 +76,9 @@ if(loggedIn()) {
         <div class="row">
           <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-8 offset-xl-2">
             <div class="text-left mb-2 p-2 bg-white rounded-2xl">
-                <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="70px" /></div>
+                <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="60px" /></div>
                 <div>
-                    <div class="font-25px text-center font-weight-bold text-dark"><?= $myClass->appName ?></div> 
+                    <div class="font-25 text-center font-weight-bold text-dark"><?= $myClass->appName ?></div> 
                     <div class="text-dark text-center">Your advanced school management software.</div>
                 </div>
             </div>
