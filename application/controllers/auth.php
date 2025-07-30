@@ -747,7 +747,7 @@ class Auth extends Myschoolgh {
 
                 } else {
                     $this->addAttempt($params->email, "reset");
-                    return ["code" => 201, "result" => "Sorry! The email address could not be validated."];
+                    return ["code" => 200, "result" => "Please check your email for steps to reset password."];
                 }
             } else {
                 return ["code" => 201, "result" => "Access denied due to multiple trial. Try again in an Hour's time."];

@@ -116,12 +116,7 @@ if(loggedIn()) {
                     </button>
                   </div>
                 </form>
-                <div class="text-center mt-6 mb-3">
-                  <p class="text-sm text-black">
-                    We'll send you an email with instructions to reset your password.
-                  </p>
-                </div>
-                <div class="form-results"></div>
+                <div class="form-results mt-2"></div>
               </div>
             </div>
             <div class="mt-3 mb-3 text-dark p-3 mb-10 bg-white text-center rounded-2xl">
