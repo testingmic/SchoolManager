@@ -50,7 +50,7 @@ if(loggedIn()) {
 
     .glass-effect {
       backdrop-filter: blur(80px);
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 1);
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
@@ -91,7 +91,7 @@ if(loggedIn()) {
                 <?= form_loader(); ?>
                 <form method="POST" autocomplete="Off" action="<?= $baseUrl ?>api/auth" id="auth-form" class="needs-validation space-y-6" novalidate="">
                   <div class="space-y-2">
-                    <label for="school_name" class="block text-sm font-semibold text-white mb-2">School Name</label>
+                    <label for="school_name" class="block text-sm text-black mb-2">School Name</label>
                     <div class="relative">
                       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-school text-gray-400"></i>
@@ -104,7 +104,7 @@ if(loggedIn()) {
                   </div>
                   
                   <div class="space-y-2">
-                    <label for="school_address" class="block text-sm font-semibold text-white mb-2">Address</label>
+                    <label for="school_address" class="block text-sm text-black mb-2">Address</label>
                     <div class="relative">
                       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-map-marker-alt text-gray-400"></i>
@@ -118,7 +118,7 @@ if(loggedIn()) {
                   
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-2">
-                      <label for="school_contact" class="block text-sm font-semibold text-white mb-2">Primary Contact <span class="text-red-500">*</span></label>
+                      <label for="school_contact" class="block text-sm text-black mb-2">Primary Contact <span class="text-red-500">*</span></label>
                       <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <i class="fas fa-phone text-gray-400"></i>
@@ -131,7 +131,7 @@ if(loggedIn()) {
                     </div>
                     
                     <div class="space-y-2">
-                      <label for="school_contact_2" class="block text-sm font-semibold text-white mb-2">Secondary Contact</label>
+                      <label for="school_contact_2" class="block text-sm text-black mb-2">Secondary Contact</label>
                       <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <i class="fas fa-phone text-gray-400"></i>
@@ -143,7 +143,7 @@ if(loggedIn()) {
                   
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-2">
-                      <label for="email" class="block text-sm font-semibold text-white mb-2">Email Address</label>
+                      <label for="email" class="block text-sm text-black mb-2">Email Address</label>
                       <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <i class="fas fa-envelope text-gray-400"></i>
@@ -156,7 +156,7 @@ if(loggedIn()) {
                     </div>
                     
                     <div class="space-y-2">
-                      <label for="password" class="block text-sm font-semibold text-white mb-2">Password</label>
+                      <label for="password" class="block text-sm text-black mb-2">Password</label>
                       <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <i class="fas fa-lock text-gray-400"></i>

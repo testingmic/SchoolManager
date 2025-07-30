@@ -42,7 +42,7 @@ if (loggedIn()) {
 
     .glass-effect {
       backdrop-filter: blur(100px);
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 1);
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
@@ -95,7 +95,7 @@ if (loggedIn()) {
                 <form method="POST" autocomplete="Off" action="<?= $baseUrl ?>api/auth/login" id="auth-form" class="needs-validation space-y-6" novalidate="">
                   <div class="space-y-2">
                     
-                    <label for="username" class="block text-sm font-semibold text-white mb-2">
+                    <label for="username" class="block text-sm text-black mb-2">
                       <i class="fas fa-user mr-2"></i>Username or Email
                     </label>
                     <div class="relative">
@@ -110,10 +110,10 @@ if (loggedIn()) {
                   </div>
                   <div class="space-y-2">
                     <div class="flex justify-between items-center mb-2">
-                      <label for="password" class="block text-sm font-semibold text-white mb-2">
+                      <label for="password" class="block text-sm text-black mb-2">
                         <i class="fas fa-lock mr-2"></i>Password
                       </label>
-                      <a href="<?= $baseUrl ?>forgot-password" class="text-sm text-white hover:text-blue-800 transition-colors duration-200">
+                      <a href="<?= $baseUrl ?>forgot-password" class="text-sm text-black hover:text-blue-800 transition-colors duration-200">
                         Forgot Password?
                       </a>
                     </div>
@@ -137,7 +137,7 @@ if (loggedIn()) {
                     </button>
                   </div>
                 </form>
-                <div class="form-results mt-4 pb-4"></div>
+                <div class="form-results mt-3 pb-3"></div>
               </div>
             </div>
             <div class="mt-3 mb-10 text-dark p-3 bg-white text-center  rounded-2xl">

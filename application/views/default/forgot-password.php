@@ -51,7 +51,7 @@ if(loggedIn()) {
 
     .glass-effect {
       backdrop-filter: blur(80px);
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 1);
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
@@ -93,7 +93,7 @@ if(loggedIn()) {
                 <?= form_loader(); ?>
                 <form method="POST" action="<?= $baseUrl ?>api/auth/forgotten" id="auth-form" class="needs-validation space-y-6" novalidate="">
                   <div class="space-y-2">
-                    <label for="email" class="block text-sm font-semibold text-white mb-2">
+                    <label for="email" class="block text-sm text-black mb-2">
                       <i class="fas fa-envelope mr-2"></i>Email Address
                     </label>
                     <div class="relative">
@@ -116,8 +116,8 @@ if(loggedIn()) {
                     </button>
                   </div>
                 </form>
-                <div class="text-center mt-6 mb-4">
-                  <p class="text-sm text-white">
+                <div class="text-center mt-6 mb-3">
+                  <p class="text-sm text-black">
                     We'll send you an email with instructions to reset your password.
                   </p>
                 </div>

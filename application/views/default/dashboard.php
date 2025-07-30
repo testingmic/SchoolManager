@@ -630,10 +630,10 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-primary border-left-solid bg-gradient-to-br from-blue-200 to-blue-100">
                             <div class="flex items-center justify-between p-4">
                                 <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
-                                    <i class="fas fa-users text-white text-xl"></i>
+                                    <i class="fas fa-user-graduate text-white text-xl"></i>
                                 </div>
                                 <div class="card-wrap text-right">
-                                    <h3 data-count="total_students_count" class="font-light text-black mb-0">0</h3>
+                                    <h3 data-count="total_students_count" class="font-bold text-black mb-0">0</h3>
                                     <span class="text-dark">Students Count</span>
                                 </div>
                             </div>
@@ -646,7 +646,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     <i class="fas fa-user-secret text-white text-xl"></i>
                                 </div>
                                 <div class="card-wrap text-right">
-                                    <h3 data-count="total_teachers_count" class="font-light text-black mb-0">0</h3>
+                                    <h3 data-count="total_teachers_count" class="font-bold text-black mb-0">0</h3>
                                     <span class="text-dark">Teaching Staff</span>
                                 </div>
                             </div>
@@ -656,21 +656,21 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
                             <div class="flex items-center justify-between p-4">
                                 <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
-                                    <i class="fas fa-user text-white text-xl"></i>
+                                    <i class="fas fa-users text-white text-xl"></i>
                                 </div>
                                 <div class="card-wrap text-right">
-                                    <h3 data-count="total_employees_count" class="font-light text-black mb-0">0</h3>
+                                    <h3 data-count="total_employees_count" class="font-bold text-black mb-0">0</h3>
                                     <span class="text-dark">Employees / Users</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card rounded-2xl transition-all duration-300 transform hover:-translate-y-1">
-                            <div class="card-body inline-flex justify-center bg-gradient-to-br from-yellow-200 to-orange-100 rounded-2xl shadow-lg text-black card-type-3">
+                        <div class="card rounded-2xl">
+                            <div class="card-body pb-3 inline-flex justify-center bg-gradient-to-br from-yellow-200 to-orange-100 rounded-2xl shadow-lg text-black card-type-3">
                                 <div align="center">
-                                    <h6 class="border-bottom font-13 text-uppercase font-bold p-0 m-0">'.date("l, F d, Y").'</h6>
-                                    <h3 class="p-0 m-0"><div class="plugin-clock text-black">'.date("h:i A").'</div></h3>
+                                    <h6 class="border-bottom font-13 pb-2 text-uppercase font-bold p-0 m-0">'.date("l, F d, Y").'</h6>
+                                    <h3 class="p-0 m-0 mt-1 mb-0"><div class="plugin-clock text-black">'.date("h:i A").'</div></h3>
                                 </div>
                             </div>
                         </div>
@@ -1268,7 +1268,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             $response->html = '
                 <div class="row">
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card">
+                        <div class="card bg-gradient-to-br from-purple-300 to-purple-100">
                             <div class="card-body pr-3 pl-3 card-type-3">
                                 <div class="row">
                                     <div class="col">
@@ -1276,7 +1276,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                         <span class="font-bold font-25 mb-0">'.count($load_schools_list).'</span>
                                     </div>
                                     <div class="col-auto">
-                                        <div class="card-circle l-bg-orange text-white">
+                                        <div class="card-circle l-bg-purple text-white">
                                             <i class="fas fa-book-open"></i>
                                         </div>
                                     </div>
@@ -1285,7 +1285,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card">
+                        <div class="card bg-gradient-to-br from-green-300 to-green-100">
                             <div class="card-body card-type-3">
                                 <div class="row">
                                     <div class="col">
@@ -1302,7 +1302,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card">
+                        <div class="card bg-gradient-to-br from-red-300 to-red-100">
                             <div class="card-body card-type-3">
                                 <div class="row">
                                     <div class="col">
@@ -1312,7 +1312,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                         .'</span>
                                     </div>
                                     <div class="col-auto">
-                                        <div class="card-circle l-bg-orange text-white">
+                                        <div class="card-circle l-bg-red text-white">
                                             <i class="fas fa-home"></i>
                                         </div>
                                     </div>
@@ -1321,7 +1321,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card">
+                        <div class="card bg-gradient-to-br from-orange-300 to-orange-100">
                             <div class="card-body card-type-3">
                                 <div class="row">
                                     <div class="col">
