@@ -868,11 +868,15 @@ class Accounting extends Myschoolgh {
         if(!isset($params->clientId)) {
             return page_not_found();
         }
+
         // confirm that the account is not empty
         if(!empty($accounts_list)) {
 
             $count = count($accounts_list);
             $html_content = "";
+
+            print_r($params);
+            exit;
 
             // get the client logo content
             if(!empty($params->client_data->client_logo)) {
@@ -880,6 +884,9 @@ class Accounting extends Myschoolgh {
                 $logo_data = file_get_contents($this->baseUrl . $params->client_data->client_logo);
                 $this->client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
             }
+
+            print_r($params);
+            exit;
 
             // date range algorithm
             if(isset($params->start_date)) {

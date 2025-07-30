@@ -134,11 +134,11 @@ if(!$accessObject->hasAccess("reports", "accounting")) {
                                         </div>
                                         <div class="col-md-3 mb-1">
                                             <label>Start Date</label>                                
-                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-01").'" type="text" class="datepicker form-control text-center" name="start_date" id="start_date">
                                         </div>
                                         <div class="col-md-3 mb-1">
                                             <label>End Date</label>
-                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-t").'" type="text" class="datepicker form-control text-center" name="end_date" id="end_date">
                                         </div>
                                         <div class="col-md-2 col-12 form-group">
                                             <label for="">&nbsp;</label>
@@ -157,11 +157,11 @@ if(!$accessObject->hasAccess("reports", "accounting")) {
                                         </div>
                                         <div class="col-md-3 mb-1">
                                             <label>Start Date</label>                                
-                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-01").'" type="text" class="datepicker form-control text-center" name="start_date" id="start_date">
                                         </div>
                                         <div class="col-md-3 mb-1">
                                             <label>End Date</label>
-                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-t").'" type="text" class="datepicker form-control text-center" name="end_date" id="end_date">
                                         </div>
                                         <div class="col-md-2 col-12 form-group">
                                             <label for="">&nbsp;</label>
@@ -187,11 +187,11 @@ if(!$accessObject->hasAccess("reports", "accounting")) {
                                         </div>
                                         <div class="col-md-2 mb-1">
                                             <label>Start Date</label>                                
-                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-01").'" type="text" class="datepicker form-control text-center" name="start_date" id="start_date">
                                         </div>
                                         <div class="col-md-2 mb-1">
                                             <label>End Date</label>
-                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-t").'" type="text" class="datepicker form-control text-center" name="end_date" id="end_date">
                                         </div>
                                         <div class="col-md-2 col-12 form-group">
                                             <label for="">&nbsp;</label>

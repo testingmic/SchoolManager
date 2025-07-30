@@ -1621,7 +1621,7 @@ class Fees extends Myschoolgh {
                         'amount' => $amountPayable,
                         'student_id' => $params->student_id,
                         'payment_method' => $params->payment_method,
-                        'contact_number' => $params->contact_number,
+                        'contact_number' => $params->contact_number ?? '',
                         'clientId' => $params->clientId,
                         'academic_term' => $params->academic_term,
                         'academic_year' => $params->academic_year,
