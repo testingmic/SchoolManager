@@ -81,6 +81,27 @@ class Myschoolgh extends Models {
 
 		$this->academic_years();
 		$this->menu_content_array();
+
+		// alter table
+		$this->alter_table();
+	}
+
+	/**
+	 * Alter the table
+	 * 
+	 * @return void
+	 */
+	public function alter_table() {
+		
+		// prepare and execute the statement
+		$fix[] = $this->db->prepare("ALTER TABLE fees_category ADD COLUMN boarding_fees ENUM('No', 'Yes') NOT NULL DEFAULT 'No'");
+		$fix[] = $this->db->prepare("ALTER TABLE fees_category ADD COLUMN frequency ENUM('Daily', 'Weekly', 'Monthly', 'Termly', 'Yearly', 'One-Time') NOT NULL DEFAULT 'Termly'");
+		
+		foreach($fix as $stmt) {
+			try {
+				$stmt->execute();
+			} catch(PDOException $e) { }
+		}
 	}
 
 	/**

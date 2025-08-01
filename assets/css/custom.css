@@ -554,7 +554,7 @@ textarea.custom_form-control {
 }
 
 .form-group .control-label, .form-group>label {
-    font-weight: normal;
+    font-weight: 550;
     color: #000000;
     font-size: 13px;
     letter-spacing: .5px;
@@ -715,7 +715,9 @@ textarea.custom_form-control {
 
 .card {
     border-radius: 0.75rem;
-    margin-bottom: 20px !important;
+    margin-bottom: 15px !important;
+    /* box-shadow:0 0.46875rem 2.1875rem rgba(90,97,105,0.1),0 0.9375rem 1.40625rem rgba(90,97,105,0.1),0 0.25rem 0.53125rem rgba(90,97,105,0.12),0 0.125rem 0.1875rem rgba(90,97,105,0.1) */
+    border: 1px solid #ccc;
 }
 
 @media(max-width:576px){

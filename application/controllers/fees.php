@@ -2107,20 +2107,41 @@ class Fees extends Myschoolgh {
 
         $params->code = isset($params->code) ? strtoupper($params->code) : null;
 
+        if(!empty($params->frequency)) {
+            if(!in_array($params->frequency, $this->fees_frequency_list)) {
+                return ["code" => 400, "data" => "Sorry! An invalid frequency was parsed."];
+            }
+        }
+
         // if the record was not found
         if(!$found) {
             // prepare and execute the statement
             $stmt = $this->db->prepare("INSERT INTO fees_category SET amount = ?, name = ?, 
-                description = ?, code = ?, client_id = ?, created_by = ?");
-            $stmt->execute([$params->amount ?? 0, $params->name, $params->description ?? null, 
-                $params->code, $params->clientId, $params->userId]);
+                description = ?, code = ?, client_id = ?, created_by = ?, boarding_fees = ?, frequency = ?");
+            $stmt->execute([
+                $params->amount ?? 0, 
+                $params->name, 
+                $params->description ?? null, 
+                $params->code, 
+                $params->clientId, 
+                $params->userId, 
+                $params->boarding_fees ?? "No", 
+                $params->frequency ?? "Termly"]);
 
             // log the user activity
             $this->userLogs("fees_category", $this->lastRowId("fees_category"), null, "<strong>{$params->userData->name}</strong> added a new category with name: {$params->name}", $params->userId);
         } else {
             // prepare and execute the statement
-            $stmt = $this->db->prepare("UPDATE fees_category SET amount = ?, name = ?, description = ?, code = ? WHERE id = ? AND client_id = ?");
-            $stmt->execute([$params->amount ?? 0, $params->name, $params->description ?? null, $params->code, $params->category_id, $params->clientId]);
+            $stmt = $this->db->prepare("UPDATE fees_category SET amount = ?, name = ?, description = ?, code = ?, frequency = ?, boarding_fees = ? 
+                WHERE id = ? AND client_id = ? LIMIT 1");
+            $stmt->execute([
+                $params->amount ?? 0, 
+                $params->name, 
+                $params->description ?? null, 
+                $params->code, 
+                $params->frequency ?? $category[0]->frequency, 
+                $params->boarding_fees ?? $category[0]->boarding_fees, 
+                $params->category_id, $params->clientId]);
 
             // log the user activity
             $this->userLogs("fees_category", $params->category_id, null, "<strong>{$params->userData->name}</strong> updated the category: {$params->name}", $params->userId);

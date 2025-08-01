@@ -24,7 +24,9 @@ $category_param = (object) [
     "clientId" => $session->clientId,
     "limit" => 100
 ];
-$fees_category_array_list = load_class("fees", "controllers", $category_param)->category_list($category_param);
+
+$feesObject = load_class("fees", "controllers", $category_param);
+$fees_category_array_list = $feesObject->category_list($category_param);
 
 $hasAdd = $accessObject->hasAccess("add", "fees_category");
 $hasUpdate = $accessObject->hasAccess("update", "fees_category");
@@ -41,10 +43,15 @@ foreach($fees_category_array_list["data"] as $key => $each) {
         $action .= "&nbsp;<a title='Click to delete this {$each->name} category' href='#' onclick='return delete_record(\"{$each->id}\", \"fees_category\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
+    // boarding fees label
+    $houseLabel = $each->boarding_fees == "Yes" ? "<span class='badge badge-success'>Yes</span>" : "<span class='badge badge-danger'>No</span>";
+
     $sections .= "<tr data-row_id=\"{$each->id}\">";
     $sections .= "<td>".($key+1)."</td>";
     $sections .= "<td>{$each->name}</td>";
     $sections .= "<td>{$each->code}</td>";
+    $sections .= "<td>{$each->frequency}</td>";
+    $sections .= "<td>{$houseLabel}</td>";
     $sections .= "<td>{$each->amount}</td>";
     $sections .= "<td>{$each->fees_count}</td>";
     $sections .= "<td align='center'>{$action}</td>";
@@ -80,8 +87,10 @@ $response->html = '
                                         <th width="5%" class="text-center">#</th>
                                         <th>Name</th>
                                         <th>Code</th>
+                                        <th width="15%">Frequency</th>
+                                        <th width="13%">Boarding Fees</th>
                                         <th>Amount</th>
-                                        <th>Fees Count</th>
+                                        <th width="15%">Allocations Count</th>
                                         <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>
@@ -111,16 +120,36 @@ $response->html = '
                                     <input type="text" maxlength="100" placeholder="Type name" name="name" id="name" class="form-control">
                                 </div>
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="code">Code</label>
                                     <input type="text" maxlength="12" placeholder="Category Code" name="code" id="code" class="form-control">
                                 </div>
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="default_amount">Default Amount <span class="required">*</span></label>
-                                    <input type="number" min="1" maxlength="20" placeholder="Type default amount" name="amount" id="amount" class="form-control">
+                                    <label for="frequency">Frequency</label>
+                                    <select name="frequency" id="frequency" class="form-control">
+                                        <option value="">Select Frequency</option>
+                                        '.implode("", array_map(function($each) {
+                                            return "<option value=\"{$each}\">{$each}</option>";
+                                        }, $feesObject->fees_frequency_list)).'
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="default_amount">Default Amount</label>
+                                    <input type="number" min="1" maxlength="20" value="0" placeholder="Type default amount" name="amount" id="amount" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="boarding_fees">Boarding Fees</label>
+                                    <select name="boarding_fees" id="boarding_fees" class="form-control">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-12">

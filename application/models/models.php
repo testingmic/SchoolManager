@@ -73,6 +73,8 @@ class Models {
     public $error_logs;
     public $client_logo;
 
+    public $fees_frequency_list = ["Daily", "Weekly", "Monthly", "Termly", "Yearly", "One-Time"];
+
     public $default_stream = [
         "summary_report", "students_report", "fees_revenue_flow", "library_report", 
         "departments_report", "attendance_report", "class_attendance_report",
