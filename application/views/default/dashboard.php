@@ -951,7 +951,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13 mb-0">Upcoming Events</h4>
                             </div>
-                            <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:355px;height:355px;'.(!empty($upcoming_events_list) ? "overflow-y:auto;" : null).'">
+                            <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:350px;height:350px;'.(!empty($upcoming_events_list) ? "overflow-y:auto;" : null).'">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
                                     '.(
                                         !empty($upcoming_events_list) ? 
@@ -967,7 +967,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13 mb-0">Upcoming Birthdays</h4>
                             </div>
-                            <div class="pl-1 pr-2 trix-slim-scroll" style="max-height:355px;height:355px;overflow-y:auto;">
+                            <div class="pl-1 pr-2 trix-slim-scroll" style="max-height:350px;height:350px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
                                     '.$upcoming_birthday_list.'
                                 </ul>
