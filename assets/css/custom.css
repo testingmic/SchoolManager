@@ -1511,6 +1511,7 @@ body.dark table.dataTable img {
 
 .school-logo {
     max-width: 350px;
+    height: 200px;
 }
 
 @media(max-width:900px) {
