@@ -2,9 +2,7 @@
 
 class Library extends Myschoolgh {
 
-	
-
-	public function __construct(stdClass $params = null) {
+	public function __construct($params = null) {
 		parent::__construct();
 
 		$this->iclient = $params->client_data ?? [];

@@ -188,10 +188,23 @@
             </ul>
         </li>
     <?php } ?>
+    <?php if(in_array("exeats", $clientFeatures)) { ?>
+        <?php if($isAdmin) { ?>
+            <li class="menu-header">Exeats Management</li>
+            <li class="dropdown">
+                <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Manage Exeats</span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="<?= $baseUrl ?>exeats">Exeats Dashboard</a></li>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>exeats_log">Exeats Logs</a></li>
+                </ul>
+            </li>
+        <?php } ?>
+    <?php } ?>
+
     <?php if($accessObject->hasAccess("view", "fees")) { ?>
-    <li class="menu-header">Finance / HR Management</li>
+    <li class="menu-header">Finance & HR Management</li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Manage Fees</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-door-open"></i><span>Manage Fees</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
             <?php if($accessObject->hasAccess("receive", "fees") || $accessObject->hasAccess("receive", "fees")) { ?>

@@ -871,10 +871,10 @@ class Myschoolgh extends Models {
 			return [];
 		}
 
-		$period = new DatePeriod(
-		  new DateTime($startDate),
-		  new DateInterval('P1D'),
-		  new DateTime(date('Y-m-d', strtotime($endDate. '+1 days')))
+		$period = new \DatePeriod(
+		  new \DateTime($startDate),
+		  new \DateInterval('P1D'),
+		  new \DateTime(date('Y-m-d', strtotime($endDate. '+1 days')))
 		);
 
 		$days = array();
@@ -968,7 +968,7 @@ class Myschoolgh extends Models {
 		// if the date equates this, then return false
 		if($date === "1970-01-01") { return false; }
 
-	    $d = DateTime::createFromFormat($format, $date);
+	    $d = \DateTime::createFromFormat($format, $date);
 	    return $d && $d->format($format) === $date;
 	}
 
@@ -1113,7 +1113,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return String | Bool
 	 */
-	final function removeRecord(stdClass $params) {
+	final function removeRecord($params) {
 		/** Process the request */
 		if(empty($params->item) || empty($params->item_id)) {
 			return "denied";
@@ -1596,7 +1596,7 @@ class Myschoolgh extends Models {
 		
 		return $string;
 
-		} catch(DivisionByZeroError $e) {
+		} catch(\DivisionByZeroError $e) {
 			return "Error: {$e->getMessage()}";
 		}
 	

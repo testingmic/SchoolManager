@@ -31,7 +31,7 @@ $fees_category_array_list = $feesObject->category_list($category_param);
 $hasAdd = $accessObject->hasAccess("add", "fees_category");
 $hasUpdate = $accessObject->hasAccess("update", "fees_category");
 
-$sections = "";
+$fees_cateories = "";
 $category_array_list = [];
 foreach($fees_category_array_list["data"] as $key => $each) {
     
@@ -46,16 +46,16 @@ foreach($fees_category_array_list["data"] as $key => $each) {
     // boarding fees label
     $houseLabel = $each->boarding_fees == "Yes" ? "<span class='badge badge-success'>Yes</span>" : "<span class='badge badge-danger'>No</span>";
 
-    $sections .= "<tr data-row_id=\"{$each->id}\">";
-    $sections .= "<td>".($key+1)."</td>";
-    $sections .= "<td>{$each->name}</td>";
-    $sections .= "<td>{$each->code}</td>";
-    $sections .= "<td>{$each->frequency}</td>";
-    $sections .= "<td>{$houseLabel}</td>";
-    $sections .= "<td>{$each->amount}</td>";
-    $sections .= "<td>{$each->fees_count}</td>";
-    $sections .= "<td align='center'>{$action}</td>";
-    $sections .= "</tr>";
+    $fees_cateories .= "<tr data-row_id=\"{$each->id}\">";
+    $fees_cateories .= "<td>".($key+1)."</td>";
+    $fees_cateories .= "<td>{$each->name}</td>";
+    $fees_cateories .= "<td>{$each->code}</td>";
+    $fees_cateories .= "<td>{$each->frequency}</td>";
+    $fees_cateories .= "<td>{$houseLabel}</td>";
+    $fees_cateories .= "<td>{$each->amount}</td>";
+    $fees_cateories .= "<td>{$each->fees_count}</td>";
+    $fees_cateories .= "<td align='center'>{$action}</td>";
+    $fees_cateories .= "</tr>";
 }
 
 // append the questions list to the array to be returned
@@ -94,7 +94,7 @@ $response->html = '
                                         <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>
-                                <tbody>'.$sections.'</tbody>
+                                <tbody>'.$fees_cateories.'</tbody>
                             </table>
                         </div>
                     </div>
@@ -129,7 +129,7 @@ $response->html = '
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="frequency">Frequency</label>
-                                    <select name="frequency" id="frequency" class="form-control">
+                                    <select name="frequency" id="frequency" class="form-control selectpicker" data-width="100%">
                                         <option value="">Select Frequency</option>
                                         '.implode("", array_map(function($each) {
                                             return "<option value=\"{$each}\">{$each}</option>";
@@ -146,7 +146,7 @@ $response->html = '
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="boarding_fees">Boarding Fees</label>
-                                    <select name="boarding_fees" id="boarding_fees" class="form-control">
+                                    <select name="boarding_fees" id="boarding_fees" class="form-control selectpicker" data-width="100%">
                                         <option value="No">No</option>
                                         <option value="Yes">Yes</option>
                                     </select>

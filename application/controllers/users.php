@@ -139,9 +139,10 @@ class Users extends Myschoolgh {
 
 			// set the columns to load
 			$params->columns = "a.id, a.client_id, a.unique_id, a.item_id AS user_id, a.name, a.scholarship_status,
-				a.user_type, a.phone_number, a.class_id, a.email, a.image, a.gender, a.user_status, a.can_change_status, cl.payment_module, cl.name class_name, dp.id AS department_id,
-				 dp.name AS department_name, sc.id AS section_id, sc.name AS section_name, 
-				 a.enrollment_date, a.position, a.date_of_birth";
+				a.user_type, a.phone_number, a.class_id, a.email, a.image, a.gender, a.user_status, a.can_change_status, 
+				cl.payment_module, cl.name class_name, dp.id AS department_id,
+				dp.name AS department_name, sc.id AS section_id, sc.name AS section_name, 
+				a.enrollment_date, a.position, a.date_of_birth";
 			
 			if(!isset($params->minified) || (isset($params->minified) && $params->minified === "no_status_filters")) {
 				$params->columns .= ", (
@@ -175,14 +176,25 @@ class Users extends Myschoolgh {
 				// set the user type
 				$params->query .= !empty($params->user_type) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
 			}
+
+			// append the join to the query
+			$appendJoin = "LEFT JOIN departments dp ON dp.id = a.department
+				LEFT JOIN sections sc ON sc.id = a.section
+				LEFT JOIN users_arrears ar ON ar.student_id = a.item_id";
+
+			if(!empty($params->quick_list)) {
+				$params->columns = "a.id, a.unique_id, a.item_id AS user_id, a.name, a.class_id, cl.name AS class, a.user_type AS type, a.date_of_birth AS dob, a.gender";
+				$appendJoin = "";
+			}
+
+			// if the quick list was parsed then set the minor dataset to true
+			$minorDataset = !empty($params->quick_list);
 			
 			// prepare and execute the statement
 			$sql = $this->db->prepare("SELECT {$params->columns} 
 				FROM users a
 				LEFT JOIN classes cl ON cl.id = a.class_id
-				LEFT JOIN departments dp ON dp.id = a.department
-				LEFT JOIN sections sc ON sc.id = a.section
-				LEFT JOIN users_arrears ar ON ar.student_id = a.item_id
+				{$appendJoin}
 				WHERE {$params->query} AND a.deleted = '0' AND a.status = '1' ORDER BY a.name LIMIT {$params->limit}
 			");
 			$sql->execute();
@@ -197,7 +209,7 @@ class Users extends Myschoolgh {
 				}
 
 				// if the user_type is a student
-				if(($result->user_type === "student") && !$groupByUserType) {
+				if(!empty($result->user_type) && (($result->user_type === "student") && !$groupByUserType) && !$minorDataset) {
 				    // set the init values
 				    $result->debt = 0.00;
 				    $result->term_bill = 0.00;
@@ -231,8 +243,10 @@ class Users extends Myschoolgh {
 					$result->is_present = false;
 				}
 
-				$result->can_change_status = (int) $result->can_change_status;
-				$result->the_status_label = $this->the_status_label($result->user_status, "p-1");
+				if(!$minorDataset) {
+					$result->can_change_status = (int) $result->can_change_status;
+					$result->the_status_label = $this->the_status_label($result->user_status, "p-1");
+				}
 
 				if($groupByUserType) {
 					$data[$result->user_type][] = $result;
@@ -253,6 +267,21 @@ class Users extends Myschoolgh {
 			return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];
 		}
 
+	}
+
+	/**
+	 * Global function to search for item based on the predefined columns and values parsed
+	 * 
+	 * @param StdClass $params
+	 * @param String $params->q		The search query
+	 * @param String $params->user_type		The type of the user to load the result
+	 * 
+	 * @return Object
+	 */
+	public function search($params = null) {
+		$params->minified = true;
+		$params->quick_list = true;
+		return $this->quick_list($params);
 	}
 	
 	/**
