@@ -2043,7 +2043,7 @@ class Users extends Myschoolgh {
 			$url_link = ($params->user_type == "student") ? "{$this->baseUrl}student/{$params->user_id}" : null;
 
 			// append the redirection url
-			if($url_link) { $additional = ["href" => $url_link]; }
+			// if($url_link) { $additional = ["href" => $url_link]; }
 
 			#record the password change request
             return ["code" => 200, "data" => ucfirst($redirect). " record successfully updated.", "additional" => $additional ];

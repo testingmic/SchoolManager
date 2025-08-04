@@ -4024,7 +4024,7 @@ class Forms extends Myschoolgh {
                 <div class="form-group">
                     <div class="d-flex pb-3 justify-content-between">
                         <div><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">GRADING SYSTEM</h5></div>
-                        <div><button type="button" title="Add new Grading" onclick="return add_grading_mark()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>
+                        <div><button type="button" title="Add new Grading" onclick="return add_grading_mark()" class="btn btn-outline-primary"><i class="fa fa-plus"></i> Add Grade</button></div>
                     </div>
                     <div id="grading_system_list">'.$grading_list.'</div>
                 </div>
@@ -4194,7 +4194,7 @@ class Forms extends Myschoolgh {
             <div class="col-lg-9">
                 <div class="d-flex pb-3 justify-content-between">
                     <div><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">EXAMS RESULTS STRUCTURE</h5></div>
-                    <div><button type="button" title="Add new Column" onclick="return add_result_comment()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>
+                    <div><button type="button" title="Add new Column" onclick="return add_result_comment()" class="btn btn-outline-primary"><i class="fa fa-plus"></i> Add Remark</button></div>
                 </div>
             </div>
             <div class="col-lg-9 mb-3 col-md-12">

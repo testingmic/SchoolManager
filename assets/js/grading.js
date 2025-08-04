@@ -31,7 +31,7 @@ var add_grading_mark = () => {
             </div>
             <div class='col-md-1'>
                 <label>&nbsp;</label><br>
-                <button type='button' onclick='return remove_grading_mark(${rows_count})' data-grading_id='${rows_count}' class='btn btn-outline-danger'><i class='fa fa-trash'></i></button>
+                <button type='button' onclick='return remove_grading_mark(${rows_count})' data-grading_id='${rows_count}' class='btn btn-block btn-outline-danger'><i class='fa fa-trash'></i></button>
             </div>
         </div>`;
     $(`button[id="save_grading_mark"]`).removeClass("hidden");

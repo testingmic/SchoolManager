@@ -29,7 +29,9 @@ $.panelIconClosed = 'icon-arrow-down';
 
 $.minTimetableTime = '7:00 AM';
 $.maxTimetableTime = '6:00 PM';
-$.array_stream = {};
+$.array_stream = {
+    'url_link': 'main/',
+};
 $.array_stream["document_breadcrumbs"] = {};
 $.today = new Date().toISOString().slice(0, 10);
 
@@ -352,6 +354,12 @@ var trigger_form_submit = () => {
                                 text: response.data.result,
                                 icon: "success",
                             });
+                            console.log(theButton.attr("href"))
+                            if (theButton.attr("href") !== undefined) {
+                                setTimeout(() => {
+                                    loadPage(theButton.attr("href"));
+                                }, refresh_seconds);
+                            }
                             if (response.data.additional) {
                                 if (response.data.additional.clear !== undefined) {
                                     if ($(`form[class="ajax-data-form"]${appendForm_Id} textarea[name="faketext"]`).length) {
@@ -401,15 +409,9 @@ var trigger_form_submit = () => {
                                     });
                                 }
                                 if (typeof response.data.additional.href !== 'undefined') {
-                                    if (theButton.attr("href") !== undefined) {
-                                        setTimeout(() => {
-                                            loadPage(theButton.attr("href"));
-                                        }, refresh_seconds);
-                                    } else {
-                                        setTimeout(() => {
-                                            loadPage(response.data.additional.href);
-                                        }, refresh_seconds);
-                                    }
+                                    setTimeout(() => {
+                                        loadPage(response.data.additional.href);
+                                    }, refresh_seconds);
                                 }
                                 if (typeof response.data.additional.data !== 'undefined') {
                                     preload_AjaxData(response.data.additional.data);
@@ -521,6 +523,11 @@ var ajax_trigger_form_submit = () => {
                                 text: response.data.result,
                                 icon: "success",
                             });
+                            if(theButton.attr("href")) {
+                                setTimeout(() => {
+                                    loadPage(theButton.attr("href"), true);
+                                }, refresh_seconds);
+                            }
                             if (response.data.additional) {
                                 if (response.data.additional.clear !== undefined) {
                                     if ($(`textarea[name="faketext"]`).length) {
@@ -545,15 +552,9 @@ var ajax_trigger_form_submit = () => {
                                     });
                                 }
                                 if (response.data.additional.href !== undefined) {
-                                    if (theButton.attr("href") !== undefined) {
-                                        setTimeout(() => {
-                                            loadPage(theButton.attr("href"));
-                                        }, refresh_seconds);
-                                    } else {
-                                        setTimeout(() => {
-                                            loadPage(response.data.additional.href);
-                                        }, refresh_seconds);
-                                    }
+                                    setTimeout(() => {
+                                        loadPage(response.data.additional.href);
+                                    }, refresh_seconds);
                                 }
                                 if (response.data.additional.data !== undefined) {
                                     preload_AjaxData(response.data.additional.data);

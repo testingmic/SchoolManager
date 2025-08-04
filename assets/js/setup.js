@@ -85,34 +85,30 @@ var trigger_form_submit = () => {
                                 text: response.data.result,
                                 icon: "success",
                             });
+                            if (theButton.attr("href") !== undefined) {
+                                setTimeout(() => {
+                                    window.location.href = `${theButton.attr("href")}`;
+                                }, refresh_seconds);
+                            } 
                             if (response.data.additional) {
-                                if (response.data.additional.clear !== undefined) {
-
-                                }
-                                if (response.data.additional.append !== undefined) {
+                                if (typeof response.data.additional.append !== 'undefined') {
                                     $(`div[id="${response.data.additional.append.div_id}"]`).html(response.data.additional.append.data);
                                 }
-                                if (response.data.additional.record !== undefined) {
+                                if (typeof response.data.additional.record !== 'undefined') {
                                     $.each(response.data.additional.record, function(ie, iv) {
                                         $(`form[id="${the_form_id}"] input[name="${ie}"]`).val(iv);
                                         $(`[data-record="${ie}"]`).html(iv);
                                     });
                                 }
-                                if (response.data.additional.href !== undefined) {
-                                    if (theButton.attr("href") !== undefined) {
-                                        setTimeout(() => {
-                                            window.location.href = `${theButton.attr("href")}`;
-                                        }, refresh_seconds);
-                                    } else {
-                                        setTimeout(() => {
-                                            window.location.href = `${response.data.additional.href}`;
-                                        }, refresh_seconds);
-                                    }
+                                if (typeof response.data.additional.href !== 'undefined') {
+                                    setTimeout(() => {
+                                        window.location.href = `${response.data.additional.href}`;
+                                    }, refresh_seconds);
                                 }
                             }
                             $(`form[id="${the_form_id}"] div[class~="file-preview"]`).html("");
                         } else {
-                            if (response.data.result !== undefined) {
+                            if (typeof response.data.result !== 'undefined') {
                                 swal({
                                     position: 'top',
                                     text: response.data.result,

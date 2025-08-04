@@ -218,6 +218,7 @@ var appVersion = "<?= version() ?>";
 <?php } else { ?>
 <script src="<?= $baseUrl; ?>assets/js/app.js?v=<?= version() ?>"></script>
 <?php if(!in_array($defaultClientData->client_state, ["Expired", "Suspended"])) { ?>
+    <script src="<?= $baseUrl; ?>assets/js/upload.js?v=<?= version() ?>"></script>
     <script src="<?= $baseUrl; ?>assets/js/setup.js?v=<?= version() ?>"></script>
 <?php } ?>
 <script src="<?= $baseUrl; ?>assets/js/grading.js?v=<?= version() ?>"></script>

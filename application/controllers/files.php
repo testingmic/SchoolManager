@@ -584,7 +584,7 @@ class Files extends Myschoolgh {
                                 <span class=\"text-{$color}\">
                                     <i class=\"{$this->favicon_array[$fileInfo["extension"]]} fa-1x font-20\"></i>
                                 </span>
-                                <a title=\"Click to Download\" target=\"_blank\" style=\"padding:5px;font-18\" href=\"{$this->baseUrl}download?file={$file_to_download}\">
+                                <a title=\"Click to Download\" class=\"text-black\" target=\"_blank\" style=\"padding:5px;font-18\" href=\"{$this->baseUrl}download?file={$file_to_download}\">
                                     {$fileInfo["name"]}
                                 </a>
                             </strong> ({$n_FileSize})";
@@ -743,8 +743,8 @@ class Files extends Myschoolgh {
             } elseif(in_array($each_file["fifth"], ['txt', 'json', 'rtf', 'sql', 'css', 'php'])) {
                 $color = 'default';
             }
-            $attachments .= "<div title=\"Click to download the file: {$each_file["second"]}.{$each_file["fifth"]}\" class=\"col-md-12 pb-1 text-left\" data-document-link=\"{$each_file["first"]}\">";
-            $attachments .= "<div class=\"bg-inverse-primary p-2\"><strong onclick=\"return download_ajax_temp_file('{$module}','{$each_file["first"]}');\" class=\"cursor download-temp-file\"><span class=\"text-{$color}\"><i class=\"{$this->favicon_array[$each_file["fifth"]]} fa-1x\"></i></span> ".substr($each_file["second"], 0, 40)."</strong> ({$each_file["forth"]})";
+            $attachments .= "<div title=\"Click to download the file: {$each_file["second"]}.{$each_file["fifth"]}\" class=\"col-md-12 pb-1 text-left text-black\" data-document-link=\"{$each_file["first"]}\">";
+            $attachments .= "<div class=\"bg-inverse-primary p-2\"><span onclick=\"return download_ajax_temp_file('{$module}','{$each_file["first"]}');\" class=\"cursor download-temp-file text-black\"><span class=\"text-{$color}\"><i class=\"{$this->favicon_array[$each_file["fifth"]]} fa-1x\"></i></span> ".substr($each_file["second"], 0, 40)."</span> ({$each_file["forth"]})";
             $attachments .= "<span class=\"float-right\"><button href=\"#\" onclick=\"return delete_ajax_file_uploaded('{$module}','{$each_file["first"]}')\" data-document-module=\"{$module}\" data-document-link=\"{$each_file["first"]}\" style=\"padding: 0.1rem 0.4rem;\" class=\"btn btn-outline-danger btn-sm delete-attachment-file\"><i class=\"fas fa-trash ml-1\"></i></button></span>";
             $attachments .= "</div>";
             $attachments .= "</div>";

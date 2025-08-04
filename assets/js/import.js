@@ -106,7 +106,7 @@ var file_checker_text_handler = (column) => {
     } else {
         $(`div[data-csv_import_column="${column}"] button[class~="upload-button"]`).css("display", "inline-block").removeClass("hidden");
         $(`div[data-csv_import_column="${column}"] button[class~="cancel-button"]`).css("display", "inline-block").removeClass("hidden");
-        $(`div[data-csv_import_column="${column}"] div[class~="file-checker"]`).html(`<h2>All matched! Ready for us to upload the ${column}s information.</h2>`);
+        $(`div[data-csv_import_column="${column}"] div[class~="file-checker"]`).html(`<h2 class="text-black">All matched! Ready for us to upload the ${column}s information.</h2>`);
     }
 
     $(`div[data-csv_import_column="${column}"] div[class~="upload-text"]`).removeClass('hidden');
@@ -126,7 +126,7 @@ var populate_select_fields = (headerData, mainContent, column) => {
 
     let h_count = 0;
     $.each(headerData, async function(i, e) {
-        htmlData = `<div class="col-md-6 col-sm-12 col-lg-3" style="min-width:250px" data-row="${iv}">
+        htmlData = `<div class="col-md-6 col-sm-12 col-lg-3" style="min-width:200px" data-row="${iv}">
             <div class="form-row">
             <div class="text-center" style="width:100%"></div>
             <select data-name="${e}" data-id="${i}" name="first_col_${iv}" id="first_col_${iv}" class="form-control selectpicker">

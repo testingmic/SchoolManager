@@ -25,7 +25,7 @@ $clientPrefs = $clientData->client_preferences;
 $clientName = $clientData->client_name;
 
 // confirm that the account is active
-$isActiveAccount = (bool) ($clientData->client_state === "Active");
+$isActiveAccount = (bool) ($clientData->client_state == "Active");
 $isSuspendedAccount = (bool) (in_array($clientData->client_state, ["Suspended", "Expired", "Propagation"]));
 
 // get the variables for the accessobject

@@ -5,6 +5,7 @@ class Forms extends Myschoolgh {
     public $thisUser;
     public $hasit;
     public $userPrefs;
+    public $isActiveAccount = true;
     public $default_height = 'height-200';
 
     public function __construct() {
@@ -1185,9 +1186,9 @@ class Forms extends Myschoolgh {
                         <div class=\"file_attachment_url\" data-url=\"{$this->baseUrl}api/files/attachments\"></div>
                     </div>
                     <div class=\"".(isset($params->class) ? $params->class : "col-md-12")." text-left\">
-                        <div class='d-flex justify-content-between'>";
+                        <div class='d-flex justify-content-between items-center'>";
                         if(!isset($params->no_title)) {
-                            $html_content .= "<label>Attachments ".(empty($params->no_notice) ? "<small class='text-danger d-none d-sm-block'>(Max size <strong>{$this->max_attachment_size}MB</strong>)</small>" : null)."</label><br>";
+                            $html_content .= "<div><label>Attachments ".(empty($params->no_notice) ? "<small class='text-danger d-none d-sm-block'>(Max size <strong>{$this->max_attachment_size}MB</strong>)</small>" : null)."</label></div>";
                         }
                     $html_content .= "
                             <div class=\"ml-3\">
@@ -3671,7 +3672,7 @@ class Forms extends Myschoolgh {
 
             <div class="row">
                 <div class="col-lg-12 text-right">
-                    <button type="button-submit" data-form_id="'.$form_id.'" href="'.$this->baseUrl.'profile" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                    <button type="button-submit" data-form_id="'.$form_id.'" href="'.$this->baseUrl.''.($this->isActiveAccount ? "profile" : "main/general").'" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>
         </form>';
@@ -3741,6 +3742,7 @@ class Forms extends Myschoolgh {
             "userData" => $client_data,
             "label" => "list",
             "is_deletable" => true,
+            "ismultiple" => true,
             "module" => "settings_calendar",
             "item_id" => $client_data->client_id,
             "accept" => implode(",", [".pdf"]),
@@ -3753,6 +3755,7 @@ class Forms extends Myschoolgh {
             "accept" => ".pdf",
             "module" => "settings_calendar",
             "userData" => $client_data,
+            "ismultiple" => true,
             "item_id" => $client_data->client_id,
             "preview_file" => true
         ];
@@ -3878,7 +3881,7 @@ class Forms extends Myschoolgh {
                         $general .= '
                             <div style="padding-left: 3.5rem;" class="custom-control col-lg-12 custom-switch switch-primary">
                                 <input type="checkbox" name="general[opening_days][]" value="'.ucfirst($today).'" class="custom-control-input" id="'.$today.'" '.(in_array($today, $openingDays) ? "checked=\"checked\"" : null).'>
-                                <label class="custom-control-label" for="'.$today.'">'.$today.'</label>
+                                <label class="custom-control-label text-black" for="'.$today.'">'.$today.'</label>
                             </div>';
                     }
                     $general .= '
@@ -3902,18 +3905,18 @@ class Forms extends Myschoolgh {
                 <div class="form-group">
                     <div class="custom-control col-lg-12 custom-switch switch-primary">
                         <input type="checkbox" id="print_receipt" name="general[labels][print_receipt]" value="1" class="custom-control-input" '.((isset($prefs->labels->print_receipt) && $prefs->labels->print_receipt === "1") ? "checked=\"checked\"" : null).'>
-                        <label class="custom-control-label" for="print_receipt">Print Receipt After Payment</label>
+                        <label class="custom-control-label text-black" for="print_receipt">Print Receipt After Payment</label>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="custom-control col-lg-12 custom-switch switch-primary">
                         <input type="checkbox" id="send_receipt" name="general[labels][send_receipt]" value="1" class="custom-control-input" '.((isset($prefs->labels->send_receipt) && $prefs->labels->send_receipt === "1") ? "checked=\"checked\"" : null).'>
-                        <label class="custom-control-label" for="send_receipt">Send Receipt After Payment via SMS</label>
+                        <label class="custom-control-label text-black" for="send_receipt">Send Receipt After Payment via SMS</label>
                     </div>
                 </div>
             </div>
             <div class="col-md-12 text-right">
-                <button type="button-submit" data-form_id="'.$form_id.'" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                <button type="button-submit" href="'.$this->baseUrl.'main/academic" data-form_id="'.$form_id.'" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
             </div>
         </form></div>';
         $forms["general"] = $general;
@@ -4057,7 +4060,7 @@ class Forms extends Myschoolgh {
                 </div>
             </div>
             <div class="col-md-12 text-right">
-                <button type="button-submit" data-form_id="'.$form_id.'" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                <button type="button-submit" href="'.$this->baseUrl.'main/students" data-form_id="'.$form_id.'" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
             </div>
         </form></div>';
         $forms["calendar"] = $calendar;
@@ -4079,16 +4082,16 @@ class Forms extends Myschoolgh {
             <div data-csv_import_column="'.$key.'">
                 <form autocomplete="Off" method="post" action="'.$this->baseUrl.'api/account/import" class="csvDataImportForm" enctype="multipart/form-data">
                     <div class="row">
-                        <div id="dropify-space" class="col-md-8  mt-5 text-center m-auto border pt-4 border-white">
+                        <div id="dropify-space" class="col-md-8  text-center m-auto border border-white">
                             <div class="form-content-loader" style="display: none;">
                                 <div class="offline-content text-center">
                                     <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                 </div>
                             </div>
-                            <h2>Upload a CSV to import <strong>'.ucwords($key).' data</strong></h2>
+                            <h2 class="text-black">Upload a CSV to import <strong>'.ucwords($key).' data</strong></h2>
                             <button type="button" class="btn btn-outline-primary" data-download_button="'.$key.'" onclick="return download_sample_csv(\''.$key.'\')"><i class="fa fa-download"></i> Download Sample CSV File</button>
-                            <hr>
-                            <div class="form-controls col-md-4 m-auto">
+                            <hr class="mt-2">
+                            <div class="form-controls items-center d-inline-block mt-2">
                                 <div class="form-group text-center">
                                     <input style="height: 50px; line-height: 25px" data-file_unique_id="'.$key.'" accept=".csv" type="file" name="'.$key.'_csv_file" id="'.$key.'_csv_file" class="form-control btn bg-purple text-white no-border text-white cursor">
                                 </div>
@@ -4096,9 +4099,9 @@ class Forms extends Myschoolgh {
                         </div>
                     </div>
                 </form>
-                <div class="row justify-content-center p-4 text-center">
+                <div class="row justify-content-center text-center">
                     <div class="col-lg-8 p-3 upload-text hidden">
-                        <h2>Upload <strong>'.ucwords($key).'</strong></h2>
+                        <h2 class="text-black">Upload <strong>'.ucwords($key).'</strong></h2>
                         <div class="csv-rows-counter text-success font-16"></div>
                     </div>
                     <div class="col-lg-8 file-checker"></div>
@@ -4155,7 +4158,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class='col-md-1'>
                     <label>&nbsp;</label><br>
-                    <button type='button' onclick='return remove_grading_mark(1)' class='btn btn-outline-danger'><i class='fa fa-trash'></i></button>
+                    <button type='button' onclick='return remove_grading_mark(1)' class='btn btn-block btn-outline-danger'><i class='fa fa-trash'></i></button>
                 </div>
             </div>";
         } else {
@@ -4181,7 +4184,7 @@ class Forms extends Myschoolgh {
                         </div>
                         <div class='col-md-1'>
                             <label>&nbsp;</label><br>
-                            <button type='button' onclick='return remove_grading_mark({$key})' class='btn btn-outline-danger'><i class='fa fa-trash'></i></button>
+                            <button type='button' onclick='return remove_grading_mark({$key})' class='btn btn-block btn-outline-danger'><i class='fa fa-trash'></i></button>
                         </div>
                     </div>";
             }
@@ -4228,14 +4231,14 @@ class Forms extends Myschoolgh {
                 <div class="form-group">
                     <div class="d-flex pb-3 justify-content-between">
                         <div><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">GRADING SYSTEM</h5></div>
-                        <div><button type="button" title="Add new Grading" onclick="return add_grading_mark()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>
+                        <div><button type="button" title="Add new Grading" onclick="return add_grading_mark()" class="btn btn-outline-primary"><i class="fa fa-plus"></i> Add Grade</button></div>
                     </div>
                     <div id="grading_system_list">'.$grading_list.'</div>
                 </div>
             </div>
             <div class="col-lg-12 mb-3 col-md-12">
                 <div class="form-group text-center">
-                    <button type="button" onclick="return save_grading_mark()" id="save_grading_mark" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Grades</button>
+                    <button type="button" href="'.$this->baseUrl.'main/results"  onclick="return save_grading_mark()" id="save_grading_mark" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Grades</button>
                 </div>
             </div>
         </div>';
@@ -4425,7 +4428,7 @@ class Forms extends Myschoolgh {
             <div class="col-lg-11">
                 <div class="d-flex pb-3 justify-content-between">
                     <div><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">EXAMS RESULTS STRUCTURE</h5></div>
-                    <div class="mt-2"><button type="button" title="Add new Column" onclick="return add_result_comment()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>
+                    <div class="mt-2"><button type="button" title="Add new Column" onclick="return add_result_comment()" class="btn btn-outline-primary"><i class="fa fa-plus"></i> Add Remark</button></div>
                 </div>
             </div>
             <div class="col-lg-11 mb-3 col-md-12">
@@ -4436,7 +4439,7 @@ class Forms extends Myschoolgh {
             </div>
             <div class="col-lg-11 pt-3 col-md-12 border-top">
                 <div class="form-group text-right">
-                    <button type="button" onclick="return save_results_remarks()" id="save_results_remarks" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Remarks</button>
+                    <button type="button" href="'.$this->baseUrl.'main/complete"  onclick="return save_results_remarks()" id="save_results_remarks" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Remarks</button>
                 </div>
             </div>
         </div>';

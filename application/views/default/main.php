@@ -60,6 +60,7 @@ if(empty($urlParse['path']) || !empty($urlParse['path']) && strlen($urlParse['pa
             "user_status" => ["Pending", "Active"],
             "full_details" => true,
             "no_limit" => 1,
+            "ismultiple" => true,
             "user_type" => $defaultUser->user_type
         ];
         $data = load_class("users", "controllers")->list($staff_param)["data"];
@@ -80,16 +81,34 @@ if(empty($urlParse['path']) || !empty($urlParse['path']) && strlen($urlParse['pa
         ?>
         <div class="main-content" id="pagecontent">
             <?= $myClass->async_notification(); ?>
-            <div class="card bg-gradient-to-br from-blue-500 to-purple-600 pb-3">
-                <div class="card-body mb-0 pb-0">
-                    <h1 class="text-center font-25 text-white text-uppercase"><?= $clientData->client_name ?></h1>
-                </div>
-                <div class="col-lg-12">
-                    <p class="text-center text-white font-20">Thank you for creating an account with <strong><?= $appName ?></strong>.
-                        Please take a moment to complete the account setup process.
+            
+            <!-- Welcome Header Section -->
+            <div class="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-3xl shadow-2xl mb-8">
+                <!-- Background decorative elements -->
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>
+                <div class="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full translate-y-12 -translate-x-12 animate-pulse" style="animation-delay: -2s;"></div>
+                
+                <div class="relative px-8 py-4 text-center">
+                    <p class="text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
+                        Thank you for choosing <strong class="text-white"><?= $appName ?></strong>. 
+                        Let's get your school set up and ready to go in just a few simple steps.
                     </p>
+                    
+                    <div class="mt-1 flex items-center justify-center space-x-2">
+                        <div class="flex items-center text-blue-100">
+                            <i class="fas fa-clock text-lg mr-2"></i>
+                            <span class="font-medium">Setup takes ~5 minutes</span>
+                        </div>
+                        <div class="w-px h-6 bg-blue-300"></div>
+                        <div class="flex items-center text-blue-100">
+                            <i class="fas fa-shield-alt text-lg mr-2"></i>
+                            <span class="font-medium">Secure & Private</span>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <!-- Setup Form Section -->
             <section class="section">
                 <div class="row">
                     <div class="col-lg-12">
