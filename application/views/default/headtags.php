@@ -116,6 +116,13 @@ load_helpers(['menu_helper']);
             myPrefs = <?= json_encode($userData->client->client_preferences) ?>;
     </script>
     <?= $myClass->google_analytics_code ?>
+    <?php if(!$isActiveAccount) { ?>
+        <style>
+            .main-content {
+                padding-left: 30px;
+            }
+        </style>
+    <?php } ?>
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-indigo-100 via-blue-50">
 	<div class="loader"></div>
@@ -167,9 +174,11 @@ load_helpers(['menu_helper']);
             <nav class="navbar navbar-expand-lg main-navbar fixed">
                 <div class="form-inline mr-auto">
                     <ul class="mb-3 navbar-nav mr-3">
+                        <?php if($isActiveAccount) { ?>
                         <li><a href="#" data-toggle="sidebar" title="Hide/Display the Side Menubar" class="nav-link mt-2 nav-link-lg collapse-btn"><i class="fas fa-bars"></i></a></li>
                         <!-- <li><a href="#" class="nav-link nav-link-lg mt-2 fullscreen-btn" title="Maximize to Fullscreen Mode"><i class="fas fa-expand"></i></a></li> -->
                         <li><a href="#" class="nav-link nav-link-lg mt-2 hidden" id="history-refresh" title="Reload Page"><i class="fas fa-redo-alt"></i></a></li>
+                        <?php } ?>
                         <?php if($isActiveAccount) { ?>
                         <li class="border-left text-white d-none d-md-block">
                             <?php if(!$isSupport) { ?>
@@ -252,20 +261,22 @@ load_helpers(['menu_helper']);
                     </a>
                     <div class="dropdown-menu dropdown-menu-right mt-1">
                     <div class="dropdown-title"><?= !empty($userData->name) ? $userData->name : $clientData->client_name ?></div>
+                    <a href="<?= $baseUrl ?>profile" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
+                        <i class="far fa-user"></i> Profile
+                    </a>
                     <?php if($isActiveAccount) { ?>
-                        <a href="<?= $baseUrl ?>profile" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
-                            <i class="far fa-user"></i> Profile
-                        </a>
                         <?php if($accessObject->hasAccess("activities", "settings")) { ?>
                         <a href="<?= $baseUrl ?>timeline" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
                             <i class="fas fa-align-left"></i> Activities
                         </a>
                         <?php } ?>
-                        <?php if($accessObject->hasAccess("login_history", "settings")) { ?>
-                        <a href="<?= $baseUrl ?>login-history" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
-                            <i class="fas fa-lock"></i> Login History
-                        </a>
-                        <?php } ?>
+                    <?php } ?>
+                    <?php if($accessObject->hasAccess("login_history", "settings")) { ?>
+                    <a href="<?= $baseUrl ?>login-history" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
+                        <i class="fas fa-lock"></i> Login History
+                    </a>
+                    <?php } ?>
+                    <?php if($isActiveAccount) { ?>
                         <?php if($accessObject->hasAccess("manage", "settings") && !$isSupport) { ?>
                         <a href="<?= $baseUrl ?>settings" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
                             <i class="fas fa-cog"></i> Settings
@@ -280,7 +291,7 @@ load_helpers(['menu_helper']);
                     <a title="Knowledge Base" href="<?= $baseUrl ?>knowledgebase" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
                         <i class="fa fa-book-open"></i> Knowledge Base
                     </a>
-                    <?php if($accessObject->hasAccess("manage", "settings") && !$isSupport) { ?>
+                    <?php if($accessObject->hasAccess("manage", "settings") && !$isSupport && $isActiveAccount) { ?>
                         <a href="<?= $baseUrl ?>schools" class="dropdown-item has-icon hover:bg-gradient-to-br hover:from-purple-500 hover:via-purple-600 hover:to-blue-600 hover:text-white">
                             <i class="fas fa-wrench"></i> <span class="mr-3">Account Setup</span> 
                             <?= $endPermission && isset($defaultUser->appPrefs) && !empty($defaultUser->appPrefs->termEnded) ? '<span class="notification beep"></span>' : null ?>
@@ -300,6 +311,7 @@ load_helpers(['menu_helper']);
                     <strong><?= $session->is_readonly_academic_year; ?></strong>
                 </div>
             <?php } ?>
+            <?php if($isActiveAccount) { ?>
             <div class="main-sidebar sidebar-style-2 sidebar-bg">
                 <aside id="sidebar-wrapper">
 
@@ -325,9 +337,10 @@ load_helpers(['menu_helper']);
                             $menu_function();
                         }
                         ?>
-                        <?php if($isSchool && $isActiveAccount && in_array("live_chat", $clientFeatures)) { ?>
+                        <?php if($isSchool && in_array("live_chat", $clientFeatures)) { ?>
                         <li class="mb-5"><a href="<?= $baseUrl ?>chat" class="nav-link"><i class="fas fa-envelope-open-text"></i><span>Live Chat</span></a></li>
                         <?php } ?>
                     </ul>
                 </aside>
             </div>
+            <?php } ?>

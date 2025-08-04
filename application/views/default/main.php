@@ -91,11 +91,10 @@ if(empty($urlParse['path']) || !empty($urlParse['path']) && strlen($urlParse['pa
                 </div>
             </div>
             <section class="section">
-                
                 <div class="row">
                     <div class="col-lg-12">
                         <?php  if(in_array($clientData->client_state, ["Activated", "Pending", "Complete"])) { ?>
-                            <?= activated_form($the_form, $clientData->client_state) ?>
+                            <?= activated_form($the_form, $clientData->client_state, false) ?>
                         <?php } ?>
                     </div>
                 </div>

@@ -1,32 +1,34 @@
-<?php function activated_form($the_form, $client_state) { global $notReady, $formsObj, $baseUrl, $userData; ?>
+<?php function activated_form($the_form, $client_state, $isActiveAccount = false) { global $notReady, $formsObj, $baseUrl, $userData; ?>
 <div class="card">
     <div class="card-body">
         <div class="padding-20">
             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                 <?php if(in_array($client_state, ["Activated", "Pending"])) { ?>
                 <li class="nav-item">
-                    <a class="nav-link active" id="profile-tab2" data-toggle="tab" href="#profile" role="tab" aria-selected="true">User Profile</a>
+                    <a class="nav-link active" id="profile-tab2" data-toggle="tab" href="#profile" role="tab" aria-selected="true"><strong>User Profile</strong></a>
                 </li>
                 <?php } ?>
                 <li class="nav-item">
-                    <a class="nav-link <?= !in_array($client_state, ["Activated", "Pending"]) ? "active" : null ?>" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">School Profile</a>
+                    <a class="nav-link <?= !in_array($client_state, ["Activated", "Pending"]) ? "active" : null ?>" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true"><strong>School Profile</strong></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="academic_calendar-tab2" data-toggle="tab" href="#academic_calendar" role="tab" aria-selected="true">Academic Calendar</a>
+                    <a class="nav-link" id="academic_calendar-tab2" data-toggle="tab" href="#academic_calendar" role="tab" aria-selected="true"><strong>Academic Calendar</strong></a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Grading System</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="results_structure-tab2" data-toggle="tab" href="#results_structure" role="tab" aria-selected="true">Results Structure</a>
-                </li>
+                <?php if($isActiveAccount) { ?>
+                    <li class="nav-item">
+                        <a class="nav-link" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true"><strong>Grading System</strong></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="results_structure-tab2" data-toggle="tab" href="#results_structure" role="tab" aria-selected="true"><strong>Results Structure</strong></a>
+                    </li>
+                <?php } ?>
                 <?php  if(in_array($client_state, ["Activated", "Pending"])) { ?>
                 <li class="nav-item">
-                    <a class="nav-link" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">Import Students</a>
+                    <a class="nav-link" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true"><strong>Import Students</strong></a>
                 </li>
                 <?php } ?>
                 <li class="nav-item">
-                    <a class="nav-link" id="complete-tab2" data-toggle="tab" href="#complete" role="tab" aria-selected="true">Complete</a>
+                    <a class="nav-link" id="complete-tab2" data-toggle="tab" href="#complete" role="tab" aria-selected="true"><strong>Complete</strong></a>
                 </li>
             </ul>
             <div class="tab-content tab-bordered" id="myTab3Content">
@@ -41,24 +43,26 @@
                 <div class="tab-pane fade" id="academic_calendar" role="tabpanel" aria-labelledby="academic_calendar-tab2">
                     <?= $the_form["calendar"] ?? null; ?>
                 </div>
-                <div class="tab-pane fade" id="examination" role="tabpanel" aria-labelledby="examination-tab2">
-                    <?php if($notReady) { ?>
-                        <div class="alert alert-warning text-center">
-                            You must first set the Academic Year and Term to proceed.
-                        </div>
-                    <?php } else { ?>
-                        <?= $the_form["examination"] ?? null; ?>
-                    <?php } ?>
-                </div>                                    
-                <div class="tab-pane fade" id="results_structure" role="tabpanel" aria-labelledby="results_structure-tab2">
-                    <?php if($notReady) { ?>
-                        <div class="alert alert-warning text-center">
-                            You must first set the Academic Year and Term to proceed.
-                        </div>
-                    <?php } else { ?>
-                        <?= $the_form["results_structure"] ?? null; ?>
-                    <?php } ?>
-                </div>
+                <?php if($isActiveAccount) { ?>
+                    <div class="tab-pane fade" id="examination" role="tabpanel" aria-labelledby="examination-tab2">
+                        <?php if($notReady) { ?>
+                            <div class="alert alert-warning text-center">
+                                You must first set the Academic Year and Term to proceed.
+                            </div>
+                        <?php } else { ?>
+                            <?= $the_form["examination"] ?? null; ?>
+                        <?php } ?>
+                    </div> 
+                    <div class="tab-pane fade" id="results_structure" role="tabpanel" aria-labelledby="results_structure-tab2">
+                        <?php if($notReady) { ?>
+                            <div class="alert alert-warning text-center">
+                                You must first set the Academic Year and Term to proceed.
+                            </div>
+                        <?php } else { ?>
+                            <?= $the_form["results_structure"] ?? null; ?>
+                        <?php } ?>
+                    </div>
+                <?php } ?>
                 <?php  if(in_array($client_state, ["Activated", "Pending"])) { ?>
                     <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
                         <?php if($notReady) { ?>
