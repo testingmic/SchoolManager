@@ -10,7 +10,6 @@ class Crons {
 	private $clientId;
 	private $limit = 5000;
     private $baseUrl;
-	private $siteName = "MySchoolGH - EmmallexTech.Com";
 
 	public function __construct() {
 		// INI FILE
@@ -66,8 +65,6 @@ class Crons {
 
             // set the current timestamp
             $timestamp = date("Y-m-d H:i:s");
-
-            print "SELECT * FROM cron_scheduler WHERE status = '0' AND active_date < '{$timestamp}' AND cron_type = 'end_academic_term' ORDER BY id ASC LIMIT 5\n\n";
 
 			// prepare and execute the statement
 			$stmt = $this->db->prepare("SELECT * FROM cron_scheduler WHERE status = '0' AND active_date < '{$timestamp}' AND cron_type = ? ORDER BY id ASC LIMIT 20");

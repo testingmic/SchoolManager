@@ -10,7 +10,6 @@ class Crons {
 	private $ini_data;
 	private $baseUrl;
 	private $limit = 1000;
-	private $siteName = "MySchoolGH - EmmallexTech.Com";
 
 	public function __construct() {
 		// INI FILE
@@ -118,12 +117,17 @@ class Crons {
 
                 // set for fees payment
                 if(isset($prefs->account->fees)) {
-	                if(round($fees_received) >= round($prefs->account->fees)) {
-	                	$query .= ",fees='1'";
-	                }
-	                elseif(round($fees_received) < round($prefs->account->fees)) {
-	                	$query .= ",fees='0'";
-	                }
+					$prefs->account->fees = trim($prefs->account->fees);
+					if(!empty($prefs->account->fees) && !is_null($prefs->account->fees)) {
+						if(!empty($fees_received) && round($fees_received) >= round($prefs->account->fees)) {
+							$query .= ",fees='1'";
+						}
+						elseif(!empty($fees_received) && round($fees_received) < round($prefs->account->fees)) {
+							$query .= ",fees='0'";
+						}
+					} else {
+						$query .= ",fees='0'";
+					}
 	            }
 	            $iqr = "UPDATE clients_accounts_limit SET last_updated=now() {$query} WHERE client_id='{$clientId}' LIMIT 1";
 

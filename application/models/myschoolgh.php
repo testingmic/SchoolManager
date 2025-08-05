@@ -108,7 +108,7 @@ class Myschoolgh extends Models {
 				`departure_date` date NOT NULL,
 				`pickup_by` VARCHAR(12) NOT NULL,
 				`guardian_contact` VARCHAR(64) NOT NULL,
-				`reason` VARCHAR(255) NOT NULL,
+				`reason` VARCHAR(1000) NOT NULL,
 				`return_date` date NOT NULL,
 				`created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 				`last_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
