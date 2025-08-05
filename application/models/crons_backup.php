@@ -7,6 +7,7 @@ class Backup {
     protected $global_tables;
     public $baseUrl;
     public $rootUrl;
+    public $systemRoot;
     public $db;
 
     // construct
@@ -18,6 +19,7 @@ class Backup {
         // set some more variables
         $this->baseUrl = $this->ini_data["base_url"];
         $this->rootUrl = $this->ini_data["root_url"];
+        $this->systemRoot = $this->ini_data["system_root"];
         
     	$this->global_tables = [
     		"banks_list", "blood_groups", "clients_accounts", "clients_packages", "contact", "country", 
@@ -93,7 +95,7 @@ class Backup {
 
         // loop through each client data
         foreach($clients_db as $client => $data) {
-            $today_file = "{$this->rootUrl}application/logs/json/{$client}_".date("Y-m-d").".json";
+            $today_file = "{$this->systemRoot}backups/myschool/{$client}_".date("Y-m-d").".json";
             $ft = fopen($today_file, "w");
             fwrite($ft, json_encode($data));
         }
