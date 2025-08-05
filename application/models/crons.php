@@ -129,8 +129,13 @@ class Crons {
 			$dataToUse = null;
 
 			print "Looping through the emails list.\n";
+
+			$count = 0;
+
 			// looping through the content
 			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+				$count++;
 			    
 				// set the store content
 				$this->userAccount = $result;
@@ -143,7 +148,7 @@ class Crons {
 				// use the content submitted
 				if(!empty($dataToUse)) {
 				    // print progress
-				    print "Data found, processing the recipients list to send\n";
+				    print "{$count}. Data found, processing the recipients list to send\n";
 
 					// convert the recipient list to an array
 					$recipient_list = json_decode($result->recipients_list, true);
@@ -155,7 +160,7 @@ class Crons {
 					// set the mail status to true
 					if($mailing) {
 						$this->db->query("UPDATE users_messaging_list SET sent_status = '1', date_sent=now() WHERE id='{$result->id}' LIMIT 1");
-						print "Mails successfully sent\n";
+						print "--- Mails successfully sent\n";
 					}
 
 				}
