@@ -205,10 +205,8 @@ class Crons {
 
 		print "Setting the configuration params.\n";
 
-		print_r($config);
-
 		// additional settings
-		$mailer->SMTPDebug = SMTP::DEBUG_CLIENT;
+		$mailer->SMTPDebug = SMTP::DEBUG_OFF;
 		$mailer->isSMTP();
 		$mailer->Host = $config->SmtpHost;
 		$mailer->SMTPAuth = true;
