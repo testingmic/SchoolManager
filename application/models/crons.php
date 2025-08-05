@@ -591,8 +591,12 @@ class Crons {
             $data[$result->item_id] = $result;
         }
 
+		$count = 0;
+
         // loop through the results list
         foreach($data as $key => $value) {
+
+			$count++;
             
 			// append the list
 			if(time() > strtotime($value->schedule_time)) {
@@ -612,7 +616,7 @@ class Crons {
 				} elseif($value->type === "email") {
 
 					// get the response of the request
-					$response = $this->send_emails($value->recipient_list, $value->subject, $value->message);
+					$response = $this->send_emails($value->recipient_list, $value->subject, $value->message, [], $count);
 					
 					// save the  reponse
 					if(!empty($response)) {
