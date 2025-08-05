@@ -9,6 +9,15 @@ var create_exeat = () => {
     $(`div[id="exeatModal"] select[name="pickup_by"]`).val("Self").trigger("change");
 }
 
+function filter_exeats() {
+    let class_id = $(`div[id="filter_Exeats_List"] select[name="class_id"]`).val(),
+        status = $(`div[id="filter_Exeats_List"] select[name="status"]`).val(),
+        exeat_type = $(`div[id="filter_Exeats_List"] select[name="exeat_type"]`).val(),
+        pickup_by = $(`div[id="filter_Exeats_List"] select[name="pickup_by"]`).val();
+    $.form_data = { status, class_id, exeat_type, pickup_by };
+    loadPage(`${baseUrl}exeats_log`);
+}
+
 var update_exeat = (exeat_id) => {
     if ($.array_stream["exeat_list"] !== undefined) {
         

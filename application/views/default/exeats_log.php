@@ -21,6 +21,8 @@ $pageTitle = "Exeats Log";
 $response->title = $pageTitle;
 $response->timer = 0;
 
+$filter = (object) array_map("xss_clean", $_POST);
+
 // end query if the user has no permissions
 if(!in_array("exeats", $clientFeatures)) {
     // permission denied information
@@ -37,12 +39,22 @@ if(!empty($session->clientId)) {
 
     // create new event class
     $data = (object) [];
+
+    // filter the exeat list
+    $filter_status = $filter->status ?? null;
+    $filter_class_id = $filter->class_id ?? null;
+    $filter_exeat_type = $filter->exeat_type ?? null;
+    $filter_pickup_by = $filter->pickup_by ?? null;
     
     // set the parameters
     $params = (object) [
         "baseUrl" => $baseUrl,
         "clientId" => $clientId,
-        "userId" => $session->userId
+        "userId" => $session->userId,
+        "status" => $filter->status ?? null,
+        "class_id" => $filter->class_id ?? null,
+        "exeat_type" => $filter->exeat_type ?? null,
+        "pickup_by" => $filter->pickup_by ?? null
     ];
 
     $hasExeatAdd = $accessObject->hasAccess("add", "exeats");
@@ -144,11 +156,41 @@ if(!empty($session->clientId)) {
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-12 col-sm-12 col-lg-12">
-                <div class="text-right mb-2">
-                    <a class="btn btn-sm btn-outline-primary"  onclick="return create_exeat();" href="#"><i class="fa fa-plus"></i> Add Exeat</a>
-                </div>
+        <div class="row" id="filter_Exeats_List">
+            <div class="col-xl-3 col-md-4 mb-2 form-group">
+                <label for="exeat_type">Select Exeat Type</label>
+                <select data-width="100%" class="form-control selectpicker" id="exeat_type" name="exeat_type">
+                    <option value="">Select Exeat Type</option>
+                    '.implode("", array_map(function($each) use ($filter_exeat_type) {
+                        return "<option value=\"{$each}\" ".($filter_exeat_type == $each ? "selected" : "").">{$each}</option>";
+                    }, ['Day', 'Weekend', 'Emergency'])).'
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-4 mb-2 form-group">
+                <label for="pickup_by">Pickup By</label>
+                <select name="pickup_by" id="pickup_by" class="form-control selectpicker" data-width="100%">
+                    <option value="">Select Pickup By</option>
+                    '.implode("", array_map(function($each) use ($filter_pickup_by) {
+                        return "<option value=\"{$each}\" ".($filter_pickup_by == $each ? "selected" : "").">{$each}</option>";
+                    }, ['Self', 'Guardian', 'Other'])).'
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-4 mb-2 form-group">
+                <label for="status">Pickup By</label>
+                <select name="status" id="status" class="form-control selectpicker" data-width="100%">
+                    <option value="">Select Status</option>
+                    '.implode("", array_map(function($each) use ($filter_status) {
+                        return "<option value=\"{$each}\" ".($filter_status == $each ? "selected" : "").">{$each}</option>";
+                    }, array_keys($exeatClass->exeat_statuses))).'
+                </select>
+            </div>
+            <div class="col-md-1 col-sm-1 col-lg-1 flex items-center">
+                <a class="btn btn-sm btn-outline-primary"  onclick="return filter_exeats();" href="#"><i class="fa fa-filter"></i> Filter Records</a>
+            </div>
+            <div class="col-md-2 col-lg-2 flex items-center">
+                <a class="btn btn-sm btn-block btn-outline-primary"  onclick="return create_exeat();" href="#"><i class="fa fa-plus"></i> Add Exeat</a>
+            </div>
+            <div class="col-12 col-sm-12 col-lg-12 mt-2">
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
