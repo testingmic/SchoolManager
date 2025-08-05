@@ -200,7 +200,7 @@ class Crons {
 			'SmtpPort' => $this->ini_data["smtp_port"],
 			'SmtpUser' => $this->ini_data["smtp_user"],
 			'SmtpPass' => $this->ini_data["smtp_password"],
-			'SmtpSecure' => 'ssl'
+			'SmtpSecure' => 'tls'
 		);
 
 		print "Setting the configuration params.\n";
