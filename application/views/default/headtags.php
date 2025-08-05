@@ -115,7 +115,7 @@ load_helpers(['menu_helper']);
             academicSession = "<?= $academicSession; ?>",
             myPrefs = <?= json_encode($userData->client->client_preferences) ?>;
     </script>
-    <?= $myClass->google_analytics_code ?>
+    <?= '';//$myClass->google_analytics_code ?>
     <?php if(!$isActiveAccount) { ?>
         <style>
             .main-content {

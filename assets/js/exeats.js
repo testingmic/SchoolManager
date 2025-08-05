@@ -3,18 +3,18 @@ var create_exeat = () => {
     $(`div[id="exeatModal"] h5[class="modal-title"]`).html(`Add Exeat`);
     $(`div[id="exeatModal"] form[id="ajax-data-form-content"]`).attr("action", `${baseUrl}api/exeats/create`);
     $(`div[id="exeatModal"] input, div[id="exeatModal"] textarea`).val("");
+    $(`div[id="exeatModal"] select[name="student_id"]`).val("").trigger("change");
     $(`div[id="exeatModal"] select[name="status"]`).val("Pending").trigger("change");
-    $(`div[id="exeatModal"] select[name="exeat_type"]`).val("Day").trigger("change");
+    $(`div[id="exeatModal"] select[name="exeat_type"]`).val("").trigger("change");
     $(`div[id="exeatModal"] select[name="pickup_by"]`).val("Self").trigger("change");
 }
 
 var update_exeat = (exeat_id) => {
-    if ($.array_stream["exeat_array_list"] !== undefined) {
-        let exeats = $.array_stream["exeat_array_list"];
+    if ($.array_stream["exeat_list"] !== undefined) {
+        
+        let exeats = $.array_stream["exeat_list"];
         if (exeats[exeat_id] !== undefined) {
-            
             let exeat = exeats[exeat_id];
-            
             $(`div[id="exeatModal"] h5[class="modal-title"]`).html(`Update Exeat Record`);
             $(`div[id="exeatModal"]`).modal("show");
 

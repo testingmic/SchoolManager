@@ -1355,7 +1355,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                                 <th>PHONE / EMAIL</th>
                                                 <th>ADDRESS</th>
                                                 <th>STATUS</th>
-                                                <th width="10%"></th>
+                                                <th width="15%"></th>
                                             </tr>
                                         </thead>
                                         <tbody>'.$schools_list.'</tbody>

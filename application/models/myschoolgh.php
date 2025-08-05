@@ -97,6 +97,31 @@ class Myschoolgh extends Models {
 		$fix[] = $this->db->prepare("ALTER TABLE fees_category ADD COLUMN boarding_fees ENUM('No', 'Yes') NOT NULL DEFAULT 'No'");
 		$fix[] = $this->db->prepare("ALTER TABLE fees_category ADD COLUMN frequency ENUM('Daily', 'Weekly', 'Monthly', 'Termly', 'Yearly', 'One-Time') NOT NULL DEFAULT 'Termly'");
 		
+		$fix[] = $this->db->prepare("CREATE TABLE IF NOT EXISTS `exeats` (
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`item_id` VARCHAR(12) NOT NULL,
+				`client_id` VARCHAR(16) NOT NULL,
+				`created_by` VARCHAR(16) NOT NULL,
+				`student_id` VARCHAR(16) NOT NULL,
+				`status` VARCHAR(12) NOT NULL,
+				`exeat_type` VARCHAR(12) NOT NULL,
+				`departure_date` date NOT NULL,
+				`pickup_by` VARCHAR(12) NOT NULL,
+				`guardian_contact` VARCHAR(64) NOT NULL,
+				`reason` VARCHAR(255) NOT NULL,
+				`return_date` date NOT NULL,
+				`created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				`last_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (`id`),
+			UNIQUE KEY `item_id` (`item_id`),
+			INDEX `client_id` (`client_id`),
+			INDEX `created_by` (`created_by`),
+			INDEX `student_id` (`student_id`),
+			INDEX `status` (`status`),
+			INDEX `exeat_type` (`exeat_type`),
+			INDEX `pickup_by` (`pickup_by`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
 		foreach($fix as $stmt) {
 			try {
 				$stmt->execute();

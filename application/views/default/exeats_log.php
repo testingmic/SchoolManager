@@ -71,9 +71,65 @@ if(!empty($session->clientId)) {
 
     // load the Exeats types
     $exeatClass = load_class("exeats", "controllers");
+    $exeat_list = $exeatClass->list($params)['data'] ?? [];
+
+    $response->array_stream['exeat_list'] = [];
 
     // get the list of exeat types
     $exeatsList = "";
+
+    $hasAdd = $accessObject->hasAccess("add", "exeats");
+    $hasUpdate = $accessObject->hasAccess("update", "exeats");
+    $hasDelete = $accessObject->hasAccess("delete", "exeats");
+
+    // loop through the exeat list
+    if(!empty($exeat_list) && is_array($exeat_list)) {
+
+        $key = 0;
+
+        foreach($exeat_list as $each) {
+
+            $key++;
+
+            // append the exeat list to the array stream
+            $response->array_stream['exeat_list'][$each->item_id] = $each;
+        
+            $action = "";
+            
+            if(!in_array($each->status, ['Returned', 'Rejected'])) {
+                if($hasUpdate) {
+                    $action .= "&nbsp;<a title='Click to update this exeat' href='#' onclick=\"return update_exeat('{$each->item_id}')\" class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+                }
+                if($hasDelete) {
+                    $action .= "&nbsp;<a title='Click to delete this exeat' href='#' onclick=\"return delete_record('{$each->item_id}', 'exeats');\" class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+                }
+            }
+
+            $exeatsList .= "<tr data-row_id=\"{$each->item_id}\">";
+            $exeatsList .= "<td class='text-center'>".$key."</td>";
+            $exeatsList .= "<td>
+                {$each->student_name}
+                <div class='text-xs text-gray-500'>
+                    <span class='badge badge-primary'>{$each->class_name}</span>
+                </div>
+            </td>";
+            $exeatsList .= "<td>{$each->exeat_type}</td>";
+            $exeatsList .= "<td width='14%'>
+                <div><i class='fa fa-calendar'></i> <span class='font-bold'>Exit:</span> {$each->departure_date}</div>
+                <div><i class='fa fa-calendar'></i> <span class='font-bold'>Return:</span> {$each->return_date}</div>
+            </td>";
+            $exeatsList .= "<td>{$each->pickup_by}</td>";
+            $exeatsList .= "<td>{$each->guardian_contact}</td>";
+            $exeatsList .= "<td width='20%'>{$each->reason}</td>";
+            $exeatsList .= "<td class='text-center'>
+                <span class='badge badge-{$exeatClass->exeat_statuses[$each->status]}'>{$each->status}</span>
+            </td>";
+            if($hasUpdate || $hasDelete) {
+                $exeatsList .= "<td align='center'>{$action}</td>";
+            }
+            $exeatsList .= "</tr>";
+        }
+    }
 
     // load the scripts
     $response->scripts = ["assets/js/exeats.js"];
@@ -101,13 +157,13 @@ if(!empty($session->clientId)) {
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
                                         <th>Student</th>
-                                        <th>Exeat Type</th>
-                                        <th>Departure & Return Date</th>
+                                        <th>Type</th>
+                                        <th>Exeat Date</th>
                                         <th>Pickup By</th>
-                                        <th>Guardian Contact</th>
+                                        <th>Contact</th>
                                         <th>Reason</th>
-                                        <th>Status</th>
-                                        <th align="center" width="12%"></th>
+                                        <th class="text-center">Status</th>
+                                        '.($hasUpdate || $hasDelete ? "<th class='text-center' width='11%'>Actions</th>" : "").'
                                     </tr>
                                 </thead>
                                 <tbody>'.$exeatsList.'</tbody>
@@ -178,7 +234,7 @@ if(!empty($session->clientId)) {
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="guardian_contact">Guardian Contact</label>
-                                    <input type="text" placeholder="Type guardian contact" name="guardian_contact" id="guardian_contact" class="form-control">
+                                    <input type="text" maxlength="32" placeholder="Type guardian contact" name="guardian_contact" id="guardian_contact" class="form-control">
                                 </div>
                             </div>
                             <div class="col-md-12">
@@ -194,7 +250,7 @@ if(!empty($session->clientId)) {
                                         <option value="">Select Status</option>
                                         '.implode("", array_map(function($each) {
                                             return "<option value=\"{$each}\">{$each}</option>";
-                                        }, ['Pending', 'Approved', 'Rejected'])).'
+                                        }, array_keys($exeatClass->exeat_statuses))).'
                                     </select>
                                 </div>
                             </div>

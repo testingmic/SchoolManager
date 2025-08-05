@@ -227,6 +227,8 @@ if(empty($user_id)) {
 
             // if the permission is not empty
             if(!empty($role_permission)) {
+                
+                $atLeastOnePermission = false;
 
                 // loop through the list
                 foreach ($role_permission["permissions"] as $key => $value) {
@@ -239,10 +241,20 @@ if(empty($user_id)) {
                         
                         // confirm the user has the permission					
                         $isPermitted = $user_permission[$key][$nkey] ?? null;
+
+                        // if the user has the permission
+                        $valueToSet = $isPermitted && $isDisabled ? $isDisabled : (
+                            !$isPermitted && $isDisabled ? '' : $isDisabled
+                        );
+
+                        if($isDisabled && !$isPermitted) {
+                            // print $key . " --- " . $nkey . " \n\n";
+                            $atLeastOnePermission = true;
+                        }
                         
                         // if the user access was parsed
                         $level_data .= "<div class='col-lg-4 col-md-6'>";
-                        $level_data .= "<input {$isDisabled} ".($isPermitted ? "checked" : null )." type='checkbox' class='brands-checkbox' ".($updatePermission ? "id='access_level[$key][$nkey]' name='access_level[$key][$nkey][]'" : null).">";
+                        $level_data .= "<input {$valueToSet} ".($isPermitted ? "checked" : null )." type='checkbox' class='brands-checkbox' ".($updatePermission ? "id='access_level[$key][$nkey]' name='access_level[$key][$nkey][]'" : null).">";
                    
                         $level_data .= "<label class='cursor' ".($updatePermission ? "for='access_level[$key][$nkey]'" : null)."> &nbsp; ".ucwords(str_ireplace("_", " ", $nkey))."</label>";
                         $level_data .= "</div>";
@@ -574,13 +586,14 @@ if(empty($user_id)) {
                             $viewPermission ? '
                                 <div class="tab-pane '.($url_link === "permissions" ? "show active" : null).' fade" id="permissions" role="tabpanel" aria-labelledby="permissions-tab2">
                                     <div class="mb-3 pb-0 border-bottom"><h5>USER PERMISSIONS</h5></div>
-                                    '.($updatePermission ? '<form class="ajaxform" id="ajaxform" '.(!$isDisabled ? 'action="'.$baseUrl.'api/users/save_permission"' : null).' method="POST">' : null).'
+                                    '.($updatePermission ? '<form class="ajaxform" id="ajaxform" '.(!$isDisabled || $atLeastOnePermission ? 'action="'.$baseUrl.'api/users/save_permission"' : null).' method="POST">' : null).'
                                         '.$level_data.'
                                         <div class="row">
                                             <input type="hidden" readonly name="user_id" id="user_id" value="'.$user_id.'">
-                                            '.($updatePermission && !$isDisabled ? 
+                                            '.($atLeastOnePermission ? '<input type="hidden" name="append_permit" value="1">' : null).'
+                                            '.(($updatePermission && !$isDisabled) || $atLeastOnePermission ? 
                                             '<div class="col-lg-12 text-right">
-                                                <button type="submit" '.$isDisabled.' class="btn btn-success"><i class="fa fa-save"></i> Save Permissions</button>
+                                                <button type="submit" '.($atLeastOnePermission ? null : $isDisabled).' class="btn btn-success"><i class="fa fa-save"></i> Save Permissions</button>
                                             </div>' : null).'
                                         </div>
                                     '.($updatePermission ? '</form>' : null).'

@@ -354,7 +354,9 @@ var trigger_form_submit = () => {
                                 text: response.data.result,
                                 icon: "success",
                             });
-                            console.log(theButton.attr("href"))
+                            if($(`div[id="exeatModal"]`).length) {
+                                $(`div[id="exeatModal"] button[data-dismiss="modal"]`).trigger("click");
+                            }
                             if (theButton.attr("href") !== undefined) {
                                 setTimeout(() => {
                                     loadPage(theButton.attr("href"));
@@ -518,6 +520,9 @@ var ajax_trigger_form_submit = () => {
                     processData: false,
                     success: function(response) {
                         if (response.code == 200) {
+                            if($(`div[id="exeatModal"]`).length) {
+                                $(`div[id="exeatModal"] button[data-dismiss="modal"]`).trigger("click");
+                            }
                             swal({
                                 position: 'top',
                                 text: response.data.result,

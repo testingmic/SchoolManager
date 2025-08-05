@@ -55,6 +55,9 @@ if(!empty($session->clientId)) {
 
     // load the Exeats types
     $exeatClass = load_class("exeats", "controllers");
+    $exeat_list = $exeatClass->list($params)['data'] ?? [];
+
+    $response->array_stream['exeat_list'] = $exeat_list;
 
     // load the scripts
     $response->scripts = ["assets/js/exeats.js"];

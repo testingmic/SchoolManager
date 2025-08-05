@@ -2043,7 +2043,7 @@ class Users extends Myschoolgh {
 			$url_link = ($params->user_type == "student") ? "{$this->baseUrl}student/{$params->user_id}" : null;
 
 			// append the redirection url
-			// if($url_link) { $additional = ["href" => $url_link]; }
+			if($url_link) { $additional = ["href" => $url_link]; }
 
 			#record the password change request
             return ["code" => 200, "data" => ucfirst($redirect). " record successfully updated.", "additional" => $additional ];
@@ -2531,6 +2531,14 @@ class Users extends Myschoolgh {
 				}
 			}
 			$permissions["permissions"] = $accessLevel;
+		}
+
+		// append the user permissions to the record set
+		if(!empty($the_user->user_permissions) && !empty($params->append_permit)) {
+			$permits = json_decode($the_user->user_permissions, true);
+			foreach($permits["permissions"] as $key => $value) {
+				$permissions["permissions"][$key] = array_merge($permissions["permissions"][$key] ?? [], $value);
+			}
 		}
 
 		try {
