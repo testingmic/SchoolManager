@@ -67,6 +67,143 @@ class Exeats extends Myschoolgh {
     }
 
     /**
+     * Get the exeat statistics
+     * 
+     * @param StdClass $params
+     * 
+     * @return Array
+     */
+    public function statistics($params = null) {
+        
+        global $accessObject;
+
+        // check permission
+        if(!$accessObject->hasAccess("view", "exeats")) {
+            return ["code" => 400, "data" => $this->permission_denied];
+        }
+
+        $result = [
+            'summary' => [
+                'status' => [],
+                'gender' => [
+                    'Male' => 0,
+                    'Female' => 0,
+                ],
+                'pickup_by' => [
+                    'Self' => 0,
+                    'Guardian' => 0,
+                    'Other' => 0
+                ],
+                'exeat_types' => [
+                    'Day' => 0,
+                    'Weekend' => 0,
+                    'Emergency' => 0
+                ],
+                'overdue' => [
+                    'total' => 0,
+                    'list' => []
+                ],
+                'listing' => []
+            ],
+            'dates' => [
+                'departure' => [],
+                'return' => []
+            ],
+            'class' => [],
+        ];
+
+        foreach($this->exeat_statuses as $key => $value) {
+            $result['summary']['status'][$key] = 0;
+        }
+
+        $stmt = $this->db->prepare("SELECT a.status, a.exeat_type, a.pickup_by, a.departure_date, a.return_date,
+                b.name as student_name, b.gender, c.name as class_name
+            FROM exeats a
+            LEFT JOIN users b ON a.student_id = b.item_id
+            LEFT JOIN classes c ON c.id = b.class_id
+            WHERE a.client_id='{$params->clientId}' AND a.status != 'Deleted'
+        ");
+        $stmt->execute();
+        $resultSet = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+        $datesGroup = [
+            'yesterday' => date('Y-m-d', strtotime('yesterday')),
+            'today' => date('Y-m-d'),
+            'tomorrow' => date('Y-m-d', strtotime('tomorrow'))
+        ];
+
+        // loop through the result set
+        foreach($resultSet as $each) {
+
+            // check if the class name is already in the result
+            if(!isset($result['class'][$each->class_name])) {
+                $result['class'][$each->class_name] = [
+                    'summary' => [
+                        'Total' => 0,
+                        'Pending' => 0,
+                        'Approved' => 0,
+                        'Rejected' => 0,
+                        'Returned' => 0,
+                        'Cancelled' => 0
+                    ]
+                ];
+            }
+
+            if(!isset($result['dates']['departure'][$each->departure_date])) {
+                $result['dates']['departure'][$each->departure_date] = 0;
+            }
+
+            if(!isset($result['dates']['return'][$each->return_date])) {
+                $result['dates']['return'][$each->return_date] = 0;
+            }
+
+            // get the various dates and their count for the exeats and the returning
+            $result['dates']['departure'][$each->departure_date]++;
+            $result['dates']['return'][$each->return_date]++;
+
+            // update the summary
+            $result['summary']['exeat_types'][$each->exeat_type] = ($result['summary']['exeat_types'][$each->exeat_type] ?? 0) + 1;
+            $result['summary']['pickup_by'][$each->pickup_by] = ($result['summary']['pickup_by'][$each->pickup_by] ?? 0) + 1;
+            $result['summary']['status'][$each->status]++;
+
+            // set the gender count
+            $result['summary']['gender'][$each->gender]++;
+            
+            $result['class'][$each->class_name]['summary'][$each->status]++;
+            $result['class'][$each->class_name]['summary']['Total']++;
+
+            if(strtotime($each->return_date) < strtotime('Y-m-d') && $each->status == 'Approved') {
+                $result['summary']['overdue']['total']++;
+                $result['summary']['overdue']['list'][] = $each;
+            }
+
+            foreach($datesGroup as $period => $date) {
+
+                if(!isset($result['summary']['listing'][$period])) {
+                    $result['summary']['listing'][$period] = [
+                        'total' => 0,
+                        'list' => []
+                    ];
+                }
+                
+                if((strtotime($each->departure_date) == strtotime($date)) && $each->status == 'Approved') {
+                    $result['summary']['listing'][$period]['total']++;
+                    $result['summary']['listing'][$period]['list'][] = $each;
+                }
+
+            } 
+
+        }
+
+        // add the raw data to the result
+        // $result['raw_data'] = $resultSet;
+
+        // return the result
+        return ["code" => 200, "data" => $result];
+
+    }
+
+    /**
      * Create a new exeat
      * 
      * @param StdClass $params
