@@ -53,4 +53,37 @@ var update_exeat = (exeat_id) => {
     }
 }
 
+if($(`div[id="exeats_summary_cards"]`).length > 0) {
+    $.get(`${baseUrl}api/exeats/statistics`, (response) => {
+        if(response.code == 200) {
+            let result = response.data.result;
+            $.each(result.summary.status, (key, value) => {
+                $(`div[id="exeats_summary_cards"] h3[data-count="${key}"]`).text(value);
+            });
+            if(result.summary.overdue.total > 0) {
+                $(`tbody[id="exeat_list_table"]`).html("");
+                $.each(result.summary.overdue.list, (key, value) => {
+                    $(`tbody[id="exeat_list_table"]`).append(`
+                        <tr>
+                            <td>${value.student_name}</td>
+                            <td>${value.class_name}</td>
+                            <td>${value.departure_date}</td>
+                            <td>${value.return_date}</td>
+                            <td>${value.exeat_type}</td>
+                            <td>${value.pickup_by}</td>
+                            <td>${value.gender}</td>
+                        </tr>
+                    `);
+                });
+            }
+            $.each(result.summary.exeat_types, (key, value) => {
+                $(`div[id="exeat_types"] h3[data-count="${key}"]`).text(value);
+            });
+            $.each(result.summary.gender, (key, value) => {
+                $(`div[id="exeat_gender"] h3[data-count="${key}"]`).text(value);
+            });
+        }
+    });
+}
+
 $(`div[class~="toggle-calculator"]`).addClass("hidden");

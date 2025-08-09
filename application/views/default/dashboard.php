@@ -923,7 +923,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 // append the data
                 $response->html .= '
                     <div class="col-lg-4 col-md-6 col-12 col-sm-12">
-                        <div class="card rounded-2xl">
+                        <div class="card rounded-2xl rounded-b-none">
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13 mb-0">Students</h4>
                             </div>
@@ -947,7 +947,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-12 col-sm-12 d-none d-sm-block">
-                        <div class="card rounded-2xl">
+                        <div class="card rounded-2xl rounded-b-none">
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13 mb-0">Upcoming Events</h4>
                             </div>
@@ -963,7 +963,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-12 col-sm-12">
-                        <div class="card rounded-2xl">
+                        <div class="card rounded-2xl rounded-b-none">
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13 mb-0">Upcoming Birthdays</h4>
                             </div>
@@ -1146,7 +1146,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13">Upcoming Events</h4>
                             </div>
-                            <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
+                            <div class="card-body p-2 pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
                                     '.$upcoming_events_list.'
                                 </ul>

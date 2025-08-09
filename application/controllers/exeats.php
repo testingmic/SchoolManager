@@ -7,7 +7,8 @@ class Exeats extends Myschoolgh {
         "Approved" => "success",
         "Rejected" => "danger",
         "Returned" => "success",
-        "Cancelled" => "danger"
+        "Cancelled" => "danger",
+        "Overdue" => "secondary"
     ];
 
     /**
@@ -84,7 +85,10 @@ class Exeats extends Myschoolgh {
 
         $result = [
             'summary' => [
-                'status' => [],
+                'status' => [
+                    'Overdue' => 0,
+                    'Total' => 0
+                ],
                 'gender' => [
                     'Male' => 0,
                     'Female' => 0,
@@ -157,6 +161,8 @@ class Exeats extends Myschoolgh {
                 $result['dates']['return'][$each->return_date] = 0;
             }
 
+            $result['summary']['status']['Total']++;
+
             // get the various dates and their count for the exeats and the returning
             $result['dates']['departure'][$each->departure_date]++;
             $result['dates']['return'][$each->return_date]++;
@@ -172,9 +178,10 @@ class Exeats extends Myschoolgh {
             $result['class'][$each->class_name]['summary'][$each->status]++;
             $result['class'][$each->class_name]['summary']['Total']++;
 
-            if(strtotime($each->return_date) < strtotime('Y-m-d') && $each->status == 'Approved') {
+            if(strtotime($each->return_date) < strtotime(date("Y-m-d"))&& $each->status == 'Approved') {
                 $result['summary']['overdue']['total']++;
                 $result['summary']['overdue']['list'][] = $each;
+                $result['summary']['status']['Overdue']++;
             }
 
             foreach($datesGroup as $period => $date) {

@@ -117,6 +117,13 @@ if(!empty($session->clientId)) {
                 }
             }
 
+            // check if the exeat is overdue
+            if(strtotime($each->return_date) < strtotime(date("Y-m-d")) && $each->status == 'Approved') {
+                $status = "Overdue";
+            } else {
+                $status = $each->status;
+            }
+
             $exeatsList .= "<tr data-row_id=\"{$each->item_id}\">";
             $exeatsList .= "<td class='text-center'>".$key."</td>";
             $exeatsList .= "<td>
@@ -134,7 +141,7 @@ if(!empty($session->clientId)) {
             $exeatsList .= "<td>{$each->guardian_contact}</td>";
             $exeatsList .= "<td width='20%'>{$each->reason}</td>";
             $exeatsList .= "<td class='text-center'>
-                <span class='badge badge-{$exeatClass->exeat_statuses[$each->status]}'>{$each->status}</span>
+                <span class='badge badge-{$exeatClass->exeat_statuses[$status]}'>{$status}</span>
             </td>";
             if($hasUpdate || $hasDelete) {
                 $exeatsList .= "<td align='center'>{$action}</td>";
@@ -291,7 +298,9 @@ if(!empty($session->clientId)) {
                                     <select name="status" id="status" class="form-control selectpicker" data-width="100%">
                                         <option value="">Select Status</option>
                                         '.implode("", array_map(function($each) {
-                                            return "<option value=\"{$each}\">{$each}</option>";
+                                            if(!in_array($each, ['Overdue', 'Cancelled'])) {
+                                                return "<option value=\"{$each}\">{$each}</option>";
+                                            }
                                         }, array_keys($exeatClass->exeat_statuses))).'
                                     </select>
                                 </div>

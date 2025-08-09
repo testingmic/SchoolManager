@@ -225,7 +225,7 @@ function no_record_found($title = null, $caption = null, $url_link = null, $reco
                         <path d='m21 21-4.3-4.3'></path>
                     </svg>
                 </div>
-                <h3 class='text-lg font-medium text-gray-900 dark:text-white mb-2'>{$title}</h3>
+                <h4 class='text-lg font-25 font-medium text-gray-900 dark:text-white mb-2'>{$title}</h4>
                 <p class='text-gray-600 dark:text-gray-400 mb-6'>{$caption}</p>
                 ".($no_button ? "
                 <div class='mt-3'>
