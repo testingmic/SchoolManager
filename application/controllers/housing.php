@@ -8,6 +8,67 @@ class Housing extends Myschoolgh {
     public $roomsObject;
     public $bedsObject;
 
+    public $housingData = [
+        'roomCondition' => [
+            'excellent' => 'Excellent',
+            'good' => 'Good',
+            'fair' => 'Fair',
+            'poor' => 'Poor',
+            'needs_repair' => 'Needs Repair',
+            'out_of_order' => 'Out of Order',
+        ],
+        'buildingType' => [
+            'dormitory' => 'Dormitory',
+            'boarding_house' => 'Boarding House',
+            'hostel' => 'Hostel',
+        ],
+        'genderRestriction' => [
+            'male_only' => 'Male Only',
+            'female_only' => 'Female Only',
+            'mixed' => 'Mixed Gender',
+        ],
+        'housingFacilities' => [
+            'common_room' => 'Common Room',
+            'study_area' => 'Study Area',
+            'kitchen_kitchenette' => 'Kitchen/Kitchenette',
+            'laundry_facilities' => 'Laundry Facilities',
+            'shared_bathrooms' => 'Shared Bathrooms',
+            'wifi_access' => 'WiFi Access',
+            'air_conditioning' => 'Air Conditioning',
+            'heating' => 'Heating',
+            'security_cameras' => 'Security Cameras',
+            'card_access_system' => 'Card Access System',
+            'elevator_access' => 'Elevator Access',
+            'disabled_access' => 'Disabled Access',
+            'fire_safety_equipment' => 'Fire Safety Equipment',
+            'water_dispenser' => 'Water Dispenser',
+            'recreation_area' => 'Recreation Area',
+        ],
+        'roomFacilities' => [
+            'mattress' => 'Mattress',
+            'pillow' => 'Pillow',
+            'bed_sheet' => 'Bed Sheet',
+            'blanket' => 'Blanket',
+            'study_table' => 'Study Table',
+            'study_chair' => 'Study Chair',
+            'wardrobe_closet' => 'Wardrobe/Closet',
+            'bookshelf' => 'Bookshelf',
+            'bedside_table' => 'Bedside Table',
+            'reading_lamp' => 'Reading Lamp',
+            'power_outlet' => 'Power Outlet',
+            'ethernet_port' => 'Ethernet Port',
+            'storage_boxes' => 'Storage Boxes',
+            'mirror' => 'Mirror',
+            'wall_hooks' => 'Wall Hooks',
+        ],
+        'roomType' => [
+            'single' => 'Single',
+            'double' => 'Double',
+            'triple' => 'Triple',
+            'quad' => 'Quad',
+        ]
+    ];
+
     public function __construct($params = null) {
 		parent::__construct();
         $this->iclient = $params->client_data ?? [];
