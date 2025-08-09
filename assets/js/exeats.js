@@ -82,6 +82,50 @@ if($(`div[id="exeats_summary_cards"]`).length > 0) {
             $.each(result.summary.gender, (key, value) => {
                 $(`div[id="exeat_gender"] h3[data-count="${key}"]`).text(value);
             });
+
+
+            if ($(`div[id="exeats_chart"]`).length) {
+                var chart_label = result.chart_grouping.legend;
+                console.log(chart_label);
+    
+                $(`div[data-chart_container="exeats_chart"]`).html(`<div id="exeats_chart" style="min-height:450px;"></div>`);
+    
+                var options = {
+                    chart: {
+                        height: 420,
+                        type: 'bar',
+                    },
+                    plotOptions: {
+                        bar: {
+                            horizontal: false,
+                            endingShape: 'rounded',
+                            columnWidth: '35%',
+                        },
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        show: true,
+                        width: 2,
+                        colors: ['transparent']
+                    },
+                    series: result.chart_grouping.data,
+                    xaxis: {
+                        categories: chart_label,
+                    },
+                    fill: {
+                        opacity: 1
+                    }
+                }
+                var chart = new ApexCharts(
+                    document.querySelector("#exeats_chart"),
+                    options
+                );
+                chart.render();
+            }
+
+
         }
     });
 }

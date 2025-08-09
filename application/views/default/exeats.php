@@ -146,7 +146,23 @@ if(!empty($session->clientId)) {
                                 }, ['Day', 'Weekend', 'Emergency'])).'
                             </div>
                             <div class="row">
-                                <div class="col-lg-6 col-md-6 col-12 col-sm-12">
+                                <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                                    <div class="card rounded-2xl">
+                                        <div class="card-header pr-0">
+                                            <div class="row width-100">
+                                                <div class="col-md-7">
+                                                    <h4 class="text-uppercase pb-0 mb-0 font-13">Exeats Trends</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body pb-0">
+                                            <div data-chart_container="exeats_chart">
+                                                <div id="exeats_chart" style="min-height:420px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-12 col-sm-12 hidden">
                                     <div class="row">
                                     '.implode("", array_map(function($each) {
                                         return '

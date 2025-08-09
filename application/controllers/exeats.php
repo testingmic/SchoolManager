@@ -109,12 +109,17 @@ class Exeats extends Myschoolgh {
                 ],
                 'listing' => []
             ],
-            'dates' => [
+            'chart' => [
                 'departure' => [],
                 'return' => []
             ],
             'class' => [],
         ];
+
+        $thirtyDaysAgo = date('Y-m-d', strtotime('-7 days'));
+        $today = date('Y-m-d', strtotime('+7 days'));
+
+        $listDays = $this->listDays($thirtyDaysAgo, $today);
 
         foreach($this->exeat_statuses as $key => $value) {
             $result['summary']['status'][$key] = 0;
@@ -136,6 +141,13 @@ class Exeats extends Myschoolgh {
             'tomorrow' => date('Y-m-d', strtotime('tomorrow'))
         ];
 
+        foreach($listDays as $each) {
+            $result['chart']['departure'][$each] = 0;
+            $result['chart']['return'][$each] = 0;
+            $result['chart_grouping']['legend'][] = date('jS M', strtotime($each));
+        }
+
+
         // loop through the result set
         foreach($resultSet as $each) {
 
@@ -153,19 +165,19 @@ class Exeats extends Myschoolgh {
                 ];
             }
 
-            if(!isset($result['dates']['departure'][$each->departure_date])) {
-                $result['dates']['departure'][$each->departure_date] = 0;
+            if(!isset($result['chart']['departure'][$each->departure_date])) {
+                $result['chart']['departure'][$each->departure_date] = 0;
             }
 
-            if(!isset($result['dates']['return'][$each->return_date])) {
-                $result['dates']['return'][$each->return_date] = 0;
+            if(!isset($result['chart']['return'][$each->return_date])) {
+                $result['chart']['return'][$each->return_date] = 0;
             }
 
             $result['summary']['status']['Total']++;
 
             // get the various dates and their count for the exeats and the returning
-            $result['dates']['departure'][$each->departure_date]++;
-            $result['dates']['return'][$each->return_date]++;
+            $result['chart']['departure'][$each->departure_date]++;
+            $result['chart']['return'][$each->return_date]++;
 
             // update the summary
             $result['summary']['exeat_types'][$each->exeat_type] = ($result['summary']['exeat_types'][$each->exeat_type] ?? 0) + 1;
@@ -202,8 +214,14 @@ class Exeats extends Myschoolgh {
 
         }
 
-        // add the raw data to the result
-        // $result['raw_data'] = $resultSet;
+        foreach(['departure', 'return'] as $ii => $key) {
+            $result['chart_grouping']['data'][$ii]['name'] = ucwords($key);
+            foreach($result['chart'][$key] as $ikey => $value) {
+                $result['chart_grouping']['data'][$ii]['data'][] = $value;
+            }
+        }
+
+        unset($result['chart']);
 
         // return the result
         return ["code" => 200, "data" => $result];
