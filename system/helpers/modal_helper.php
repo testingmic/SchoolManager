@@ -211,19 +211,14 @@ function color_code_picker($selected = null, $colorsOnly = false) {
  * 
  * @return String
  */
-function no_record_found($title = null, $caption = null, $url_link = null, $record = null, $no_button = false) {
+function no_record_found($title = null, $caption = null, $url_link = null, $record = null, $no_button = false, $icon = "fa-search") {
     return "
     <div id='no_record_found_container' class='backdrop-blur-xl ".($no_button ? "mt-2" : null)." backdrop-saturate-150 rounded-2xl border shadow-[0_0_1px_1px_rgba(0,0,0,0.1)] dark:shadow-[0_0_1px_1px_rgba(255,255,255,0.05)] dark:bg-opacity-20 transition-all duration-300 p-6 bg-white dark:bg-gray-900/50 border-white/10 dark:border-gray-700/50'>
         <div class='dark:text-gray-300'>
             <div class='text-center py-12'>
                 <div
                     class='w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4'>
-                    <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'
-                        fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'
-                        stroke-linejoin='round' class='w-8 h-8 text-gray-400 dark:text-gray-500'>
-                        <circle cx='11' cy='11' r='8'></circle>
-                        <path d='m21 21-4.3-4.3'></path>
-                    </svg>
+                    <i class='fa {$icon} text-3xl text-gray-500 dark:text-gray-400'></i>
                 </div>
                 <h4 class='text-lg font-25 font-medium text-gray-900 dark:text-white mb-2'>{$title}</h4>
                 <p class='text-gray-600 dark:text-gray-400 mb-6'>{$caption}</p>
@@ -493,6 +488,22 @@ function top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl
     }
 
     return $html;
+}
+
+/**
+ * Remove all spaces from a string
+ * 
+ * @param String $string
+ * 
+ * @return String
+ */
+function remove_all_spaces($string) {
+    // remove all spaces from the string
+    $string = str_replace(" ", "", $string);
+    $string = str_replace("\n", "", $string);
+    $string = str_replace("\r", "", $string);
+    $string = str_replace("\t", "", $string);
+    return trim($string);
 }
 
 /**

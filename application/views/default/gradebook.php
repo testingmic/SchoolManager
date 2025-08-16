@@ -581,7 +581,10 @@ $response->html = '
         ).'
     </div>
     '.(($isTeacher || $isAdmin) && $single_student_id && $isGrading && !empty($course_id) ? $student_performance_chart : null).'
-    '.$section_content.'
+    '.(strlen($section_content) < 100 ? 
+        no_record_found("No Subject Selected", "You must first select a subject in order to render the gradebook details and its insights.", null, "Event", false, "fa-book-reader") : 
+        $section_content
+    ).'
     '.(($isStudent || (($isTeacher || $isAdmin) && empty($single_student_id))) && $isGrading && !empty($course_id) ? $student_performance_chart : null).'
 </section>';
 

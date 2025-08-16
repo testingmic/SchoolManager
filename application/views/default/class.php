@@ -78,6 +78,8 @@ if(!empty($item_id)) {
         $timetable = load_class("timetable", "controllers", $item_param)->class_timetable($data->item_id, $clientId);
         $count = 0;
 
+        $t_status = "";
+
         // loop through the students list
         foreach($student_list["data"] as $key => $student) {
 
@@ -235,7 +237,7 @@ if(!empty($item_id)) {
                         </div>
                     </div>' : null
                 ).'
-                <div class="card pb-0">
+                <div class="card pb-0 stick_to_top">
                     <div class="card-header">
                         <h4 class="mb-0">CLASS TEACHER</h4>
                     </div>
@@ -259,7 +261,7 @@ if(!empty($item_id)) {
                         </div>' ).'
                     </div>
                 </div>
-                <div class="card pb-0 d-none d-sm-block">
+                <div class="card pb-0 stick_to_top d-none d-sm-block">
                     <div class="card-header">
                         <h4 class="mb-0">CLASS PREFECT</h4>
                     </div>
@@ -283,7 +285,7 @@ if(!empty($item_id)) {
                     </div>
                 </div>
                 '.($viewAllocation ?
-                    '<div class="card">
+                    '<div class="card stick_to_top">
                         <div class="card-header pr-3">
                             <div class="d-flex width-per-100 justify-content-between">
                                 <div><h4>FINANCES</h4></div>

@@ -2179,9 +2179,6 @@ class Assignments extends Myschoolgh {
             $description = isset($data["assessment_description"]) ? custom_clean(htmlspecialchars_decode($data["assessment_description"])) : null;
             $description = htmlspecialchars($description);
 
-            // begin a transaction
-            $this->db->beginTransaction();
-
             // append the attachments
             $filesObj = load_class("files", "controllers");
             $attachments = $filesObj->prep_attachments("assessments_{$params->userId}", $params->userId, $item_id);
@@ -2247,19 +2244,17 @@ class Assignments extends Myschoolgh {
                 "data" => "Assignment successfully created.",
                 "additional" => [
                     "clear" => true,
-                    "href" => "{$this->baseUrl}assessment/{$item_id}"
+                    "href" => "{$this->baseUrl}assessment/{$item_id}/instructions"
                 ],
                 "refresh" => 2000
             ];
-
-            // commit the statement
-            $this->db->commit();
 
 			// return the output
             return $return;
 
         } catch(PDOException $e) {
-            $this->db->rollBack();
+            // return the error message
+            return ["code" => 500, "data" => $e->getMessage()];
         }
 
     }

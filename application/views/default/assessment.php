@@ -457,7 +457,7 @@ if(!empty($item_id)) {
                     </div>
                 </div>
                 </div>
-                <div class="card">
+                <div class="card stick_to_top">
                     <div class="card-header">
                         <h4 class="mb-0">'.$data->assignment_type.' Details</h4>
                     </div>

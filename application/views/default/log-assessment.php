@@ -65,7 +65,7 @@ if(!$createAssessmentTest) {
         <div class="section-body">
             <div class="row">
                 <div class="col-12 col-md-12 col-lg-5">
-                    <div class="card">
+                    <div class="card stick_to_top">
                         <div class="card-header">
                             <h4>Assessment Content Details</h4>
                         </div>
@@ -146,7 +146,7 @@ if(!$createAssessmentTest) {
                     </div>
                 </div>
                 <div class="col-12 col-md-12 col-lg-7">
-                    <div class="card">
+                    <div class="card stick_to_top">
                         <div class="padding-20">
                             <div class="text-center" id="init_data">The students list for gradding will appear here.</div>
                             <div id="award_marks" class="hidden">

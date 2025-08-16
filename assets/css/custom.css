@@ -419,6 +419,50 @@ table.dataTable.table-sm>thead>tr>th {
     margin: auto !important;
 }
 
+.bg-blur {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0;
+    overflow-y: auto;
+    background-color: rgba(0, 0, 0, .4);
+    z-index: 1000;
+    transition: opacity .3s;
+}
+
+.settingSidebar,
+.settingSidebar .settingPanelToggle {
+    z-index: 9999;
+}
+
+.settingSidebar {
+    width: 850px;
+    right: -850px;
+}
+
+@media only screen and (max-width: 1024px) {
+    .settingSidebar {
+        display: block!important;
+    }
+    .settingSidebar {
+        width: 650px;
+        right: -650px;
+    }
+}
+
+@media only screen and (max-width: 575.98px) {
+    .settingSidebar {
+        display: block!important;
+    }
+    .settingSidebar {
+        width: 380px;
+        right: -380px;
+    }
+}
+
 .form-content-loader {
     display: flex;
     align-items: center;
@@ -774,13 +818,8 @@ textarea.custom_form-control {
 
 .stick_to_top {
     position: sticky;
-    top: 10px;
+    top: 90px;
     z-index: 9999;
-}
-
-.settingSidebar {
-    width: 400px;
-    right: -400px;
 }
 
 .font-18px {
@@ -801,26 +840,6 @@ textarea.custom_form-control {
 
 .chat-box .chat-content {
     height: 600px !important;
-}
-
-@media only screen and (max-width: 1024px) {
-    .settingSidebar {
-        display: block!important;
-    }
-    .settingSidebar {
-        width: 350px;
-        right: -350px;
-    }
-}
-
-@media only screen and (max-width: 575.98px) {
-    .settingSidebar {
-        display: block!important;
-    }
-    .settingSidebar {
-        width: 285px;
-        right: -289px;
-    }
 }
 
 @media only screen and (max-width: 575.98px) {

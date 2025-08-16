@@ -221,7 +221,7 @@ if(!empty($item_id)) {
                 </div>
                 </div>
                 '.(!empty($data->description) ? 
-                    '<div class="card">
+                    '<div class="card stick_to_top">
                         <div class="card-header">
                             <h4 class="mb-0">DESCRIPTION</h4>
                         </div>
@@ -232,7 +232,7 @@ if(!empty($item_id)) {
                         </div>
                     </div>' : null
                 ).'
-                <div class="card">
+                <div class="card stick_to_top">
                     <div class="card-header">
                         <h4 class="mb-0">SECTION LEADER DETAILS</h4>
                     </div>
@@ -254,7 +254,7 @@ if(!empty($item_id)) {
                     </div>
                 </div>
                 '.($viewAllocation ?
-                    '<div class="card">
+                    '<div class="card stick_to_top">
                         <div class="card-header pr-3">
                             <div class="d-flex width-per-100 justify-content-between">
                                 <div><h4 class="mb-0">FINANCES</h4></div>

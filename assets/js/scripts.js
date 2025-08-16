@@ -524,10 +524,14 @@ $(function() {
     // setting sidebar 
 
     $(".settingPanelToggle").on("click", function() {
-        $(".settingSidebar").toggleClass("showSettingPanel")
+        $(".settingSidebar").toggleClass("showSettingPanel");
+        $("div[class~='bg-blur'").toggleClass("hidden");
     }), $(".page-wrapper").on("click", function() {
-        $(".settingSidebar").removeClass("showSettingPanel")
-    })
+        $(".settingSidebar").removeClass("showSettingPanel");
+    });
+    $("div[class~='bg-blur'").on("click", function() {
+        $("div[class~='bg-blur'").addClass("hidden");
+    });
 
     // close right sidebar when click outside
     var mouse_is_inside = false;

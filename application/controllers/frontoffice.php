@@ -76,7 +76,7 @@ class Frontoffice extends Myschoolgh {
                 }
 
                 // decode the attachments as well
-                $result->attachment = json_decode($result->attachment);
+                $result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : null;
                 $result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-6 col-md-6", false, false) : "";
 
                 // convert the content into an object

@@ -20,8 +20,9 @@
             </div>
         </footer>
 
+        <div class="bg-blur hidden"></div>
         <div class="settingSidebar">
-          <a href="#" class="settingPanelToggle"> <i class="fa fa-book-reader"></i></a>
+            <a href="#" class="settingPanelToggle"> <i class="fa fa-book-reader"></i></a>
             <div class="settingSidebar-body ps ps-theme-default">
                 <div class=" fade show active">
                     <div class="setting-panel-header">
