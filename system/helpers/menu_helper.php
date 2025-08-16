@@ -188,20 +188,6 @@
             </ul>
         </li>
     <?php } ?>
-    <?php if(in_array("exeats", $clientFeatures)) { ?>
-        <?php if($isAdmin) { ?>
-            <li class="menu-header">Exeats Management</li>
-            <li class="dropdown">
-                <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Manage Exeats</span></a>
-                <ul class="dropdown-menu">
-                    <li><a class="nav-link" href="<?= $baseUrl ?>exeats">Exeats Dashboard</a></li>
-                    <?php if($accessObject->hasAccess("add", "exeats") || $accessObject->hasAccess("update", "exeats")) { ?>
-                        <li><a class="nav-link" href="<?= $baseUrl ?>exeats_log">Exeats Logs</a></li>
-                    <?php } ?>
-                </ul>
-            </li>
-        <?php } ?>
-    <?php } ?>
 
     <?php if($accessObject->hasAccess("view", "fees")) { ?>
     <li class="menu-header">Finance & HR Management</li>
@@ -282,7 +268,7 @@
                     <li><a class="nav-link" href="<?= $baseUrl ?>office_visitors">Visitors Book</a></li>
                     <?php } ?>
                     <?php if($accessObject->hasAccess("view", "phone_call_log")) { ?>
-                    <li><a class="nav-link" href="<?= $baseUrl ?>office_phonecall">Phone Call Log</a></li>
+                    <!-- <li><a class="nav-link" href="<?= $baseUrl ?>office_phonecall">Phone Call Log</a></li> -->
                     <?php } ?>
                     <?php if($accessObject->hasAccess("view", "postal_dispatch")) { ?>
                     <li><a class="nav-link" href="<?= $baseUrl ?>office_postaldispatch">Postal Dispatch</a></li>
@@ -320,6 +306,20 @@
                 <?php } ?>
             </ul>
         </li>
+    <?php } ?>
+    <?php if(in_array("exeats", $clientFeatures)) { ?>
+        <?php if($isAdmin) { ?>
+            <li class="menu-header">Exeats Management</li>
+            <li class="dropdown">
+                <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Manage Exeats</span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="<?= $baseUrl ?>exeats">Exeats Dashboard</a></li>
+                    <?php if($accessObject->hasAccess("add", "exeats") || $accessObject->hasAccess("update", "exeats")) { ?>
+                        <li><a class="nav-link" href="<?= $baseUrl ?>exeats_log">Exeats Logs</a></li>
+                    <?php } ?>
+                </ul>
+            </li>
+        <?php } ?>
     <?php } ?>
     <li class="menu-header">Communication</li>
     <?php if(in_array("events", $clientFeatures)) { ?>
@@ -607,7 +607,7 @@
                 <li><a class="nav-link" href="<?= $baseUrl ?>office_visitors">Visitors Book</a></li>
                 <?php } ?>
                 <?php if($accessObject->hasAccess("view", "phone_call_log")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>office_phonecall">Phone Call Log</a></li>
+                <!-- <li><a class="nav-link" href="<?= $baseUrl ?>office_phonecall">Phone Call Log</a></li> -->
                 <?php } ?>
                 <?php if($accessObject->hasAccess("view", "postal_dispatch")) { ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>office_postaldispatch">Postal Dispatch</a></li>

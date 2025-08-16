@@ -100,6 +100,7 @@ if(!empty($user_id)) {
             // append the academic year and term
             $allocation_param->academic_year = $defaultAcademics->academic_year;
             $allocation_param->academic_term = $defaultAcademics->academic_term;
+            $allocation_param->onScholarship = $data->scholarship_status;
 
             // create a new object
             $feesObject = load_class("fees", "controllers", $allocation_param);
@@ -362,8 +363,8 @@ if(!empty($user_id)) {
 
         // set the scholarship status
         $scholarship_status = $data->scholarship_status == 1 ? 0 : 1;
-        $scholarship_class = $data->scholarship_status == 1 ? "btn-outline-danger" : "btn-outline-success";
-        $scholarship_title = $data->scholarship_status == 1 ? "<i class='fa fa-ankh'></i> Remove Scholarship</span>" : "<i class='fa fa-ankh'></i> Scholarship";
+        $scholarship_class = !$scholarship_status ? "btn-outline-danger" : "btn-outline-success";
+        $scholarship_title = !$scholarship_status ? "<i class='fa fa-ankh'></i> Remove Scholarship" : "<i class='fa fa-ankh'></i> Scholarship";
 
         // the default data to stream
         $data_stream = "attendance_report&label[student_id]={$user_id}";
@@ -642,13 +643,17 @@ if(!empty($user_id)) {
                                 <div class="col-md-12 text-right">
                                 '.(
                                     ((!empty($student_allocation_list["owning"]) && $canReceive) || (!empty($student_allocation_list["owning"]) && $isParent)) ? 
-                                        '<span class="text-right">
+                                        '<span class="text-right '.($data->scholarship_status ? 'hidden' : null).'" id="make_payment_button">
                                             <a '.($isParent ? "target='_blank' href='{$myClass->baseUrl}pay/{$defaultUser->client_id}/fees/{$user_id}'" : 'href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.$payment_module_url.'"').' class="btn mb-2 btn-outline-success"><i class="fa fa-adjust"></i> MAKE PAYMENT</a>
                                         </span>
                                         '.($canAllocate && in_array($data->user_status, ["Active"]) && ($data->payment_module !== "Monthly") ? '
-                                        <button title="Click to Modify Fees Allocated to Student" onclick="return load(\'fees-allocate/'.$user_id.'\')" class="btn text-uppercase mb-2 btn-outline-primary">
-                                            <i class="fa fa-edit"></i> Modify Bill 
+                                        <button id="modify_bill_button" title="Click to Modify Fees Allocated to Student" onclick="return load(\'fees-allocate/'.$user_id.'\')" class="btn text-uppercase mb-2 btn-outline-primary '.($data->scholarship_status ? 'hidden' : null).'">
+                                            <i class="fa fa-edit"></i> Modify Bill
                                         </button>' : null).'
+                                        <span>
+                                        <button id="student_on_scholarship" class="btn text-uppercase mb-2 btn-info '.(!$data->scholarship_status ? 'hidden' : null).'">
+                                            <i class="fa fa-ankh"></i> On Scholarship
+                                        </button>
                                         '
                                     : ($student_allocation_list["allocated"] && empty($student_allocation_list["owning"]) ? 
                                         '<div class="btn mb-2 btn-success text-uppercase">Fees Fully Paid</div>' :

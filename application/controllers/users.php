@@ -994,7 +994,10 @@ class Users extends Myschoolgh {
 			return [
 				"code" => 200,
 				"data" => "Scholarship status was successfully updated",
-				"additional" => '<span class="btn mb-1 btn-outline-'.$color.'" onclick="return full_scholarship(\''.$params->student_id.'\', '.$status.')"><i class="fa fa-ankh"></i> '.$title.'</span></span>'
+				"additional" => [
+					'html' => '<span class="btn mb-1 btn-outline-'.$color.'" onclick="return full_scholarship(\''.$params->student_id.'\', '.$status.')"><i class="fa fa-ankh"></i> '.$title.'</span></span>',
+					'status' => $status,
+				]
 			];
 		} catch(PDOException $e) {
 			return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];

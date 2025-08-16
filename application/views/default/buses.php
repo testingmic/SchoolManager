@@ -106,7 +106,7 @@ if(!in_array("bus_manager", $clientFeatures)) {
 
                 <div class="col-12 col-sm-12 col-md-12">
                     '.($hasCreate ? 
-                        '<div class="text-right mb-2">
+                        '<div class="text-right mb-3">
                             <a class="btn btn-sm btn-outline-primary" onclick="return bus_modal();" href="#">
                                 <i class="fa fa-plus"></i> Add Bus
                             </a>

@@ -169,12 +169,15 @@ class Frontoffice extends Myschoolgh {
 
             }
 
+			$href = str_ireplace("/log", "", $this->session->user_current_url);
+			$href = $href . "/{$item_id}";
+
             // return the success message
             return [
                 'code' => 200,
                 'data' => 'Request was successfully processed.',
                 'additional' => [
-                    'href' => $this->session->user_current_url
+                    'href' => $href
                 ]
             ];
 

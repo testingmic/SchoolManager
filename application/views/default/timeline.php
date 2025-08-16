@@ -189,7 +189,7 @@ if(!$accessObject->hasAccess("activities", "settings")) {
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-lg-7 trix-slim-scroll" style="max-height:700px; overflow-y:auto;">
-                                    <div class="activities mt-3">
+                                    <div class="activities">
                                     '.$activities.'
                                     </div>
                                 </div>

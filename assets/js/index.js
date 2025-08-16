@@ -35,7 +35,22 @@ var full_scholarship = (student_id, status) => {
                 success: (result) => {
                     if(result.code === 200) {
                         notify(result.data.result, "success");
-                        $(`#scholarship_status`).html(result.data.additional);
+                        $(`#scholarship_status`).html(result.data.additional.html);
+                        if(result.data.additional.status == 0) {
+                            $(`button[id="student_on_scholarship"]`).removeClass("hidden");
+                            $(`span[id="make_payment_button"]`).addClass("hidden");
+                            $(`button[id="modify_bill_button"]`).addClass("hidden");
+                            $(`button[data-item='pay_fees-button']`)
+                                .attr("disabled", true)
+                                .html(`<i class="fa fa-ankh"></i> On Scholarship`);
+                        } else {
+                            $(`button[id="student_on_scholarship"]`).addClass("hidden");
+                            $(`span[id="make_payment_button"]`).removeClass("hidden");
+                            $(`button[id="modify_bill_button"]`).removeClass("hidden");
+                            $(`button[data-item='pay_fees-button']`)
+                                .removeAttr("disabled")
+                                .html(`<i class="fa fa-adjust"></i> PAY FEES`);
+                        }
                     } else {
                         notify(result.data.result);
                     }

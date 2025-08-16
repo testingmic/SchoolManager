@@ -109,7 +109,6 @@ load_helpers(['menu_helper']);
         <link rel="stylesheet" href="<?= $baseUrl ?><?= $eachCSS ?>">
     <?php } ?>
     <link id="user_current_url" name="user_current_url" value="<?= $user_current_url ?>">
-    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/clients/<?= $clientData->client_id ?>.css">
     <script>
         var myUName = "<?= $session->userName ?>",
             academicSession = "<?= $academicSession; ?>",

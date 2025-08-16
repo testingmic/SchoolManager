@@ -363,7 +363,7 @@ var trigger_form_submit = () => {
                                 }, refresh_seconds);
                             }
                             if (response.data.additional) {
-                                if (response.data.additional.clear !== undefined) {
+                                if (typeof response.data.additional.clear !== 'undefined') {
                                     if ($(`form[class="ajax-data-form"]${appendForm_Id} textarea[name="faketext"]`).length) {
                                         CKEDITOR.instances['ajax-form-content'].setData("");
                                     }
@@ -410,6 +410,7 @@ var trigger_form_submit = () => {
                                         $(`[data-record="${ie}"]`).html(iv);
                                     });
                                 }
+                                console.log(response.data.additional);
                                 if (typeof response.data.additional.href !== 'undefined') {
                                     setTimeout(() => {
                                         loadPage(response.data.additional.href);

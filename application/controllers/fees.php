@@ -459,6 +459,9 @@ class Fees extends Myschoolgh {
             $showOutstanding = (bool) !empty($params->showOutstanding);
             $groupBy = (bool) isset($params->group_by_student) && ($params->group_by_student == "group_by");
 
+            // set if the student is on scholarship
+            $onScholarship = !empty($params->onScholarship);
+
             // init values
             $count = 1;
             $total_due = 0;
@@ -558,10 +561,10 @@ class Fees extends Myschoolgh {
                             // if the student is still owing
                             $_class = "class='btn mb-1 btn-sm text-uppercase btn-outline-success'";
                             $student_allocation_list .= $isParent ? "
-                                <a {$_class} href='{$this->baseUrl}pay/{$defaultUser->client_id}/fees/{$student->checkout_url}/checkout' target='_blank'>Pay Fee</a>
+                                <a {$_class} data-item='pay_fees-button' href='{$this->baseUrl}pay/{$defaultUser->client_id}/fees/{$student->checkout_url}/checkout' target='_blank'>Pay Fee</a>
                             " : "
-                            <button onclick='return load(\"fees-payment?".($groupBy ? "student_id={$student->student_id}&class_id={$student->class_id}{$url}" : "checkout_url={$student->checkout_url}{$url}")."\");' {$_class}>
-                                <i class='fa fa-adjust'></i> Pay Fees
+                            <button ".($onScholarship ? "disabled" : null)." data-item='pay_fees-button' onclick='return load(\"fees-payment?".($groupBy ? "student_id={$student->student_id}&class_id={$student->class_id}{$url}" : "checkout_url={$student->checkout_url}{$url}")."\");' {$_class}>
+                                ".($onScholarship ? '<i class="fa fa-ankh"></i> On Scholarship' : '<i class="fa fa-adjust"></i> Pay Fees')."
                             </button>";
                         }
                         // delete the record if possible => that is allowed only if the student has not already made an payment

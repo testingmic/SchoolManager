@@ -140,9 +140,11 @@ if(!$accessObject->hasAccess("view", "postal_dispatch")) {
                     <div class="mb-2 border-bottom pb-2 mb-2">
                         <div class="font-14">'.$data->content->note.'</div>
                     </div>
-                    <div class="mb-2 border-bottom pb-2 mb-2">
-                        '.$data->attachment_html.'
-                    </div>
+                    '.(!empty($data->attachment_html) ? 
+                        '<div class="mb-2 border-bottom pb-2 mb-2">
+                            '.$data->attachment_html.'
+                        </div>' : null
+                    ).'
                     <div class="font-15  pb-2 mb-2">
                         <div>
                             <i class="fa fa-user"></i>
