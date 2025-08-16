@@ -94,6 +94,33 @@
         </li>
         <?php } ?>
     <?php } ?>
+    <?php if($accessObject->hasAccess("view", "fees")) { ?>
+    <li class="menu-header">Finance & HR Management</li>
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-door-open"></i><span>Manage Fees</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
+            <?php if($accessObject->hasAccess("receive", "fees") || $accessObject->hasAccess("receive", "fees")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Pay Term Fees</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>arrears/apay">Arrears Payment</a></li>
+            <?php } ?>
+            <?php if($accessObject->hasAccess("view", "fees_category")) { ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>fees-category">Fees Category</a></li>
+            <?php } ?>
+            <?php if($accessObject->hasAccess("allocation", "fees")) { ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>term_bills">Manage <?= $academicSession; ?> Bills</a></li>
+            <?php } ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>debtors">Debtors List</a></li>
+            <?php if($accessObject->hasAccess("send", "communication")) { ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>reminders/send">Send Reminder</a></li>
+            <?php } ?>
+            <?php if($accessObject->hasAccess("reports", "fees")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Fees Report</a></li>
+            <?php } ?>
+        </ul>
+    </li>
+    <?php } ?>
     <?php if($accessObject->hasAccess("view", "class")) { ?>
     <li class="menu-header">Academics</li>
     <li class="dropdown">
@@ -201,34 +228,6 @@
                 </ul>
             </li>
         <?php } ?>
-    <?php } ?>
-
-    <?php if($accessObject->hasAccess("view", "fees")) { ?>
-    <li class="menu-header">Finance & HR Management</li>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-door-open"></i><span>Manage Fees</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
-            <?php if($accessObject->hasAccess("receive", "fees") || $accessObject->hasAccess("receive", "fees")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Pay Term Fees</a></li>
-                <li><a class="nav-link" href="<?= $baseUrl ?>arrears/apay">Arrears Payment</a></li>
-            <?php } ?>
-            <?php if($accessObject->hasAccess("view", "fees_category")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-category">Fees Category</a></li>
-            <?php } ?>
-            <?php if($accessObject->hasAccess("allocation", "fees")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>term_bills">Manage <?= $academicSession; ?> Bills</a></li>
-            <?php } ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>debtors">Debtors List</a></li>
-            <?php if($accessObject->hasAccess("send", "communication")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>reminders/send">Send Reminder</a></li>
-            <?php } ?>
-            <?php if($accessObject->hasAccess("reports", "fees")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Fees Report</a></li>
-            <?php } ?>
-        </ul>
-    </li>
     <?php } ?>
     <?php if($accessObject->hasAccess("view", "payslip")) { ?>
         <?php if(in_array("payroll", $clientFeatures)) { ?>
