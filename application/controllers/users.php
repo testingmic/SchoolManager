@@ -230,6 +230,9 @@ class Users extends Myschoolgh {
 						$result->payments_data = format_payment_data($payments);
 					}
 
+					// set the scholarship status
+					$result->scholarship_status = (int) $result->scholarship_status;
+
 					if(($result->user_type === "student")) {
 						// set the additional data
 						$result->debt_formated = empty($result->debt) ? 0 : number_format($result->debt, 2);

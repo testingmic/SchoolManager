@@ -78,7 +78,16 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                     if (response.code == 200) {
 
                         $.each(response.data.result, function(i, e) {
-                            $(`div[id="filter_Department_Class"] select[name='student_id']`).append(`<option data-image="${e.image}" data-arrears_formated="${e.arrears_formated}" data-total_debt_formated="${e.total_debt_formated}" data-debt_formated="${e.debt_formated}" data-unique_id="${e.unique_id}" data-name="${e.name}" data-phone_number="${e.phone_number}" data-email="${e.email}" value='${e.user_id}'>${e.name.toUpperCase()}</option>`);
+                            $(`div[id="filter_Department_Class"] select[name='student_id']`).append(`<option 
+                                data-image="${e.image}" data-arrears_formated="${e.arrears_formated}" 
+                                data-total_debt_formated="${e.total_debt_formated}" 
+                                data-debt_formated="${e.debt_formated}" 
+                                data-unique_id="${e.unique_id}" 
+                                data-name="${e.name}" 
+                                data-phone_number="${e.phone_number}" 
+                                data-email="${e.email}" 
+                                data-scholarship_status="${e.scholarship_status}"
+                                value='${e.user_id}'>${e.name.toUpperCase()}</option>`);
                         });
 
                         if($(`div[id="fees_payment_preload"]`).length) {
@@ -139,6 +148,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
 
             if (value.length && value !== "null") {
                 let option = $(`select[name="student_id"] > option:selected`).data();
+                console.log(option);
                 $(`div[id="student_information"]`).html(`
                 <div class="card">
                     <div class="card-body p-3 pb-3 shadow-style">
@@ -147,16 +157,18 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                                 <img title="Click to view record of ${option.name}" onclick="return load('student/${value}')" width="60px" class="img-shadow" src="${baseUrl}${option.image}">
                             </div>
                             <div>
-                                <div class="font-20 user_name" title="Click to view record of ${option.name}" onclick="return load('student/${value}')"><strong>${option.name}</strong></div>
+                                <div class="font-18 user_name" title="Click to view record of ${option.name}" onclick="return load('student/${value}')"><strong>${option.name}</strong></div>
                                 <div><strong>STUDENT ID:</strong> ${option.unique_id}</div>
                                 <div><strong>FEES:</strong> <span class="fees_arrears">${myPrefs.labels.currency}${option.debt_formated}</span></div>
                                 <div><strong>ARREARS:</strong> ${myPrefs.labels.currency}${option.arrears_formated}</div>
                                 <div><strong>OUTSTANDING:</strong> <span class="balance_outstanding">${myPrefs.labels.currency}${option.total_debt_formated}</span></div>
+                                ${option.scholarship_status ? `<span class="badge badge-success"><i class="fa fa-ankh"></i> On Scholarship</span>` : ''}
                             </div>                            
                         </div>
                     </div>
                 </div>`);
                 $(`div[id="make_payment_button"]`).removeClass("hidden");
+                $(`div[id="make_payment_button"] button`).attr("disabled", option.scholarship_status ? true : false);
                 let data = $(`div[id="fees_payment_preload"] select[name="student_id"] option:selected`).data();
                 $(`div[id="fees_payment_form"] input[id="email_address"]`).val(data.email);
                 $(`div[id="fees_payment_form"] input[id="contact_number"]`).val(data.phone_number);
