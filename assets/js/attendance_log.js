@@ -93,7 +93,7 @@ var finalize_AttendanceLog = (date, user_type = "", class_id = "", finalize) => 
 
 $(`select[id="attendance_category"]`).on("change", function() {
     let value = $(this).val();
-    $(`div[id="attendance_log_list"]`).html(`<div class="text-center font-italic">Users list is displayed here.</div>`);
+    $(`div[id="attendance_log_list"]`).html(`<div class="text-center font-italic">${no_content_wrapper('Attendance', 'Sorry! The selected date is a weekend which has been excluded from recording attendance.')}</div>`);
     if (value == "null") {
         $(`div[class~="attendance_category_list"], div[class~="refresh_attendance_list"]`).addClass("hidden");
     } else if (value == "student") {

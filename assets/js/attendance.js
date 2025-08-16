@@ -122,7 +122,9 @@ var finalize_AttendanceLog = (date, user_type = "", class_id = "", finalize) => 
 $(`select[id="attendance_category"]`).on("change", function() {
     let value = $(this).val();
     $(`div[id="attendance_log_summary"]`).html(``);
-    $(`div[id="attendance_log_list"]`).html(`<div class="text-center font-italic">Users list is displayed here.</div>`);
+    $(`div[id="attendance_log_list"]`).html(`<div class="text-center font-italic">
+        ${no_content_wrapper('Attendance Recorder', 'Complete the option selection to render the students or staff list for the selected date.')}    
+    </div>`);
     if (value == "null") {
         $(`div[class~="attendance_category_list"], div[class~="refresh_attendance_list"]`).addClass("hidden");
     } else if (value == "student") {

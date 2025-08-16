@@ -605,7 +605,7 @@ class Attendance extends Myschoolgh {
         if(!isset($list_days[0])) {
             return [
                 "data" => [
-                    "table_content" => "<div class='mt-3 text-danger text-center font-italic'>Sorry! The date must not be a Weekend.</div>"
+                    "table_content" => no_record_found("Weekend Excluded", "Sorry! The selected date is a weekend which has been excluded from recording attendance.", null, "Event", false, "fa-clock")
                 ]
             ];
         }

@@ -143,7 +143,9 @@ if($defaultUser->appPrefs->termEnded) {
                                 <div class="col-md-12" id="attendance">
                                     '.form_loader().'
                                     <div id="attendance_log_list">
-                                        <div class="text-center font-italic">Users list is displayed here.</div>
+                                        <div class="text-center font-italic">
+                                        '.no_record_found("Record Attendance", "Select option above to record attendance for a class or staff for any given date.", null, "Event", false, "fa-clock").'
+                                        </div>
                                     </div>
                                     <div id="attendance_log_summary"></div>
                                 </div>

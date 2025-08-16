@@ -47,6 +47,21 @@ var form_error = (message) => {
         </div>
     </div>`;
 }
+
+function no_content_wrapper(title = null, caption = null, icon = "fa-search") {
+    return `<div id="no_record_found_container" class="backdrop-blur-xl  backdrop-saturate-150 rounded-2xl border shadow-[0_0_1px_1px_rgba(0,0,0,0.1)] dark:shadow-[0_0_1px_1px_rgba(255,255,255,0.05)] dark:bg-opacity-20 transition-all duration-300 p-6 bg-white dark:bg-gray-900/50 border-white/10 dark:border-gray-700/50">
+            <div class="dark:text-gray-300">
+                <div class="text-center py-12">
+                    <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa ${icon} text-3xl text-gray-500 dark:text-gray-400"></i>
+                    </div>
+                    <h4 class="text-lg font-25 font-medium text-gray-900 dark:text-white mb-2">${title}</h4>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">${caption}</p>
+                </div>
+            </div>
+        </div>`;
+}
+
 $(window).on("beforeunload", (evt) => {
     window.location.href = `${baseUrl}dashboard`;
 });
