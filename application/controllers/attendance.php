@@ -849,7 +849,7 @@ class Attendance extends Myschoolgh {
                                 </div>
                             </td>
                             <td width='35%'>".$this->attendance_radios($user->user_id, $user_state, $final, "")."</td>
-                            <td><input ".($final ? "readonly title='{$user_comments}'" : "data-user_id='{$user->user_id}' id='comments' autocomplete='Off'")." value='{$user_comments}' class='form-control' type='text'></td>
+                            <td><input ".($final ? "readonly title='{$user_comments}'" : "data-user_id='{$user->user_id}' id='comments' autocomplete='Off'")." placeholder='Add remarks (optional)' value='{$user_comments}' class='form-control' type='text'></td>
                         </tr>";
                     }
                 }
