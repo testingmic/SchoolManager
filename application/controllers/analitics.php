@@ -348,6 +348,22 @@ class Analitics extends Myschoolgh {
             $c_query->execute();
             $_c_result = $c_query->fetch(PDO::FETCH_OBJ);
 
+            // reformat the data and use
+            if(!empty($_c_result)) {
+                foreach(['amount_due', 'amount_paid', 'actual_total_paid', 'actual_fees_paid', 'actual_arrears_paid', 'balance'] as $ii) {
+                    $_c_result->{$ii} = !empty($_c_result->{$ii}) ? $_c_result->{$ii} : 0;
+                }
+            } else {
+                $_c_result = (object) [
+                    "amount_due" => 0,
+                    "amount_paid" => 0,
+                    "actual_total_paid" => 0,
+                    "actual_fees_paid" => 0,
+                    "actual_arrears_paid" => 0,
+                    "balance" => 0
+                ];
+            }
+
             $result["students_class_fees_payment"][$value->name] = $_c_result;
 
             // value_name
@@ -358,9 +374,12 @@ class Analitics extends Myschoolgh {
             $query->execute();
             $_q_result = $query->fetch(PDO::FETCH_OBJ);
 
+            // set the fee amout to use
+            $itemAmount = $_q_result->{$value_count} ?? 0;
+
             $result["students_class_record_count"]["count"][$value_count] = [
                 "class_id" => $value->id,
-                "value" => $_q_result->{$value_count} ?? 0,
+                "value" => empty($itemAmount) ? 0 : $itemAmount,
                 "name" => $value->name
             ];
 
@@ -378,9 +397,11 @@ class Analitics extends Myschoolgh {
                 $query->execute();
                 $_q_result = $query->fetch(PDO::FETCH_OBJ);
 
+                $feesAmount = $_q_result->{$value_count} ?? 0;
+
                 // append to the result array
                 $result["students_class_record_count"]["comparison"][$range_key][$value_count] = [
-                    "value" => $_q_result->{$value_count} ?? 0,
+                    "value" => empty($feesAmount) ? 0 : $feesAmount,
                     "name" => $value->name
                 ];
             }

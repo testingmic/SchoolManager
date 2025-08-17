@@ -118,11 +118,11 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 "border" => "info", "sum_tag" => "Bank_Deposit", "left-border" => "border-blue",
                 "background" => "bg-blue-50"
             ],
-            [
-                "label" => "This week", "title" => "Bank Withdrawals", "favicon" => "fa-wind", 
-                "border" => "warning", "sum_tag" => "Bank_Withdrawal", "left-border" => "border-orange", 
-                "background" => "bg-orange-50"
-            ],
+            // [
+            //     "label" => "This week", "title" => "Bank Withdrawals", "favicon" => "fa-wind", 
+            //     "border" => "warning", "sum_tag" => "Bank_Withdrawal", "left-border" => "border-orange", 
+            //     "background" => "bg-orange-50"
+            // ],
             [
                 "label" => "Overall", "title" => "Account Balance", "favicon" => "fa-balance-scale", 
                 "border" => "primary", "sum_tag" => "account_balance", "left-border" => "border-purple",
@@ -858,49 +858,25 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     '
                     <div class="col-lg-12"><div class="grid grid-cols-1 hidden md:grid-cols-2 lg:grid-cols-5 gap-4">
                     '.$financialSummary.'
-                    </div></div>
-                    <div class="col-lg-12 col-md-12 col-12 col-sm-12">
-                        <div class="card rounded-2xl">
-                            <div class="card-header pr-0">
-                                <div class="row width-100">
-                                    <div class="col-md-7">
-                                        <h4 class="text-uppercase font-13">Attendance Logs</h4>
-                                    </div>
-                                    <div align="right" class="col-md-5">
-                                        <div class="btn-group" data-filter="quick_attendance_filter" id="quick_attendance_filter" role="group" aria-label="Filter Attendance">
-                                            <button type="button" data-stream="attendance_report" data-period="last_week" class="btn btn-info">Last Week</button>
-                                            <button type="button" data-stream="attendance_report" data-period="this_week" class="btn btn-info">This Week</button>
-                                            <button type="button" data-stream="attendance_report" data-period="this_month" class="btn active btn-info">This Month</button>
-                                            <button type="button" data-stream="attendance_report" data-period="last_month" class="btn btn-info">Last Month</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body pb-0">
-                                <div data-chart_container="attendance_chart">
-                                    <div id="attendance_chart" style="min-height:420px;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>' : null
+                    </div></div>' : null
                 );
 
             // if an account is logged in
             if($isAccountant) {
-                $response->html .= '<div class="col-lg-12"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">';
+                $response->html .= '<div class="col-lg-12"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">';
                 $response->html .= $financialSummary;
                 $response->html .= '</div></div>';
             }
             
             // load the class payment information by class only
-            if($isAccountant) {
+            if($isAdminAccountant) {
                 $response->html .= '
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header pr-0">
                             <div class="row width-100">
                                 <div class="col-md-5">
-                                    <h4>Fees Payment by Class</h4>
+                                    <h4 class="mb-0">Fees Payment by Class</h4>
                                 </div>
                             </div>
                         </div>
@@ -916,6 +892,34 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                 </div>';
+            }
+
+            if($isAdmin) {
+                $response->html .= '<div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                        <div class="card rounded-2xl">
+                            <div class="card-header pr-0">
+                                <div class="row width-100">
+                                    <div class="col-md-4">
+                                        <h4 class="text-uppercase font-13">Attendance Logs</h4>
+                                    </div>
+                                    <div align="right" class="col-md-7">
+                                        <div class="btn-group" data-filter="quick_attendance_filter" id="quick_attendance_filter" role="group" aria-label="Filter Attendance">
+                                            <button type="button" data-stream="attendance_report" data-period="last_week" class="btn btn-info">Last Week</button>
+                                            <button type="button" data-stream="attendance_report" data-period="this_week" class="btn btn-info">This Week</button>
+                                            <button type="button" data-stream="attendance_report" data-period="this_month" class="btn active btn-info">This Month</button>
+                                            <button type="button" data-stream="attendance_report" data-period="last_month" class="btn btn-info">Last Month</button>
+                                            <button type="button" data-stream="attendance_report" data-period="last_30days" class="btn btn-info">Last 30 Days</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body pb-0">
+                                <div data-chart_container="attendance_chart">
+                                    <div id="attendance_chart" style="min-height:420px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>';
             }
 
             // if the user logged in is an admin
