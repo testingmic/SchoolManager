@@ -148,7 +148,6 @@ if ($(`div[id="filter_Department_Class"]`).length) {
 
             if (value.length && value !== "null") {
                 let option = $(`select[name="student_id"] > option:selected`).data();
-                console.log(option);
                 $(`div[id="student_information"]`).html(`
                 <div class="card">
                     <div class="card-body p-3 pb-3 shadow-style">
@@ -258,7 +257,7 @@ $(`button[id="filter_Daily_Reports_List"]`).on("click", function() {
     let class_id = $(`div[id="report_container"] select[name="class_id"]`).val(),
         student_id = $(`div[id="report_container"] select[name="student_id"]`).val();
     $.form_data = { class_id, student_id };
-    loadPage(`${baseUrl}students_daily_reports`);
+    loadPage(`${baseUrl}staff_weekly_reports`);
 });
 
 $(`button[id="generate_Transaction_Report"]`).on("click", function() {

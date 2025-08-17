@@ -915,8 +915,14 @@ textarea.custom_form-control {
 }
 
 .btn.btn-sm {
-    padding: .30rem .6rem;
+    padding: .50rem 0.7rem;
     font-size: 13px;
+}
+
+.btn {
+    font-size: 13px;
+    padding: .5rem .9rem;
+    letter-spacing: .5px;
 }
 
 .buy_button {

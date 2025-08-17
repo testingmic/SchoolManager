@@ -7,6 +7,9 @@ $ini = parse_ini_file("db.ini");
 // set thee default date/time for the php.ini to use
 date_default_timezone_set('UTC');
 
+// set the constant for the root
+defined('ROOT_DIRECTORY')  OR define('ROOT_DIRECTORY', dirname(dirname(__DIR__)));
+
 # set the constants for the database connection
 defined('APP_INI')  OR define('APP_INI', $ini ?? []);
 defined('DB_HOST')  OR define('DB_HOST', $ini['hostname'] ?? null);

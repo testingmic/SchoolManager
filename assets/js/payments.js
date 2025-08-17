@@ -137,7 +137,7 @@ var save_Receive_Payment = async () => {
 
     if ($amount < $balance) {
         t_message = `Are you sure you want to save this payment. 
-            An amount of ${amount_in_words[$amount]} (${myPrefs.labels.currency}${$amount}) is been paid which will leave a balance of ${amount_in_words[$balance]} (${myPrefs.labels.currency}${$balance}).`;
+            An amount of ${amount_in_words[$amount]} (${myPrefs.labels.currency}${$amount}) is been paid which will leave a balance of ${amount_in_words[_arrears]} (${myPrefs.labels.currency}${_arrears}).`;
     }
 
     var data = {

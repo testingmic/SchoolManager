@@ -398,7 +398,7 @@ class Incidents extends Myschoolgh {
 
         // set some filters
         $filter .= !empty($params->report_type) ? " AND a.report_type='{$params->report_type}'" : null;
-        $filter .= !empty($params->created_by) ? " AND a.created_by='{$params->created_by}'" : null;
+        $filter .= !empty($params->created_by) ? " AND (a.created_by='{$params->created_by}' OR a.student_id = '{$params->created_by}')" : null;
         $filter .= !empty($params->student_id) ? " AND a.student_id IN {$this->inList($params->student_id)}" : null;
         $filter .= !empty($params->client_id) ? " AND a.client_id='{$params->client_id}'" : null;
         $filter .= !empty($params->report_id) ? " AND a.{$column}='{$params->report_id}'" : null;
@@ -586,7 +586,7 @@ class Incidents extends Myschoolgh {
                     "code" => 200, 
                     "data" => "Daily report was successfully updated.",
                     "additional" => [
-                        "href" => "{$this->baseUrl}students_daily_reports"
+                        "href" => "{$this->baseUrl}staff_weekly_reports"
                     ]
                 ];
             }
@@ -609,7 +609,7 @@ class Incidents extends Myschoolgh {
 
                 // message
                 $message = "Your ward {$student[0]->name}\'s daily report for {$date} as been logged.";
-                $content = "Your ward <strong>{$student[0]->name}</strong>\'s daily report for <strong>{$date}</strong> as successfully been logged. Kindly <a href=\"{{APPURL}}students_daily_reports/{$report_id}\">click here</a> to review the report.";
+                $content = "Your ward <strong>{$student[0]->name}</strong>\'s daily report for <strong>{$date}</strong> as successfully been logged. Kindly <a href=\"{{APPURL}}staff_weekly_reports/{$report_id}\">click here</a> to review the report.";
 
                 // loop through the guardian information
                 foreach($guardian_ids as $guardian_id) {
@@ -636,7 +636,7 @@ class Incidents extends Myschoolgh {
                 "code" => 200, 
                 "data" => "Daily report was successfully inserted.",
                 "additional" => [
-                    "href" => "{$this->baseUrl}students_daily_reports"
+                    "href" => "{$this->baseUrl}staff_weekly_reports"
                 ]
             ];
 

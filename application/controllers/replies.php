@@ -339,7 +339,7 @@ class Replies extends Myschoolgh {
                 "page" => "bus"
             ], "daily_report" => [
                 "table" => "daily_reports",
-                "page" => "students_daily_reports"
+                "page" => "staff_weekly_reports"
             ], "frontoffice" => [
                 "table" => "frontoffice",
                 "page" => "frontoffice"

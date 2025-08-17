@@ -54,7 +54,7 @@
                                             <span onclick="return clear_quick_search_form('system')" class="cursor text-danger" title="Click to reset form">Clear</span>
                                         </div>
                                     </div>
-                                    <input type="search" autocomplete="Off" name="system" id="system" class="form-control">
+                                    <input type="search" placeholder="Enter search term here." autocomplete="Off" name="system" id="system" class="form-control">
                                 </div>
                             </div>
                         <?php } ?>
@@ -68,7 +68,7 @@
                                         <span onclick="return clear_quick_search_form('dictionary')" class="cursor text-danger" title="Click to reset form">Clear</span>
                                     </div>
                                 </div>
-                                <input type="search" autocomplete="Off" name="dictionary" id="dictionary" class="form-control">
+                                <input type="search" placeholder="Enter word to search for from dictionary." autocomplete="Off" name="dictionary" id="dictionary" class="form-control">
                             </div>
                         </div>
                     </div>

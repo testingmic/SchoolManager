@@ -41,7 +41,7 @@ $userData->mini_description = true;
 $userData->the_user_type = $defaultUser->user_type;
 
 // set the date to load
-$global_period = $isWardParent ? "this_term" : "this_week";
+$global_period = $isWardParent ? "this_term" : "this_month";
 
 // global params
 $global_params = (object) ["client_data" => $defaultUser->client];
@@ -770,7 +770,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
             $response->html .= '
                 <div class="col-lg-4 col-md-12 col-12 col-sm-12">
-                    <div class="card rounded-2xl">
+                    <div class="card rounded-2xl rounded-b-none">
                         <div class="card-header pr-2">
                             <div class="row width-per-100">
                                 <div class="col-md-9">
@@ -791,16 +791,16 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-8">
-                    <div class="card rounded-2xl">
+                    <div class="card rounded-2xl rounded-b-none">
                         <div class="card-header pr-0">
                             <div class="row width-100">
                                 <div align="right" class="col-md-12">
                                     <div class="btn-group" data-filter="quick_summary_filter" id="quick_summary_filter" role="group" aria-label="Filter Revenue">
                                         <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="yesterday" class="btn sm-hide btn-info">Yesterday</button>
                                         <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="today" class="btn btn-info">Today</button>
-                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_week" class="btn active btn-info">This Week</button>
+                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_week" class="btn btn-info">This Week</button>
                                         <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="last_week" class="btn sm-hide btn-info">Last Week</button>
-                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_month" class="btn btn-info">This Month</button>
+                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_month" class="btn active btn-info">This Month</button>
                                         <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="last_3months" class="btn btn-info">This Quarter</button>
                                         <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_term" class="btn btn-info">'.$academicSession.'</button>
                                     </div>
@@ -869,8 +869,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     <div align="right" class="col-md-5">
                                         <div class="btn-group" data-filter="quick_attendance_filter" id="quick_attendance_filter" role="group" aria-label="Filter Attendance">
                                             <button type="button" data-stream="attendance_report" data-period="last_week" class="btn btn-info">Last Week</button>
-                                            <button type="button" data-stream="attendance_report" data-period="this_week" class="btn active btn-info">This Week</button>
-                                            <button type="button" data-stream="attendance_report" data-period="this_month" class="btn btn-info">This Month</button>
+                                            <button type="button" data-stream="attendance_report" data-period="this_week" class="btn btn-info">This Week</button>
+                                            <button type="button" data-stream="attendance_report" data-period="this_month" class="btn active btn-info">This Month</button>
                                             <button type="button" data-stream="attendance_report" data-period="last_month" class="btn btn-info">Last Month</button>
                                         </div>
                                     </div>

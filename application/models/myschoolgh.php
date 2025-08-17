@@ -26,8 +26,8 @@ class Myschoolgh extends Models {
 	public $accountLimit = [];
 	public $school_academic_terms = [];
 	public $academic_calendar_years = [];
-	public $pk_public_key = "pk_live_1eca68da1afea8bb9d567a05fe05db1b4297a8c6";
-	public $mnotify_key = "Id2itReHkQ1C0bMfjSjj7VeU3";
+	public $pk_public_key;
+	public $mnotify_key;
 	public $default_pay_email = "payments@myschoolgh.com";
 
 	public $db;
@@ -66,6 +66,13 @@ class Myschoolgh extends Models {
 		global $myschoolgh, $session;
 
 		$this->db = $myschoolgh;
+
+		// load the init
+		$init_data = parse_ini_file(ROOT_DIRECTORY . "/db.ini");
+
+		// set the mnotify and paystack ids
+		$this->mnotify_key = $init_data['mnotify_key'] ?? null;
+		$this->pk_public_key = $init_data['pk_public_key'] ?? null;
 
 		$this->session = $session;
 		$this->clientId = !empty($session->clientId) ? $session->clientId : null;

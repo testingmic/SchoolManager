@@ -1,10 +1,8 @@
 <?php 
 
 class Communication extends Myschoolgh {
-
     
-
-    public function __construct(stdClass $params = null) {
+    public function __construct($params = null) {
         parent::__construct();
 
         // get the client data
@@ -28,10 +26,10 @@ class Communication extends Myschoolgh {
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->type) && !empty($params->type)) ? " AND a.type='{$params->type}'" : null;
-        $params->query .= (isset($params->q) && !empty($params->q)) ? " AND a.campaign_name LIKE '%{$params->q}%'" : null;
-        $params->query .= (isset($params->status) && !empty($params->status)) ? " AND a.sent_status='{$params->status}'" : null;
-        $params->query .= (isset($params->message_id) && !empty($params->message_id)) ? " AND a.item_id='{$params->message_id}'" : null;
+        $params->query .= !empty($params->type) ? " AND a.type='{$params->type}'" : null;
+        $params->query .= !empty($params->q) ? " AND a.campaign_name LIKE '%{$params->q}%'" : null;
+        $params->query .= !empty($params->status) ? " AND a.sent_status='{$params->status}'" : null;
+        $params->query .= !empty($params->message_id) ? " AND a.item_id='{$params->message_id}'" : null;
 
         try {
 
@@ -357,8 +355,6 @@ class Communication extends Myschoolgh {
 
             // if the reminder must also be sent via email
             if($isEmail) {
-                // init
-                $recipient_list = [];
 
                 // parameter
                 $fees_param = (object) [

@@ -1063,6 +1063,9 @@ class Attendance extends Myschoolgh {
 
         // loop through the days for the record
         foreach($days as $day) {
+
+            $dayName = date("l", strtotime($day));
+            if(in_array($dayName, ['Saturday', 'Sunday'])) continue;
             
             // loop through the users for each day
             foreach($users as $user) {
