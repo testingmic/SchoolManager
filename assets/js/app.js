@@ -642,7 +642,7 @@ var page_programming = (array_content) => {
                 menu_content += `<div>`;
                 $.each(array_content.left, function(key, value) {
                     menu_content += `
-                    <button class="btn btn-plain" type="button">
+                    <button class="btn btn-plain border-radius-none" type="button">
                         <strong>${key}</strong> 
                         <span class="text-muted-dark">${myPrefs.labels.currency}</span> ${value}
                     </button>`;
@@ -653,7 +653,7 @@ var page_programming = (array_content) => {
             menu_content += "<div>";
                 right_list = array_content.right;
             $.each(right_list, function(key, value) {
-                menu_content += `<button onclick="load('${key}')" class="btn ${value[2]}"><i class="fa ${value[1]}"></i> ${value[0]}</button>`;
+                menu_content += `<button onclick="load('${key}')" class="btn ${value[2]} border-radius-none"><i class="fa ${value[1]}"></i> ${value[0]}</button>`;
             });
             menu_content += `</div>`;
             $(`div[id="content_menu_display"]`).html(menu_content);
