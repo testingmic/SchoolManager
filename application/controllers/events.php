@@ -518,9 +518,9 @@ class Events extends Myschoolgh {
                     -- Normalize date_of_birth to the current year
                     DATE_FORMAT(u.date_of_birth, CONCAT(YEAR(CURDATE()), '-%m-%d')) 
                     BETWEEN 
-                        DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 5 DAY), '%Y-%m-%d') 
+                        DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 WEEK), '%Y-%m-%d') 
                     AND 
-                        DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 1 WEEK), '%Y-%m-%d')
+                        DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 2 WEEK), '%Y-%m-%d')
                 )
                  AND u.client_id = '{$data->client_id}' AND u.user_status='Active' AND u.status='1' AND u.deleted='0'
                 AND u.user_type IN ('student','teacher','admin','accountant','admin')
