@@ -819,31 +819,31 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                         <h4 class="text-primary">
                                             <span data-summary="amount_due">0.00</span>
                                         </h4>
-                                        <label>Fees Due</label>
+                                        <label class="text-black font-bold">Fees Due</label>
                                     </div>
                                     <div class="mb-1 amount text-center">
                                         <h4 class="text-success">
                                             <span data-summary="amount_paid">0.00</span>
                                         </h4>
-                                        <label>Fees Paid</label>
+                                        <label class="text-black font-bold">Fees Paid</label>
                                     </div>
                                     <div class="mb-1 amount text-center">
                                         <h4 class="text-danger">
                                             <span data-count="total_balance">0.00</span>
                                         </h4>
-                                        <label>Fees Balance</label>
+                                        <label class="text-black font-bold">Fees Balance</label>
                                     </div>
                                     <div class="mb-1 amount text-center">
                                         <h4 class="text-success">
                                             <span '.($isAdmin ? 'data-count="total_expenditure"' : 'data-summary="arrears_paid"').'>0.00</span>
                                         </h4>
-                                        <label>'.($isAdmin ? 'Total Expenses' : 'Arrears Paid').'</label>
+                                        <label class="text-black font-bold">'.($isAdmin ? 'Total Expenses' : 'Arrears Paid').'</label>
                                     </div>
                                     <div class="mb-1 amount text-center">
                                         <h4 class="text-warning">
                                             <span data-count="arrears_total">0.00</span>
                                         </h4>
-                                        <label>Arrears Balance</label>
+                                        <label class="text-black font-bold">Arrears Balance</label>
                                     </div>
                                 </div>
                                 <div class="card-body mt-0 pt-2" data-chart="revenue_category_chart">
