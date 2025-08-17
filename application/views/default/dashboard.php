@@ -774,7 +774,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         <div class="card-header pr-2">
                             <div class="row width-per-100">
                                 <div class="col-md-9 flex align-items-lg-center">
-                                    <h4 class="text-uppercase font-13">Students Per Class Count</h4>
+                                    <h4 class="text-uppercase font-13 mb-0">Students Per Class Count</h4>
                                 </div>
                                 <div class="col-md-3 text-success text-right p-0">
                                     Total: <span data-count="total_students_count" class="font-bold font-25 mb-0">0</span>
@@ -900,7 +900,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card-header pr-0">
                                 <div class="row width-100">
                                     <div class="col-md-4 flex align-items-lg-center">
-                                        <h4 class="text-uppercase font-13">Attendance Logs</h4>
+                                        <h4 class="text-uppercase font-13 mb-0">Attendance Logs</h4>
                                     </div>
                                     <div align="right" class="col-md-8">
                                         <div class="btn-group" data-filter="quick_attendance_filter" id="quick_attendance_filter" role="group" aria-label="Filter Attendance">
