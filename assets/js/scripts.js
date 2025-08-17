@@ -66,7 +66,7 @@ $(function() {
     }
 
     $(".main-content").css({
-        minHeight: $(window).outerHeight() - 95
+        minHeight: $(window).outerHeight() - 130
     })
 
     $(".nav-collapse-toggle").click(function() {
