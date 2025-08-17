@@ -25,19 +25,44 @@ function loggedIn() {
 }
 
 function invalid_route($title = "Invalid Route", $content = "Sorry! You are trying to access an invalid route on this server.") {
+
+	$init_data = parse_ini_file(ROOT_DIRECTORY . "/db.ini");
+
     echo "
     <!DOCTYPE html>
 	<html lang='en'>
 	<head>
-	<title>{$title}</title></head>
+		<title>{$title}</title></head>
+		<link rel='stylesheet' href='".$init_data['base_url']."assets/css/app.min.css'>
+		<style>
+			.main-wrapper {
+				margin: 0; 
+				font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji';
+				font-size: 1rem; 
+				font-weight: 400; 
+				line-height: 1.5; 
+				color: #212529; 
+				text-align: left;
+				background-color: #fff;
+			}
+			.content {
+				background:#fbfbfb; 
+				padding:20px; 
+				width: 90%; 
+				text-align: center;
+				border-radius: 10px;
+				margin:auto auto;
+				border: solid 1px #ccc;
+			}
+		</style>
+	</head>
 	<body>
-		<div style='margin: 0; font-family: -apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,\"Helvetica Neue\",Arial,\"Noto Sans\",sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\",\"Segoe UI Symbol\",\"Noto Color Emoji\";
-		    font-size: 1rem; font-weight: 400; line-height: 1.5; color: #212529; text-align: left;
-		    background-color: #fff;'>
-		    <div align='center' style='background:#fbfbfb; padding:20px; width: 90%; margin:auto auto;border: solid 1px #ccc;'>
+		<div class='main-wrapper mt-3'>
+		    <div class='content text-center'>
 		        <h1 style='color: #dc3545;font-size: 2.5rem;margin-bottom:0px;'>MySchoolGH</h1>
 		        <h1 style='margin-bottom: 0.5rem;margin:0px;line-height: 1.2;font-size: 2.5rem;'>{$title}</h1>
 		        <p style='font-size:20px'>{$content}</p>
+				<a href='".$init_data['base_url']."' class='btn btn-outline-success'>Back to Home</a>
 		    </div>
 		</div>
 	</body>

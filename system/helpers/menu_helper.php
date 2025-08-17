@@ -179,8 +179,8 @@
         <li class="dropdown">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
             <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
                 <?php if($accessObject->hasAccess("add", "library")) { ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_stock">Stock Update</a></li>
@@ -190,15 +190,10 @@
     <?php } ?>
 
     <?php if($accessObject->hasAccess("view", "fees")) { ?>
-    <li class="menu-header">Finance & HR Management</li>
+    <li class="menu-header">Finance & Accounting</li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-door-open"></i><span>Manage Fees</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-server"></i><span>Fees Setup</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
-            <?php if($accessObject->hasAccess("receive", "fees") || $accessObject->hasAccess("receive", "fees")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Pay Term Fees</a></li>
-                <li><a class="nav-link" href="<?= $baseUrl ?>arrears/apay">Arrears Payment</a></li>
-            <?php } ?>
             <?php if($accessObject->hasAccess("view", "fees_category")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-category">Fees Category</a></li>
             <?php } ?>
@@ -206,6 +201,17 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>term_bills">Manage <?= $academicSession; ?> Bills</a></li>
             <?php } ?>
+        </ul>
+    </li>
+    
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-door-open"></i><span>Payment & History</span></a>
+        <ul class="dropdown-menu">
+            <?php if($accessObject->hasAccess("receive", "fees") || $accessObject->hasAccess("receive", "fees")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Pay Term Fees</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>arrears/apay">Arrears Payment</a></li>
+            <?php } ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List Payment History</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>debtors">Debtors List</a></li>
             <?php if($accessObject->hasAccess("send", "communication")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>reminders/send">Send Reminder</a></li>
@@ -215,21 +221,9 @@
             <?php } ?>
         </ul>
     </li>
-    <?php } ?>
-    <?php if($accessObject->hasAccess("view", "payslip")) { ?>
-        <?php if(in_array("payroll", $clientFeatures)) { ?>
-            <li class="dropdown">
-                <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
-                <ul class="dropdown-menu">
-                    <li><a class="nav-link" href="<?= $baseUrl ?>payroll">Payroll</a></li>
-                    <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Payslip List</a></li>
-                    <li><a class="nav-link" href="<?= $baseUrl ?>payroll-category">Allowance Category</a></li>
-                    <?php if($accessObject->hasAccess("reports", "payslip")) { ?>
-                    <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">Payroll Reports</a></li>
-                    <?php } ?>
-                </ul>
-            </li>
-        <?php } ?>
+    
+
+
     <?php } ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-archway"></i><span>Accounting</span></a>
@@ -254,6 +248,22 @@
             <?php } ?>
         </ul>
     </li>
+    <li class="menu-header">Human Resource</li>
+    <?php if($accessObject->hasAccess("view", "payslip")) { ?>
+        <?php if(in_array("payroll", $clientFeatures)) { ?>
+            <li class="dropdown">
+                <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="<?= $baseUrl ?>payroll-category">Allowance Category</a></li>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>payroll">Payroll</a></li>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Payslip List</a></li>
+                    <?php if($accessObject->hasAccess("reports", "payslip")) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">Payroll Reports</a></li>
+                    <?php } ?>
+                </ul>
+            </li>
+        <?php } ?>
+    <?php } ?>
     <?php if(in_array("front_office", $clientFeatures)) { ?>
         <?php if($accessObject->hasAccess("view", "admission_enquiry") || 
             $accessObject->hasAccess("view", "visitor_book") || $accessObject->hasAccess("view", "phone_call_log") ||
@@ -417,8 +427,8 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
         </ul>
     </li>
@@ -486,8 +496,8 @@
         <li class="dropdown">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
             <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
             </ul>
         </li>
@@ -551,8 +561,8 @@
         <li class="dropdown">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
             <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
             </ul>
         </li>
@@ -590,8 +600,8 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
         </ul>
     </li>
