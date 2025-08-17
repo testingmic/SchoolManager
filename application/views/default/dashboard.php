@@ -773,7 +773,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="card rounded-2xl rounded-b-none">
                         <div class="card-header pr-2">
                             <div class="row width-per-100">
-                                <div class="col-md-9">
+                                <div class="col-md-9 flex align-items-lg-center">
                                     <h4 class="text-uppercase font-13">Students Per Class Count</h4>
                                 </div>
                                 <div class="col-md-3 text-success text-right p-0">
@@ -876,7 +876,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         <div class="card-header pr-0">
                             <div class="row width-100">
                                 <div class="col-md-5">
-                                    <h4 class="mb-0">Fees Payment by Class</h4>
+                                    <h4 class="text-uppercase font-13 mb-0">Fees Payment by Class</h4>
                                 </div>
                             </div>
                         </div>
@@ -899,10 +899,10 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         <div class="card rounded-2xl">
                             <div class="card-header pr-0">
                                 <div class="row width-100">
-                                    <div class="col-md-4">
+                                    <div class="col-md-4 flex align-items-lg-center">
                                         <h4 class="text-uppercase font-13">Attendance Logs</h4>
                                     </div>
-                                    <div align="right" class="col-md-7">
+                                    <div align="right" class="col-md-8">
                                         <div class="btn-group" data-filter="quick_attendance_filter" id="quick_attendance_filter" role="group" aria-label="Filter Attendance">
                                             <button type="button" data-stream="attendance_report" data-period="last_week" class="btn btn-info">Last Week</button>
                                             <button type="button" data-stream="attendance_report" data-period="this_week" class="btn btn-info">This Week</button>
