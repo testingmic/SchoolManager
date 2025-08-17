@@ -1413,8 +1413,7 @@ code {
 }
 
 .list-unstyled-border li {
-    border-bottom: 1px
-    solid #f9f9f9;
+    border-bottom: 1px solid #9e9b9b;
     padding-bottom: 5px;
     margin-bottom: 5px;
     margin-top: 10px;
