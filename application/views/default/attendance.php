@@ -58,7 +58,7 @@ if(!empty($clientId)) {
                             <div class="padding-20">
                                 <div class="text-right">
                                     <h3 data-attendance_count="Student" class="font-light mb-0">0</h3>
-                                    <span class="text-muted">Students</span>
+                                    <span class="text-black">Students</span>
                                 </div>
                             </div>
                         </div>
@@ -71,7 +71,7 @@ if(!empty($clientId)) {
                             <div class="padding-20">
                                 <div class="text-right">
                                     <h3 data-attendance_count="Staff" class="font-light mb-0">0</h3>
-                                    <span class="text-muted">Teachers, Employees & Users</span>
+                                    <span class="text-black">Teachers, Employees & Users</span>
                                 </div>
                             </div>
                         </div>
@@ -84,7 +84,7 @@ if(!empty($clientId)) {
                             <div class="padding-20">
                                 <div class="text-right">
                                     <h3 data-attendance_count="Present" class="font-light mb-0">0</h3>
-                                    <span class="text-muted">Days Present</span>
+                                    <span class="text-black">Days Present</span>
                                 </div>
                             </div>
                         </div>
@@ -127,7 +127,7 @@ if(!empty($clientId)) {
                                     </div>
                                 </div>
                                 <div class="text-left">
-                                    <span class="text-muted" data-section="chart_summary"></span>
+                                    <span class="text-black" data-section="chart_summary"></span>
                                 </div>
                             </div>
                         </div>

@@ -627,7 +627,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 $response->html .=
                 '<div class="row">
                     <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
-                        <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-success border-left-solid bg-gradient-to-br from-green-200 to-green-100">
+                        <div class="card card-statistic-1 border border-left-lg border-success border-left-solid bg-gradient-to-br from-green-200 to-green-100">
                             <div class="flex items-center justify-between p-4">
                                 <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                     <i class="fas fa-user-graduate text-white text-xl"></i>
@@ -640,7 +640,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
-                        <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-primary border-left-solid bg-gradient-to-br from-blue-300 to-blue-100">
+                        <div class="card card-statistic-1 border border-left-lg border-primary border-left-solid bg-gradient-to-br from-blue-300 to-blue-100">
                             <div class="flex items-center justify-between p-4">
                                 <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                     <i class="fas fa-user-secret text-white text-xl"></i>
@@ -653,7 +653,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
-                        <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
+                        <div class="card card-statistic-1 border border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
                             <div class="flex items-center justify-between p-4">
                                 <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                     <i class="fas fa-users text-white text-xl"></i>
@@ -666,7 +666,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
-                        <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-danger border-left-solid bg-gradient-to-br from-red-300 to-red-100">
+                        <div class="card card-statistic-1 border border-left-lg border-danger border-left-solid bg-gradient-to-br from-red-300 to-red-100">
                             <div class="flex items-center justify-between p-4">
                                 <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-red-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                     <i class="fas fa-clock text-white text-xl"></i>
@@ -985,7 +985,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     $isTutorStudent || $isEmployee ?
                     ''.($data_stream ? '
                         <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
-                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-green border-left-solid bg-gradient-to-br from-green-300 to-green-100">
+                            <div class="card card-statistic-1 border border-left-lg border-green border-left-solid bg-gradient-to-br from-green-300 to-green-100">
                                 <div class="flex items-center justify-between p-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                         <i class="fas fa-user-check text-white text-xl"></i>
@@ -998,7 +998,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             </div>
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
-                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-danger border-left-solid bg-gradient-to-br from-red-300 to-red-100">
+                            <div class="card card-statistic-1 border border-left-lg border-danger border-left-solid bg-gradient-to-br from-red-300 to-red-100">
                                 <div class="flex items-center justify-between p-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-red-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                         <i class="fas fa-user-alt-slash text-white text-xl"></i>
@@ -1011,7 +1011,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             </div>
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
-                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
+                            <div class="card card-statistic-1 border border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
                                 <div class="flex items-center justify-between p-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                         <i class="fas fa-user-edit text-white text-xl"></i>
@@ -1024,7 +1024,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             </div>
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
-                            <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-blue border-left-solid bg-gradient-to-br from-blue-300 to-blue-100">
+                            <div class="card card-statistic-1 border border-left-lg border-blue border-left-solid bg-gradient-to-br from-blue-300 to-blue-100">
                                 <div class="flex items-center justify-between p-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                         <i class="fas fa-list text-white text-xl"></i>
@@ -1158,7 +1158,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="row">
                         '.($isParent ?                             
                             '<div class="col-lg-4 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
-                                <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-green border-left-solid bg-gradient-to-br from-green-300 to-green-100">
+                                <div class="card card-statistic-1 border border-left-lg border-green border-left-solid bg-gradient-to-br from-green-300 to-green-100">
                                     <div class="flex items-center justify-between p-4">
                                         <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                             <i class="fas fa-users text-white text-xl"></i>
@@ -1171,7 +1171,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 </div>
                             </div>
                             <div class="col-lg-4 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
-                                <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
+                                <div class="card card-statistic-1 border border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
                                     <div class="flex items-center justify-between p-4">
                                         <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                             <i class="fas fa-money-bill text-white text-xl"></i>

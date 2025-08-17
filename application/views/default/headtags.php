@@ -123,7 +123,7 @@ load_helpers(['menu_helper']);
         </style>
     <?php } ?>
 </head>
-<body class="bg-gradient-to-br from-slate-50 to-indigo-100 via-blue-50">
+<body class="bg-gradient-to-br from-indigo-50 to-indigo-100">
 	<div class="loader"></div>
     <input name="minimum_date" hidden type="hidden" disabled value="<?= date("Y-m-d", strtotime("today -100 years")) ?>">
     <input type="hidden" hidden id="todays_date" disabled value="<?= date("Y-m-d") ?>">
