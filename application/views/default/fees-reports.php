@@ -140,7 +140,7 @@ $response->html = '
                                             <div class="row">
 
                                                 <div class="col-lg-3 col-md-6">
-                                                    <div class="card border-top-0 border-bottom-0 border-right-0 hover:scale-105 transition-all duration-300 border-left-lg border-left-solid border-blue">
+                                                    <div class="card border hover:scale-105 transition-all duration-300 border-left-lg border-left-solid border-blue">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
                                                                 <div class="col pr-0">
@@ -158,7 +158,7 @@ $response->html = '
                                                 </div>
                                 
                                                 <div class="col-lg-3 col-md-6">
-                                                    <div class="card border-top-0 border-bottom-0 border-right-0 hover:scale-105 transition-all duration-300 border-left-lg border-left-solid border-success">
+                                                    <div class="card border hover:scale-105 transition-all duration-300 border-left-lg border-left-solid border-success">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
                                                                 <div class="col">
@@ -176,7 +176,7 @@ $response->html = '
                                                 </div>
                                 
                                                 <div class="col-lg-3 col-md-6">
-                                                    <div class="card border-top-0 border-bottom-0 border-right-0 hover:scale-105 transition-all duration-300 border-left-lg border-left-solid border-danger">
+                                                    <div class="card border hover:scale-105 transition-all duration-300 border-left-lg border-left-solid border-danger">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
                                                                 <div class="col">
@@ -194,7 +194,7 @@ $response->html = '
                                                 </div>
 
                                                 <div class="col-lg-3 col-md-6">
-                                                    <div class="card border-top-0 border-bottom-0 border-right-0 hover:scale-105 transition-all duration-300 border-left-lg border-left-solid border-warning">
+                                                    <div class="card border hover:scale-105 transition-all duration-300 border-left-lg border-left-solid border-warning">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
                                                                 <div class="col">
@@ -243,7 +243,7 @@ $response->html = '
                                                                         <button type="button" data-stream="summary_report" data-period="last_week" class="btn '.($session->reportPeriod == "last_week" ? "active" : null).' btn-info">Last Week</button>
                                                                         <button type="button" data-stream="summary_report" data-period="this_month" class="btn '.($session->reportPeriod == "this_month" ? "active" : null).' btn-info">This Month</button>
                                                                         <button type="button" data-stream="summary_report" data-period="last_month" class="btn '.($session->reportPeriod == "last_month" ? "active" : null).' btn-info">Last Month</button>
-                                                                        <button type="button" data-stream="summary_report" data-period="last_3months" class="btn '.($session->reportPeriod == "last_3months" ? "active" : null).' btn-info">Quarter</button>
+                                                                        <button type="button" data-stream="summary_report" data-period="last_3months" class="btn '.($session->reportPeriod == "last_3months" ? "active" : null).' btn-info hidden">Quarter</button>
                                                                         <button type="button" data-stream="summary_report" data-period="this_year" class="btn '.($session->reportPeriod == "this_year" ? "active" : null).' btn-info">This Year</button>
                                                                     </div>
                                                                 </div>
@@ -312,7 +312,7 @@ $response->html = '
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="last_week" class="btn '.($session->reportPeriod == "last_week" ? "active" : null).' btn-info">Last Week</button>
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="this_month" class="btn '.($session->reportPeriod == "this_month" ? "active" : null).' btn-info">This Month</button>
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="last_month" class="btn '.($session->reportPeriod == "last_month" ? "active" : null).' btn-info">Last Month</button>
-                                                                        <button type="button" data-stream="fees_revenue_flow" data-period="last_3months" class="btn '.($session->reportPeriod == "last_3months" ? "active" : null).' btn-info">Quarter</button>
+                                                                        <button type="button" data-stream="fees_revenue_flow" data-period="last_3months" class="btn '.($session->reportPeriod == "last_3months" ? "active" : null).' btn-info hidden">Quarter</button>
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="this_year" class="btn '.($session->reportPeriod == "this_year" ? "active" : null).' btn-info">This Year</button>
                                                                     </div>
                                                                 </div>
