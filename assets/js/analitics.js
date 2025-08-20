@@ -187,9 +187,9 @@ var summaryReporting = (t_summary, date_range) => {
                 _html_content += `
                 <tr>
                     <td>${i}</td>
-                    <td class='text-center'>${formatMoney(e.amount_due, myPrefs.labels.currency)}</td>
-                    <td class='text-center'>${formatMoney(e.actual_total_paid, myPrefs.labels.currency)}</td>
-                    <td class='text-center'>${formatMoney(e.balance, myPrefs.labels.currency)}</td>
+                    <td class='text-center'>${formatMoney(e.amount_due)}</td>
+                    <td class='text-center'>${formatMoney(e.actual_total_paid)}</td>
+                    <td class='text-center'>${formatMoney(e.balance)}</td>
                     <td class='text-center'>${percent}%</td>
                 </tr>`;
             } catch(error) { }
@@ -470,12 +470,12 @@ var summaryReporting = (t_summary, date_range) => {
             let t_balance = fees.summation.balance !== null ? fees.summation.balance : 0;
             let t_arrears_total = fees.summation.arrears_total !== null ? fees.summation.arrears_total : 0;
             $(`[data-count="total_balance"]`).html(format_currency(t_balance)).addClass('font-22');
-            $(`[data-count="arrears_total"]`).html(format_currency(t_arrears_total)).addClass('font-22');
+            $(`[data-count="arrears_total"]`).html(formatMoney(t_arrears_total)).addClass('font-22');
         }
 
         $.each(summary.fees_record_count.summation, function(i, e) {
-            let amount = e !== null ? format_currency(e) : "0.00";
-            $(`[data-summary="${i}"]`).html(`${amount}`).addClass('font-22');
+            // let amount = e !== null ? format_currency(e) : "0.00";
+            $(`[data-summary="${i}"]`).html(`${formatMoney(e)}`).addClass('font-20');
         });
 
         if(summary.transaction_revenue_flow !== undefined) {

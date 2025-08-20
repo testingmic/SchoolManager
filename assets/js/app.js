@@ -1045,10 +1045,10 @@ var appendToUrl = (url) => {
     return false;
 }
 
-function formatMoney(amount, currency = "GHS", locale = "en-GH") {
+function formatMoney(amount, locale = "en-GH") {
     return new Intl.NumberFormat(locale, {
       style: "currency",
-      currency: currency
+      currency: myPrefs.labels.currency
     }).format(amount);
 }
 

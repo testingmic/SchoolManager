@@ -768,6 +768,25 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 }
             }
 
+            $revenue_summary = '';
+            foreach([
+                'amount_paid' => ['Fees Paid', 'text-success'], 
+                'amount_due' => ['Fees Due', 'text-primary'], 
+                'balance' => ['Fees Balance', 'text-danger'],
+            ] as $it => $iv) {
+                $revenue_summary .= '
+                <div class="mb-0 amount text-center">
+                    <div class="card mb-0">
+                        <div class="card-body mb-0 pb-2 pr-1 pl-1 pt-2">
+                            <h4 class="'.$iv[1].'">
+                                <span data-summary="'.$it.'" class="font-20">0.00</span>
+                            </h4>
+                            <label class="text-black font-bold">'.$iv[0].'</label>
+                        </div>
+                    </div>
+                </div>';
+            }
+
             $response->html .= '
                 <div class="col-lg-4 col-md-12 col-12 col-sm-12">
                     <div class="card rounded-2xl rounded-b-none">
@@ -781,7 +800,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body trix-slim-scroll quick_loader" id="class_count_list" style="max-height:465px;height:465px;overflow-y:auto;">
+                        <div class="card-body trix-slim-scroll quick_loader" id="class_count_list" style="max-height:507px;height:507px;overflow-y:auto;">
                             <div class="form-content-loader" style="display: flex; position: absolute">
                                 <div class="offline-content text-center">
                                     <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
@@ -791,54 +810,25 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-8">
-                    <div class="d-flex justify-content-between border-bottom pb-2">
-                        <div class="mb-0 amount text-center">
+                    <div class="grid grid-cols-4 gap-4 mb-2">
+                        '.$revenue_summary.'
+                        <div class="mb-0 amount hidden text-center">
                             <div class="card mb-0">
-                                <div class="card-body mb-0">
-                                    <h4 class="text-primary">
-                                        <span data-summary="amount_due">0.00</span>
-                                    </h4>
-                                    <label class="text-black font-bold">Fees Due</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-0 amount text-center">
-                            <div class="card mb-0">
-                                <div class="card-body mb-0">
+                                <div class="card-body mb-0 pr-1 pl-1 pb-2 pt-2">
                                     <h4 class="text-success">
-                                    <span data-summary="amount_paid">0.00</span>
+                                        <span class="font-20" '.($isAdmin ? 'data-count="total_expenditure"' : 'data-summary="arrears_paid"').'>0.00</span>
                                     </h4>
-                                    <label class="text-black font-bold">Fees Paid</label>
+                                    <label class="text-black font-bold">'.($isAdmin ? 'Expenses' : 'Arrears Paid').'</label>
                                 </div>
                             </div>
                         </div>
                         <div class="mb-0 amount text-center">
                             <div class="card mb-0">
-                                <div class="card-body mb-0">
-                                    <h4 class="text-danger">
-                                        <span data-count="total_balance">0.00</span>
-                                    </h4>
-                                    <label class="text-black font-bold">Fees Balance</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-0 amount text-center">
-                            <div class="card mb-0">
-                                <div class="card-body mb-0">
-                                    <h4 class="text-success">
-                                        <span '.($isAdmin ? 'data-count="total_expenditure"' : 'data-summary="arrears_paid"').'>0.00</span>
-                                    </h4>
-                                    <label class="text-black font-bold">'.($isAdmin ? 'Total Expenses' : 'Arrears Paid').'</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-0 amount text-center">
-                            <div class="card mb-0">
-                                <div class="card-body mb-0">
+                                <div class="card-body mb-0 pr-1 pl-1 pb-2 pt-2">
                                     <h4 class="text-warning">
-                                        <span data-count="arrears_total">0.00</span>
+                                        <span class="font-20" data-count="arrears_total">0.00</span>
                                     </h4>
-                                    <label class="text-black font-bold">Arrears Balance</label>
+                                    <label class="text-black font-bold">Arrears</label>
                                 </div>
                             </div>
                         </div>
