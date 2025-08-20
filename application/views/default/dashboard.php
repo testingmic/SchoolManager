@@ -791,6 +791,59 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-8">
+                    <div class="d-flex justify-content-between border-bottom pb-2">
+                        <div class="mb-0 amount text-center">
+                            <div class="card mb-0">
+                                <div class="card-body mb-0">
+                                    <h4 class="text-primary">
+                                        <span data-summary="amount_due">0.00</span>
+                                    </h4>
+                                    <label class="text-black font-bold">Fees Due</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-0 amount text-center">
+                            <div class="card mb-0">
+                                <div class="card-body mb-0">
+                                    <h4 class="text-success">
+                                    <span data-summary="amount_paid">0.00</span>
+                                    </h4>
+                                    <label class="text-black font-bold">Fees Paid</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-0 amount text-center">
+                            <div class="card mb-0">
+                                <div class="card-body mb-0">
+                                    <h4 class="text-danger">
+                                        <span data-count="total_balance">0.00</span>
+                                    </h4>
+                                    <label class="text-black font-bold">Fees Balance</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-0 amount text-center">
+                            <div class="card mb-0">
+                                <div class="card-body mb-0">
+                                    <h4 class="text-success">
+                                        <span '.($isAdmin ? 'data-count="total_expenditure"' : 'data-summary="arrears_paid"').'>0.00</span>
+                                    </h4>
+                                    <label class="text-black font-bold">'.($isAdmin ? 'Total Expenses' : 'Arrears Paid').'</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-0 amount text-center">
+                            <div class="card mb-0">
+                                <div class="card-body mb-0">
+                                    <h4 class="text-warning">
+                                        <span data-count="arrears_total">0.00</span>
+                                    </h4>
+                                    <label class="text-black font-bold">Arrears Balance</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card rounded-2xl rounded-b-none">
                         <div class="card-header pr-0">
                             <div class="row width-100">
@@ -807,46 +860,14 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body quick_loader dashboard_revenue" style="min-height:465px;">
+                        <div class="card-body p-0 pr-1 pl-2 quick_loader dashboard_revenue" style="min-height:300px;">
                             <div class="table-responsive">
                                 <div class="form-content-loader" style="display: flex; position: absolute">
                                     <div class="offline-content text-center">
                                         <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                     </div>
                                 </div>
-                                <div class="d-flex justify-content-between border-bottom pb-2">
-                                    <div class="mb-1 amount text-center">
-                                        <h4 class="text-primary">
-                                            <span data-summary="amount_due">0.00</span>
-                                        </h4>
-                                        <label class="text-black font-bold">Fees Due</label>
-                                    </div>
-                                    <div class="mb-1 amount text-center">
-                                        <h4 class="text-success">
-                                            <span data-summary="amount_paid">0.00</span>
-                                        </h4>
-                                        <label class="text-black font-bold">Fees Paid</label>
-                                    </div>
-                                    <div class="mb-1 amount text-center">
-                                        <h4 class="text-danger">
-                                            <span data-count="total_balance">0.00</span>
-                                        </h4>
-                                        <label class="text-black font-bold">Fees Balance</label>
-                                    </div>
-                                    <div class="mb-1 amount text-center">
-                                        <h4 class="text-success">
-                                            <span '.($isAdmin ? 'data-count="total_expenditure"' : 'data-summary="arrears_paid"').'>0.00</span>
-                                        </h4>
-                                        <label class="text-black font-bold">'.($isAdmin ? 'Total Expenses' : 'Arrears Paid').'</label>
-                                    </div>
-                                    <div class="mb-1 amount text-center">
-                                        <h4 class="text-warning">
-                                            <span data-count="arrears_total">0.00</span>
-                                        </h4>
-                                        <label class="text-black font-bold">Arrears Balance</label>
-                                    </div>
-                                </div>
-                                <div class="card-body mt-0 pt-2" data-chart="revenue_category_chart">
+                                <div class="mt-0 pt-2" data-chart="revenue_category_chart">
                                     <div id="revenue_category_chart"></div>
                                 </div>
                             </div>

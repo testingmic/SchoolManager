@@ -176,6 +176,7 @@ var summaryReporting = (t_summary, date_range) => {
             _class_values = new Array(),
             _html_content = "";
 
+        $('table[class~="reformat_table"]').DataTable().destroy();
         $.each(class_payments, function(i, e) {
             _class_keys.push(i);
             let t_val = e.actual_total_paid == null ? 0 : e.actual_total_paid;
@@ -187,7 +188,7 @@ var summaryReporting = (t_summary, date_range) => {
                 <tr>
                     <td>${i}</td>
                     <td class='text-center'>${formatMoney(e.amount_due, myPrefs.labels.currency)}</td>
-                    <td class='text-center'>${formatMoney(e.amount_paid, myPrefs.labels.currency)}</td>
+                    <td class='text-center'>${formatMoney(e.actual_total_paid, myPrefs.labels.currency)}</td>
                     <td class='text-center'>${formatMoney(e.balance, myPrefs.labels.currency)}</td>
                     <td class='text-center'>${percent}%</td>
                 </tr>`;
@@ -413,7 +414,7 @@ var summaryReporting = (t_summary, date_range) => {
 
                 var options = {
                     chart: {
-                        height: 350,
+                        height: 400,
                         type: 'bar',
                     },
                     plotOptions: {

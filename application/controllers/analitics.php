@@ -128,6 +128,18 @@ class Analitics extends Myschoolgh {
             ]
         ];
 
+        /** Set the date range */
+        $params->date_range = $this->date_range;
+
+        /** Set the start and end date */
+        $params->start_date = $this->start_date;
+        $params->end_date = $this->end_date;
+
+        /** set the previous date range */
+        $params->previous_start_date = $this->prevstart_date;
+        $params->previous_end_date = $this->prevend_date;
+        
+
         // confirm if the user pushed a query set
         $this->user_status = isset($params->label["user_status"]) ? $params->label["user_status"] : $this->default_allowed_status_users_array;
         $this->class_id_query = (isset($params->label["class_id"]) && !empty($params->label["class_id"])) ? $params->label["class_id"] : null;
@@ -326,6 +338,7 @@ class Analitics extends Myschoolgh {
                 "return_where_clause" => true,
             ];
             $where_clause = $usersClass->list($client_param);
+            
 
             // get the fees payment made by each class
             $c_query = $this->db->prepare("SELECT
