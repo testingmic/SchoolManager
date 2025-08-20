@@ -775,7 +775,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 'balance' => ['Fees Balance', 'text-danger'],
             ] as $it => $iv) {
                 $revenue_summary .= '
-                <div class="mb-0 amount text-center">
+                <div class="mb-0 amount text-center  transition-all duration-300 transform hover:-translate-y-1">
                     <div class="card mb-0">
                         <div class="card-body mb-0 pb-2 pr-1 pl-1 pt-2">
                             <h4 class="'.$iv[1].'">
@@ -822,7 +822,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 </div>
                             </div>
                         </div>
-                        <div class="mb-0 amount text-center">
+                        <div class="mb-0 amount text-center transition-all duration-300 transform hover:-translate-y-1">
                             <div class="card mb-0">
                                 <div class="card-body mb-0 pr-1 pl-1 pb-2 pt-2">
                                     <h4 class="text-warning">
