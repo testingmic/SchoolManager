@@ -1045,6 +1045,13 @@ var appendToUrl = (url) => {
     return false;
 }
 
+function formatMoney(amount, currency = "GHS", locale = "en-GH") {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: currency
+    }).format(amount);
+}
+
 var setActiveNavLink = () => {
 
     let location = window.location.href,
@@ -1065,6 +1072,22 @@ var setActiveNavLink = () => {
             } else {}
         });
     }
+}
+
+var formatSimpleTable = () => {
+    try {
+        $(`table[class~="reformat_table"]`).DataTable({
+            search: false,
+            lengthMenu: [
+                [7, 15, -1],
+                [7, 15, "All"]
+            ],
+            language: {
+                sEmptyTable: "Nothing Found",
+                lengthMenu: "Display _MENU_ rows"
+            }
+        });
+    } catch(err) {}
 }
 
 var initDataTables = () => {

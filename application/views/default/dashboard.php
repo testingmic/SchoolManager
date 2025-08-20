@@ -871,7 +871,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             // load the class payment information by class only
             if($isAdminAccountant) {
                 $response->html .= '
-                <div class="col-lg-12">
+                <div class="col-lg-8">
                     <div class="card">
                         <div class="card-header pr-0">
                             <div class="row width-100">
@@ -880,14 +880,42 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 </div>
                             </div>
                         </div>
+                        <div class="card-body pt-0 pr-2 pl-2 pb-0 quick_loader">
+                            <div class="form-content-loader" style="display: flex; position: absolute">
+                                <div class="offline-content text-center">
+                                    <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                </div>
+                            </div>
+                            <div data-chart="class_fees_payment_chart_table" style="max-height:440px; height:440px; overflow-y:auto;">
+                                <table class="table table-bordered table-striped reformat_table">
+                                    <thead>
+                                        <tr>
+                                            <th class="8%">Class Name</th>
+                                            <th class="text-center">Amount Due</th>
+                                            <th class="text-center">Fees Paid</th>
+                                            <th class="text-center">Outstanding</th>
+                                            <th class="text-center">Bal Percent</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="class_fees_payment_chart_table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header pr-0">
+                            <h4 class="text-uppercase font-13 mb-0">Fees Payment by Class</h4>
+                        </div>
                         <div class="card-body pb-0 quick_loader">
                             <div class="form-content-loader" style="display: flex; position: absolute">
                                 <div class="offline-content text-center">
                                     <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                 </div>
                             </div>
-                            <div data-chart="class_fees_payment_chart">
-                                <div id="class_fees_payment_chart" style="width:100%;max-height:420px;height:420px;"></div>
+                            <div class="card-body pb-2" data-chart="class_revenue_donought_chart">
+                                <canvas style="max-height:400px;height:400px;" id="class_revenue_donought_chart"></canvas>
                             </div>
                         </div>
                     </div>

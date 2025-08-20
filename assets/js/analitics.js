@@ -4,6 +4,12 @@ var filter = $(`[id="reports_insight"] button[id="filter_Fees_Report"]`),
         "l-bg-yellow", "l-bg-purple-dark", "bg-deep-orange", "bg-brown", "bg-pink",
         "bg-indigo", "bg-teal", "bg-light-blue", "bg-info", "bg-warning", "bg-dark"
     ],
+    colors_bank = [
+        '#304ffe', '#ffa601', '#fc544b', '#63ed7a', 
+        '#191d21', '#e83e8c', '#6777ef', '#FF9800', 
+        '#dd1a97', '#3f51b5', '#f44336', '#024f05',
+        '#b5f740', '#9c27b0', '#82d3f8'
+    ],
     to_stream = "";
 
 var revenueReporting = (revenue) => {
@@ -163,17 +169,68 @@ var summaryReporting = (t_summary, date_range) => {
     $(`[data-filter="current_period"]`).html(date_range.current.title);
     $(`span[data-filter="period"]`).html(date_range.previous.title);
 
-    if(summary.students_class_fees_payment !== undefined) {
+    if(typeof summary.students_class_fees_payment !== 'undefined') {
+
+        let class_payments = summary.students_class_fees_payment,
+            _class_keys = new Array(),
+            _class_values = new Array(),
+            _html_content = "";
+
+        $.each(class_payments, function(i, e) {
+            _class_keys.push(i);
+            let t_val = e.actual_total_paid == null ? 0 : e.actual_total_paid;
+            _class_values.push(parseInt(t_val));
+            
+            try {
+                let percent = e.balance > 0 ? Math.round((e.balance / e.amount_due) * 100).toFixed(2) : 0;
+                _html_content += `
+                <tr>
+                    <td>${i}</td>
+                    <td class='text-center'>${formatMoney(e.amount_due, myPrefs.labels.currency)}</td>
+                    <td class='text-center'>${formatMoney(e.amount_paid, myPrefs.labels.currency)}</td>
+                    <td class='text-center'>${formatMoney(e.balance, myPrefs.labels.currency)}</td>
+                    <td class='text-center'>${percent}%</td>
+                </tr>`;
+            } catch(error) { }
+        });
+        $(`tbody[class="class_fees_payment_chart_table"]`).html(_html_content);
+        
+        formatSimpleTable();
+
+        $(`div[data-chart="class_fees_payment_chart_table"] div[class="dataTables_length"]`).remove();
+        $(`div[data-chart="class_fees_payment_chart_table"] div[id="DataTables_Table_0_filter"]`).remove();
+
+        if ($(`canvas[id="class_revenue_donought_chart"]`).length) {
+
+            let color_list = [];
+            for(let i = 0; i < _class_values.length; i++) {
+                color_list.push(colors_bank[i]);
+            }
+
+            var ctx = document.getElementById("class_revenue_donought_chart");
+            var myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: _class_keys,
+                    datasets: [{
+                        label: 'Revenue per Class',
+                        data: _class_values,
+                        backgroundColor: color_list,
+                        borderColor: ['#fff', '#fff', '#fff']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutoutPercentage: 70,
+                    maintainAspectRatio: false,
+                    legend: {
+                        display: false
+                    }
+                }
+            });
+        }
 
         if($(`div[id="class_fees_payment_chart"]`).length) {
-            let class_payments = summary.students_class_fees_payment,
-                _class_keys = new Array(),
-                _class_values = new Array();
-            $.each(class_payments, function(i, e) {
-                _class_keys.push(i);
-                let t_val = e.actual_total_paid == null ? 0 : e.actual_total_paid;
-                _class_values.push(parseInt(t_val))
-            });
 
             $(`div[data-chart="class_fees_payment_chart"]`).html(``);
             $(`div[data-chart="class_fees_payment_chart"]`).html(`<div id="class_fees_payment_chart" style="width:100%;max-height:420px;height:420px;"></div>`);
@@ -233,7 +290,7 @@ var summaryReporting = (t_summary, date_range) => {
         
     }
 
-    if (summary.users_record_count !== undefined) {
+    if (typeof summary.users_record_count !== 'undefined') {
         let user = summary.users_record_count;
         let employees = parseInt(user.count.total_employees_count) + parseInt(user.count.total_accountants_count) + parseInt(user.count.total_admins_count);
         $(`[data-count="total_employees_count"]`).html(employees);
@@ -273,18 +330,18 @@ var summaryReporting = (t_summary, date_range) => {
 
     }
 
-    if (t_summary.departments_report !== undefined) {
+    if (typeof t_summary.departments_report !== 'undefined') {
         let department = t_summary.departments_report;
         $(`span[data-count="departments_count"]`).html(department.departments_count);
     }
 
-    if (t_summary.library_report !== undefined) {
+    if (typeof t_summary.library_report !== 'undefined') {
         let library = t_summary.library_report;
         $(`span[data-count="library_category_count"]`).html(library.library_category_count);
         $(`span[data-count="library_books_count"]`).html(library.library_books_count);
     }
 
-    if (summary.students_class_record_count !== undefined) {
+    if (typeof summary.students_class_record_count !== 'undefined') {
         let classes = summary.students_class_record_count,
             class_count_list = "",
             key = 0;
@@ -306,7 +363,7 @@ var summaryReporting = (t_summary, date_range) => {
         $(`div[id="class_count_list"]`).html(class_count_list);
     }
 
-    if (summary.fees_record_count !== undefined) {
+    if (typeof summary.fees_record_count !== 'undefined') {
         let fees = summary.fees_record_count,
             total_revenue = 0,
             previous_amount = 0,
@@ -341,7 +398,7 @@ var summaryReporting = (t_summary, date_range) => {
         revenue_category_counts += "</div>";
         $(`div[id="revenue_category_counts"]`).html(revenue_category_counts);
 
-        if (summary.fees_record_count.comparison !== undefined) {
+        if (typeof summary.fees_record_count.comparison !== 'undefined') {
             if($(`div[data-chart="revenue_category_chart"]`).length) {
                 $(`div[data-chart="revenue_category_chart"]`).html(`<div id="revenue_category_chart"></div>`);
                 $.each(summary.fees_record_count.comparison.amount.previous, function(i, e) {

@@ -727,7 +727,7 @@ if(!empty($user_id)) {
                                                 <tr>
                                                     <th data-width="40" style="width: 40px;">#</th>
                                                     <th>Item</th>
-                                                    <th>Payment Method</th>
+                                                    <th>Method</th>
                                                     <th>Description</th>
                                                     <th>Record Date</th>
                                                     <th align="right">Amount</th>
