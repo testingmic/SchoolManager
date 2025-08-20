@@ -70,7 +70,7 @@ function pay_student_fees_checkout() {
     $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Student Name:</strong> {$payInit->student_details["student_name"]}</div>";
     $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Student ID:</strong> {$payInit->student_details["unique_id"]}</div>";
     $payment_form .= "<div class='font-15 mb-0 text-uppercase'><strong>Student Class:</strong> {$payInit->class_name}</div>";
-    $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Outstanding Balance: </strong><span class='font-20'>{$clientPref->labels->currency}".number_format($balance, 2)."</span></div>";
+    $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Outstanding Balance: </strong><span class='font-20'>{$clientPref?->labels?->currency}".number_format($balance, 2)."</span></div>";
     
     // if the item was specified
     if($getObject->item_specified) {

@@ -477,7 +477,7 @@ var attendanceReport = (_attendance) => {
 
         let chart_summary = "";
         $.each(attendance.chart_summary, function(i, e) {
-            chart_summary += `<div><strong>${i}:</strong> ${e}</div>`;
+            chart_summary += `<div class='mb-1'><strong>${i}:</strong> ${e}</div>`;
         });
         $(`span[data-section="chart_summary"]`).html(chart_summary);
 
@@ -586,9 +586,19 @@ var attendanceReport = (_attendance) => {
     }
 
     if (_attendance.class_summary !== undefined) {
+        let _class_summary = _attendance.class_summary,
+            _chart_label = new Array(),
+            color = 'text-black';
+        let rate = _class_summary.summaries.attendanceRate;
+        if(rate < 40) {
+            color = 'text-danger';
+        } else if(rate > 90) {
+            color = 'text-success';
+        } else {
+            color = 'text-warning';
+        }
+        $(`h3[data-attendance_count="attendanceRate"]`).html(`<span class='${color}'>${rate}%</span>`);
         if ($(`div[id="class_attendance_chart"]`).length) {
-            let _class_summary = _attendance.class_summary,
-                _chart_label = new Array();
             $.each(_class_summary.summary, function(i, day) {
                 _chart_label.push(i);
             });
@@ -649,7 +659,7 @@ var attendanceReport = (_attendance) => {
             attendance_chart_list += `
             <div class='${single_data ? "col-lg-4 col-md-6" : "col-lg-4 col-md-6"}'>
                 <div class='card mb-3'>
-                    <div class='card-header pl-2 pr-2 pb-0'><h5 class='pb-0 mb-0'>${day}</h5></div>
+                    <div class='card-header pl-2 pr-2 pb-5px'><h5 class='pb-0 mb-0'>${day}</h5></div>
                     <div class='card-body p-2'>
                         <i class="fa ${present.includes(status) ? "text-success fa-check" : (absent.includes(status) ? "text-danger fa-times" : (
                            holiday.includes(status) ? "text-info fa-calendar-times" : "text-warning fa-adjust"
@@ -875,16 +885,52 @@ var filter_Class_Attendance = () => {
     });
 }
 
+var filter_ClassGroup_Attendance = (append_query = "") => {
+    let start_date = $(`input[data-item="attendance_performance"][name="group_start_date"]`).val(),
+        end_date = $(`input[data-item="attendance_performance"][name="group_end_date"]`).val();
+    $(`div[id="class_summary_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "flex" });
+    $.get(`${baseUrl}api/analitics/generate?label[stream]=class_attendance_report&label[start_date]=${start_date}&label[end_date]=${end_date}${append_query}`).then((response) => {
+        if (response.code === 200) {
+            if (typeof response.data.result.attendance_report !== 'undefined') {
+                let attendance = response.data.result.attendance_report.class_summary;
+                let html = '', i = 0;
+                $.each(attendance.attendanceRate, function(id, value) {
+                    i++;
+                    if(value.totalDays) {
+                        html += `<tr>
+                            <td class='3%'>${i}</td>
+                            <td>${id}</td>
+                            <td class='text-center'>${value['Size']}</td>
+                            <td class='text-center'>${value['totalDays']}</td>
+                            <td class='text-center text-success'>${value['Present']}</td>
+                            <td class='text-center text-danger'>${value['Absent']}</td>
+                            <td class='text-center text-success'>${value['presentRate']}%</td>
+                            <td class='text-center text-warning'>${value['absentRate']}%</td>
+                            <td class='text-center'>
+                                <button onclick='return loadPage("${baseUrl}attendance/summary/${value['Id']}")' class='btn btn-outline-success'><i class='fas fa-chart-bar'></i></button>
+                            </td>
+                        </tr>`;
+                    }
+                });
+                $(`tbody[class="class_summary_attendance_rate"]`).html(html);
+            }
+            setTimeout(() => {
+                $(`div[id="class_summary_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
+            }, refresh_seconds);
+        }
+    }).catch(() => {
+        $(`div[id="class_summary_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
+    });
+}
+
 var filter_UserGroup_Attendance = (append_query = "") => {
     let start_date = $(`input[data-item="attendance"][name="group_start_date"]`).val(),
         end_date = $(`input[data-item="attendance"][name="group_end_date"]`).val();
     $(`div[id="users_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "flex" });
-    $.get(`${baseUrl}api/analitics/generate?label[stream]=attendance_report&label[start_date]=${start_date}&label[end_date]=${end_date}${append_query}`).then((response) => {
+    $.get(`${baseUrl}api/analitics/generate?label[stream]=class_attendance_report&label[start_date]=${start_date}&label[end_date]=${end_date}${append_query}&class_only=true&is_summary=true`).then((response) => {
         if (response.code === 200) {
-            $(`div[data-chart_container="users_attendance_chart"]`).html(`<div style="width:100%;height:345px;" id="attendance_chart"></div>`);
-            if (response.data.result.attendance_report !== undefined) {
-                attendanceReport(response.data.result.attendance_report);
-            }
+            let summary = response.data.result.attendance_report.class_summary;
+            $(`table[id="attendance_logs_by_daychart"]`).html(summary.summaries.table);
             setTimeout(() => {
                 $(`div[id="users_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
             }, refresh_seconds);

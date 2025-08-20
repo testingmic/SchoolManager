@@ -931,6 +931,47 @@ class Myschoolgh extends Models {
 	}
 
 	/**
+	 * Remove all days excluded from loading
+	 * 
+	 * @param string $start_date
+	 * @param string $end_date
+	 * @param string $defaultClientData;
+	 * 
+	 * @return array
+	 */
+	final function daysExclusionList($start_date, $end_date, $clientData = []) {
+
+		global $defaultClientData;
+
+		$defaultClientData = !empty($defaultClientData) ? $defaultClientData : $clientData;
+
+		$list_days = $this->listDays($start_date, $end_date);
+		$days = $defaultClientData?->client_preferences?->opening_days ?? [];
+
+		foreach($list_days as $day) {
+			if(in_array(date("l", strtotime($day)), array_values($days))) {
+				$accepted[] = $day;
+			}
+		}
+
+		return $accepted ?? [];
+
+	}
+
+	/**
+	 * Confirm if the day is part of the accepted days list
+	 * 
+	 * @return bool
+	 */
+	final function isAcceptedDay($day, $defaultClientData) {
+
+		$days = $defaultClientData?->client_preferences?->opening_days ?? [];
+
+		return in_array(date("l", strtotime($day)), array_values($days));
+
+	}
+ 
+	/**
 	 * @method stringToArray
 	 * 
 	 * @desc Converts a string to an array

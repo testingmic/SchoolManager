@@ -12,7 +12,7 @@ global $defaultClientData, $myClass;
 // init variables
 $payment_form = "";
 $errorFound = false;
-$clientPref = [];
+$clientPref = null;
 $getObject = array_map("xss_clean", $_GET);
 
 // accepted url

@@ -142,10 +142,10 @@ $response->html = '
         <div class="col-xl-12 mb-2 form-group">
             <div class="page-content">
                 <div class="row">
-                    <div class="col-lg-5 p-2">
+                    <div class="col-lg-6 p-2">
                         <div class="card">
                             <div class="card-header">
-                                <div class="card-title">Api Endpoint List</div>
+                                <div class="card-title  mb-0">Api Endpoint List</div>
                             </div>
                             <div class="card-body p-1">
                                 <div class="filters">
@@ -187,7 +187,7 @@ $response->html = '
                                         <th width="15%">Method</th>
                                         <th width="20%"></th>
                                     </table>
-                                    <div class="slim-scroll" style="overflow-y:auto;height:650px">
+                                    <div class="slim-scroll" style="overflow-y:auto;height:400px">
                                         <table class="table pt-0 mt-0 table-hover data-table">
                                             <tbody>';
                                             $key = 0; 
@@ -223,10 +223,10 @@ $response->html = '
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-7 p-2">
+                    <div class="col-lg-6 p-2">
                         <div class="card">
                             <div class="card-header">
-                                <div class="card-title width-100">
+                                <div class="card-title mb-0 width-100">
                                     Endpoint Content &nbsp;
                                     <span class="float-right">
                                         <a href="'.$myClass->baseUrl.'endpoints" class="btn btn-sm hidden refresh-button btn-outline-success"><i class="fa fa-random"></i> Refresh</a>
@@ -293,7 +293,7 @@ $response->html = '
                                                     <button type="submit" class="btn btn-block btn-outline-success btn-sm"><i class="fa fa-save"></i> Save</button>
                                                 </div>
                                             </div>
-                                            <div class="col-md-5">
+                                            <div class="col-md-12">
                                                 <div class="endpoint-info hidden">
                                                     <div><strong>Date Created:</strong> <span class="date_created"></span></div>
                                                     <div><strong>Last Updated:</strong> <span class="last_updated"></span></div>

@@ -261,7 +261,7 @@ if(!$isSupport) {
     /** Download Timetables */
     elseif(confirm_url_id(1, "attendance")) {
         /** Start processing */
-        $getObject = (array) $_GET;
+        $getObject = $_GET;
         $getObject = (object) array_map("xss_clean", $getObject);
         
         // end the query

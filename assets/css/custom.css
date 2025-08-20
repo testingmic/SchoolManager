@@ -793,6 +793,7 @@ textarea.custom_form-control {
 .main-footer {
     margin-top: 0px!important;
     position: absolute;
+    font-weight: normal;
     /* bottom: 0; */
 }
 
@@ -848,11 +849,16 @@ textarea.custom_form-control {
 }
 
 .chat-window {
-    height:650px !important
+    height:450px;
 }
 
 .chat-box .chat-content {
-    height: 600px !important;
+    height: 500px !important;
+}
+
+.chat-box .chat-form .form-control {
+    border-radius: 0px;
+    border: solid 1px #2196F3;
 }
 
 @media only screen and (max-width: 575.98px) {
@@ -1183,6 +1189,14 @@ h4 {
 
 .pb-0 {
     padding-bottom: 0px!important;
+}
+
+.pb-5px {
+    padding-bottom: 5px !important;
+}
+
+.border-solid-gray {
+    border: solid 1px #ccc !important;
 }
 
 .main-sidebar .sidebar-menu li a {

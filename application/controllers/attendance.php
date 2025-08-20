@@ -246,6 +246,16 @@ class Attendance extends Myschoolgh {
         $labels = ["success" => "Present", "danger" => "Absent", "primary" => "Holiday", "warning" => "Late"];
         $disabled = $final ? "disabled" : "data-user_id='{$userId}' name='attendance_status[{$userId}][]'";
 
+        // foreach($labels as $color => $label) {
+        //     $the_key = strtolower($label);
+        //     $html .= "
+        //     <div data_item-container='attendance_{$the_key}' class='flex align-center'>
+        //         <input {$disabled} type='radio' ".($user_state == $the_key ? "checked" : "")." class='cursor mr-1' value='{$the_key}' id='{$userId}_{$the_key}'>
+        //         <label style='display: table-cell;' class='cursor mb-0' title='Click to Select {$label}' for='{$userId}_{$the_key}'>".($user_state == $the_key ? "<strong class='text-{$color}'>{$label}</strong>" : "{$label}")."</label>
+        //     </div>
+        //     ";
+        // }
+
         foreach($labels as $color => $label) {
             $the_key = strtolower($label);
             $html .= "
@@ -830,7 +840,7 @@ class Attendance extends Myschoolgh {
                         $table_content .= "
                         <tr data-row_search='name' data-attandance_fullname='{$user->name}' data-attendance_unique_id='{$user->unique_id}'>
                             <td width='5%'>{$numb}</td>
-                            <td width='22%' class='text-uppercase'>
+                            <td width='25%'>
                                 <div class='d-flex justify-content-start'>
                                     <div class='hidden mr-2'>
                                         <img src=\"{$this->baseUrl}{$user->image}\" width=\"28\" class=\"rounded-circle author-box-picture\" alt=\"User Image\">
@@ -848,13 +858,15 @@ class Attendance extends Myschoolgh {
                                     )."
                                 </div>
                             </td>
-                            <td width='35%'>".$this->attendance_radios($user->user_id, $user_state, $final, "")."</td>
+                            <td width='30%'>".$this->attendance_radios($user->user_id, $user_state, $final, "")."</td>
                             <td><input ".($final ? "readonly title='{$user_comments}'" : "data-user_id='{$user->user_id}' id='comments' autocomplete='Off'")." placeholder='Add remarks (optional)' value='{$user_comments}' class='form-control' type='text'></td>
                         </tr>";
                     }
                 }
             }
         }
+
+        //  class='grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 w-100 flex items-center'
 
         // if the users list is parsed
         if($isListed) {
@@ -1033,7 +1045,7 @@ class Attendance extends Myschoolgh {
     public function range_summary(stdClass $params) {
 
         // global variable
-        global $defaultAcademics, $isWardParent, $isStudent, $defaultUser;
+        global $defaultAcademics, $isWardParent, $isStudent, $defaultUser, $defaultClientData;
 
         // get the attendance log for the day
         $days = $this->listDays($params->start_date, $params->end_date, 'Y-m-d');
@@ -1060,12 +1072,18 @@ class Attendance extends Myschoolgh {
 
         // attendance log algo
         $logged_count = 0;
+        $activeDaysCount = 0;
+
+        $markedDays = [];
+
+        $acceptedDays = $defaultClientData?->client_preferences?->opening_days ?? [];
 
         // loop through the days for the record
         foreach($days as $day) {
 
-            $dayName = date("l", strtotime($day));
-            if(in_array($dayName, ['Saturday', 'Sunday'])) continue;
+            if($this->isAcceptedDay($day, $acceptedDays)) continue;
+
+            $activeDaysCount++;
             
             // loop through the users for each day
             foreach($users as $user) {
@@ -1082,6 +1100,13 @@ class Attendance extends Myschoolgh {
 
                 // if the query is not empty
                 if(!empty($theQuery)) {
+
+                    if(!isset($users_count["summary"]["{$user}.Marked_Days"])) {
+                        $users_count["summary"]["{$user}.Marked_Days"] = 0;
+                    }
+
+                    // append to the list
+                    $users_count["summary"]["{$user}.Marked_Days"] += 1;
 
                     // increment the logged count
                     $logged_count++;
@@ -1101,14 +1126,13 @@ class Attendance extends Myschoolgh {
 
                             if(!$is_present) {
                                 $getItem = $_user_data[$params->the_current_user_id]["state"] ?? false;
-                                // print_r(['the_day' => $the_day, '_user_data' => $_user_data, 'getItem' => $getItem]);
                             }
 
                             // set the label for the day
                             $the_state = $is_present ? "present" : (!empty($getItem) ? $getItem : "absent");
                             $users_count["days_list"][$the_day] = ucwords($the_state);
                             $users_count["days_comments"][$the_day] = $_user_data[$params->the_current_user_id]["comments"] ?? "";
-                            $users_count["days_log_time"][$the_day] = $today->date_finalized;
+                            $users_count["days_log_time"][$the_day] = empty($today->date_finalized) ? 0 : $today->date_finalized;
 
                         } else {
                             
@@ -1116,7 +1140,7 @@ class Attendance extends Myschoolgh {
                             $users_count["summary"][$the_label] = isset($users_count["summary"][$the_label]) ? ($users_count["summary"][$the_label] + count($present)) : count($present);
                             $users_count["days_list"][$the_day][$the_label] = isset($users_count["days_list"][$the_day][$the_label]) ? ($users_count["days_list"][$the_day][$the_label] + count($present)) : count($present);
                             $users_count["days_comments"][$the_day] = $_user_data[$params->the_current_user_id]["comments"] ?? "";
-                            $users_count["days_log_time"][$the_day] = count($present);
+                            $users_count["days_log_time"][$the_day] = !empty($present) ? count($present) : 0;
                         }
 
                     }
@@ -1130,7 +1154,7 @@ class Attendance extends Myschoolgh {
                         $users_count["days_list"][$the_day] = "Not_Logged";
                     }
                     $users_count["days_comments"][$the_day] = "";
-                    $users_count["days_log_time"][$the_day] = "";
+                    $users_count["days_log_time"][$the_day] = 0;
                 }
 
             }
@@ -1161,6 +1185,7 @@ class Attendance extends Myschoolgh {
             } else {
                 $users_count["summary"] = ["present" => 0, "absent" => 0];
             }
+
             $users_count["summary"]["logs_count"] = $logged_count;
             $users_count["chart_summary"] = [
                 "Start Date" => $params->start_date,
@@ -1177,6 +1202,7 @@ class Attendance extends Myschoolgh {
                     }
                 }
             }
+
             $fresh_group = [];
             foreach($new_group as $name => $data) {
                 $fresh_group[] = [
@@ -1184,12 +1210,18 @@ class Attendance extends Myschoolgh {
                     "data" => array_values($data)
                 ];
             }
+
+            $exclusion = array_map(function($day) {
+                if(!in_array(date("l", strtotime($day)), ['Saturday', 'Sunday'])) {
+                    return true;
+                }
+            }, $days);
+            
             $users_count["chart_grouping"] = $fresh_group;
             $users_count["chart_summary"] = [
                 "Start Date" => $params->start_date,
                 "End Date" => $params->end_date,
-                "Days Interval" => count($days) . " days interval",
-                "Logs Count" => $logged_count,
+                "Days Interval" => count(array_filter($exclusion)) . " active days"
             ];
         }
 
@@ -1208,6 +1240,137 @@ class Attendance extends Myschoolgh {
      * @return Array
      */
     public function class_summary(stdClass $data) {
+
+        global $defaultClientData;
+
+        /** If finalized */
+        $query = isset($data->is_finalized) ? " AND finalize='1'" : null;
+        $list_days = $this->daysExclusionList($data->start_date, $data->end_date, $defaultClientData);
+
+        $summary = [];
+        $summation = [];
+
+        $daysExpected = 0;
+
+        foreach($list_days as $currentDay) {
+            
+            if(strtotime($currentDay) > strtotime(date('Y-m-d'))) continue;
+
+            /** Run a query for all classes, append the total logged count as well */
+            $classes_list = $this->pushQuery(
+                "a.id, a.name, 
+                    (
+                        SELECT COUNT(*) FROM users b 
+                        WHERE 
+                            b.user_status = 'Active' AND b.deleted='0' AND 
+                            b.user_type='student' AND b.class_id = a.id AND 
+                            b.client_id = a.client_id
+                    ) AS class_size,
+                    (
+                        SELECT b.users_list FROM users_attendance_log b
+                        WHERE 
+                            b.log_date = '{$currentDay}' AND 
+                            b.class_id = a.id AND b.user_type = 'student' AND
+                            status = '1' {$query}
+                        LIMIT 1
+                    ) AS users_list, 
+                    (
+                        SELECT b.users_data FROM users_attendance_log b
+                        WHERE 
+                            b.log_date = '{$currentDay}' AND 
+                            b.class_id = a.id AND b.user_type = 'student' AND
+                            status = '1' {$query}
+                        LIMIT 1
+                    ) AS users_data
+                ", 
+                "classes a", 
+                "a.status='1' AND a.client_id='{$data->clientId}'"
+            );
+
+            if(!empty($classes_list)) {
+                $daysExpected++;
+            }
+
+            /** Loop through the results list */
+            foreach($classes_list as $result) {
+                // convert the columns into an array
+                $users_list = !empty($result->users_list) ? json_decode($result->users_list, true) : [];
+                $users_data = !empty($result->users_data) ? json_decode($result->users_data, true) : [];
+
+                // get the students who were present
+                $result->present = !empty($users_list) ? count($users_list) : 0;
+                $result->absent = !empty($users_data) ? (count($users_data) - $result->present) : 0;
+
+                // append to the array
+                $summary[$result->name][$currentDay] = [
+                    'Id' => $result->id,
+                    "Present" => $result->present,
+                    "Absent" => $result->absent,
+                    "Class Size" => (int) $result->class_size,
+                ];
+
+                if(!isset($summation[$result->name])) {
+                    $summation[$result->name] = ['Size' => (int) $result->class_size, 'Absent' => 0, 'Present' => 0];
+                }
+
+                // summation of the dataset
+                $summation[$result->name] = [
+                    'Id' => $result->id,
+                    'Size' => (int) $result->class_size, 
+                    'Absent' => $summation[$result->name]['Absent'] + $result->absent, 
+                    'Present' => $summation[$result->name]['Present'] + $result->present
+                ];
+            }
+
+        }
+
+        if($daysExpected) {
+            $overallExpected = 0;
+            $totalPresent = 0;
+            $totalAbsent = 0;
+            foreach($summation as $i => $class) {
+                if($class['Size'] == 0) continue;
+                $presentExpected = $daysExpected * $class['Size'];
+                $overallExpected += $presentExpected;
+                
+                $totalAbsent += $class['Absent'];
+                $totalPresent += $class['Present'];
+
+                $summation[$i]['totalDays'] = $daysExpected;
+                $summation[$i]['presentExpected'] = $presentExpected;
+                $summation[$i]['absentRate'] = $class['Absent'] > 0 ? round(($class['Absent'] / $presentExpected) * 100, 2) : 0;
+                $summation[$i]['presentRate'] = $class['Present'] > 0 ? round(($class['Present'] / $presentExpected) * 100, 2) : 0;
+            }
+
+            // perform the calculation
+            $fresh_group['totalAbsent'] = $totalAbsent;
+            $fresh_group['totalPresent'] = $totalPresent;
+            $fresh_group['overallExpected'] = $overallExpected;
+            $fresh_group['attendanceRate'] = $totalPresent > 0 ? round(($totalPresent / $overallExpected) * 100, 2) : 0;
+        }
+
+        if(!empty($data->is_summary) && !empty($data->class_only)) {
+            $fresh_group['table'] = render_attendance_table($summary);
+        }
+
+        return [
+            "summary" => $summary,
+            "summaries" => $fresh_group,
+            "attendanceRate" => $summation,
+        ];
+    }
+
+    /**
+     * Get the Class Summary for the Current Date
+     * 
+     * Loop through all classes and get the number of students present 
+     * and absent for the specified date
+     * 
+     * @return Array
+     */
+    public function class_summary2(stdClass $data) {
+
+        global $defaultClientData;
 
         /** If finalized */
         $query = isset($data->is_finalized) ? " AND finalize='1'" : null;

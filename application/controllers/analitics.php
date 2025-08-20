@@ -19,6 +19,12 @@ class Analitics extends Myschoolgh {
 
         parent::__construct();
 
+        global $defaultClientData;
+
+        if(empty($params->client_data)) {
+            $params->client_data = $defaultClientData;
+        }
+
         // get the client data
         $client_data = $params->client_data;
 
@@ -133,7 +139,7 @@ class Analitics extends Myschoolgh {
         $this->query_date_range = isset($params->label["stream_period"]) ? $this->stringToArray($params->label["stream_period"]) : ["current", "previous"];
 
         // append the arange information
-        $this->final_report["userData"] = $params->userData;
+        // $this->final_report["userData"] = $params->userData;
         $this->final_report["date_range"] = $this->date_range;
 
         // get the clients information if not parsed in the stream
@@ -193,6 +199,8 @@ class Analitics extends Myschoolgh {
 
         // get the class attendance information if not parsed in the stream
         if(in_array("class_attendance_report", $this->info_to_stream)) {
+            // append this paramter
+            $params->load_summary_info = true;
             // query the class attendance data
             $this->final_report["attendance_report"] = $this->attendance_report($params);
         }
@@ -241,7 +249,7 @@ class Analitics extends Myschoolgh {
                 "user_type" => $role,
                 "clientId" => $params->clientId,
                 "remove_user_data" => true,
-                "userId" => $params->userId,
+                "userId" => $params->userId ?? 0,
                 "return_where_clause" => true,
                 "user_status" => $this->user_status
             ];
