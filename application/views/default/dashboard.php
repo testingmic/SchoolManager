@@ -897,7 +897,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                 </div>
                             </div>
-                            <div data-chart="class_fees_payment_chart_table" style="max-height:450px; height:450px; overflow-y:auto;">
+                            <div data-chart="class_fees_payment_chart_table" style="max-height:450px; height:450px;">
                                 <table class="table table-bordered table-striped reformat_table">
                                     <thead>
                                         <tr>

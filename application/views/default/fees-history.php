@@ -131,6 +131,7 @@ foreach($item_list["data"] as $key => $fees) {
     $useTheImage = strpos($fees->student_info->image, "assets/img/avatar.png") !== false;
 
     $fees_history .= "<tr data-row_id=\"{$fees->payment_id}\">";
+    $fees_history .= "<td class='text-center'>{$fees_count}</td>";
     $fees_history .= "
         <td>
             <div class='d-flex text-uppercase justify-content-start space-x-2'>
@@ -310,11 +311,12 @@ $response->html = '
                         <table data-empty="" class="table table-bordered table-sm table-striped datatable">
                             <thead>
                                 <tr>
+                                    <th class="text-center" width="5%">ID</th>
                                     <th>Student Name</th>
                                     <th>Class</th>
                                     <th>Amount</th>
-                                    <th>Fees Type</th>
-                                    <th>Payment Method</th>
+                                    <th width="12%">Fees Type</th>
+                                    <th>Method</th>
                                     <th>Recorded By</th>
                                     <th align="center" width="13%"></th>
                                 </tr>
