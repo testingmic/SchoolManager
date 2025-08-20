@@ -186,7 +186,8 @@ var summaryReporting = (t_summary, date_range) => {
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: '80%',
+                        endingShape: 'rounded',
+                        columnWidth: '25%',
                     },
                 },
                 dataLabels: {
@@ -360,7 +361,7 @@ var summaryReporting = (t_summary, date_range) => {
                     },
                     plotOptions: {
                         bar: {
-                            horizontal: false,
+                            horizontal: true,
                             endingShape: 'rounded',
                             columnWidth: '25%',
                         },

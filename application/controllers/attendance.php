@@ -1081,7 +1081,7 @@ class Attendance extends Myschoolgh {
         // loop through the days for the record
         foreach($days as $day) {
 
-            if($this->isAcceptedDay($day, $acceptedDays)) continue;
+            if(!in_array(date("l", strtotime($day)), $acceptedDays)) continue;
 
             $activeDaysCount++;
             

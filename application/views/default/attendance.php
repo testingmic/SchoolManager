@@ -102,45 +102,7 @@ if(!empty($clientId)) {
             </div>
             <div class="row default_period" data-current_period="this_month">
             '.($isAdminAccountant ? 
-                '<div class="col-lg-3 col-md-3 col-sm-6">
-                    <div class="card card-statistic-1">
-                        <i class="fas fa-user-graduate card-icon col-green"></i>
-                        <div class="card-wrap">
-                            <div class="padding-20">
-                                <div class="text-right">
-                                    <h3 data-attendance_count="student.Marked_Days" class="font-light mb-0">0</h3>
-                                    <span class="text-black font-13">Student Marked Days</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-3 col-sm-6">
-                    <div class="card card-statistic-1">
-                        <i class="fas fa-user-tie card-icon col-orange"></i>
-                        <div class="card-wrap">
-                            <div class="padding-20">
-                                <div class="text-right">
-                                    <h3 data-attendance_count="staff.Marked_Days" class="font-light mb-0">0</h3>
-                                    <span class="text-black font-13">Staff marked Days</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6">
-                    <div class="card card-statistic-1">
-                        <i class="fas fas fa-user-check card-icon col-blue card-icon"></i>
-                        <div class="card-wrap">
-                            <div class="padding-20">
-                                <div class="text-right">
-                                    <h3 data-attendance_count="attendanceRate" class="font-light mb-0">0</h3>
-                                    <span class="text-black">Attendance Rate</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>' : '
+                admin_summary_cards() : '
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-1">
                         <i class="fas fa-user-check card-icon col-green"></i>
@@ -250,7 +212,7 @@ if(!empty($clientId)) {
                         <div class="card-header pr-0">
                             <div class="row width-100">
                                 <div class="col-md-4 flex align-items-lg-center">
-                                    <h4 class="text-uppercase font-13 mb-0">Attendance Summation</h4>
+                                    <h4 class="text-uppercase font-13 mb-0">Student vs Staff Attendance Count</h4>
                                 </div>
                                 <div align="right" class="col-md-8">
                                     <div class="btn-group" data-filter="quick_attendance_filter" id="quick_attendance_filter" role="group" aria-label="Filter Attendance">

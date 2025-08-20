@@ -965,7 +965,7 @@ class Myschoolgh extends Models {
 	 */
 	final function isAcceptedDay($day, $defaultClientData) {
 
-		$days = $defaultClientData?->client_preferences?->opening_days ?? [];
+		$days = $defaultClientData?->client_preferences?->opening_days ?? $defaultClientData;
 
 		return in_array(date("l", strtotime($day)), array_values($days));
 

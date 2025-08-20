@@ -94,7 +94,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
         if($isAdmin) {
             // set the stream
-            $data_stream = 'id="data-report_stream" data-report_stream="attendance_report,summary_report,transaction_revenue_flow"';
+            $data_stream = 'id="data-report_stream" data-report_stream="attendance_report,summary_report,transaction_revenue_flow,class_attendance_report"';
         } else {
             $data_stream = 'id="data-report_stream" data-report_stream="summary_report,transaction_revenue_flow"';
         }
@@ -895,12 +895,20 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             }
 
             if($isAdmin) {
-                $response->html .= '<div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                $response->html .= '<div class="col-lg-12 col-md-12 col-12 col-sm-12">';
+                $response->html .= '<div class="row">';
+                $response->html .= '<div class="col-lg-3 col-md-3">';
+                    $response->html .= '<div class="row">';
+                        $response->html .= admin_summary_cards('col-md-12 col-lg-12');
+                    $response->html .= '</div>';
+                $response->html .= '</div>';
+                $response->html .= '
+                    <div class="col-lg-9 col-md-9 col-12 col-sm-12">
                         <div class="card rounded-2xl">
                             <div class="card-header pr-0">
                                 <div class="row width-100">
                                     <div class="col-md-4 flex align-items-lg-center">
-                                        <h4 class="text-uppercase font-13 mb-0">Attendance Logs</h4>
+                                        <h4 class="text-uppercase font-13 mb-0">Student vs Staff Attendance Count</h4>
                                     </div>
                                     <div align="right" class="col-md-8">
                                         <div class="btn-group" data-filter="quick_attendance_filter" id="quick_attendance_filter" role="group" aria-label="Filter Attendance">
@@ -920,6 +928,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             </div>
                         </div>
                     </div>';
+                $response->html .= '</div>';
+                $response->html .= '</div>';
             }
 
             // if the user logged in is an admin
