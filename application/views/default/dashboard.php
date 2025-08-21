@@ -41,7 +41,7 @@ $userData->mini_description = true;
 $userData->the_user_type = $defaultUser->user_type;
 
 // set the date to load
-$global_period = $isWardParent ? "this_term" : "this_week";
+$global_period = $isWardParent ? "this_term" : "this_term";
 
 // global params
 $global_params = (object) ["client_data" => $defaultUser->client];
@@ -265,8 +265,6 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class='flex justify-between space-x-2'><span class='text-success'>Graded</span> <span>{$each->students_graded}</span></div>
                 </div>
                 </td>";
-                // $assigments_list .= "<td>{$each->students_handed_in}</td>";
-                // $assigments_list .= "<td>{$each->students_graded}</td>";
             }
             
             if(!$can_Update_Assign) {
@@ -770,8 +768,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
             $revenue_summary = '';
             foreach([
-                'amount_paid' => ['Fees Paid', 'text-gray'], 
                 'amount_due' => ['Total Billed', 'text-gray'], 
+                'amount_paid' => ['Fees Paid', 'text-gray'], 
                 'balance' => ['Outstanding Balance', 'text-gray'],
             ] as $it => $iv) {
                 $revenue_summary .= '
@@ -782,7 +780,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 <span data-summary="'.$it.'" class="font-20">0.00</span>
                             </h4>
                             <label class="text-black mb-0">'.$iv[0].'</label>
-                            <div><span class="text-warning font-12">This Week</span></div>
+                            <div><span class="text-warning font-12">This Term</span></div>
                         </div>
                     </div>
                 </div>';
@@ -827,7 +825,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                         <span class="font-20" data-count="arrears_total">0.00</span>
                                     </h4>
                                     <label class="text-black mb-0">Previous Arrears</label>
-                                    <div><span class="text-warning font-12">This Week</span></div>
+                                    <div><span class="text-warning font-12">Previous Term(s)</span></div>
                                 </div>
                             </div>
                         </div>

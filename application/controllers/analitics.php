@@ -187,14 +187,6 @@ class Analitics extends Myschoolgh {
             $this->final_report["library_report"] = $this->library_report($params);
         }
 
-        // get the departments information if not parsed in the stream
-        if(in_array("attendance_report", $params->stream)) {
-            // append this paramter
-            $params->load_summary_info = true;
-            // query the departments data
-            $this->final_report["attendance_report"] = $this->attendance_report($params);
-        }
-
         // get the department information if not parsed in the stream
         if(in_array("departments_report", $params->stream)) {
             // append this paramter
@@ -207,6 +199,14 @@ class Analitics extends Myschoolgh {
         if(in_array("transaction_revenue_flow", $params->stream) && $isAdminAccountant) {
             // query the department data
             $this->final_report["transaction_revenue_flow"] = $this->transaction_revenue_flow($params);
+        }
+
+        // get the departments information if not parsed in the stream
+        if(in_array("attendance_report", $params->stream)) {
+            // append this paramter
+            $params->load_summary_info = true;
+            // query the departments data
+            $this->final_report["attendance_report"] = $this->attendance_report($params);
         }
 
         // get the class attendance information if not parsed in the stream
@@ -738,6 +738,15 @@ class Analitics extends Myschoolgh {
 
             // if finalized record is requested
             $_params->is_finalized = true;
+
+            if(isset($_params->label["attendance_period"])) {
+                $_params->period = $_params->label["attendance_period"];
+
+                /** Get the date formatter */
+                $the_date = $this->format_date($_params->period);
+                $_params->start_date = $this->start_date;
+                $_params->end_date = $this->end_date;
+            }
 
             // set the student id
             $filter_student_id = isset($_params->label["student_id"]) && !empty($_params->label["student_id"]) ? $_params->label["student_id"] : null;

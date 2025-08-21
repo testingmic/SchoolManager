@@ -1052,6 +1052,13 @@ var filter_Transaction_Summary = (stream) => {
 
 if ($(`div[id="data-report_stream"]`).length) {
     let d_period = $(`div[class~="default_period"]`).attr("data-current_period");
+
+    // get the period for the data-filter="quick_attendance_filter" which has a class of active
+    let _attendance_period = $(`div[data-filter="quick_attendance_filter"] button.active`).attr("data-period");
+    if(_attendance_period) {
+        d_period += `&label[attendance_period]=${_attendance_period}`;
+    }
+    
     loadDashboardAnalitics(d_period);
 
     filter.on("click", function() {
