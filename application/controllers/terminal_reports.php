@@ -275,13 +275,11 @@ class Terminal_reports extends Myschoolgh {
 
         $course_item = $course_item[0];
         $course_name = ucwords($course_item->name);
-        $course_code = strtoupper($course_item->course_code);
 
         $csv_file = "STUDENT,STUDENT ID,";
         $csv_file .= "SUBJECT,";
 
         $grading_sba = $client_data->grading_sba ?? [];
-        $sba_list = "";
 
         // get the grading structure
         if(!empty($grading_sba)) {
@@ -301,13 +299,15 @@ class Terminal_reports extends Myschoolgh {
                 $count = 0;
                 foreach($columns->columns as $key => $column) {
                     $count++;
+                    $percent = $column->percentage;
                     if($key == 'School Based Assessment') {
                         $csv_notes = "{$key} is {$column->percentage}% of the total scores";
                     }
                     if($key == 'Examination') {
-                        $csv_notes = "{$key} is {$column->percentage}% of the total examination scores.";
+                        $percent = 100;
+                        $csv_notes = "{$key} will be calculated as {$column->percentage}% of the total raw examination score.";
                     }
-                    $csv_file .= strtoupper("{$key} - {$column->percentage}%,");
+                    $csv_file .= strtoupper("{$key} - {$percent}%,");
                 }
             }
         }
@@ -625,7 +625,14 @@ class Terminal_reports extends Myschoolgh {
             }
 
             $overall_score = 0;
+            $percentage = 0;
             $scores_array = [];
+
+            // set the percentage
+            if(isset($defaultClientData?->grading_structure?->columns)) {
+                $percentage = $defaultClientData?->grading_structure?->columns?->Examination?->percentage ?? 0;
+            }
+
             // group the information in an array
             foreach($report->ss as $score) {
                 // explode the record
@@ -640,6 +647,9 @@ class Terminal_reports extends Myschoolgh {
                         $scores_array[$student_id]["remarks"] = $spl[1];
                     }
                     if(!in_array($spl[0], ['name', 'id', 'remarks'])) {
+                        if($spl[0] == 'marks' && $percentage) {
+                            $spl[1] = $spl[1] > 0 ? round(($spl[1] / 100) * $percentage) : 0;
+                        }
                         $scores_array[$student_id]["marks"][] = [
                             "item" => $spl[0],
                             "score" => $spl[1]
@@ -709,7 +719,7 @@ class Terminal_reports extends Myschoolgh {
                 
                 // prepare the statement
                 $stmt = $this->db->prepare("INSERT IGNORE INTO grading_terminal_scores SET 
-                    distinct_record = ?,class_id = ?, class_name = ?, date_modified = now(),
+                    distinct_record = ?, class_id = ?, class_name = ?, date_modified = now(),
                     course_id = ?, course_name = ?, course_code = ?, scores = ?, total_score = ?, 
                     average_score = ?, teacher_ids = ?, class_teacher_remarks = ?, created_by = ?,
                     academic_year = ?, academic_term = ?, student_unique_id = ?, client_id = ?, report_id = ?
@@ -1318,7 +1328,7 @@ class Terminal_reports extends Myschoolgh {
                     </div>
 
                     <div style=\"padding:10px; color:#fff; background-color:{$bg_color};\">
-                        Please visit www.myschoolgh.com/report/{$student["data"]["unique_id"]} for a graphical analysis of this report.
+                        Please visit app.myschoolgh.com/report/{$student["data"]["unique_id"]} for a graphical analysis of this report.
                     </div>
 
                     </td>

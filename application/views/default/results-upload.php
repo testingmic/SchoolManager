@@ -49,15 +49,15 @@ foreach($results_list as $key => $report) {
         <td>".($key+1)."</td>
         <td><span class='user_name' onclick='return load(\"class/{$report->class_id}\");'>".strtoupper($report->class_name)."</span></td>
         <td><span class='user_name' onclick='return load(\"course/{$report->course_id}\");'>{$report->course_name} ({$report->course_code})</span></td>
-        <td class='text-center'>{$report->academic_year}</td>
-        <td class='text-center'>{$report->academic_term}</td>
-        <td width='18%'>
+        <td width='15%' class='text-center'>{$report->academic_year}</td>
+        <td width='15%' class='text-center'>{$report->academic_term}</td>
+        <td width='16%'>
             <div>{$report->fullname}</div>
             <div class='font-weight-bold'>{$report->user_unique_id}</div>
             {$report->date_created}
         </td>
         <td width='10%'>{$myClass->the_status_label($report->status)}</td>
-        <td align='center' width='14%'>{$action}</td>
+        <td align='center' width='18%'>{$action}</td>
     </tr>";
 }
 

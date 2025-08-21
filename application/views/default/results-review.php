@@ -153,7 +153,7 @@ if(empty($result_id)) {
                 $rawscore = $headers["column"]["{$clean_key}"]["raw_score"] ?? 0;
 
                 $simp_value = $simplified_sba[$s_key] ?? 0;
-                $marks = $marks > $simp_value ? $simp_value : $marks;
+                $marks = $marks['score'] > $simp_value ? $simp_value : $marks['score'];
 
                 // append to the item
                 $marks_list .= "
@@ -171,10 +171,10 @@ if(empty($result_id)) {
                 $total_percentage_score += $percent;
             }
 
-            $sbaScore = $score->scores["sba"] ?? 0;
+            $sbaScore = $score->scores["sba"]["score"] ?? 0;
             $sbaPercentage = $sbaScore > $simplified_sba["sba"] ? $simplified_sba["sba"] : $sbaScore;
 
-            $examsScore = $score->scores["marks"] ?? 0;
+            $examsScore = $score->scores["marks"]["score"] ?? 0;
             $examsPercentage = $examsScore > $simplified_sba["examination"] ? $simplified_sba["examination"] : $examsScore;
 
             // calculate the total percentage

@@ -383,14 +383,18 @@ if(in_array($url, ["attendance", "grading"])) {
             $overall_performance = $value["count"] > 0 ? round((($value["marks"] / $value["actualmarks"]) * 100), 2) : 0;
             $actualcount = $isWardParent || $single_student_id ? $value["count"] : ($value["count"] / count($students_list));
 
+            $color = $overall_performance > 75 ? "text-success" : (
+                $overall_performance > 50 ? "text-warning" : "text-danger"
+            );
+
             $student_performance .= "
             <tr>
                 <td>".strtoupper($key)."</td>
-                <td align='center'>{$actualcount}</td>
-                <td align='center'>{$value["marks"]}</td>
-                <td align='center'>{$average_score}</td>
-                <td align='center'>".($value["actualmarks"] > 0 ? $value["actualmarks"] : "N/A")."</td>
-                <td align='center'>".($overall_performance > 0 ? "{$overall_performance}%" : "N/A")."</td>
+                <td class='text-center'>{$actualcount}</td>
+                <td class='text-center'>{$value["marks"]}</td>
+                <td class='text-center'>{$average_score}</td>
+                <td class='text-center'>".($value["actualmarks"] > 0 ? $value["actualmarks"] : "N/A")."</td>
+                <td class='text-center {$color}'>".($overall_performance > 0 ? "{$overall_performance}%" : "N/A")."</td>
             </tr>";
             $performance_chart[$key] = $overall_performance;
         }
@@ -440,7 +444,7 @@ if(in_array($url, ["attendance", "grading"])) {
                             </table>
                         </div>
                         <div class='col-md-5 mb-3'>
-                            <canvas style='max-height:305px;height:305px;' id='student_performance'></canvas>
+                            <canvas style='max-height:355px;height:355px;' id='student_performance'></canvas>
                         </div>
                     </div>
                 </div>

@@ -103,6 +103,7 @@ class Myschoolgh extends Models {
 		// prepare and execute the statement
 		$fix[] = $this->db->prepare("ALTER TABLE fees_category ADD COLUMN boarding_fees ENUM('No', 'Yes') NOT NULL DEFAULT 'No'");
 		$fix[] = $this->db->prepare("ALTER TABLE fees_category ADD COLUMN frequency ENUM('Daily', 'Weekly', 'Monthly', 'Termly', 'Yearly', 'One-Time') NOT NULL DEFAULT 'Termly'");
+		$fix[] = $this->db->prepare("ALTER TABLE `grading_terminal_scores` ADD `distinct_record` VARCHAR(32) NULL DEFAULT NULL AFTER `report_id`, ADD UNIQUE (`distinct_record`);");
 		
 		$fix[] = $this->db->prepare("CREATE TABLE IF NOT EXISTS `exeats` (
 				`id` INT(11) NOT NULL AUTO_INCREMENT,
