@@ -138,7 +138,7 @@ class Attendance extends Myschoolgh {
             $stmt = $this->db->prepare("
                 INSERT INTO users_attendance_log SET user_type = ?, users_list = ?, users_data = ?, log_date = ?,
                 created_by = ?, academic_year = ?, academic_term = ?, client_id = ?
-                ".(isset($params->class_id) ? ", class_id='{$params->class_id}'" : "")."
+                ".(!empty($params->class_id) ? ", class_id='{$params->class_id}'" : "")."
             ");
             $stmt->execute([
                 $params->user_type, json_encode($present_list), json_encode($user_data), $params->date, 
@@ -184,7 +184,7 @@ class Attendance extends Myschoolgh {
             // prepare and execute the statement
             $stmt = $this->db->prepare("
                 UPDATE users_attendance_log SET users_list = ?, users_data = ?
-                WHERE user_type = ? AND log_date = ? AND client_id = ? ".(isset($params->class_id) ? " AND class_id='{$params->class_id}'" : "")."
+                WHERE user_type = ? AND log_date = ? AND client_id = ? ".(!empty($params->class_id) ? " AND class_id='{$params->class_id}'" : "")."
             ");
             $stmt->execute([
                 json_encode($present_list), json_encode($user_data), $params->user_type, $params->date, $params->clientId
@@ -642,7 +642,7 @@ class Attendance extends Myschoolgh {
         
         $user_type = isset($params->user_type) ? $params->user_type : null;
 
-        $class_id = isset($params->class_id) && ($params->class_id !== "null") ? $params->class_id : null;
+        $class_id = !empty($params->class_id) ? $params->class_id : 0;
         $the_user_type = $params->user_type == "staff" ? ["teacher","employee","admin","accountant", "staff"] : [$params->user_type];
 
         $query = !empty($params->user_type) ? " AND a.user_type = '{$params->user_type}'" : null;
