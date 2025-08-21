@@ -101,11 +101,12 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = $this->db->prepare("ALTER TABLE fees_category ADD COLUMN boarding_fees ENUM('No', 'Yes') NOT NULL DEFAULT 'No'");
-		$fix[] = $this->db->prepare("ALTER TABLE fees_category ADD COLUMN frequency ENUM('Daily', 'Weekly', 'Monthly', 'Termly', 'Yearly', 'One-Time') NOT NULL DEFAULT 'Termly'");
-		$fix[] = $this->db->prepare("ALTER TABLE `grading_terminal_scores` ADD `distinct_record` VARCHAR(32) NULL DEFAULT NULL AFTER `report_id`, ADD UNIQUE (`distinct_record`);");
+		$fix[] = ("ALTER TABLE fees_category ADD COLUMN boarding_fees ENUM('No', 'Yes') NOT NULL DEFAULT 'No'");
+		$fix[] = ("ALTER TABLE fees_category ADD COLUMN frequency ENUM('Daily', 'Weekly', 'Monthly', 'Termly', 'Yearly', 'One-Time') NOT NULL DEFAULT 'Termly'");
+		$fix[] = ("ALTER TABLE `grading_terminal_scores` ADD `distinct_record` VARCHAR(32) NULL DEFAULT NULL AFTER `report_id`, ADD UNIQUE (`distinct_record`);");
+		$fix[] = ("ALTER TABLE `users_bills` CHANGE `bill` `bill` MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;");
 		
-		$fix[] = $this->db->prepare("CREATE TABLE IF NOT EXISTS `exeats` (
+		$fix[] = ("CREATE TABLE IF NOT EXISTS `exeats` (
 				`id` INT(11) NOT NULL AUTO_INCREMENT,
 				`item_id` VARCHAR(12) NOT NULL,
 				`client_id` VARCHAR(16) NOT NULL,
@@ -132,8 +133,9 @@ class Myschoolgh extends Models {
 
 		foreach($fix as $stmt) {
 			try {
-				$stmt->execute();
-			} catch(PDOException $e) { }
+				// $query = $this->db->prepare($stmt);
+				// $query->execute();
+			} catch(PDOException $e) {}
 		}
 	}
 
@@ -220,10 +222,11 @@ class Myschoolgh extends Models {
 	 */
 	public function build_mnotify_query($number, $message) {
 		return [
-			"key" => $this->mnotify_key,
-			"to" => $number,
-			"msg" => $message,
-			"sender_id" => !empty($this->iclient->sms_sender) ? $this->iclient->sms_sender : $this->sms_sender
+			"recipient" => $number,
+			"message" => $message,
+			"is_schedule" => 'false',
+			"schedule_date" => '',
+			"sender" => !empty($this->iclient->sms_sender) ? $this->iclient->sms_sender : $this->sms_sender
 		];
 	}
 
@@ -237,30 +240,30 @@ class Myschoolgh extends Models {
 	 */
 	public function send_mnotify_sms($number, $message) {
 		
-		$fields_string = $this->build_mnotify_query($message, $number);
+		$fields_string = $this->build_mnotify_query($number, $message);
 
 		//open connection
 		$ch = curl_init();
 
+		$options = [
+			CURLOPT_URL => "https://api.mnotify.com/api/sms/quick?key={$this->mnotify_key}",
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => "",
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_TIMEOUT => 30,
+			CURLOPT_POST => true,
+			CURLOPT_SSL_VERIFYPEER => false,
+			CURLOPT_CAINFO => dirname(__FILE__)."\cacert.pem",
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => "POST",
+			CURLOPT_POSTFIELDS => json_encode($fields_string),
+			CURLOPT_HTTPHEADER => [
+				"Content-Type: application/json",
+			]
+		];
+
 		// send the message
-		curl_setopt_array($ch, 
-			array(
-				CURLOPT_URL => "https://apps.mnotify.net/smsapi",
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_ENCODING => "",
-				CURLOPT_MAXREDIRS => 10,
-				CURLOPT_TIMEOUT => 30,
-				CURLOPT_POST => true,
-				CURLOPT_SSL_VERIFYPEER => false,
-				CURLOPT_CAINFO => dirname(__FILE__)."\cacert.pem",
-				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-				CURLOPT_CUSTOMREQUEST => "POST",
-				CURLOPT_POSTFIELDS => json_encode($fields_string),
-				CURLOPT_HTTPHEADER => [
-					"Content-Type: application/json",
-				]
-			)
-		);
+		curl_setopt_array($ch, $options);
 
 		//execute post
 		$result = json_decode(curl_exec($ch));

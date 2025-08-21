@@ -810,6 +810,7 @@ class Crons {
 
 // create new object
 $jobs = new Crons;
+$jobs->send_student_bill();
 $jobs->load_emails();
 $jobs->scheduler();
 $jobs->send_smsemail();

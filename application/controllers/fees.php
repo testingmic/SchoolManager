@@ -2629,11 +2629,16 @@ class Fees extends Myschoolgh {
                 $currentBalance = null;
             }
 
+            // set the save bill variable
+            $saveBill = (bool) !empty($params->save_bill);
+
             // get the client logo content
             if(!empty($client->client_logo) && file_exists($client->client_logo)) {
                 $type = pathinfo($client->client_logo, PATHINFO_EXTENSION);
                 $logo_data = file_get_contents($client->client_logo);
-                $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+
+                // set the client logo
+                $client_logo = $saveBill ? $client->client_logo : 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
             }
             $counter_ = 0;
             $list_count = count($students_list);
@@ -2644,7 +2649,6 @@ class Fees extends Myschoolgh {
             // students bill record list
             // to be used when generating the terminal report
             $student_bills_record_list = [];
-            $saveBill = (bool) !empty($params->save_bill);
 
             // set the button class
             $button_class = "font-weight:bold;border-radius:4px;padding:3px;border:solid 1px";

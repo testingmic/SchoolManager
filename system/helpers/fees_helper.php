@@ -145,7 +145,7 @@ function fees_payment_reminder_form($student_name, $student_id) {
     // generate the form to popup
     $html = 
         '<div data-backdrop="static" data-keyboard="false" class="modal fade" id="send_Fees_Reminder">
-            <form action="'.$baseUrl.'api/fees/send_reminder" class="ajax-data-form" id="send_reminder">
+            <form action="'.$baseUrl.'api/fees/send_reminder" method="POST" class="ajax-data-form" id="send_reminder">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -175,8 +175,8 @@ function fees_payment_reminder_form($student_name, $student_id) {
                                     <div class="form-group">
                                         <label for="description">Do you wish to also send the bill via E-Mail?</label>
                                         <select data-width="100%" class="selectpicker" name="send_via_email" id="send_via_email">
-                                            <option value="send">Yes! Send Bill via E-Mail</option>
                                             <option value="do_not_send">No! Do not Send Bill</option>
+                                            <option value="send">Yes! Send Bill via E-Mail</option>
                                         </select>
                                     </div>
                                 </div>
