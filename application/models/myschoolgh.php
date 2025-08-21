@@ -105,6 +105,7 @@ class Myschoolgh extends Models {
 		$fix[] = ("ALTER TABLE fees_category ADD COLUMN frequency ENUM('Daily', 'Weekly', 'Monthly', 'Termly', 'Yearly', 'One-Time') NOT NULL DEFAULT 'Termly'");
 		$fix[] = ("ALTER TABLE `grading_terminal_scores` ADD `distinct_record` VARCHAR(32) NULL DEFAULT NULL AFTER `report_id`, ADD UNIQUE (`distinct_record`);");
 		$fix[] = ("ALTER TABLE `users_bills` CHANGE `bill` `bill` MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;");
+		$fix[] = ("ALTER TABLE `smsemail_templates` CHANGE `module` `module` VARCHAR(24) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;");
 		
 		$fix[] = ("CREATE TABLE IF NOT EXISTS `exeats` (
 				`id` INT(11) NOT NULL AUTO_INCREMENT,

@@ -143,8 +143,8 @@ class Communication extends Myschoolgh {
             $item_id = random_string("alnum",  12);
 
             // clean the template
-            $params->message = custom_clean(htmlspecialchars_decode($params->message));
-            $params->message = htmlspecialchars($params->message);
+            $params->message = !empty($params->message) ? custom_clean(htmlspecialchars_decode($params->message)) : null;
+            $params->message = !empty($params->message) ? htmlspecialchars($params->message) : null;
 
             // prepare and execute the statement
             $stmt = $this->db->prepare("INSERT INTO smsemail_templates SET 
@@ -170,7 +170,7 @@ class Communication extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
-            return $this->unexpected_error;
+            return $e->getMessage();
         } 
     }
 

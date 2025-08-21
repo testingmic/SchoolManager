@@ -3,15 +3,15 @@
         <li class="dropdown">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails & SMS</span></a>
             <ul class="dropdown-menu">
+                <?php if($accessObject->hasAccess("templates", "communication")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>sms_template">SMS Templates</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>email_template">Email Templates</a></li>
+                <?php } ?>
                 <?php if($accessObject->hasAccess("send", "communication")) { ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>sms_send">Send SMS</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>email_send">Send Email</a></li>
                 <?php } ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_report">SMS / Email Reports</a></li>
-                <?php if($accessObject->hasAccess("templates", "communication")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>sms_template">SMS Templates</a></li>
-                <li><a class="nav-link" href="<?= $baseUrl ?>email_template">Email Templates</a></li>
-                <?php } ?>
             </ul>
         </li>
     <?php } ?>
@@ -332,6 +332,7 @@
         <?php } ?>
     <?php } ?>
     <li class="menu-header">Communication</li>
+    <?= communication_menu() ?>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <?php if($accessObject->hasAccess("update", "events")) { ?>
         <li class="dropdown">
@@ -345,7 +346,6 @@
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
         <?php } ?>
     <?php } ?>
-    <?= communication_menu() ?>
 <?php } ?>
 <?php function admin_menu() { global $baseUrl; ?>
     <?php general_menu(true); ?>

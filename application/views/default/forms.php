@@ -5238,7 +5238,7 @@ class Forms extends Myschoolgh {
                 <div class=\"card\">
                     <div class=\"card-header\">".(empty($data) ? $form_route[$params->route]["title"] : $form_route[$params->route]["title"])."</div>
                     <div class=\"card-body\">
-                        <form method=\"post\" action=\"".(!empty($data) ? $form_route[$params->route]["update"] : $form_route[$params->route]["add"])."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">
+                        <form method=\"POST\" action=\"".(!empty($data) ? $form_route[$params->route]["update"] : $form_route[$params->route]["add"])."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">
                             <div class=\"form-group\">
                                 <label>Name <span class=\"required\">*</span></label>
                                 <input type=\"text\" name=\"name\" value=\"".($data->name ?? null)."\" class=\"form-control\">
@@ -5248,7 +5248,7 @@ class Forms extends Myschoolgh {
                                 <label>SMS Module</label>
                                 <select class=\"selectpicker\" name=\"module\" data-width=\"100%\">
                                     <option>Select Module (Optional)</option>
-                                    <option value=\"f\">Fees Payment Reminder</option>
+                                    <option value=\"fees\">Fees Payment Reminder</option>
                                 </select>
                             </div>"
                             : null)."
