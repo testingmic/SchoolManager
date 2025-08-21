@@ -771,8 +771,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             $revenue_summary = '';
             foreach([
                 'amount_paid' => ['Fees Paid', 'text-success'], 
-                'amount_due' => ['Fees Due', 'text-primary'], 
-                'balance' => ['Fees Balance', 'text-danger'],
+                'amount_due' => ['Total Billed', 'text-primary'], 
+                'balance' => ['Outstanding Balance', 'text-danger'],
             ] as $it => $iv) {
                 $revenue_summary .= '
                 <div class="mb-0 amount text-center  transition-all duration-300 transform hover:-translate-y-1">
@@ -809,7 +809,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-8 col-md-8">
+                <div class="col-lg-8 col-md-12">
                     <div class="grid grid-cols-4 gap-4 mb-2">
                         '.$revenue_summary.'
                         <div class="mb-0 amount hidden text-center">
@@ -828,7 +828,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     <h4 class="text-warning">
                                         <span class="font-20" data-count="arrears_total">0.00</span>
                                     </h4>
-                                    <label class="text-black font-bold">Arrears</label>
+                                    <label class="text-black font-bold">Previous Arrears</label>
                                 </div>
                             </div>
                         </div>
@@ -938,7 +938,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 $response->html .= '<div class="row">';
                 $response->html .= '<div class="col-lg-3 col-md-3">';
                     $response->html .= '<div class="row">';
-                        $response->html .= admin_summary_cards('col-md-12 col-lg-12');
+                        $response->html .= admin_summary_cards('col-md-12 col-lg-12', true);
                     $response->html .= '</div>';
                 $response->html .= '</div>';
                 $response->html .= '
@@ -951,16 +951,16 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     </div>
                                     <div align="right" class="col-md-8">
                                         <div class="btn-group" data-filter="quick_attendance_filter" id="quick_attendance_filter" role="group" aria-label="Filter Attendance">
-                                            <button type="button" data-stream="attendance_report" data-period="last_week" class="btn btn-info">Last Week</button>
-                                            <button type="button" data-stream="attendance_report" data-period="this_week" class="btn btn-info">This Week</button>
-                                            <button type="button" data-stream="attendance_report" data-period="this_month" class="btn active btn-info">This Month</button>
-                                            <button type="button" data-stream="attendance_report" data-period="last_month" class="btn btn-info">Last Month</button>
-                                            <button type="button" data-stream="attendance_report" data-period="last_30days" class="btn btn-info">Last 30 Days</button>
+                                            <button type="button" data-stream="attendance_report,class_attendance_report" data-period="last_week" class="btn btn-info">Last Week</button>
+                                            <button type="button" data-stream="attendance_report,class_attendance_report" data-period="this_week" class="btn btn-info">This Week</button>
+                                            <button type="button" data-stream="attendance_report,class_attendance_report" data-period="this_month" class="btn active btn-info">This Month</button>
+                                            <button type="button" data-stream="attendance_report,class_attendance_report" data-period="last_month" class="btn btn-info">Last Month</button>
+                                            <button type="button" data-stream="attendance_report,class_attendance_report" data-period="last_30days" class="btn btn-info">Last 30 Days</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body pb-0">
+                            <div class="card-body pb-0 pt-1">
                                 <div data-chart_container="attendance_chart">
                                     <div id="attendance_chart" style="min-height:420px;"></div>
                                 </div>
@@ -987,13 +987,13 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             </div>
                             <div class="card-footer pb-1 mt-1">
                                 <div class="student-report">
-                                    <div class="student-count pseudo-bg-blue">
-                                        <h4 class="item-title text-black mb-1">Female Students</h4>
-                                        <div class="font-25 font-bold text-black" data-sex_count="Female"></div>
-                                    </div>
                                     <div class="student-count pseudo-bg-yellow">
                                         <h4 class="item-title text-black mb-1">Male Students</h4>
-                                        <div class="font-25 font-bold text-black" data-sex_count="Male"></div>
+                                        <div class="font-25 text-black" data-sex_count="Male"></div>
+                                    </div>
+                                    <div class="student-count pseudo-bg-blue">
+                                        <h4 class="item-title text-black mb-1">Female Students</h4>
+                                        <div class="font-25 text-black" data-sex_count="Female"></div>
                                     </div>
                                 </div>
                             </div>

@@ -5,10 +5,10 @@ var filter = $(`[id="reports_insight"] button[id="filter_Fees_Report"]`),
         "bg-indigo", "bg-teal", "bg-light-blue", "bg-info", "bg-warning", "bg-dark"
     ],
     colors_bank = [
-        '#304ffe', '#ffa601', '#fc544b', '#63ed7a', 
-        '#191d21', '#e83e8c', '#6777ef', '#FF9800', 
-        '#dd1a97', '#3f51b5', '#f44336', '#024f05',
-        '#b5f740', '#9c27b0', '#82d3f8'
+        '#5b71efff', '#ffa601', '#fc544b', '#63ed7a', 
+        '#191d21', '#e83e8c', '#6777ef', '#fac576ff', 
+        '#ef4fb5ff', '#3f51b5', '#f44336', '#024f05',
+        '#b5f740', '#a84cb8ff', '#82d3f8'
     ],
     to_stream = "";
 
@@ -199,7 +199,7 @@ var summaryReporting = (t_summary, date_range) => {
         formatSimpleTable();
 
         $(`div[data-chart="class_fees_payment_chart_table"] div[class="dataTables_length"]`).remove();
-        $(`div[data-chart="class_fees_payment_chart_table"] div[id="DataTables_Table_0_filter"]`).remove();
+        $(`div[data-chart="class_fees_payment_chart_table"] div[class="dataTables_filter"]`).remove();
 
         if ($(`canvas[id="class_revenue_donought_chart"]`).length) {
 
@@ -216,8 +216,7 @@ var summaryReporting = (t_summary, date_range) => {
                     datasets: [{
                         label: 'Revenue per Class',
                         data: _class_values,
-                        backgroundColor: color_list,
-                        borderColor: ['#fff', '#fff', '#fff']
+                        backgroundColor: color_list
                     }]
                 },
                 options: {
@@ -288,6 +287,11 @@ var summaryReporting = (t_summary, date_range) => {
 
             chart.render();
         }
+        
+        setTimeout(() => {
+            $(`div[data-chart="class_fees_payment_chart_table"] div[class="dataTables_length"]`).remove();
+            $(`div[data-chart="class_fees_payment_chart_table"] div[class="dataTables_filter"]`).remove();
+        }, 1000);
         
     }
 
@@ -522,7 +526,7 @@ var summaryReporting = (t_summary, date_range) => {
 
 var attendanceReport = (_attendance) => {
 
-    if (_attendance.attendance !== undefined) {
+    if (typeof _attendance.attendance !== 'undefined') {
         let attendance = _attendance.attendance;
 
         if(typeof attendance.code !== 'undefined' && attendance.code == 203) {
@@ -644,7 +648,9 @@ var attendanceReport = (_attendance) => {
         }
     }
 
-    if (_attendance.class_summary !== undefined) {
+    console.log(_attendance);
+
+    if (typeof _attendance.class_summary !== 'undefined') {
         let _class_summary = _attendance.class_summary,
             _chart_label = new Array(),
             color = 'text-black';

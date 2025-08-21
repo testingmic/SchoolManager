@@ -759,6 +759,8 @@ var loadPage = (loc, pushstate) => {
             formSubmitStopper($.pagecontent);
             trigger_form_submit();
             ajax_trigger_form_submit();
+            $(`div[data-chart="class_fees_payment_chart_table"] div[class="dataTables_length"]`).remove();
+            $(`div[data-chart="class_fees_payment_chart_table"] div[id="DataTables_Table_0_filter"]`).remove();
         },
         complete: () => {
             var prev = window.history.state === null ? null : window.history.state.current

@@ -1074,8 +1074,6 @@ class Attendance extends Myschoolgh {
         $logged_count = 0;
         $activeDaysCount = 0;
 
-        $markedDays = [];
-
         $acceptedDays = $defaultClientData?->client_preferences?->opening_days ?? [];
 
         // loop through the days for the record
@@ -1187,6 +1185,7 @@ class Attendance extends Myschoolgh {
             }
 
             $users_count["summary"]["logs_count"] = $logged_count;
+            $users_count["summary"]["ActiveSchoolDays"] = count(filterWeekendDates($days));
             $users_count["chart_summary"] = [
                 "Start Date" => $params->start_date,
                 "End Date" => $params->end_date,
@@ -1195,6 +1194,7 @@ class Attendance extends Myschoolgh {
         } else {
             // using the grouping format
             $new_group = [];
+            $users_count["summary"]["ActiveSchoolDays"] = count(filterWeekendDates($days));
             if(isset($users_count["days_list"])) {
                 foreach($users_count["days_list"] as $day) {
                     foreach($day as $role => $count) {
