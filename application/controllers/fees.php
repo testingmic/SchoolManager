@@ -2696,6 +2696,16 @@ class Fees extends Myschoolgh {
 
                 }
 
+                if($saveBill) {
+                    $message = !empty($params->send_mail_message) ? $params->send_mail_message : null;
+                    if(!empty($message)) {
+                        $student_bill .= '
+                        <div style="padding:0px;margin-top:10px; margin-bottom: 30px; text-align:center; padding-bottom:10px;color:#000; font-size:14px;">
+                            '.$message.'
+                        </div>';
+                    }
+                }
+
                 // set the bill form
                 $student_bill .= '<div style="margin:auto auto; '.($isPDF ? '' : "max-width:1050px;").';background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: \'Calibri Regular\'; width:100%;margin-bottom:2px">
                     <div class="row mb-3">
@@ -3484,6 +3494,7 @@ class Fees extends Myschoolgh {
                         "userData" => $params->userData,
                         "clientId" => $params->clientId,
                         "recipient_list" => json_encode($emails_list),
+                        "send_mail_message" => $params->message,
                         "save_bill" => true
                     ];
                     $this->bill($fees_param);
