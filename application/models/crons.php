@@ -243,10 +243,15 @@ class Crons {
         foreach($recipient_list as $emailRecipient) {
         	if(!empty($emailRecipient['email'])) {
 				$receipient = true;
+				print "Appending the email address: {$emailRecipient['email']} to the email list\n";
 				// user fullname
 				$fullname = isset($emailRecipient['fullname']) ? $emailRecipient['fullname'] : $emailRecipient['name'];
 				// append the email address
 				$mailer->addAddress($emailRecipient['email'], $fullname);
+			} elseif(filter_var($emailRecipient, FILTER_VALIDATE_EMAIL)) {
+				$receipient = true;
+				print "Appending the email address: {$emailRecipient} to the email list\n";
+				$mailer->addAddress($emailRecipient);
 			}
 		}
 
