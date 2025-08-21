@@ -1129,8 +1129,8 @@ var initDataTables = () => {
         $(`table[class~="small_datatable"]`).DataTable({
             search: null,
             lengthMenu: [
-                [4, 10, 15, -1],
-                [4, 10, 15, "All"]
+                [5, 10, 15, -1],
+                [5, 10, 15, "All"]
             ],
             language: {
                 sEmptyTable: "Nothing Found",

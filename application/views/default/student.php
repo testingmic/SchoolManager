@@ -459,7 +459,7 @@ if(!empty($user_id)) {
                     <div class="card-header">
                         <h4 class="pb-0 mb-0">PERSONAL INFORMATION</h4>
                     </div>
-                    <div class="card-body pt-0 pb-0 bg-gradient-to-br from-blue-50 to-blue-100">
+                    <div class="card-body pt-0 pb-0">
                         <div class="py-2">
                             <p class="clearfix">
                                 <span class="float-left">Enrollment Date</span>

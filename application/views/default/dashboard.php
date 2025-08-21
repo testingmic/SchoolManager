@@ -96,38 +96,38 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             // set the stream
             $data_stream = 'id="data-report_stream" data-report_stream="attendance_report,summary_report,transaction_revenue_flow,class_attendance_report"';
         } else {
-            $data_stream = 'id="data-report_stream" data-report_stream="summary_report,transaction_revenue_flow"';
+            $data_stream = 'id="data-report_stream" data-report_stream="summary_report,transaction_revenue_flow,class_attendance_report"';
         }
         // load the events list
         $events_list = $eventClass->events_list($userData);
 
         // list of summary content
         $summary_list = [
-            [
-                "label" => "This week", "title" => "Overall Income", "favicon" => "fa-money-bill", 
-                "border" => "success", "sum_tag" => "total_income_received", "left-border" => "border-green", 
-                "background" => "bg-green-50"
-            ],
-            [
-                "label" => "This week", "title" => "Expenditure", "favicon" => "fa-money-bill-alt", 
-                "border" => "danger", "sum_tag" => "total_expenditure", "left-border" => "border-danger",
-                "background" => "bg-red-50"
-            ],
-            [
-                "label" => "This week", "title" => "Bank Deposits", "favicon" => "fa-desktop", 
-                "border" => "info", "sum_tag" => "Bank_Deposit", "left-border" => "border-blue",
-                "background" => "bg-blue-50"
-            ],
+            // [
+            //     "label" => "This week", "title" => "Overall Income", "favicon" => "fa-money-bill", 
+            //     "border" => "success", "sum_tag" => "total_income_received", "left-border" => "border-green", 
+            //     "background" => "bg-green-50"
+            // ],
+            // [
+            //     "label" => "This week", "title" => "Expenditure", "favicon" => "fa-money-bill-alt", 
+            //     "border" => "danger", "sum_tag" => "total_expenditure", "left-border" => "border-danger",
+            //     "background" => "bg-red-50"
+            // ],
+            // [
+            //     "label" => "This week", "title" => "Bank Deposits", "favicon" => "fa-desktop", 
+            //     "border" => "info", "sum_tag" => "Bank_Deposit", "left-border" => "border-blue",
+            //     "background" => "bg-blue-50"
+            // ],
             // [
             //     "label" => "This week", "title" => "Bank Withdrawals", "favicon" => "fa-wind", 
             //     "border" => "warning", "sum_tag" => "Bank_Withdrawal", "left-border" => "border-orange", 
             //     "background" => "bg-orange-50"
             // ],
-            [
-                "label" => "Overall", "title" => "Account Balance", "favicon" => "fa-balance-scale", 
-                "border" => "primary", "sum_tag" => "account_balance", "left-border" => "border-purple",
-                "background" => "bg-purple-50"
-            ]
+            // [
+            //     "label" => "Overall", "title" => "Account Balance", "favicon" => "fa-balance-scale", 
+            //     "border" => "primary", "sum_tag" => "account_balance", "left-border" => "border-purple",
+            //     "background" => "bg-purple-50"
+            // ]
         ];
 
         // include the scripts to load
@@ -159,7 +159,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
             // append to the events list
             $upcoming_events_list .= "
-                <div class='flex items-center space-x-3 p-3 {$textStartBg} mb-2 border rounded-xl border-l-4 {$textFullBg}'>
+                <div class='flex items-center space-x-3 p-3 mb-2 border rounded-xl'>
                     <i class='fas fa-check-circle {$textColor}'></i>
                     <div class='flex items-center justify-between w-100'>
                         <div class='flex-1'>
@@ -202,7 +202,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         <img title='Click to view student details' class='rounded-2xl cursor author-box-picture' width='40px' src=\"{$baseUrl}{$event["description"]->image}\">
                         <div class='media-body ml-2' style='flex: 2;'>
                             <div class='media-title'>
-                                <span class='user_name' onclick='return load(\"{$event["link"]}/{$event["description"]->item_id}\");'>
+                                <span class='user_name cursor' onclick='return load(\"{$event["link"]}/{$event["description"]->item_id}\");'>
                                 ".ucwords($event["description"]->name)."</span><br>
                                 ".(
                                     !empty($event["description"]->class_name) ? 
@@ -239,11 +239,11 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
         // unset the sessions if $session->currentQuestionId is not empty
         foreach($assignments_array_list["data"] as $key => $each) {
             
-            $action = "<a  href='#' onclick='return load(\"assessment/{$each->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $action = "<a  href='#' onclick='return load(\"assessment/{$each->item_id}/instructions\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
             $assigments_list .= "<tr data-row_id=\"{$each->id}\">";
             $assigments_list .= "<td>".($key+1)."</td>";
-            $assigments_list .= "<td width='30%'><a href='#' onclick='return load(\"assessment/{$each->item_id}/view\");'>{$each->assignment_title}</a> ".(
+            $assigments_list .= "<td width='30%'><a href='#' onclick='return load(\"assessment/{$each->item_id}/instructions\");'>{$each->assignment_title}</a> ".(
                 $can_Update_Assign ? 
                     "<br>Class: <strong>{$each->class_name}</strong>
                     <br>Course: <strong>{$each->course_name}</strong>" : 
@@ -686,11 +686,11 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             $response->html .= '<div class="row">';
             
             // if the user is an admin
-            if($isAdmin) {
+            if($isAdminAccountant) {
                 $response->html .= '
                 <div class="col-lg-12">
                     <div class="row">
-                    <div class="col-lg-8 col-md-7">
+                    <div class="col-lg-8 col-md-7 mb-2">
                         <div class="card rounded-2xl">
                             <div class="card-body school-details" style="min-height:235px">
                                 <div class="row">
@@ -715,7 +715,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4 col-md-5">
+                    <div class="col-lg-4 col-md-5 mb-2">
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="relative card overflow-hidden rounded-2xl  bg-gradient-to-br from-yellow-200 to-red-50">
@@ -770,9 +770,9 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
             $revenue_summary = '';
             foreach([
-                'amount_paid' => ['Fees Paid', 'text-success'], 
-                'amount_due' => ['Total Billed', 'text-primary'], 
-                'balance' => ['Outstanding Balance', 'text-danger'],
+                'amount_paid' => ['Fees Paid', 'text-gray'], 
+                'amount_due' => ['Total Billed', 'text-gray'], 
+                'balance' => ['Outstanding Balance', 'text-gray'],
             ] as $it => $iv) {
                 $revenue_summary .= '
                 <div class="mb-0 amount text-center  transition-all duration-300 transform hover:-translate-y-1">
@@ -781,26 +781,23 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <h4 class="'.$iv[1].'">
                                 <span data-summary="'.$it.'" class="font-20">0.00</span>
                             </h4>
-                            <label class="text-black font-bold">'.$iv[0].'</label>
+                            <label class="text-black">'.$iv[0].'</label>
                         </div>
                     </div>
                 </div>';
             }
 
             $response->html .= '
-                <div class="col-lg-4 col-md-12 col-12 col-sm-12">
+                <div class="col-lg-4 col-md-12 col-12 col-sm-12 mb-2">
                     <div class="card rounded-2xl rounded-b-none">
                         <div class="card-header pr-2">
                             <div class="row width-per-100">
                                 <div class="col-md-9 flex align-items-lg-center">
                                     <h4 class="text-uppercase font-13 mb-0">Students Per Class Count</h4>
                                 </div>
-                                <div class="col-md-3 text-success text-right p-0">
-                                    Total: <span data-count="total_students_count" class="font-bold font-25 mb-0">0</span>
-                                </div>
                             </div>
                         </div>
-                        <div class="card-body trix-slim-scroll quick_loader" id="class_count_list" style="max-height:507px;height:507px;overflow-y:auto;">
+                        <div class="card-body trix-slim-scroll quick_loader" id="class_count_list" style="max-height:517px;height:517px;overflow-y:auto;">
                             <div class="form-content-loader" style="display: flex; position: absolute">
                                 <div class="offline-content text-center">
                                     <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
@@ -809,7 +806,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-8 col-md-12">
+                <div class="col-lg-8 col-md-12 mb-2">
                     <div class="grid grid-cols-4 gap-4 mb-2">
                         '.$revenue_summary.'
                         <div class="mb-0 amount hidden text-center">
@@ -825,64 +822,14 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         <div class="mb-0 amount text-center transition-all duration-300 transform hover:-translate-y-1">
                             <div class="card mb-0">
                                 <div class="card-body mb-0 pr-1 pl-1 pb-2 pt-2">
-                                    <h4 class="text-warning">
+                                    <h4 class="text-gray">
                                         <span class="font-20" data-count="arrears_total">0.00</span>
                                     </h4>
-                                    <label class="text-black font-bold">Previous Arrears</label>
+                                    <label class="text-black">Previous Arrears</label>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="card rounded-2xl rounded-b-none">
-                        <div class="card-header pr-0">
-                            <div class="row width-100">
-                                <div align="right" class="col-md-12">
-                                    <div class="btn-group" data-filter="quick_summary_filter" id="quick_summary_filter" role="group" aria-label="Filter Revenue">
-                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="yesterday" class="btn sm-hide btn-info">Yesterday</button>
-                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="today" class="btn btn-info">Today</button>
-                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_week" class="btn btn-info">This Week</button>
-                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="last_week" class="btn sm-hide btn-info">Last Week</button>
-                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_month" class="btn active btn-info">This Month</button>
-                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="last_3months" class="btn btn-info">This Quarter</button>
-                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_term" class="btn btn-info">'.$academicSession.'</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-body p-0 pr-1 pl-2 quick_loader dashboard_revenue" style="min-height:300px;">
-                            <div class="table-responsive">
-                                <div class="form-content-loader" style="display: flex; position: absolute">
-                                    <div class="offline-content text-center">
-                                        <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
-                                    </div>
-                                </div>
-                                <div class="mt-0 pt-2" data-chart="revenue_category_chart">
-                                    <div id="revenue_category_chart"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                '.(
-                    $isAdmin ?
-                    '
-                    <div class="col-lg-12"><div class="grid grid-cols-1 hidden md:grid-cols-2 lg:grid-cols-5 gap-4">
-                    '.$financialSummary.'
-                    </div></div>' : null
-                );
-
-            // if an account is logged in
-            if($isAccountant) {
-                $response->html .= '<div class="col-lg-12"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">';
-                $response->html .= $financialSummary;
-                $response->html .= '</div></div>';
-            }
-            
-            // load the class payment information by class only
-            if($isAdminAccountant) {
-                $response->html .= '
-                <div class="col-lg-8">
                     <div class="card">
                         <div class="card-header pr-0">
                             <div class="row width-100">
@@ -897,7 +844,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                 </div>
                             </div>
-                            <div data-chart="class_fees_payment_chart_table" style="max-height:450px; height:450px;">
+                            <div data-chart="class_fees_payment_chart_table" style="max-height:430px; height:435px;">
                                 <table class="table table-bordered table-striped reformat_table">
                                     <thead>
                                         <tr>
@@ -913,27 +860,24 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             </div>
                         </div>
                     </div>
+                    
                 </div>
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header pr-0">
-                            <h4 class="text-uppercase font-13 mb-0">Fees Payment by Class</h4>
-                        </div>
-                        <div class="card-body pb-0 quick_loader">
-                            <div class="form-content-loader" style="display: flex; position: absolute">
-                                <div class="offline-content text-center">
-                                    <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
-                                </div>
-                            </div>
-                            <div class="card-body pb-2" data-chart="class_revenue_donought_chart">
-                                <canvas style="max-height:400px;height:400px;" id="class_revenue_donought_chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>';
+                '.(
+                    $isAdmin ?
+                    '
+                    <div class="col-lg-12"><div class="grid grid-cols-1 hidden md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    '.$financialSummary.'
+                    </div></div>' : null
+                );
+
+            // if an account is logged in
+            if($isAccountant) {
+                $response->html .= '<div class="col-lg-12"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">';
+                $response->html .= $financialSummary;
+                $response->html .= '</div></div>';
             }
 
-            if($isAdmin) {
+            if($isAdminAccountant) {
                 $response->html .= '<div class="col-lg-12 col-md-12 col-12 col-sm-12">';
                 $response->html .= '<div class="row">';
                 $response->html .= '<div class="col-lg-3 col-md-3">';
@@ -942,19 +886,19 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     $response->html .= '</div>';
                 $response->html .= '</div>';
                 $response->html .= '
-                    <div class="col-lg-9 col-md-9 col-12 col-sm-12">
+                    <div class="col-lg-9 col-md-9 col-12 col-sm-12 mb-2">
                         <div class="card rounded-2xl">
                             <div class="card-header pr-0">
                                 <div class="row width-100">
-                                    <div class="col-md-4 flex align-items-lg-center">
+                                    <div class="col-md-5 flex align-items-lg-center">
                                         <h4 class="text-uppercase font-13 mb-0">Student vs Staff Attendance Count</h4>
                                     </div>
-                                    <div align="right" class="col-md-8">
+                                    <div align="right" class="col-md-7">
                                         <div class="btn-group" data-filter="quick_attendance_filter" id="quick_attendance_filter" role="group" aria-label="Filter Attendance">
                                             <button type="button" data-stream="attendance_report,class_attendance_report" data-period="last_week" class="btn btn-info">Last Week</button>
                                             <button type="button" data-stream="attendance_report,class_attendance_report" data-period="this_week" class="btn btn-info">This Week</button>
                                             <button type="button" data-stream="attendance_report,class_attendance_report" data-period="this_month" class="btn active btn-info">This Month</button>
-                                            <button type="button" data-stream="attendance_report,class_attendance_report" data-period="last_month" class="btn btn-info">Last Month</button>
+                                            <button type="button" data-stream="attendance_report,class_attendance_report" data-period="last_month" class="btn hidden btn-info">Last Month</button>
                                             <button type="button" data-stream="attendance_report,class_attendance_report" data-period="last_30days" class="btn btn-info">Last 30 Days</button>
                                         </div>
                                     </div>
@@ -1037,7 +981,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 '.(
                     $isTutorStudent || $isEmployee ?
                     ''.($data_stream ? '
-                        <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="col-lg-3 mb-2 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
                             <div class="card card-statistic-1 border border-left-lg border-green border-left-solid bg-gradient-to-br from-green-300 to-green-100">
                                 <div class="flex items-center justify-between p-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
@@ -1050,7 +994,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="col-lg-3 mb-2 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
                             <div class="card card-statistic-1 border border-left-lg border-danger border-left-solid bg-gradient-to-br from-red-300 to-red-100">
                                 <div class="flex items-center justify-between p-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-red-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
@@ -1063,7 +1007,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="col-lg-3 mb-2 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
                             <div class="card card-statistic-1 border border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
                                 <div class="flex items-center justify-between p-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
@@ -1076,7 +1020,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="col-lg-3 mb-2 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
                             <div class="card card-statistic-1 border border-left-lg border-blue border-left-solid bg-gradient-to-br from-blue-300 to-blue-100">
                                 <div class="flex items-center justify-between p-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
@@ -1092,7 +1036,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     ).'' : null
                 ).'
                 '.($isWardTutorParent || $isEmployee ?
-                '<div class="col-lg-4 col-md-12">
+                '<div class="col-lg-4 col-md-12 mb-2">
                     '.($isStudent || $isTutor ? '
                         <div class="relative card overflow-hidden rounded-2xl  bg-gradient-to-br from-yellow-200 to-red-50">
                             <div class="card-body mb-2 pl-2 pr-2 pb-2" align="center">

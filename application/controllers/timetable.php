@@ -619,7 +619,7 @@ class Timetable extends Myschoolgh {
             if(empty($courses_list) && $format) {
                 // return error message
                 $lessons_list .= "<div class='col-lg-12 text-center'>";
-                $lessons_list .= no_record_found("No Lessons Found", "You do not have any lessons to teach today.", null, "Lesson");
+                $lessons_list .= no_record_found("No Lessons Found", "You do not have any lessons to teach today.", null, "Lesson", false, "fas fa-book-reader");
                 $lessons_list .= "</div>";
             } else {
                 // get only the unique course ids

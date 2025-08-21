@@ -109,7 +109,7 @@ function admin_summary_cards($col = "col-lg-3 col-md-3", $append = false) {
                         <div class="padding-20">
                             <div class="text-right">
                                 <h3 data-attendance_count="ActiveSchoolDays" class="font-light mb-0">0</h3>
-                                <span class="text-black font-13">Active Days</span>
+                                <span class="text-black font-13">School Active Days</span>
                             </div>
                         </div>
                     </div>

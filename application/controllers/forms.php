@@ -630,10 +630,10 @@ class Forms extends Myschoolgh {
 
         }
         // class filter
-        $classFilter = $isTutor ? "AND item_id IN ".$this->inList($defaultUser->class_ids) : null;
+        $classFilter = $isTutor && !empty($defaultUser->class_ids) ? "AND item_id IN ".$this->inList($defaultUser->class_ids) : null;
 
         // get the classes list
-        $classes_list = $this->pushQuery("name, id, item_id, payment_module", "classes", "client_id='{$params->clientId}' AND status='1' {$classFilter} LIMIT 100");
+        $classes_list = empty($classFilter) ? [] : $this->pushQuery("name, id, item_id, payment_module", "classes", "client_id='{$params->clientId}' AND status='1' {$classFilter} LIMIT 100");
         
         $html_content = "<div class='col-lg-8'>";
         $html_content .= "<div class='form-group'>";
