@@ -37,23 +37,31 @@ if(!empty($clientId)) {
     $response->scripts = ["assets/js/analitics.js"];
 
     $class_attendance = "";
+    $class_student_attendance = "";
     $attendance_logs_by_daychart = "";
 
     // student id
     $isSummary = isset($SITEURL[1]) && ($SITEURL[1] == "summary");
-    $class_id = $SITEURL[2] ?? null;
+    $class_id = $SITEURL[2] ?? 0;
     
     // the default data to stream
     $data_stream = $isAdminAccountant ? "attendance_report,class_attendance_report" : "attendance_report";
+    
+    $start_date = date("Y-m-d", strtotime("first day of this month"));
+    $end_date = date("Y-m-d");
 
     // load if the user is an admin or an accountant
     if($isAdminAccountant) {
+
+        // load the attendance summary
         $ana_params = (object)[
             "clientId" => $session->clientId,
             "userData" => $defaultUser,
             "class_id" => $class_id,
             "is_summary" => $isSummary,
             "label" => [
+                "start_date" => $start_date,
+                "end_date" => $end_date,
                 "stream" => "class_attendance_report"
             ]
         ];
@@ -63,30 +71,13 @@ if(!empty($clientId)) {
         $attendance = $attendance_summary['attendance_report']['class_summary'] ?? [];
         $class_summary_attendance = $attendance_summary['attendance_report']['class_summary'] ?? [];
 
-        $i = 0;
-        foreach($attendance["attendanceRate"] as $className => $each) {
-            
-            $i++;
-
-            if(empty($each['totalDays'])) continue;
-
-            $class_attendance .= "
-            <tr>
-                <td class='3%'>{$i}</td>
-                <td>{$className}</td>
-                <td class='text-center'>{$each['Size']}</td>
-                <td class='text-center'>{$each['totalDays']}</td>
-                <td class='text-center text-success'>{$each['Present']}</td>
-                <td class='text-center text-danger'>{$each['Absent']}</td>
-                <td class='text-center text-success'>{$each['presentRate']}%</td>
-                <td class='text-center text-warning'>{$each['absentRate']}%</td>
-                <td class='text-center'>
-                    <button onclick='return loadPage(\"{$baseUrl}attendance/summary/{$each['Id']}\")' class='btn btn-sm p-1 pr-2 pl-2 btn-outline-success'><i class='fas fa-chart-bar'></i> View</button>
-                </td>
-            </tr>";
-        }
-
+        // render the class attendance
+        $class_attendance = render_class_attendance($attendance, $class_id, $baseUrl);
         $attendance_logs_by_daychart .= render_attendance_table($class_summary_attendance);
+
+        if(!empty($class_id)) {
+            $class_student_attendance = class_student_attendance($attendance_summary['attendance_report']['attendance']->students_dataset, $class_id, $baseUrl);
+        }
 
     }
  
@@ -175,6 +166,9 @@ if(!empty($clientId)) {
                                     <input data-item="attendance_performance" data-maxdate="'.$myClass->data_maxdate.'" value="'.date("Y-m-d").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
                                     <div class="input-group-append">
                                         <button style="border-radius:0px" onclick="return filter_ClassGroup_Attendance()" class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
+                                        '.(!empty($class_id) ? '<button class="btn btn-outline-primary" onclick="return loadPage(\''.$baseUrl.'attendance\')">
+                                            <i class="fa fa-arrow-left"></i> Go Back</button>' : null
+                                        ).'
                                     </div>
                                 </div>
                             </div>
@@ -185,19 +179,20 @@ if(!empty($clientId)) {
                                     <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                 </div>
                             </div>
+                            <input type="hidden" name="filtered_class_id" readonly id="filtered_class_id" value="'.$class_id.'">
                             <div class="table-responsive table-student_staff_list">
-                                <table class="table table-sm table-bordered table-striped">
+                                <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
                                             <th class="3%">No.</th>
                                             <th>Class Name</th>
-                                            <th class="text-center">Class Size</th>
-                                            <th class="text-center">Total Days</th>
-                                            <th class="text-center">Present</th>
-                                            <th class="text-center">Absent</th>
-                                            <th class="text-center">Attendance Rate</th>
-                                            <th class="text-center">Absent Rate</th>
-                                            <th></th>
+                                            <th class="text-center text-black">Class Size</th>
+                                            <th class="text-center text-black">Total Days</th>
+                                            <th class="text-center text-black">Present</th>
+                                            <th class="text-center text-black">Absent</th>
+                                            <th class="text-center text-black">Attendance Rate</th>
+                                            <th class="text-center text-black">Absent Rate</th>
+                                            '.(empty($class_id) ? "<th></th>" : null).'
                                         </tr>
                                     </thead>
                                     <tbody class="class_summary_attendance_rate">'.$class_attendance.'</tbody>
@@ -205,6 +200,38 @@ if(!empty($clientId)) {
                             </div>
                         </div>
                     </div>
+                    '.(!empty($class_id) ? '
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="col-lg-8 pl-0 col-md-8">
+                                <h4 class="text-uppercase font-13 mb-0">Attendance Performance By Class</h4>
+                            </div>
+                        </div>
+                        <div class="card-body quick_loader" id="class_summary_attendance_loader">
+                            <div class="form-content-loader" style="display: flex; position: absolute">
+                                <div class="offline-content text-center">
+                                    <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                </div>
+                            </div>
+                            <div class="table-responsive table-student_staff_list">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="3%">No.</th>
+                                            <th>Student Name</th>
+                                            <th class="text-center text-black">Total Days</th>
+                                            <th class="text-center text-black">Present</th>
+                                            <th class="text-center text-black">Absent</th>
+                                            <th class="text-center text-black">Attendance Rate</th>
+                                            <th class="text-center text-black">Absent Rate</th>
+                                            '.(empty($class_id) ? "<th></th>" : null).'
+                                        </tr>
+                                    </thead>
+                                    <tbody class="class_students_attendance_rate">'.$class_student_attendance.'</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>' : null).'
                 </div>' : null).'
                 '.($isAdmin && !$isSummary ? '
                 <div class="col-lg-12 col-md-12 col-12 col-sm-12">
@@ -246,8 +273,8 @@ if(!empty($clientId)) {
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="fa fa-calendar-check"></i></span>
                                         </div>
-                                        <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.date("Y-m-d", strtotime("first day of this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
-                                        <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.date("Y-m-d").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
+                                        <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.$start_date.'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
+                                        <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.$end_date.'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
                                         <div class="input-group-append">
                                             <button style="border-radius:0px" onclick="return filter_UserGroup_Attendance()" class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
                                         </div>

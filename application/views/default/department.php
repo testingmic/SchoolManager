@@ -145,15 +145,15 @@ if(!empty($item_id)) {
             </div>
             <div class="section-body">
             <div class="row">
-            <div class="col-md-3">
+            <div class="col-lg-3 col-md-6">
                 <div class="card rounded-2xl">
                     <div class="card-body pt-3 pb-3 pr-2 pl-2 text-center bg-gradient-to-br from-yellow-200 to-yellow-100 rounded-2xl">
-                        <div class="font-22 text-black">DEPARTMENT CODE</div>
+                        <div class="font-22 text-black">CODE</div>
                         <div class="font-18 font-weight-bold text-uppercase text-black">'.$data->department_code.'</div>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
                 <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-green border-left-solid">
                     <div class="card-body card-type-3">
                         <div class="row">
@@ -170,7 +170,7 @@ if(!empty($item_id)) {
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
                 <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-blue border-left-solid">
                     <div class="card-body card-type-3">
                         <div class="row">
@@ -187,7 +187,7 @@ if(!empty($item_id)) {
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
                 <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-danger border-left-solid">
                     <div class="card-body card-type-3">
                         <div class="row">

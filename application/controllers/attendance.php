@@ -1070,9 +1070,18 @@ class Attendance extends Myschoolgh {
             $query .= $isStudent ? " AND class_id='{$defaultUser->class_id}'" : " AND class_id='{$this->session->student_class_row_id}'";
         }
 
+        elseif(!empty($params->class_id)) {
+            $query .= " AND class_id='{$params->class_id}'";
+        }
+
         // attendance log algo
         $logged_count = 0;
         $activeDaysCount = 0;
+        $classSummaryRequest = !empty($params->class_id) && !empty($params->is_summary);
+
+        // set the students dataset
+        $students_dataset = [];
+        $schoolActiveDays = count(filterWeekendDates($days));
 
         $acceptedDays = $defaultClientData?->client_preferences?->opening_days ?? [];
 
@@ -1115,6 +1124,40 @@ class Attendance extends Myschoolgh {
                         // convert the users list into an array
                         $present = !empty($today->users_list) ? json_decode($today->users_list, true) : [];
                         $_user_data = !empty($today->users_data) ? json_decode($today->users_data, true) : [];
+
+                        if($classSummaryRequest) {
+
+                            // loop through the users data
+                            foreach($_user_data as $user_id => $user) {
+
+                                // get the state
+                                $theState = $user["state"] ?? "absent";
+
+                                if(!isset($students_dataset['breakdown'][$user_id])) {
+                                    $students_dataset['breakdown'][$user_id] = [
+                                        'days' => [],
+                                        'name' => $user["name"],
+                                    ];
+                                }
+
+                                // append to the breakdown
+                                $students_dataset['breakdown'][$user_id]['days'][$the_day] = $theState;
+
+                                // append to the summary
+                                if(!isset($students_dataset['summary'][$user_id])) {
+                                    $students_dataset['summary'][$user_id] = [
+                                        'expected' => $schoolActiveDays,
+                                        'holiday' => 0,
+                                        'present' => 0,
+                                        'absent' => 0,
+                                        'late' => 0,
+                                    ];
+                                }
+
+                                // increment the state count
+                                $students_dataset['summary'][$user_id][$theState] += 1;
+                            }
+                        }
 
                         // if the user is not an admin/accountant then verify if the user was present or absent
                         if($checkPresent) {
@@ -1185,7 +1228,7 @@ class Attendance extends Myschoolgh {
             }
 
             $users_count["summary"]["logs_count"] = $logged_count;
-            $users_count["summary"]["ActiveSchoolDays"] = count(filterWeekendDates($days));
+            $users_count["summary"]["ActiveSchoolDays"] = $schoolActiveDays;
             $users_count["chart_summary"] = [
                 "Start Date" => $params->start_date,
                 "End Date" => $params->end_date,
@@ -1194,7 +1237,7 @@ class Attendance extends Myschoolgh {
         } else {
             // using the grouping format
             $new_group = [];
-            $users_count["summary"]["ActiveSchoolDays"] = count(filterWeekendDates($days));
+            $users_count["summary"]["ActiveSchoolDays"] = $schoolActiveDays;
             if(isset($users_count["days_list"])) {
                 foreach($users_count["days_list"] as $day) {
                     foreach($day as $role => $count) {
@@ -1225,6 +1268,10 @@ class Attendance extends Myschoolgh {
             ];
         }
 
+        if(!empty($params->class_id)) {
+            $users_count["students_dataset"] = $students_dataset;
+        }
+
         $users_count = (object) $users_count;
         
         return $users_count;
@@ -1251,6 +1298,9 @@ class Attendance extends Myschoolgh {
         $summation = [];
 
         $daysExpected = 0;
+
+        // if the class id is set then filter the query
+        $classFilter = !empty($data->class_id) ? " AND a.id = '{$data->class_id}'" : null;
 
         foreach($list_days as $currentDay) {
             
@@ -1284,7 +1334,7 @@ class Attendance extends Myschoolgh {
                     ) AS users_data
                 ", 
                 "classes a", 
-                "a.status='1' AND a.client_id='{$data->clientId}'"
+                "a.status='1' AND a.client_id='{$data->clientId}' {$classFilter}"
             );
 
             if(!empty($classes_list)) {
@@ -1357,95 +1407,6 @@ class Attendance extends Myschoolgh {
             "summary" => $summary,
             "summaries" => $fresh_group,
             "attendanceRate" => $summation,
-        ];
-    }
-
-    /**
-     * Get the Class Summary for the Current Date
-     * 
-     * Loop through all classes and get the number of students present 
-     * and absent for the specified date
-     * 
-     * @return Array
-     */
-    public function class_summary2(stdClass $data) {
-
-        global $defaultClientData;
-
-        /** If finalized */
-        $query = isset($data->is_finalized) ? " AND finalize='1'" : null;
-        
-        /** Run a query for all classes, append the total logged count as well */
-        $classes_list = $this->pushQuery(
-            "a.id, a.name, 
-                (
-                    SELECT COUNT(*) FROM users b 
-                    WHERE 
-                        b.user_status = 'Active' AND b.deleted='0' AND 
-                        b.user_type='student' AND b.class_id = a.id AND 
-                        b.client_id = a.client_id
-                ) AS class_size,
-                (
-                    SELECT b.users_list FROM users_attendance_log b
-                    WHERE 
-                        DATE(b.log_date) = '{$data->load_date}' AND 
-                        b.class_id = a.id AND b.user_type = 'student' AND
-                        status = '1' {$query}
-                    LIMIT 1
-                ) AS users_list, 
-                (
-                    SELECT b.users_data FROM users_attendance_log b
-                    WHERE 
-                        DATE(b.log_date) = '{$data->load_date}' AND 
-                        b.class_id = a.id AND b.user_type = 'student' AND
-                        status = '1' {$query}
-                    LIMIT 1
-                ) AS users_data
-            ", 
-            "classes a", 
-            "a.status='1' AND a.client_id='{$data->clientId}'"
-        );
-        /** Init variables */
-        $data = [];
-
-        /** Loop through the results list */
-        foreach($classes_list as $result) {
-            // convert the columns into an array
-            $users_list = !empty($result->users_list) ? json_decode($result->users_list, true) : [];
-            $users_data = !empty($result->users_data) ? json_decode($result->users_data, true) : [];
-
-            // get the students who were present
-            $result->present = !empty($users_list) ? count($users_list) : 0;
-            $result->absent = !empty($users_data) ? (count($users_data) - $result->present) : 0;
-
-            // append to the array
-            $data[$result->name] = [
-                "Present" => $result->present,
-                "Absent" => $result->absent,
-                "Class Size" => (int) $result->class_size,
-            ];
-        }
-
-        // using the grouping format
-        $new_group = [];
-        foreach($data as $day) {
-            foreach($day as $role => $count) {
-                $new_group[$role][] = $count;
-            }
-        }
-
-        // set it in an array again
-        $fresh_group = [];
-        foreach($new_group as $name => $ddata) {
-            $fresh_group[] = [
-                "name" => $name,
-                "data" => array_values($ddata)
-            ];
-        }
-
-        return [
-            "summary" => $data,
-            "chart_grouping" => $fresh_group
         ];
     }
 

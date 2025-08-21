@@ -512,6 +512,10 @@ table.dataTable.table-sm>thead>tr>th {
     margin-bottom: 9px!important;
 }
 
+.table:not(.table-sm) thead th {
+    color: #262626;
+}
+
 .slim-scroll::-webkit-scrollbar-thumb {
     border-radius: 5px;
     background-color: #ccc;

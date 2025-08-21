@@ -51,6 +51,75 @@ function render_attendance_table($dataset = []) {
 }
 
 /**
+ * Render the class attendance
+ * 
+ * @param array $attendance
+ * @param string $class_id
+ * @param string $baseUrl
+ * 
+ * @return string
+ */
+function render_class_attendance($attendance = [], $class_id = null, $baseUrl = null) {
+    $html_content = "";
+
+    $i = 0;
+    foreach(($attendance["attendanceRate"] ?? 0) as $className => $each) {
+        $i++;
+        if(empty($each['totalDays'])) continue;
+        $html_content .= "
+        <tr>
+            <td class='3%'>{$i}</td>
+            <td>{$className}</td>
+            <td class='text-center'>{$each['Size']}</td>
+            <td class='text-center'>{$each['totalDays']}</td>
+            <td class='text-center text-success'>{$each['Present']}</td>
+            <td class='text-center text-danger'>{$each['Absent']}</td>
+            <td class='text-center text-success'>{$each['presentRate']}%</td>
+            <td class='text-center text-warning'>{$each['absentRate']}%</td>
+            ".(empty($class_id) ? "
+            <td class='text-center'>
+                <button onclick='return loadPage(\"{$baseUrl}attendance/summary/{$each['Id']}\")' class='btn btn-sm p-1 pr-2 pl-2 btn-outline-success'><i class='fas fa-chart-bar'></i> View</button>
+            </td>" : null)."
+        </tr>";
+    }
+    return $html_content;
+}
+
+/**
+ * Render the class student attendance
+ * 
+ * @param array $attendance
+ * @param string $class_id
+ * @param string $baseUrl
+ * 
+ * @return string
+ */
+function class_student_attendance($attendance = []) {
+    $html_content = "";
+
+    $breakdown = $attendance['breakdown'] ?? [];
+    $i = 0;
+    foreach(($attendance['summary'] ?? []) as $id => $student) {
+        $i++;
+
+        $presentRate = $student['present'] > 0 ? round(($student['present'] / $student['expected']) * 100, 2) : 0;
+        $absentRate = $student['absent'] > 0 ? round(($student['absent'] / $student['expected']) * 100, 2) : 0;
+
+        $html_content .= "
+        <tr>
+            <td class='3%'>{$i}</td>
+            <td>{$breakdown[$id]['name']}</td>
+            <td class='text-center'>{$student['expected']}</td>
+            <td class='text-center'>{$student['present']}</td>
+            <td class='text-center'>{$student['absent']}</td>
+            <td class='text-center'>{$presentRate}%</td>
+            <td class='text-center'>{$absentRate}%</td>
+        </tr>";
+    }
+    return $html_content;
+}
+
+/**
  * Setup the admin attendance summary cards
  * 
  * @param string $col

@@ -650,8 +650,6 @@ var attendanceReport = (_attendance) => {
         }
     }
 
-    console.log(_attendance);
-
     if (typeof _attendance.class_summary !== 'undefined') {
         let _class_summary = _attendance.class_summary,
             _chart_label = new Array(),
@@ -954,13 +952,20 @@ var filter_Class_Attendance = () => {
 
 var filter_ClassGroup_Attendance = (append_query = "") => {
     let start_date = $(`input[data-item="attendance_performance"][name="group_start_date"]`).val(),
-        end_date = $(`input[data-item="attendance_performance"][name="group_end_date"]`).val();
+        end_date = $(`input[data-item="attendance_performance"][name="group_end_date"]`).val(),
+        class_id = $(`input[name="filtered_class_id"]`).val();
+    
+    if(class_id) {
+        append_query += `&class_id=${class_id}`;
+        append_query += `&is_summary=${class_id}`;
+    }
+
     $(`div[id="class_summary_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "flex" });
     $.get(`${baseUrl}api/analitics/generate?label[stream]=class_attendance_report&label[start_date]=${start_date}&label[end_date]=${end_date}${append_query}`).then((response) => {
         if (response.code === 200) {
             if (typeof response.data.result.attendance_report !== 'undefined') {
                 let attendance = response.data.result.attendance_report.class_summary;
-                let html = '', i = 0;
+                let html = '', students = '', si = 0, i = 0;
                 $.each(attendance.attendanceRate, function(id, value) {
                     i++;
                     if(value.totalDays) {
@@ -973,13 +978,35 @@ var filter_ClassGroup_Attendance = (append_query = "") => {
                             <td class='text-center text-danger'>${value['Absent']}</td>
                             <td class='text-center text-success'>${value['presentRate']}%</td>
                             <td class='text-center text-warning'>${value['absentRate']}%</td>
+                            ${class_id ? "" : `
                             <td class='text-center'>
                                 <button onclick='return loadPage("${baseUrl}attendance/summary/${value['Id']}")' class='btn btn-outline-success'><i class='fas fa-chart-bar'></i></button>
-                            </td>
+                            </td>`}
                         </tr>`;
                     }
                 });
                 $(`tbody[class="class_summary_attendance_rate"]`).html(html);
+
+                if(class_id && $(`tbody[class="class_students_attendance_rate"]`).length) {
+                    let attendance = response.data.result.attendance_report.attendance.students_dataset;
+                    $.each(attendance.summary, function(id, value) {
+                        i++;
+                        if(value.expected) {
+                            let presentRate = value.present > 0 ? round(value.present / value.expected * 100, 2) : 0;
+                            let absentRate = value.absent > 0 ? round(value.absent / value.expected * 100, 2) : 0;
+                            students += `<tr>
+                                <td class='3%'>${i}</td>
+                                <td>${attendance.breakdown[id]['name']}</td>
+                                <td class='text-center'>${value['expected']}</td>
+                                <td class='text-center text-success'>${value.summary[id]['present']}</td>
+                                <td class='text-center text-danger'>${value['absent']}</td>
+                                <td class='text-center text-success'>${presentRate}%</td>
+                                <td class='text-center text-warning'>${absentRate}%</td>
+                            </tr>`;
+                        }
+                    });
+                    $(`tbody[class="class_students_attendance_rate"]`).html(students);
+                }
             }
             setTimeout(() => {
                 $(`div[id="class_summary_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });

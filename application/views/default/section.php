@@ -148,15 +148,15 @@ if(!empty($item_id)) {
             <div class="section-body">
             <div class="row">
 
-            <div class="col-md-3">
+            <div class="col-lg-3 col-md-6">
                 <div class="card rounded-2xl">
                     <div class="card-body rounded-2xl card-body pt-3 pb-3 pr-2 pl-2 text-center bg-gradient-to-br from-blue-300 via-blue-200 to-blue-100 shadow-lg text-white">
-                        <div class="font-23 text-black">SECTION CODE</div>
+                        <div class="font-23 text-black">CODE</div>
                         <div class="font-18 font-weight-bold text-uppercase text-black">'.$data->section_code.'</div>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 hover:scale-105 transition-all duration-300">
+            <div class="col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
                 <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-green border-left-solid">
                     <div class="card-body card-type-3">
                         <div class="row">
@@ -173,7 +173,7 @@ if(!empty($item_id)) {
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 hover:scale-105 transition-all duration-300">
+            <div class="col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
                 <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-blue border-left-solid">
                     <div class="card-body card-type-3">
                         <div class="row">
@@ -190,7 +190,7 @@ if(!empty($item_id)) {
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 hover:scale-105 transition-all duration-300">
+            <div class="col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
                 <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple border-left-solid">
                     <div class="card-body card-type-3">
                         <div class="row">
