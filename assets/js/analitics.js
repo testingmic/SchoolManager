@@ -953,9 +953,9 @@ var filter_Class_Attendance = () => {
 var filter_ClassGroup_Attendance = (append_query = "") => {
     let start_date = $(`input[data-item="attendance_performance"][name="group_start_date"]`).val(),
         end_date = $(`input[data-item="attendance_performance"][name="group_end_date"]`).val(),
-        class_id = $(`input[name="filtered_class_id"]`).val();
+        class_id = parseInt($(`input[name="filtered_class_id"]`).val());
     
-    if(class_id) {
+    if(class_id > 0) {
         append_query += `&class_id=${class_id}`;
         append_query += `&is_summary=${class_id}`;
     }
@@ -978,9 +978,9 @@ var filter_ClassGroup_Attendance = (append_query = "") => {
                             <td class='text-center text-danger'>${value['Absent']}</td>
                             <td class='text-center text-success'>${value['presentRate']}%</td>
                             <td class='text-center text-warning'>${value['absentRate']}%</td>
-                            ${class_id ? "" : `
+                            ${class_id > 0 ? "" : `
                             <td class='text-center'>
-                                <button onclick='return loadPage("${baseUrl}attendance/summary/${value['Id']}")' class='btn btn-outline-success'><i class='fas fa-chart-bar'></i></button>
+                                <button onclick='return loadPage("${baseUrl}attendance/summary/${value['Id']}")' class='btn btn-outline-success'><i class='fas fa-chart-bar'></i> View</button>
                             </td>`}
                         </tr>`;
                     }

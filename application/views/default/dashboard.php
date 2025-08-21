@@ -41,7 +41,7 @@ $userData->mini_description = true;
 $userData->the_user_type = $defaultUser->user_type;
 
 // set the date to load
-$global_period = $isWardParent ? "this_term" : "this_month";
+$global_period = $isWardParent ? "this_term" : "this_week";
 
 // global params
 $global_params = (object) ["client_data" => $defaultUser->client];
@@ -781,7 +781,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <h4 class="'.$iv[1].'">
                                 <span data-summary="'.$it.'" class="font-20">0.00</span>
                             </h4>
-                            <label class="text-black">'.$iv[0].'</label>
+                            <label class="text-muted mb-0">'.$iv[0].'</label>
+                            <div><span class="text-warning font-12">This Week</span></div>
                         </div>
                     </div>
                 </div>';
@@ -825,7 +826,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     <h4 class="text-gray">
                                         <span class="font-20" data-count="arrears_total">0.00</span>
                                     </h4>
-                                    <label class="text-black">Previous Arrears</label>
+                                    <label class="text-muted mb-0">Previous Arrears</label>
+                                    <div><span class="text-warning font-12">This Week</span></div>
                                 </div>
                             </div>
                         </div>
@@ -896,8 +898,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     <div align="right" class="col-md-7">
                                         <div class="btn-group" data-filter="quick_attendance_filter" id="quick_attendance_filter" role="group" aria-label="Filter Attendance">
                                             <button type="button" data-stream="attendance_report,class_attendance_report" data-period="last_week" class="btn btn-info">Last Week</button>
-                                            <button type="button" data-stream="attendance_report,class_attendance_report" data-period="this_week" class="btn btn-info">This Week</button>
-                                            <button type="button" data-stream="attendance_report,class_attendance_report" data-period="this_month" class="btn active btn-info">This Month</button>
+                                            <button type="button" data-stream="attendance_report,class_attendance_report" data-period="this_week" class="btn active btn-info">This Week</button>
+                                            <button type="button" data-stream="attendance_report,class_attendance_report" data-period="this_month" class="btn btn-info">This Month</button>
                                             <button type="button" data-stream="attendance_report,class_attendance_report" data-period="last_month" class="btn hidden btn-info">Last Month</button>
                                             <button type="button" data-stream="attendance_report,class_attendance_report" data-period="last_30days" class="btn btn-info">Last 30 Days</button>
                                         </div>
