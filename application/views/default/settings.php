@@ -73,7 +73,7 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                     <li class="nav-item">
                                         <a class="nav-link '.($url_link == "_grading" ? "active" : null).'" id="results_structure-tab2" data-toggle="tab" href="#results_structure" role="tab" aria-selected="true">Result Settings</a>
                                     </li>
-                                    <li class="nav-item">
+                                    <li class="nav-item hidden" hidden>
                                         <a class="nav-link '.($url_link == "_remarks" ? "active" : null).'" id="_remarks-tab2" data-toggle="tab" href="#_remarks" role="tab" aria-selected="true">Remarks</a>
                                     </li>
                                     <li class="nav-item">

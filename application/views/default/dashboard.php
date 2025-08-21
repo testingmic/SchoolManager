@@ -781,7 +781,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <h4 class="'.$iv[1].'">
                                 <span data-summary="'.$it.'" class="font-20">0.00</span>
                             </h4>
-                            <label class="text-muted mb-0">'.$iv[0].'</label>
+                            <label class="text-black mb-0">'.$iv[0].'</label>
                             <div><span class="text-warning font-12">This Week</span></div>
                         </div>
                     </div>
@@ -826,7 +826,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     <h4 class="text-gray">
                                         <span class="font-20" data-count="arrears_total">0.00</span>
                                     </h4>
-                                    <label class="text-muted mb-0">Previous Arrears</label>
+                                    <label class="text-black mb-0">Previous Arrears</label>
                                     <div><span class="text-warning font-12">This Week</span></div>
                                 </div>
                             </div>

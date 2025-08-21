@@ -1090,6 +1090,14 @@ class Auth extends Myschoolgh {
             $item_id = random_string("alnum", RANDOM_STRING);
             $token = random_string("alnum", 32);
 
+            // get the default features
+            $defaultFeatures = $this->features_list;
+
+            // remove the features that are not available for the trial account
+            unset($defaultFeatures["documents_manager"]);
+            unset($defaultFeatures["bulk_action"]);
+            unset($defaultFeatures["online_applications"]);
+
             // the preferences
             $preference = (object) [
                 "labels" => [
@@ -1118,7 +1126,7 @@ class Auth extends Myschoolgh {
                     "expiry" => date("Y-m-d h:iA", strtotime("+1 months"))
                 ],
                 "opening_days" => $this->default_opening_days,
-                "features_list" => array_keys($this->features_list)
+                "features_list" => array_keys($defaultFeatures)
             ];
 
             // merge the array information

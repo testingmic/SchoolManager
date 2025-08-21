@@ -297,7 +297,7 @@ class Assignments extends Myschoolgh {
     public function format_list($the_list, $allow_export = false) {
 
         // global variables
-        global $accessObject, $defaultUser;
+        global $accessObject, $defaultUser, $isAdmin;
 
         // permissions
         $hasDelete = $accessObject->hasAccess("delete", "assignments");
@@ -317,7 +317,9 @@ class Assignments extends Myschoolgh {
     
             // manage questions button
             if($hasUpdate && $each->questions_type == "multiple_choice") {
-                $action .= "&nbsp;<a title='Manage questions for this Assessment' href='#' onclick='return load(\"add-assessment/add_question/{$each->item_id}?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
+                $action .= "&nbsp;<a title='Manage questions for this Assessment' href='#' onclick='return load(\"add-assessment/add_question/{$each->item_id}?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>
+                    <i class='fa fa-edit'></i>
+                </a>";
             }
     
             // if the state is either closed or graded
@@ -333,7 +335,7 @@ class Assignments extends Myschoolgh {
                 // if in array
                 if(in_array($each->assignment_type, $export_array)) {
                     // append the export marks button if the creator of the question is the same person logged in
-                    if(($each->created_by === $defaultUser->user_id) && in_array($each->state, ["Closed"])) {
+                    if(($each->created_by === $defaultUser->user_id || $isAdmin) && in_array($each->state, ["Closed"])) {
                         $action .= " <button onclick='return export_Assessment_Marks(\"{$each->item_id}\",\"{$each->assignment_type}\",\"{$each->class_id}\",\"{$each->course_id}\")' class='btn btn-sm mb-1 btn-outline-warning' title='Export Marks'><i class='fa fa-reply-all'></i></button>";
                     }
                 }
