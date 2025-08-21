@@ -315,16 +315,18 @@ var generate_list = (route) => {
             if ((e.user_type == "student") && (e.class_id == class_select)) {
                 count++;
                 let the_value = (route == "sms") ? e.phone_number : e.email;
-                users_receipients_list += `
-                <tr row_id="${e.item_id}">
-                    <td width="10%">${count}</td>
-                    <td width="50%">
-                        <label for="recipients_${e.item_id}" class="cursor mb-0 pb-0 underline text-uppercase text-info">${e.name}</label>
-                        <br><strong>${e.unique_id}</strong>
-                    </td>
-                    <td width="25%"><label class="cursor" for="recipients_${e.item_id}">${((the_value !== null) && (the_value.length)) ? the_value : ""}</label></td>
-                    <td align="center">${((the_value !== null) && (the_value.length)) ? `<input class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}" style="width:20px;cursor:pointer;height:20px;" type="checkbox">` : ""}</td>
-                </tr>`;
+                if(the_value) {
+                    users_receipients_list += `
+                    <tr row_id="${e.item_id}">
+                        <td width="10%">${count}</td>
+                        <td width="50%">
+                            <label for="recipients_${e.item_id}" class="cursor mb-0 pb-0 underline text-uppercase text-info">${e.name}</label>
+                            <br><strong>${e.unique_id}</strong>
+                        </td>
+                        <td width="25%"><label class="cursor" for="recipients_${e.item_id}">${((the_value !== null) && (the_value.length)) ? the_value : ""}</label></td>
+                        <td align="center">${((the_value !== null) && (the_value.length)) ? `<input class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}" style="width:20px;cursor:pointer;height:20px;" type="checkbox">` : ""}</td>
+                    </tr>`;
+                }
             }
         });
     }
@@ -333,16 +335,18 @@ var generate_list = (route) => {
             if ((e.user_type == individual_select)) {
                 count++;
                 let the_value = (route == "sms") ? e.phone_number : e.email;
-                users_receipients_list += `
-                <tr row_id="${e.item_id}">
-                    <td width="10%">${count}</td>
-                    <td width="50%">
-                        <label for="recipients_${e.item_id}" class="cursor mb-0 pb-0 text-uppercase text-info">${e.name}</label>
-                        <br><strong>${e.unique_id}</strong>
-                    </td>
-                    <td width="25%"><label class="cursor" for="recipients_${e.item_id}">${((the_value !== null) && (the_value.length)) ? the_value : ""}</label></td>
-                    <td align="center">${((the_value !== null) && (the_value.length)) ? `<input class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}" style="width:20px;cursor:pointer;height:20px;" type="checkbox">` : ""}</td>
-                </tr>`;
+                if(the_value) {
+                    users_receipients_list += `
+                    <tr row_id="${e.item_id}">
+                        <td width="10%">${count}</td>
+                        <td width="50%">
+                            <label for="recipients_${e.item_id}" class="cursor mb-0 pb-0 text-uppercase text-info">${e.name}</label>
+                            <br><strong>${e.unique_id}</strong>
+                        </td>
+                        <td width="25%"><label class="cursor" for="recipients_${e.item_id}">${((the_value !== null) && (the_value.length)) ? the_value : ""}</label></td>
+                        <td align="center">${((the_value !== null) && (the_value.length)) ? `<input class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}" style="width:20px;cursor:pointer;height:20px;" type="checkbox">` : ""}</td>
+                    </tr>`;
+                }
             }
         });
     } else if((recipient_type === "group") && role_group.length) {
@@ -350,16 +354,18 @@ var generate_list = (route) => {
             if ($.inArray(e.user_type, role_group) !== -1) {
                 count++;
                 let the_value = (route == "sms") ? e.phone_number : e.email;
-                users_receipients_list += `
-                <tr row_id="${e.item_id}">
-                    <td width="10%">${count}</td>
-                    <td width="50%">
-                        <label for="recipients_${e.item_id}" class="cursor mb-0 pb-0 text-uppercase text-info">${e.name}</label>
-                        <br><strong>${e.unique_id}</strong>
-                    </td>
-                    <td width="25%"><label class="cursor" for="recipients_${e.item_id}">${((the_value !== null) && (the_value.length)) ? the_value : ""}</label></td>
-                    <td align="center">${((the_value !== null) && (the_value.length)) ? `<input class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}" style="width:20px;cursor:pointer;height:20px;" type="checkbox">` : ""}</td>
-                </tr>`;
+                if(the_value) {
+                    users_receipients_list += `
+                    <tr row_id="${e.item_id}">
+                        <td width="10%">${count}</td>
+                        <td width="50%">
+                            <label for="recipients_${e.item_id}" class="cursor mb-0 pb-0 text-uppercase text-info">${e.name}</label>
+                            <br><strong>${e.unique_id}</strong>
+                        </td>
+                        <td width="25%"><label class="cursor" for="recipients_${e.item_id}">${((the_value !== null) && (the_value.length)) ? the_value : ""}</label></td>
+                        <td align="center">${((the_value !== null) && (the_value.length)) ? `<input class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}" style="width:20px;cursor:pointer;height:20px;" type="checkbox">` : ""}</td>
+                    </tr>`;
+                }
             }
         });
     }

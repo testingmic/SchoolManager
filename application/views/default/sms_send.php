@@ -139,7 +139,7 @@ $response->html = '
                                 <div class="col">
                                     <div class="form-group mb-1">
                                         <label>.</label>
-                                        <button type="button" id="generate_list_button" onclick="return generate_list(\''.$route.'\')" class="width-150 btn-block btn btn-outline-primary hidden">Generate <i class="fa fa-download"></i></button>
+                                        <button type="button" id="generate_list_button" onclick="return generate_list(\''.$route.'\')" class="btn-block btn btn-outline-primary hidden">Generate <i class="fa fa-download"></i></button>
                                     </div>
                                 </div>
                             </div>

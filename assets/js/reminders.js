@@ -20,20 +20,22 @@ var generate_list = (route, student_id = "") => {
         if((e.class_id == class_id) && (e.student_debt !== null) && (e.student_debt > 1)) {
             count++;
             let the_value = (e.phone_number !== null) ? e.phone_number : "";
-            users_receipients_list += `
-            <tr row_id="${e.item_id}">
-                <td width="10%">${count}</td>
-                <td width="75%" class="">
-                    <label for="recipients_${e.item_id}" title="Click to select ${e.name}"  class="cursor text-uppercase text-info">${e.name}</label>
-                    <div>
-                        <span class="mr-4"><strong>BAL:</strong> ${myPrefs.labels.currency}${format_currency(e.student_debt)}</span>
-                        ${((e.arrears !== null) && (e.arrears.length)) ?     
-                            `<span><strong class="text-danger">ARREARS:</strong> ${myPrefs.labels.currency}${format_currency(e.arrears)}</span>`
-                        : ""}
-                    </div>
-                </td>
-                <td align="center"><input ${student_id == e.item_id ? "checked" : ""} ${((the_value !== null) && (the_value.length)) ? `class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
-            </tr>`;
+            if(the_value.length) {
+                users_receipients_list += `
+                <tr row_id="${e.item_id}">
+                    <td width="10%">${count}</td>
+                    <td width="75%" class="">
+                        <label for="recipients_${e.item_id}" title="Click to select ${e.name}"  class="cursor text-uppercase text-info">${e.name}</label>
+                        <div>
+                            <span class="mr-4"><strong>BAL:</strong> ${myPrefs.labels.currency}${format_currency(e.student_debt)}</span>
+                            ${((e.arrears !== null) && (e.arrears.length)) ?     
+                                `<span><strong class="text-danger">ARREARS:</strong> ${myPrefs.labels.currency}${format_currency(e.arrears)}</span>`
+                            : ""}
+                        </div>
+                    </td>
+                    <td align="center"><input ${student_id == e.item_id ? "checked" : ""} ${((the_value !== null) && (the_value.length)) ? `class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
+                </tr>`;
+            }
         }
     });
 
