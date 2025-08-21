@@ -2638,7 +2638,7 @@ class Fees extends Myschoolgh {
                 $logo_data = file_get_contents($client->client_logo);
 
                 // set the client logo
-                $client_logo = $saveBill ? $client->client_logo : 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+                $client_logo = $saveBill ? $this->baseUrl . $client->client_logo : 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
             }
             $counter_ = 0;
             $list_count = count($students_list);
