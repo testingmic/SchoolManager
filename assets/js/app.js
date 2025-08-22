@@ -374,6 +374,7 @@ var trigger_form_submit = () => {
                             }
                             if (theButton.attr("href") !== undefined) {
                                 setTimeout(() => {
+                                    $(`div[class~="modal-backdrop"]`).remove();
                                     loadPage(theButton.attr("href"));
                                 }, refresh_seconds);
                             }
@@ -428,6 +429,7 @@ var trigger_form_submit = () => {
                                 console.log(response.data.additional);
                                 if (typeof response.data.additional.href !== 'undefined') {
                                     setTimeout(() => {
+                                        $(`div[class~="modal-backdrop"]`).remove();
                                         loadPage(response.data.additional.href);
                                     }, refresh_seconds);
                                 }

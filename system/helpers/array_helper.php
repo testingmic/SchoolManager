@@ -385,12 +385,12 @@ function format_bus_item($value, $no_container = false, $no_buttons = false, $wi
     $html = (!$no_container ? "<div class='{$width} transition-all duration-300 transform hover:-translate-y-1' data-element_type='bus' data-element_id='{$value->item_id}'>" : null);
     $html .= "
     <div class='card'>
-        <div class='card-body' data-parameter_type='bus' data-parameter_url='{$value->item_id}' data-parameter='bus'>
+        <div class='card-body p-2' data-parameter_type='bus' data-parameter_url='{$value->item_id}' data-parameter='bus'>
             <div class='item_loader'></div>
             <div class='img-container cursor bus-img-container' ".(!$no_buttons && !empty($permissions["hasModify"]) ? "onclick='return load(\"bus/{$value->item_id}\");'" : null).">
                 <img src='{$myClass->baseUrl}{$image}' class='bus-img' width='100%'>
             </div>
-            <div class='text-left p-2 description'>
+            <div class='text-left pb-2 pt-2 pr-0 pl-0 description'>
                 <div class='mb-2'><span class='font-bold text-primary'>Color:</span><span class='float-right'>".(!empty($value->color) ? "<span style='Background:{$value->color}' class='badge'>&nbsp;</span>" : "-")."</span></div>
                 <div class='mb-2'><span class='font-bold text-primary'>Registration Number:</span><span class='float-right'>{$value->reg_number}</span></div>
                 <div class='mb-2'><span class='font-bold text-primary'>Purchase Price:</span><span class='float-right'>".(!empty($value->purchase_price) ? number_format($value->purchase_price, 2) : "-")."</span></div>
@@ -405,14 +405,15 @@ function format_bus_item($value, $no_container = false, $no_buttons = false, $wi
                             ".(!$no_buttons && !empty($permissions["hasModify"]) ? "<button class='btn btn-sm mb-1 btn-outline-danger' title='Delete {$value->brand}' onclick='return delete_bus(\"{$value->item_id}\",\"{$item_name}\");'><i class='fa fa-trash'></i> Trash</button>" : null)."
                         </div>
                         <div class='text-right'>
-                            ".(!empty($permissions["hasModify"]) ? "
-                                <button class='btn btn-sm mb-1 btn-outline-success' title='Update {$value->brand}' onclick='return update_bus(\"{$value->item_id}\");'><i class='fa fa-edit'></i> Edit</button>" : null)."
-                            ".(!$no_buttons ? "<button class='btn btn-sm mb-1 btn-outline-primary' title='View Comments Log for {$value->brand}' onclick='return load(\"bus/{$value->item_id}\");'><i class='fa fa-comments'></i> Comments</button>" : null)."
+                            ".(!empty($permissions["hasModify"]) && $no_buttons ? "<button class='btn btn-sm mb-1 btn-outline-success' title='Update {$value->brand}' onclick='return update_bus(\"{$value->item_id}\");'><i class='fa fa-edit'></i> Edit</button>" : null)."
+                            ".(!$no_buttons ? "<button class='btn btn-sm mb-1 btn-outline-success' title='View {$value->brand}' onclick='return load(\"bus/{$value->item_id}\");'><i class='fa fa-eye'></i> View</button>" : null)."
+                            ".(!empty($permissions["markAttendance"]) && $permissions["attendancePage"] ? "<button class='btn btn-sm mb-1 btn-outline-primary' title='View {$value->brand}' onclick='return load(\"bus/{$value->item_id}\");'><i class='fa fa-eye'></i> Manage Interactions</button>" : null)."
+                            ".(!empty($permissions["markAttendance"]) && !$permissions["attendancePage"] ? "<button class='btn btn-sm mb-1 btn-outline-primary' title='View Comments Log for {$value->brand}' onclick='return load(\"bus/{$value->item_id}/attendance\");'><i class='fa fa-bus'></i> Attendance</button>" : null)."
                         </div>
                     </div>
                 </div>
             </div>
-            <div title='{$item_name}' class='cursor font-20 bg-primary text-white p-2'>
+            <div title='{$item_name}' class='cursor font-20 bg-primary rounded text-white p-2'>
                 <p>{$value->brand}</p>
             </div>
         </div>

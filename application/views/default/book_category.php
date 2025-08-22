@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 // additional update
 $clientId = $session->clientId;
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
-$pageTitle = "Book Category Details";
+$pageTitle = "Book Collection Details";
 $response->title = $pageTitle;
 
 $response->scripts = [
@@ -74,7 +74,7 @@ if(!empty($item_id)) {
 
             $category_books_list .= "<tr data-row_id=\"{$book->item_id}\">";
             $category_books_list .= "<td>".($key+1)."</td>";
-            $category_books_list .= "<td><a href='#' onclick='return load(\"book/{$book->item_id}\");'>{$book->title}</a></td>";
+            $category_books_list .= "<td><a href='#' class='text-primary' onclick='return load(\"book/{$book->item_id}\");'>{$book->title}</a></td>";
             $category_books_list .= "<td>{$book->author}</td>";
             $category_books_list .= "<td>{$book->quantity}</td>";
             $category_books_list .= "<td><span class='underline'>".($book->isbn ?? null)."</span></td>";
@@ -88,6 +88,9 @@ if(!empty($item_id)) {
         // guardian information
         $the_form = $formsObj->library_category_form($item_param);
         $hasUpdate = $accessObject->hasAccess("update", "library");
+
+        // language select
+        $languages = render_language_select();
 
         // if the request is to view the student information
         $updateItem = confirm_url_id(2, "update") ? true : false;
@@ -118,7 +121,7 @@ if(!empty($item_id)) {
                 '.($data->description ? 
                     '<div class="card">
                         <div class="card-header">
-                            <h4>Description</h4>
+                            <h4 class="mb-0">Description</h4>
                         </div>
                         <div class="card-body pt-0">
                             <div class="py-3 pt-0">
@@ -129,7 +132,7 @@ if(!empty($item_id)) {
                 ).'
                 <div class="card">
                     <div class="card-header">
-                        <h4>Book Details</h4>
+                        <h4 class="mb-0">Collection Details</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">
                         <div class="py-3 pt-0">
@@ -140,6 +143,10 @@ if(!empty($item_id)) {
                             <p class="clearfix">
                                 <span class="float-left">Books Count</span>
                                 <span class="float-right text-muted">'.($data->books_count ?? null).'</span>
+                            </p>
+                            <p class="clearfix">
+                                <span class="float-left">Language</span>
+                                <span class="float-right text-muted">'.($languages[$data->language] ?? $data->language).'</span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Date Created</span>

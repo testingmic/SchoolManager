@@ -508,6 +508,20 @@ table.dataTable.table-sm>thead>tr>th {
     background-color: #919599;
 }
 
+.text-italic {
+    font-style: italic;
+}
+
+.item-picture {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.text-muted {
+    color: #1a546f !important;
+}
+
 .clearfix {
     margin-bottom: 9px!important;
 }
@@ -1181,10 +1195,19 @@ h4 {
 }
 
 .bus-img-container {
-    min-height: 250px;
-    max-height: 250px;
+    min-height: 220px;
+    max-height: 220px;
     overflow: hidden;
     border-radius: 10px;
+}
+
+.bus-img-container .bus-img {
+    min-height: 220px;
+    object-fit: cover;
+}
+
+.bus-img-container:hover img {
+    border: solid 1px #0071f3;
 }
 
 .bus-img {

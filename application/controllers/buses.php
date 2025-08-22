@@ -148,6 +148,7 @@ class Buses extends Myschoolgh {
 			return [
 				"data" => "Bus successfully added.",
 				"additional" => [
+					"href" => "{$this->baseUrl}/bus/{$bus_id}",
 					"append_data" => [
 						"container" => "div[data-element_type='bus']:last",
 						"data" => format_bus_item($record)
@@ -260,6 +261,7 @@ class Buses extends Myschoolgh {
 			return [
 				"data" => "Bus information successfully modified.",
 				"additional" => [
+					"href" => "{$this->baseUrl}/bus/{$params->bus_id}",
 					"replace_data" => [
 						"container" => "div[data-element_type='bus'][data-element_id='{$params->bus_id}']",
 						"data" => format_bus_item($record, true)

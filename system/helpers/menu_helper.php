@@ -179,7 +179,7 @@
         <li class="dropdown">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
             <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Manage Collection</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
                 <?php if($accessObject->hasAccess("add", "library")) { ?>
@@ -427,7 +427,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Collection</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
         </ul>
@@ -496,7 +496,7 @@
         <li class="dropdown">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
             <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Collection</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
             </ul>
@@ -561,7 +561,7 @@
         <li class="dropdown">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
             <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Collection</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
             </ul>
@@ -593,6 +593,9 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
+            <?php if($accessObject->hasAccess("bus_log", "attendance")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>bus_logs">Bus Attendance</a></li>
+            <?php } ?>
         </ul>
     </li>
     <?php } ?>
@@ -600,7 +603,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Collection</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
         </ul>

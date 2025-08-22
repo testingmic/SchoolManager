@@ -106,6 +106,10 @@ class Myschoolgh extends Models {
 		$fix[] = ("ALTER TABLE `grading_terminal_scores` ADD `distinct_record` VARCHAR(32) NULL DEFAULT NULL AFTER `report_id`, ADD UNIQUE (`distinct_record`);");
 		$fix[] = ("ALTER TABLE `users_bills` CHANGE `bill` `bill` MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;");
 		$fix[] = ("ALTER TABLE `smsemail_templates` CHANGE `module` `module` VARCHAR(24) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;");
+		$fix[] = ("ALTER TABLE `books_type` ADD COLUMN `language` VARCHAR(12) NOT NULL DEFAULT 'en' AFTER `description`;");
+		$fix[] = ("ALTER TABLE `books` ADD COLUMN `publisher` VARCHAR(128) NULL DEFAULT NULL AFTER `description`;");
+		$fix[] = ("ALTER TABLE `books` ADD COLUMN `publish_date` DATE NULL DEFAULT NULL AFTER `publisher`;");
+		$fix[] = ("ALTER TABLE `books` ADD COLUMN `price` DECIMAL(10, 2) NULL DEFAULT NULL AFTER `publish_date`;");
 		
 		$fix[] = ("CREATE TABLE IF NOT EXISTS `exeats` (
 				`id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -134,8 +138,8 @@ class Myschoolgh extends Models {
 
 		foreach($fix as $stmt) {
 			try {
-				// $query = $this->db->prepare($stmt);
-				// $query->execute();
+				$query = $this->db->prepare($stmt);
+				$query->execute();
 			} catch(PDOException $e) {}
 		}
 	}

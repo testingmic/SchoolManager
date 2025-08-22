@@ -16,7 +16,7 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
-$pageTitle = "Add Book Category";
+$pageTitle = "Create Book Collection";
 $response->title = $pageTitle;
 $response->scripts = [
     "assets/js/index.js"

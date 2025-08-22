@@ -16,7 +16,7 @@ $baseUrl = $myClass->baseUrl;
 jump_to_main($baseUrl);
 
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
-$pageTitle = "Books Category";
+$pageTitle = "Books Collection";
 $response->title = $pageTitle;
 
 $params = (object) [
@@ -38,6 +38,8 @@ $hasAdd = $accessObject->hasAccess("add", "library");
 $hasDelete = $accessObject->hasAccess("delete", "library");
 $hasUpdate = $accessObject->hasAccess("update", "library");
 
+$languages = render_language_select();
+
 $category_list = "";
 foreach($item_list["data"] as $key => $each) {
     
@@ -47,10 +49,13 @@ foreach($item_list["data"] as $key => $each) {
         $action .= "&nbsp;<a href='#' title='Delete this Book Category' onclick='return delete_record(\"{$each->item_id}\", \"book_category\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
+    $language = $languages[$each->language] ?? $each->language;
+
     $category_list .= "<tr data-row_id=\"{$each->item_id}\">";
     $category_list .= "<td>".($key+1)."</td>";
     $category_list .= "<td><span class='user_name' onclick='return load(\"book_category/{$each->item_id}\");'>{$each->name}</span></td>";
     $category_list .= "<td>{$each->description}</td>";
+    $category_list .= "<td>{$language}</td>";
     $category_list .= "<td>{$each->books_count}</td>";
     $category_list .= "<td align='center'>{$action}</td>";
     $category_list .= "</tr>";
@@ -69,7 +74,7 @@ $response->html = '
             <div class="col-12 col-sm-12 col-lg-12">
                 '.($hasAdd ? '
                     <div class="text-right mb-2">
-                        <a class="btn btn-outline-primary" href="'.$baseUrl.'book_category_add"><i class="fa fa-plus"></i> Add Category</a>
+                        <a class="btn btn-outline-primary" href="'.$baseUrl.'book_category_add"><i class="fa fa-plus"></i> Add Collection</a>
                     </div>' : ''
                 ).'
                 <div class="card">
@@ -79,8 +84,9 @@ $response->html = '
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
-                                        <th width="20%">Category Name</th>
+                                        <th width="20%">Collection Name</th>
                                         <th>Description</th>
+                                        <th>Language</th>
                                         <th width="15%">Books Count</th>
                                         <th align="center" width="12%"></th>
                                     </tr>

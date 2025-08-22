@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $clientFeatures;
+global $myClass, $accessObject, $defaultUser, $clientFeatures, $defaultCurrency;
 
 // initial variables
 $appName = $myClass->appName;
@@ -41,6 +41,9 @@ $books_list = "";
 foreach($item_list["data"] as $key => $each) {
     $action = "<a title='View this book record' href='#' onclick='return load(\"book/{$each->item_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
+    if($hasUpdate) {
+        $action .= "&nbsp;<a title='Update this book record' href='#' onclick='return load(\"book/{$each->item_id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+    }
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Delete this Book' onclick='return delete_record(\"{$each->item_id}\", \"book\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
@@ -58,8 +61,9 @@ foreach($item_list["data"] as $key => $each) {
     </td>";
     $books_list .= "<td>{$each->author}</td>";
     $books_list .= "<td>{$each->books_stock}</td>";
-    $books_list .= "<td>".($each->category_name ?? null)."</td>";
+    $books_list .= "<td><a href='#' class='text-primary' onclick='return load(\"book_category/{$each->category_item_id}\");'>".($each->category_name ?? null)."</a></td>";
     $books_list .= "<td>".($each->isbn ?? null)."</td>";
+    $books_list .= "<td>".($defaultCurrency ?? null).' '.number_format($each->price ?? 0, 2)."</td>";
     $books_list .= "<td align='center'>{$action}</td>";
     $books_list .= "</tr>";
 }
@@ -91,9 +95,10 @@ $response->html = '
                                         <th>Book Title</th>
                                         <th>Author</th>
                                         <th width="13%">Stock Quantity</th>
-                                        <th>Category</th>
+                                        <th>Collection</th>
                                         <th>ISBN</th>
-                                        <th align="center" width="12%"></th>
+                                        <th>Price</th>
+                                        <th align="center" width="13%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$books_list.'</tbody>

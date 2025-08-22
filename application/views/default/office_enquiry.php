@@ -73,6 +73,8 @@ if(!$accessObject->hasAccess("view", "admission_enquiry")) {
         $data = $results_array[0];
     }
 
+    $canLog = $accessObject->hasAccess("add", "admission_enquiry");
+
     if(!$loadForm) {
 
         // loop through the results array list
@@ -150,7 +152,7 @@ if(!$accessObject->hasAccess("view", "admission_enquiry")) {
                         <div class="font-14">'.$data->content->description.'</div>
                     </div>
                     '.($accessObject->hasAccess("update", "admission_enquiry") ?
-                        '<div class="form-group">
+                        '<div class="form-group mb-3">
                             <label>Enquiry Status</label>
                             <select data-request_url="office_enquiry" data-request_id="'.$data->item_id.'" name="enquiry_status" id="enquiry_status" class="selectpicker" data-width="100%">
                                 <option '.($data->state === 'Pending' ? 'selected' : null).' value="Pending">Pending</option>
@@ -161,7 +163,7 @@ if(!$accessObject->hasAccess("view", "admission_enquiry")) {
                             </select>
                         </div>' : "<strong>Status: </strong><span class='badge badge-{$status}'>{$state}</span>"
                     ).'
-                    <div class="font-15  pb-2 mb-2">
+                    <div class="font-15 mt-3 pb-2 mb-2">
                         <div>
                             <i class="fa fa-user"></i>
                             <span onclick="return load(\'staff/'.$data->created_by.'/documents\')" class="user_name">
@@ -207,13 +209,7 @@ if(!$accessObject->hasAccess("view", "admission_enquiry")) {
         <section class="section">
 
             <div class="section-header">
-                <h1>'.$pageTitle.' 
-                    '.(!$loadForm ? '
-                        <span onclick="load(\'office_enquiry/log\')" class="btn btn-sm btn-primary">
-                            Log Enquiry
-                        </span>' : null
-                    ).'
-                </h1>
+                <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     '.($loadForm || !empty($data) ? 
@@ -230,6 +226,11 @@ if(!$accessObject->hasAccess("view", "admission_enquiry")) {
                 '.(!empty($data) ? $request_data : null).'
 
                 <div '.(!empty($data) ? 'hidden' : null).' class="col-12 col-sm-12 col-lg-12">
+                    '.(!$loadForm && $canLog ? '
+                        <div class="text-right mb-2">
+                            <a class="btn btn-outline-primary" href="'.$baseUrl.'office_enquiry/log"><i class="fa fa-plus"></i> Log New Enquiry</a>
+                        </div>' : ''
+                    ).'
                     <div class="card">
                         <div class="card-body">
                             

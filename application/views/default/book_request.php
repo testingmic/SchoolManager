@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser, $clientFeatures;
+global $myClass, $SITEURL, $defaultUser, $clientFeatures, $defaultCurrency; 
 
 // initial variables
 $appName = $myClass->appName;
@@ -79,15 +79,15 @@ if(!empty($item_id)) {
             $books_list .= "<tr class='each_book_item' data-request_id='{$item_id}' data-book_id='{$book->book_id}'>";
             $books_list .= "<td>
                 <div class='d-flex justify-content-start'>
-                    <div class='mr-2'>".(!empty($book->book_image) ? "<img class='rounded-2xl author-box-picture' src='{$baseUrl}{$book->book_image}' width='40px' height='40px'>" : "")."</div>
-                    <div><a href='#' onclick='return load(\"book/{$book->book_id}\");'>{$book->title}</a> <br> <strong>{$book->isbn}</strong></div>
+                    <div class='mr-2'>".(!empty($book->book_image) ? "<img class='rounded-lg author-box-picture' src='{$baseUrl}{$book->book_image}' width='40px' height='40px'>" : "")."</div>
+                    <div><a href='#' onclick='return load(\"book/{$book->book_id}\");'>{$book->title}</a> <br> <strong>ISBN: {$book->isbn}</strong></div>
                 </div>
             </td>";
             $books_list .= "<td>{$book->author}</td>";
 
             // if the user has the required permissions
             if($isEditable && $isRequested) {
-                $books_list .= "<td><input type='number' min='1' max='{$book->books_stock}' class='form-control' style='width:100px' data-request_id='{$item_id}' data-book_id='{$book->book_id}' data-original='{$book->quantity}' value='{$book->quantity}'></td>";
+                $books_list .= "<td><input type='number' min='1' max='{$book->books_stock}' class='form-control text-center' style='width:100px' data-request_id='{$item_id}' data-book_id='{$book->book_id}' data-original='{$book->quantity}' value='{$book->quantity}'></td>";
             } else {
                 $books_list .= "<td>{$book->quantity}</td>";
             }
@@ -133,7 +133,7 @@ if(!empty($item_id)) {
                     <tr>
                         <th>Book Title</th>
                         <th>Author</th>
-                        <th>Quantity</th>
+                        <th class="text-center">Quantity</th>
                         '.(round($data->fine) > 1 ? "<th>Fine</th>" : "").'
                         '.($isRequested || $canReturn || $isReturned ? '<th width="13%"></th>' : '').'
                     </tr>
@@ -204,7 +204,7 @@ if(!empty($item_id)) {
                                     <span class="float-left">Return Date:</span>
                                     <span class="float-right text-muted">'.($data->return_date ?? null).'</span>
                                 </p>
-                                <p class="clearfix">
+                                <div class="clearfix mb-2">
                                     <div class="d-flex justify-content-between">
                                         <div class="float-left">Overdue Fine:</div>
                                         '.($isRequested && $hasIssue ? 
@@ -217,10 +217,10 @@ if(!empty($item_id)) {
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>" : "<div>{$data->fine}</div>"
+                                            </div>" : "<div>{$defaultCurrency} {$data->fine}</div>"
                                         ).'
                                     </div>
-                                </p>
+                                </div>
                                 '.( 
                                     $data->state == "Overdue" ? '
                                         <p class="clearfix">
@@ -229,11 +229,11 @@ if(!empty($item_id)) {
                                         </p>
                                     ' : ''
                                 ).'
-                                <p class="clearfix">
+                                <p class="clearfix mb-2">
                                     <span class="float-left">Current State:</span>
                                     <span class="float-right text-muted">'.$myClass->the_status_label($data->state).'</span>
                                 </p>
-                                <p class="clearfix">
+                                <p class="clearfix mb-2">
                                     <span class="float-left">Request Created:</span>
                                     <span class="float-right text-muted">'.($data->created_at ?? null).'</span>
                                 </p>

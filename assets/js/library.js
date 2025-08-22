@@ -450,7 +450,7 @@ $(`div[id='library_form'] select[name='book_id']`).on("change", function() {
             } else {
                 selected_books.removeClass("hidden");
                 selected_books.html(`
-            <div class="card-body pb-1">
+            <div class="card-body pb-3">
                 <div class="d-flex justify-content-start">
                     ${book.book_image ? `<div class="mr-2"><img src="${book.book_image}" width="180px"></div>` : ""}
                     <div>
@@ -464,7 +464,7 @@ $(`div[id='library_form'] select[name='book_id']`).on("change", function() {
                         </p>
                         ${book.books_stock !== 0 ? `
                         <p class="mb-0">
-                            ${book.in_session !== true ? `<button onclick="return issue_Request_Handler('add', '${book.item_id}');" class="btn-sm btn-outline-success btn"><i class="fa fa-plus"></i> Add</button>` 
+                            ${book.in_session !== true ? `<button onclick="return issue_Request_Handler('add', '${book.item_id}');" class="btn-sm btn-outline-success btn"><i class="fa fa-plus"></i> Add to Cart</button>` 
                             : `<button onclick="return issue_Request_Handler('remove', '${book.item_id}');" class="btn-sm btn-outline-danger btn"><i class="fa fa-trash"></i> Remove</button>`}
                         </p>
                         ` : `<p class="text-danger font-weight-600 mb-0">Sorry! This book is out of Stock</p>`}

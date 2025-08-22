@@ -44,7 +44,7 @@ class Library extends Myschoolgh {
 						" bk.*, (SELECT quantity FROM books_stock WHERE books_id = bk.item_id) AS books_stock,
 					(SELECT name FROM classes WHERE classes.id = bk.class_id LIMIT 1) AS class_name,
 					(SELECT name FROM departments WHERE departments.id = bk.department_id LIMIT 1) AS department_name,
-					bt.name AS category_name,
+					bt.name AS category_name, bt.item_id AS category_item_id,
 					(SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = bk.created_by LIMIT 1) AS created_by_info,
 					(SELECT b.description FROM files_attachment b WHERE b.resource='library_book' AND b.record_id = bk.item_id ORDER BY b.id DESC LIMIT 1) AS attachment ")."
 				FROM books bk
@@ -182,13 +182,13 @@ class Library extends Myschoolgh {
 			$params->show_list = true;
 		}
 
-		$params->query .= (isset($params->issued_date) && !empty($params->issued_date)) ? " AND a.issued_date='{$params->issued_date}'" : null;
-		$params->query .= (isset($params->return_date) && !empty($params->return_date)) ? " AND a.return_date='{$params->return_date}'" : null;
-		$params->query .= (isset($params->status) && !empty($params->status)) ? " AND a.status='{$params->status}'" : null;
-        $params->query .= (isset($params->user_role) && !empty($params->user_role)) ? " AND a.user_role='{$params->user_role}'" : null;
-        $params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->user_id) && !empty($params->user_id)) ? " AND a.user_id='{$params->user_id}'" : null;
-		$params->query .= (isset($params->borrowed_id) && !empty($params->borrowed_id)) ? " AND a.item_id='{$params->borrowed_id}'" : null;
+		$params->query .= !empty($params->issued_date) ? " AND a.issued_date='{$params->issued_date}'" : null;
+		$params->query .= !empty($params->return_date) ? " AND a.return_date='{$params->return_date}'" : null;
+		$params->query .= !empty($params->status) ? " AND a.status='{$params->status}'" : null;
+        $params->query .= !empty($params->user_role) ? " AND a.user_role='{$params->user_role}'" : null;
+        $params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= !empty($params->user_id) ? " AND a.user_id='{$params->user_id}'" : null;
+		$params->query .= !empty($params->borrowed_id) ? " AND a.item_id='{$params->borrowed_id}'" : null;
 
         try {
 
@@ -320,9 +320,10 @@ class Library extends Myschoolgh {
             # execute the statement
             $stmt = $this->db->prepare("
                 INSERT INTO books_type SET client_id = ?, item_id = ?, created_by = ?
-                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
-                ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(!empty($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(!empty($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
+                ".(!empty($params->description) ? ", description = '{$params->description}'" : null)."
+				".(!empty($params->language) ? ", language = '{$params->language}'" : null)."
             ");
             $stmt->execute([$params->clientId, $item_id, $params->userId]);
             
@@ -333,7 +334,7 @@ class Library extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Book Category successfully created.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["clear" => true];
+			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}books_categories"];
 
 			# return the output
             return $return;
@@ -366,8 +367,9 @@ class Library extends Myschoolgh {
             # execute the statement
             $stmt = $this->db->prepare("
                 UPDATE books_type SET name = '{$params->name}'
-                ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(!empty($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
+                ".(!empty($params->description) ? ", description = '{$params->description}'" : null)."
+				".(!empty($params->language) ? ", language = '{$params->language}'" : null)."
 				WHERE client_id = ? AND item_id = ?
             ");
             $stmt->execute([$params->clientId, $params->category_id]);
@@ -1149,9 +1151,12 @@ class Library extends Myschoolgh {
 				"books",
 				"isbn = ?, title = ?, description = ?, author = ?, rack_no = ?, row_no = ?, 
                     class_id = ?, category_id = ?, department_id = ? 
-                    ".(isset($params->quantity) ? ",quantity = '{$params->quantity}'" : "")."
-					".(isset($book_image) ? ",book_image = '{$book_image}'" : "")."
-                    ".(isset($params->code) ? ",code = '{$params->code}'" : "")."",
+                    ".(!empty($params->quantity) ? ",quantity = '{$params->quantity}'" : "")."
+					".(!empty($book_image) ? ",book_image = '{$book_image}'" : "")."
+                    ".(!empty($params->code) ? ",code = '{$params->code}'" : "")."
+					".(!empty($params->publisher) ? ",publisher = '{$params->publisher}'" : "")."
+					".(!empty($params->publish_date) ? ",publish_date = '{$params->publish_date}'" : "")."
+					".(isset($params->price) ? ",price = '{$params->price}'" : ""),
 				"item_id = ? AND client_id = ?",
 				array(
 					$params->isbn, $params->title, $params->description ?? null, 
@@ -1226,11 +1231,12 @@ class Library extends Myschoolgh {
 				"books",
 				"client_id = ?, isbn = ?, title = ?, description = ?, author = ?, rack_no = ?, 
                 row_no = ?, class_id = ?, category_id = ?, department_id = ?, quantity = ?, code = ?,
-                created_by = ?, item_id = ?, book_image = ?",
+                created_by = ?, item_id = ?, book_image = ?, publisher = ?, publish_date = ?, price = ?",
 				array(
 					$params->clientId, $params->isbn, $params->title, $params->description ?? null, $params->author, 
                     $params->rack_no ?? null, $params->row_no ?? null, $params->class_id ?? null, $params->category_id ?? null,  
-                    $params->department_id ?? null, $params->quantity, $code, $params->userId, $item_id, $book_image ?? null
+                    $params->department_id ?? null, $params->quantity, $code, $params->userId, $item_id, $book_image ?? null, 
+					$params->publisher ?? null, $params->publish_date ?? null, $params->price ?? 0
 				)
 			)
 		);

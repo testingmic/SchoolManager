@@ -48,11 +48,16 @@ if(empty($bus_id)) {
     $hasModify = $accessObject->hasAccess("update", "buses");
     $hasCreate = $accessObject->hasAccess("add", "buses");
 
+    // confirm if the user is on the attendance page
+    $attendancePage = (bool) isset($SITEURL[2]) && ($SITEURL[2] == "attendance");
+
     // set the user permissions
     $permissions = [
         "hasView" => $hasView,
         "hasModify" => $hasModify,
-        "hasCreate" => $hasCreate
+        "hasCreate" => $hasCreate,
+        "attendancePage" => $attendancePage,
+        "markAttendance" => $accessObject->hasAccess("bus_log", "attendance")
     ];
 
     // create a bus object
@@ -113,15 +118,25 @@ if(empty($bus_id)) {
                 </div>
 
                 <div class="col-md-8">
+                    '.($attendancePage ? '
+                    <div class="text-right mb-2">
+                        <a class="btn btn-outline-success" href="'.$baseUrl.'bus/'.$bus_id.'/attendance"><i class="fa fa-bus"></i> Take Attendance</a>
+                    </div>
+                    ' : '').'
                     <div class="card">
+                        '.($attendancePage ? '
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">Bus Attendance History</h4>
+                        </div>' : '').'
                         <div class="card-body">
-                            <div class="slim-scroll">
+                            '.($attendancePage ? '' :
+                            '<div class="slim-scroll">
                                 <div class="p-0 m-0">
                                     '.leave_comments_builder("bus", $bus_id, false).'
                                     <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$bus_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
                                     <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-outline-secondary btn-sm">Loading comments <i class="fa fa-spin fa-spinner"></i></button></div>
                                 </div>
-                            </div>
+                            </div>').'
                         </div>
                     </div>
                 </div>

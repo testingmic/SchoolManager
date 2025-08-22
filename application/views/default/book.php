@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser, $clientFeatures;
+global $myClass, $SITEURL, $defaultUser, $clientFeatures, $defaultCurrency;
 
 // initial variables
 $appName = $myClass->appName;
@@ -99,7 +99,7 @@ if(!empty($item_id)) {
                         <div class="author-box-center">
                             '.(!empty($data->book_image) ? 
                             '<div class="text-center flex items-center justify-center">
-                                <img alt="image" src="'.$baseUrl.''.$data->book_image.'" class="profile-picture">
+                                <img alt="image" src="'.$baseUrl.''.$data->book_image.'" class="item-picture">
                             </div>' : '').'
                             <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->title.'</div>
                         </div>
@@ -107,17 +107,17 @@ if(!empty($item_id)) {
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <h4>Description</h4>
+                        <h4 class="mb-0">Description</h4>
                     </div>
-                    <div class="card-body pt-0">
-                        <div class="py-3 pt-0">
+                    <div class="card-body">
+                        <div class="pt-0">
                             '.($data->description ? $data->description : "-").'
                         </div>
                     </div>
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <h4>Book Details</h4>
+                        <h4 class="mb-0">Book Details</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">
                         <div class="py-3 pt-0">
@@ -132,6 +132,10 @@ if(!empty($item_id)) {
                             <p class="clearfix">
                                 <span class="float-left">Department</span>
                                 <span class="float-right text-muted">'.($data->department_name ?? null).'</span>
+                            </p>
+                            <p class="clearfix">
+                                <span class="float-left">Price</span>
+                                <span class="float-right text-muted">'.($defaultCurrency ?? null).' '.number_format($data->price ?? 0, 2).'</span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Code</span>
@@ -162,7 +166,7 @@ if(!empty($item_id)) {
                 </div>
             </div>
             <div class="col-12 col-md-12 col-lg-8">
-                <div class="card">
+                <div class="card stick_to_top">
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                         <li class="nav-item">

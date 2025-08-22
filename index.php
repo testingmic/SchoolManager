@@ -52,7 +52,7 @@ $myClass = load_class('myschoolgh', 'models');
 $noticeClass = load_class('notification', 'controllers');
 $accessObject = load_class('accesslevel', 'controllers');
 
-global $isSupportPreviewMode, $isSupport;
+global $isSupportPreviewMode, $isSupport, $defaultCurrency;
 
 // if the session is set
 if(!empty($session->userId) && empty($argv)) {

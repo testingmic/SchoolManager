@@ -1043,8 +1043,8 @@ class Forms extends Myschoolgh {
                         $caption = "
                         <div class=\"file_caption text-left\">
                             <span {$preview_link}><strong>{$eachFile->name}</strong></span>
-                            <span class=\"text-muted tx-11\">({$eachFile->size})</span>
-                            <br><strong class=\"mt-2\"><i class=\"fa fa-calendar\"></i> ".date("jS F Y", strtotime($eachFile->datetime))."</strong>
+                            <div><span class=\"tx-11\"><i class=\"fa fa-file-alt\"></i> Size: {$eachFile->size}</span></div>
+                            <div><span class=\"mt-2\"><i class=\"fa fa-calendar\"></i> ".date("jS F Y", strtotime($eachFile->datetime))."</span></div>
                         </div>";
 
                         $view_option = $show_view ? "<button onclick=\"return load('{$show_view}/{$record_id}_{$eachFile->unique_id}');\" title=\"Click to view details of file\" class=\"btn btn-sm btn-primary\"><i class=\"fa fa-eye\"></i></button>" : "";
@@ -3235,58 +3235,86 @@ class Forms extends Myschoolgh {
         $html_content = '
         <form autocomplete="Off" enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/library/'.(isset($data->title) ? "update_book" : "add_book").'" method="POST" id="ajax-data-form-content">    
             <div class="row">
+                <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">Book Cover Image</h5></div>
                 <div class="col-lg-5 col-md-5">
                     <div class="form-group">
                         <label for="book_image">Cover Image</label>
                         <input accept=".jpg,.jpeg,.png,.gif" type="file" name="book_image" id="book_image" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-7 col-md-7"></div>
-                <div class="col-md-6">
+                <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">Book Details</h5></div>
+                <div class="col-md-12">
                     <div class="form-group">
-                        <label for="">BOOK TITLE <span class="required">*</span></label>
+                        <label for="">Book Title <span class="required">*</span></label>
                         <input type="text" placeholder="Book Title" value="'.($data->title ?? null).'" class="form-control" name="title">
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="form-group">
                         <label for="">ISBN <span class="required">*</span></label>
                         <input type="text" style="text-transform:uppercase" placeholder="ISBN" value="'.($data->isbn ?? null).'" class="form-control" name="isbn">
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="form-group">
-                        <label for="">CODE</label>
-                        <input type="text" style="text-transform:uppercase" placeholder="Book Code" value="'.($data->code ?? null).'" class="form-control" name="code">
+                        <label for="">Book Collection</label>
+                        <select name="category_id" data-width="100%" id="category" class="form-control category selectpicker">
+                            <option value="">Please Select</option>';
+                            foreach($this->pushQuery("id, name", "books_type", "status='1' AND client_id='{$data->clientId}'") as $each) {
+                                $html_content .= "<option ".(isset($data->category_id) && ($each->id == $data->category_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $html_content .= '
+                        </select>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group">
-                        <label for="">AUTHOR <span class="required">*</span></label>
+                        <label for="">Book Code</label>
+                        <input type="text" placeholder="Book Code" value="'.($data->code ?? null).'" class="form-control" name="code">
+                    </div>
+                </div>
+                <div class="col-md-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">Other Information</h5></div>
+                <div class="col-md-12 mt-1">
+                    <div class="form-group">
                         <input type="text" placeholder="Book Author" value="'.($data->author ?? null).'" class="form-control" name="author">
+                        <div class="text-muted text-italic">Separate authors with a comma.</div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
-                        <label for="">RACK NO.</label>
+                        <label for="">Publish Date</label>
+                        <input type="text" placeholder="Publish Date" value="'.($data->publish_date ?? null).'" class="form-control datepicker" name="publish_date">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">Rack Number</label>
                         <input type="text" placeholder="Rack Number" value="'.($data->rack_no ?? null).'" class="form-control" name="rack_no">
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
-                        <label for="">ROW NO.</label>
+                        <label for="">Row Number</label>
                         <input type="text" name="row_no" placeholder="Row Number" value="'.($data->row_no ?? null).'" class="form-control">
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-group">
-                        <label for="">QUANTITY <span class="required">*</span></label>
+                        <label for="">Quantity <span class="required">*</span></label>
                         <input type="number" '.(isset($data->quantity) ? "disabled" : "").' max="200" placeholder="Quantity Available" value="'.($data->quantity ?? null).'" name="quantity" class="form-control">
                     </div>
                 </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="">Publisher</label>
+                        <input type="text" placeholder="Publisher" value="'.($data->publisher ?? null).'" class="form-control" name="publisher">
+                        <div class="text-muted text-italic">Separate publishers with a comma.</div>
+                    </div>
+                </div>
+                <div class="col-md-12 mb-1"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">Classroom & Description</h5></div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        <label for="">DEPARTMENT</label>
+                        <label for="">Department</label>
                         <select id="department_id" data-width="100%" class="form-control selectpicker" name="department_id">
                             <option value="">Please Select</option>';
                             foreach($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$data->clientId}'") as $each) {
@@ -3297,7 +3325,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        <label for="">CLASS</label>
+                        <label for="">Class</label>
                         <select name="class_id" data-width="100%" id="class_id" class="form-control programme selectpicker">
                             <option value="">Please Select</option>';
                             foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$data->clientId}'") as $each) {
@@ -3307,21 +3335,15 @@ class Forms extends Myschoolgh {
                         </select>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-group">
-                        <label for="">BOOK CATEGORY</label>
-                        <select name="category_id" data-width="100%" id="category" class="form-control category selectpicker">
-                            <option value="">Please Select</option>';
-                            foreach($this->pushQuery("id, name", "books_type", "status='1' AND client_id='{$data->clientId}'") as $each) {
-                                $html_content .= "<option ".(isset($data->category_id) && ($each->id == $data->category_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
-                            }
-                        $html_content .= '
-                        </select>
+                        <label for="">Price <span class="required">*</span></label>
+                        <input type="number" '.(isset($data->price) ? "disabled" : "").' max="200" placeholder="Price" value="'.($data->price ?? null).'" name="price" class="form-control">
                     </div>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-12">
                     <div class="form-group">
-                        <label for="">DESCRIPTION</label>
+                        <label for="">Description</label>
                         <textarea style="height:70px" name="description" placeholder="Book Description" id="description" cols="30" rows="10" class="form-control description">'.($data->description ?? null).'</textarea>
                     </div>
                 </div>
@@ -3347,13 +3369,24 @@ class Forms extends Myschoolgh {
         $html_content = '
         <form autocomplete="Off" class="ajax-data-form" action="'.$this->baseUrl.'api/library/'.(isset($data->name) ? "update_category" : "add_category").'" method="POST" id="ajax-data-form-content">    
             <div class="row">
-                <div class="col-md-8">
+                <div class="col-lg-6 col-md-6">
                     <div class="form-group">
-                        <label for="">CATEGORY NAME <span class="required">*</span></label>
-                        <input type="text" placeholder="Category Name" value="'.($data->name ?? null).'" class="form-control" name="name">
+                        <label for="">Collection Name <span class="required">*</span></label>
+                        <input type="text" placeholder="Collection Name" value="'.($data->name ?? null).'" class="form-control" name="name">
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-lg-3 col-md-3">
+                    <div class="form-group">
+                        <label for="">Language</label>
+                        <select id="language" data-width="100%" class="form-control selectpicker" name="language">
+                            <option value="">Please Select</option>';
+                            foreach(render_language_select() as $key => $value) {
+                                $html_content .= "<option ".(isset($data->language) && ($key == $data->language) || ($key == "en") ? "selected" : null)." value=\"{$key}\">{$value}</option>";                            
+                            }
+                        $html_content .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3">
                     <div class="form-group">
                         <label for="">DEPARTMENT</label>
                         <select id="department_id" data-width="100%" class="form-control selectpicker" name="department_id">
@@ -3366,7 +3399,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-md-12">
                     <div class="form-group">
-                        <label for="">DESCRIPTION</label>
+                        <label for="">Description</label>
                         <textarea style="height:70px" name="description" placeholder="Book Description" id="description" cols="30" rows="10" class="form-control description">'.($data->description ?? null).'</textarea>
                     </div>
                 </div>
@@ -3453,7 +3486,7 @@ class Forms extends Myschoolgh {
             // set the html_content to display
             $html_content .= '
                 <div class="form-group">
-                    <label>Book Category</label>
+                    <label>Book Collection</label>
                     <select name="category_id" data-width="100%" id="category_id" class="form-control selectpicker">
                         <option value="">Please Select</option>';
                         foreach($category_list as $each) {
@@ -3479,7 +3512,7 @@ class Forms extends Myschoolgh {
             // set the html_content to display
             $html_content .= '
                 <div class="form-group">
-                    <label>User Role</label>
+                    <label>User Role <span class="required">*</span></label>
                     <select data-width="100%" name="user_role" id="user_role" class="form-control selectpicker">
                         <option value="">Please Select</option>';
                         foreach($this->all_user_roles_list as $key => $value) {
@@ -3494,9 +3527,15 @@ class Forms extends Myschoolgh {
                         <option value="">Please Select</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Return Date <span class="required">*</span></label>
-                    <input type="text" data-mindate="'.date("Y-m-d").'" data-maxdate="'.date("Y-m-d", strtotime("+3 month")).'" name="return_date" id="return_date" value="'.($data->return_date ?? date("Y-m-d", strtotime("+1 week"))).'" class="form-control datepicker">
+                <div class="row mb-3">
+                    <div class="col-lg-6">
+                        <label>Return Date <span class="required">*</span></label>
+                        <input type="text" data-mindate="'.date("Y-m-d").'" data-maxdate="'.date("Y-m-d", strtotime("+3 month")).'" name="return_date" id="return_date" value="'.($data->return_date ?? date("Y-m-d", strtotime("+1 week"))).'" class="form-control datepicker">
+                    </div>
+                    <div class="col-lg-6">
+                        <label>Amount Paid</label>
+                        <input type="number" value="'.($data->amount_paid ?? "").'" name="amount_paid" id="amount_paid" class="form-control">
+                    </div>
                 </div>
                 <div class="form-group">
                     <div class="row">
