@@ -129,7 +129,23 @@ if(empty($bus_id)) {
                             <h4 class="card-title mb-0">Bus Attendance History</h4>
                         </div>' : '').'
                         <div class="card-body">
-                            '.($attendancePage ? '' :
+                            '.($attendancePage ? '
+                            <div class="table-responsive">
+                                <table data-empty="" class="table table-sm table-bordered table-striped datatable">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%" class="text-center">#</th>
+                                            <th>Driver</th>
+                                            <th>Date & Time</th>
+                                            <th>Teachers Count</th>
+                                            <th>Students Count</th>
+                                            <th>Details</th>
+                                            <th align="center" width="13%"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>' :
                             '<div class="slim-scroll">
                                 <div class="p-0 m-0">
                                     '.leave_comments_builder("bus", $bus_id, false).'

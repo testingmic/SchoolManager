@@ -218,8 +218,6 @@ if(empty($user_id)) {
             $role_permission = $role_permission[0]->user_permissions ?? [];
             $role_permission = !empty($role_permission) ? json_decode($role_permission, true) : [];
 
-            // print_r($role_permission);exit;
-
             // convert to an array
             $user_permission = !empty($data->user_permissions) && !is_array($data->user_permissions) ? json_decode($data->user_permissions, true)["permissions"] : $data->user_permissions["permissions"];
             
