@@ -6,7 +6,7 @@ global $defaultUser, $isSupport, $usersClass, $defaultClientData;
 $pages_content = "<style>@page { margin: 5px; } body { margin: 5px; } .page_break { page-break-before: always; } div.page_break+div.page_break { page-break-before: always; }</style>";
 
 // set no memory limit
-error_reporting(1);
+error_reporting(0);
 ini_set("memory_limit", "-1");
 
 // reference the Dompdf namespace
