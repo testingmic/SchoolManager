@@ -1,0 +1,9 @@
+{
+    "name": "testingmic/ipaddress",
+    "description": "Get the current visitor IP Address and determine the country, city, latitude, longitude, and ISP",
+    "autoload": {
+        "psr-4": {
+          "Testingmic\\": "src/"
+        }
+    }
+}
