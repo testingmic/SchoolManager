@@ -23,8 +23,9 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code User Verification - School Manager</title>
+    <title>Attendance Taker - <?= $appName ?></title>
     <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
+    <link rel="apple-touch-icon" href="<?= $baseUrl ?>assets/img/favicon.ico">
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="theme-color" content="#2196F3">
@@ -190,10 +191,14 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                                 </div>
                             </div>
                             
-                            <div class="mt-6 space-y-3">
-                                <button id="confirmBtn" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
-                                    <i class="fas fa-check"></i>
-                                    <span>Log Attendance</span>
+                            <div class="mt-6 grid grid-cols-2 gap-4">
+                                <button id="checkInBtn" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
+                                    <i class="fas fa-user-clock"></i>
+                                    <span>Check In</span>
+                                </button>
+                                <button id="checkoutOutBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Check Out</span>
                                 </button>
                             </div>
                         </div>
@@ -356,19 +361,15 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                     startScanner();
                 }
 
-                // Event listeners
-                document.getElementById('startBtn').addEventListener('click', startScanner);
-                document.getElementById('stopBtn').addEventListener('click', stopScanner);
-                
-                document.getElementById('confirmBtn').addEventListener('click', async () => {
+                async function saveAttendance(action) {
                     try {
                         // Simulate confirmation API call
                         const userId = document.getElementById('scannedId').textContent;
                         const response = await $.post(`${baseUrl}api/qr/save`, {
                             user_id: userId,
                             request: logType,
+                            action: action,
                             bus_id: busId,
-                            action: 'save',
                             client_id: clientId
                         });
                         
@@ -381,6 +382,18 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                         console.error('Verification error:', error);
                         showError('Verification failed. Please try again.');
                     }
+                }
+
+                // Event listeners
+                document.getElementById('startBtn').addEventListener('click', startScanner);
+                document.getElementById('stopBtn').addEventListener('click', stopScanner);
+                
+                document.getElementById('checkInBtn').addEventListener('click', async () => {
+                    saveAttendance('checkin');
+                });
+
+                document.getElementById('checkoutOutBtn').addEventListener('click', async () => {
+                    saveAttendance('checkout');
                 });
                 
                 document.getElementById('newScanBtn').addEventListener('click', resetForNewScan);

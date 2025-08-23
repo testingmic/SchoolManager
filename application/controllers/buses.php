@@ -380,11 +380,12 @@ class Buses extends Myschoolgh {
         // set the date logged and bus id
         $date_logged = date("Y-m-d");
         $bus_id = $params->bus_id ?? null;
+		$action = $params->action ?? "checkin";
 
         // log the bus attendance for the user
         $this->db->query("INSERT INTO bus_attendance 
-            (client_id, user_id, bus_id, date_logged, request) VALUES 
-            ('{$params->clientId}', '{$user->id}', '{$bus_id}', '{$date_logged}', '{$params->request}')"
+            (client_id, user_id, bus_id, date_logged, request, action) VALUES 
+            ('{$params->clientId}', '{$user->id}', '{$bus_id}', '{$date_logged}', '{$params->request}', '{$action}')"
         );
 
         return [
