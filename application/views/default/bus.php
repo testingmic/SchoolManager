@@ -120,7 +120,7 @@ if(empty($bus_id)) {
                 <div class="col-md-8">
                     '.($attendancePage ? '
                     <div class="text-right mb-2">
-                        <a class="btn btn-outline-success" href="'.$baseUrl.'bus/'.$bus_id.'/attendance"><i class="fa fa-bus"></i> Take Attendance</a>
+                        <a class="btn btn-outline-success" target="_blank" href="'.$baseUrl.'qr_code/?request=bus&bus_id='.$bus_id.'&client='.$clientId.'"><i class="fa fa-bus"></i> Take Attendance</a>
                     </div>
                     ' : '').'
                     <div class="card">

@@ -316,5 +316,116 @@ class Buses extends Myschoolgh {
 
 	}
 
+	/**
+     * Lookup the user by the user id
+     * 
+     * @param Object $params
+     * 
+     * @return Array
+     */
+    public function user_lookup($params = null) {
+
+        if(empty($params->user_id)) {
+            return ["code" => 400, "data" => "User ID is required"];
+        }
+
+        $explodedUserId = explode(":", $params->user_id);
+
+        // search for the user
+        $users = $this->pushQuery(
+            "u.id, u.name, u.gender, u.class_id, u.day_boarder, u.unique_id, u.date_of_birth, u.user_type, u.enrollment_date, c.name AS class_name", 
+            "users u LEFT JOIN classes c ON u.class_id=c.id", 
+            "u.client_id='{$params->clientId}' AND u.id='{$explodedUserId[1]}' AND u.user_status='active'"
+        );
+
+        if(empty($users)) {
+            return ["code" => 404, "data" => "User not found"];
+        }
+
+        return [
+            "code" => 200,
+            "data" => $users[0]
+        ];
+    }
+
+    /**
+     * Save the attendance
+     * 
+     * @param Object $params
+     * 
+     * @return Array
+     */
+    public function log_attendance($params = null) {
+
+        // check if the request is empty
+        if(empty($params->request)) {
+            return ["code" => 400, "data" => "Request is required"];
+        }
+
+        // check if the request is valid
+        if(!in_array($params->request, ["bus", "daily"])) {
+            return ["code" => 400, "data" => "Invalid request"];
+        }
+
+        // lookup the user
+        $user = $this->user_lookup($params);
+
+        if($user['code'] == 404) {
+            return ["code" => 404, "data" => "User not found"];
+        }
+
+        // get the user data
+        $user = $user['data'];
+
+        // set the date logged and bus id
+        $date_logged = date("Y-m-d");
+        $bus_id = $params->bus_id ?? null;
+
+        // log the bus attendance for the user
+        $this->db->query("INSERT INTO bus_attendance 
+            (client_id, user_id, bus_id, date_logged, request) VALUES 
+            ('{$params->clientId}', '{$user->id}', '{$bus_id}', '{$date_logged}', '{$params->request}')"
+        );
+
+        return [
+            "code" => 200,
+            "data" => "Attendance logged successfully"
+        ];
+    }
+
+	/**
+     * Get the attendance list
+     * 
+     * @param Object $params
+     * 
+     * @return Array
+     */
+	public function attendance_list($params = null) {
+		
+		// append some filters to apply to the query
+		$query = !empty($params->user_id) ? " AND a.user_id IN ({$params->user_id})" : "";
+		$query .= !empty($params->bus_id) ? " AND a.bus_id IN ({$params->bus_id})" : "";
+		$query .= !empty($params->date_logged) ? " AND a.date_logged = '{$params->date_logged}'" : "";
+		$query .= !empty($params->request) ? " AND a.request = '{$params->request}'" : "";
+
+		// get the list of users based on the request 
+		$stmt = $this->db->prepare("SELECT 
+				a.*, b.reg_number, u.name AS fullname, u.gender, u.day_boarder, u.unique_id, 
+				u.date_of_birth, u.user_type, b.brand, b.insurance_company, b.insurance_date
+			FROM bus_attendance a 
+			LEFT JOIN buses b ON a.bus_id = b.item_id
+			LEFT JOIN users u ON a.user_id = u.id
+			WHERE a.client_id='{$params->clientId}' {$query}");
+		$query = $stmt->execute();
+
+		$data = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+		return [
+			"code" => 200,
+			"data" => $data
+		];
+
+	}
+
 }
 ?>

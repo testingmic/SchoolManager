@@ -101,36 +101,15 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("CREATE TABLE IF NOT EXISTS `generated_cards` (
-			`id` INT(11) NOT NULL AUTO_INCREMENT,
-			`client_id` VARCHAR(16) NOT NULL,
-			`unique_id` VARCHAR(16) NOT NULL,
-			`user_id` VARCHAR(16) NOT NULL,
-			`name` VARCHAR(128) NOT NULL,
-			`user_type` VARCHAR(12) NOT NULL,
-			`gender` VARCHAR(12) NOT NULL,
-			`enrollment_date` DATE NULL DEFAULT NULL,
-			`issue_date` DATE NULL DEFAULT NULL,
-			`expiry_date` DATE NULL DEFAULT NULL,
-			`class_id` VARCHAR(16) NULL DEFAULT NULL,
-			`day_boarder` VARCHAR(12) NULL DEFAULT NULL,
-			`date_of_birth` DATE NULL DEFAULT NULL,
-			`created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			`last_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-			PRIMARY KEY (`id`),
-			INDEX `client_id` (`client_id`),
-			INDEX `user_id` (`user_id`),
-			INDEX `user_type` (`user_type`),
-			INDEX `class_id` (`class_id`),
-			INDEX `day_boarder` (`day_boarder`),
-			INDEX `unique_id` (`unique_id`)
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+		$fix[] = ("ALTER TABLE `bus_attendance` ADD `request` VARCHAR(16) NULL DEFAULT NULL AFTER `bus_id`;");
 
 		foreach($fix as $stmt) {
 			try {
-				$query = $this->db->prepare($stmt);
-				$query->execute();
-			} catch(PDOException $e) { }
+				// $query = $this->db->prepare($stmt);
+				// $query->execute();
+			} catch(PDOException $e) {
+				// print $e->getMessage();
+			}
 		}
 	}
 

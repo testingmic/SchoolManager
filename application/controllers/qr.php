@@ -62,27 +62,34 @@ class Qr extends Myschoolgh {
      * @return Array
      */
     public function lookup($params = null) {
+        // create a default object
+        $busObject = load_class("buses", "controllers");
+        return $busObject->user_lookup($params);
+    }
 
-        if(empty($params->user_id)) {
-            return ["code" => 400, "data" => "User ID is required"];
-        }
+    /**
+     * Get the attendance logs
+     * 
+     * @param Object $params
+     * 
+     * @return Array
+     */
+    public function logs($params = null) {
+        // create a default object
+        $busObject = load_class("buses", "controllers");
+        return $busObject->attendance_list($params);
+    }
 
-        $explodedUserId = explode(":", $params->user_id);
-
-        // search for the user
-        $users = $this->pushQuery(
-            "u.id, u.name, u.gender, u.class_id, u.day_boarder, u.unique_id, u.date_of_birth, u.user_type, u.enrollment_date, c.name AS class_name", 
-            "users u LEFT JOIN classes c ON u.class_id=c.id", 
-            "u.client_id='{$params->clientId}' AND u.id='{$explodedUserId[1]}' AND u.user_status='active'"
-        );
-
-        if(empty($users)) {
-            return ["code" => 404, "data" => "User not found"];
-        }
-
-        return [
-            "code" => 200,
-            "data" => $users[0]
-        ];
+    /**
+     * Save the attendance
+     * 
+     * @param Object $params
+     * 
+     * @return Array
+     */
+    public function save($params = null) {
+        // create a default object
+        $busObject = load_class("buses", "controllers");
+        return $busObject->log_attendance($params);
     }
 }

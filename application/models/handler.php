@@ -319,7 +319,7 @@ class Handler {
         $invalidToken = false;
 
         // check if the endpoint is not the auth endpoint
-        if(!in_array($endpoint, ["api/auth", "qr/lookup", "qr/scan", "qr/save"])) {
+        if(!in_array($endpoint, ["api/auth", "qr/lookup", "qr/logs", "qr/save"])) {
 
             // confirm that the access token parameter was parsed but did not pass the test
             // confirm if a valid api access key was parsed

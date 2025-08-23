@@ -41,8 +41,7 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                 }
             }
         }
-        const baseUrl = '<?= $baseUrl ?>';
-        const clientId = '<?= $clientId ?>';
+        const baseUrl = '<?= $baseUrl ?>', logType = '<?= $logType ?>', clientId = '<?= $clientId ?>', busId = '<?= $_GET['bus_id'] ?? null ?>';
         function returnToHome() {
             window.location.href = '<?= $baseUrl ?>dashboard';
         }
@@ -79,7 +78,7 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
     <?php if($clientState !== "Active") { ?>
         <?= render_qr_code_inactive($baseUrl) ?>
     <?php } else { ?>
-        <?php if(!in_array($logType, $acceptedLog)) { ?>
+        <?php if(!in_array($logType, array_values($acceptedLog))) { ?>
             <div class="max-w-4xl mx-auto px-4 pt-4">
                 <div class="grid lg:grid-cols-2 gap-4 py-6">
                     <div class="bg-white rounded-2xl shadow-xl p-10">
@@ -191,19 +190,19 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                             <div class="mt-6 space-y-3">
                                 <button id="confirmBtn" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
                                     <i class="fas fa-check"></i>
-                                    <span>Confirm & Verify</span>
+                                    <span>Log Attendance</span>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Success Message -->
-                        <div id="successMessage" class="bg-white rounded-2xl shadow-xl p-6 hidden">
+                        <div id="successMessage" class="bg-white mt-4 mb-4 rounded-2xl shadow-xl p-6 hidden">
                             <div class="text-center">
                                 <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <i class="fas fa-check-circle text-green-600 text-3xl"></i>
                                 </div>
-                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Verification Successful!</h3>
-                                <p class="text-gray-600 mb-4">User has been successfully verified and logged.</p>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Attendance Logged Successfully!</h3>
+                                <p class="text-gray-600 mb-4">User attendance has been successfully logged.</p>
                                 <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                                     <div class="flex items-center space-x-2 text-green-700">
                                         <i class="fas fa-clock"></i>
@@ -217,12 +216,12 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                         </div>
 
                         <!-- Error Message -->
-                        <div id="errorMessage" class="bg-white rounded-2xl shadow-xl p-6 hidden">
+                        <div id="errorMessage" class="bg-white mt-4 mb-4 rounded-2xl shadow-xl p-6 hidden">
                             <div class="text-center">
                                 <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <i class="fas fa-exclamation-triangle text-red-600 text-3xl"></i>
                                 </div>
-                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Verification Failed</h3>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Attendance Log Failed</h3>
                                 <p class="text-gray-600 mb-4" id="errorText"></p>
                                 <button id="retryBtn" class="bg-primary-500 hover:bg-primary-600 text-white py-2 px-6 rounded-lg transition-colors">
                                     Try Again
@@ -370,9 +369,11 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                     try {
                         // Simulate confirmation API call
                         const userId = document.getElementById('scannedId').textContent;
-                        const response = await $.post(`${baseUrl}api/qr/verify`, {
+                        const response = await $.post(`${baseUrl}api/qr/save`, {
                             user_id: userId,
-                            action: 'verify',
+                            request: logType,
+                            bus_id: busId,
+                            action: 'save',
                             client_id: clientId
                         });
                         
