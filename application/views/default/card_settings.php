@@ -46,7 +46,7 @@ $response->html = '
             </div>
         </div>
         <div class="row">
-            <div class="col-12 col-sm-12 col-lg-6 col-md-6">
+            <div class="col-12 col-sm-12 col-lg-5 col-md-4">
                 <div class="card">
                     <div class="card-header">
                         <h4 class="mb-0">ID Card Field Configuration</h4>
@@ -100,7 +100,7 @@ $response->html = '
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-12 col-lg-6 col-md-6">
+            <div class="col-12 col-sm-12 col-lg-7 col-md-8">
                 <div class="card">
                     <div class="card-header">
                         <h4 class="mb-0">Live Preview</h4>
