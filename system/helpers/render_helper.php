@@ -189,11 +189,156 @@ function admin_summary_cards($col = "col-lg-3 col-md-3", $append = false) {
 }
 
 /**
+ * Render the qr code inactive
+ * 
+ * @return string
+ */
+function render_qr_code_inactive($baseUrl = null) {
+    return "<div class='max-w-4xl mx-auto px-4 pt-4'>
+        <div id='no_record_found_container' class='backdrop-blur-xl mt-2 backdrop-saturate-150 rounded-2xl border border-solid-gray dark:bg-opacity-20 transition-all duration-300 p-6 bg-white dark:bg-gray-900/50 border-white/10 dark:border-gray-700/50'>
+            <div class='dark:text-gray-300'>
+                <div class='text-center py-6'>
+                    <div
+                        class='w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4'>
+                        <i class='fa fa-school text-3xl text-gray-500 dark:text-gray-400'></i>
+                    </div>
+                    <h4 class='text-lg font-25 font-medium text-gray-900 dark:text-white mb-2 text-red-500'>School Inactive</h4>
+                    <p class='text-gray-600 dark:text-gray-400 mb-6'>The school is currently inactive. Please contact the school administrator for more information.</p>
+                    
+                    <div class='mt-3'>
+                        <button class='w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-2 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2' onclick='return  returnToHome()'><i class='fa fa-arrow-left'></i> Go Back</button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>";
+}
+
+/**
+ * Render the qr code header
+ * 
+ * @return string
+ */
+function render_qr_code_header() {
+    return '<div class="bg-white shadow-sm border-b">
+        <div class="max-w-4xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-qrcode text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">QR Scanner</h1>
+                        <p class="text-gray-600">Scan QR codes for verification</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-gray-500">School Manager</div>
+                    <div class="text-xs text-gray-400" id="current-time"></div>
+                </div>
+            </div>
+        </div>
+    </div>';
+}
+
+/**
+ * Get the card found message
+ * 
+ * @return string
+ */
+function card_found_message($schoolName = null) {
+    return "This card is the property of {$schoolName}. If found, please return to the school address below or contact us immediately.";
+}
+
+/**
+ * Render the card preview
+ * 
+ * @param object $cardSettings
+ * @param object $defaultClientData
+ * 
+ * @return string
+ */
+function render_card_preview($cardSettings = null, $defaultClientData = null, $useData = false) {
+    
+    $start = $cardSettings->admission_date ?? "2020-01-01";
+    $end = $cardSettings->valid_until ?? "2025-01-01";
+
+    $html = '
+    <div class="card-preview" style="min-width: 300px;">
+        <div class="card-preview-body">
+            <div class="card-preview-front">
+                <div class="card-preview-front-header pb-0" style="width: 100%;">
+                    <div style="float: left; margin-right: 10px; width: 15%;">
+                        <img width="50" height="40" src="'.$defaultClientData->client_logo.'" alt="'.$defaultClientData->client_name.'">
+                    </div>
+                    <div class="text-center" style="float: left; width: 80%;">
+                        <h4 class="mb-0 font-weight-bold">'.$defaultClientData->client_name.'</h4>
+                        <p class="mb-0" data-item="card_type">Student Identification Card</p>
+                    </div>
+                </div>
+                <div class="card-preview-front-body" style="width:100%; float: left; background-color: '.($cardSettings->front_color ?? "#1E40AF").'; color: '.($cardSettings->front_text_color ?? "#ffffff").';">
+                    <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 10px;">
+                        '.($useData ? $cardSettings->name : "Emmanuel Obeng").'
+                        <div style="font-size: 13px; font-weight: normal;">
+                            '.($useData ? $cardSettings->user_id : "M000000001").'
+                        </div>
+                    </div>
+                    <div style="width: 100px; float: left; height: 100px; background-color: #fff; padding: 5px; border-radius: 7px;">
+                        <img src="'.$defaultClientData->baseUrl.'assets/img/avatar.png" style="border-radius: 7px;" width="100%">
+                    </div>
+                    <div style="margin-left: 30px;float: left; font-size: 13px;" data-item="front_card_details">
+                        <div><strong>Gender:</strong></div>
+                        <div><strong>Date of Birth:</strong></div>
+                        <div><strong>Admission:</strong></div>
+                        <div><strong>Student Type:</strong></div>
+                        '.($useData && !empty($cardSettings->house) ? "<div><strong>House:</strong></div>" : "").'
+                    </div>
+                    <div style="margin-left: 30px;float: left; font-size: 13px;" data-item="front_card_details">
+                        <div>'.($useData ? $cardSettings->gender : "Male").'</div>
+                        <div>'.($useData ? $cardSettings->dob : "1990-01-01").'</div>
+                        <div>'.($useData ? $cardSettings->admission_date : "2020-01-01").'</div>
+                        <div>'.($useData ? $cardSettings->student_type : "Regular").'</div>
+                        '.($useData && !empty($cardSettings->house) ? "<div>".$cardSettings->house."</div>" : "").'
+                    </div>
+                    <div style="width: 100px; text-align: center; font-size: 14px; float: right; background-color: #fff; color: #000; border-radius: 5px; padding: 5px; height: 100px;">
+                        QR Code
+                    </div>
+                </div>
+                <div style="text-align: center; font-size: 13px; padding-top: 5px; font-weight: normal;width: 100%; float: left;">
+                    Valid: '.date('M Y', strtotime($start)).' - '.date('M Y', strtotime($end)).'
+                </div>
+            </div>
+            
+            <div class="card-preview-back" style="background-color: '.($cardSettings->back_color ?? "#DC2626").'; color: '.($cardSettings->back_text_color ?? "#ffffff").';">
+                <div style="padding: 10px;">
+                    <div style="text-align: center; font-size: 20px; padding: 7px; min-height: 40px; line-height: 1.2; background: rgba(255, 255, 255, 0.1); width: 100%; float: left;">
+                        <div>'.($defaultClientData->client_name ?? "").'</div>
+                    </div>
+                    <div style="text-align: center; width: 100%; padding-top: 25px; padding-bottom: 25px; font-size: 15px;float: left;">
+                        <div style="width: 90%; margin: 0 auto;" data-item="back_found_message">
+                            '.($cardSettings->back_found_message ?? card_found_message($defaultClientData->client_name)).'
+                        </div>
+                    </div>
+                    <div style="text-align: center; font-size: 13px; border-radius: 10px; padding: 10px; background: rgba(255, 255, 255, 0.1); font-weight: normal;width: 100%; float: left;">
+                        <div>If Found, Contact:</div>
+                        <div data-item="contact_numbers">'.($defaultClientData->client_contact ?? "").'</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>';
+
+    return $html;
+}
+
+/**
  * Render the language select
  * 
  * @param object $data
  * 
- * @return string
+ * @return array
  */
 function render_language_select($data = null) {
     

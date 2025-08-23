@@ -1194,6 +1194,42 @@ h4 {
     border-radius: 5px;
 }
 
+.card-preview {
+    border: solid 1px #ccc;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: #f8fafc;
+    margin-bottom: 10px;
+    width: 85%;
+    margin: auto;
+}
+
+@media(max-width:768px){
+    .card-preview {
+        min-width: 400px !important;
+    }    
+}
+
+.card-preview-front,
+.card-preview-back {
+    min-height: 270px;
+    width: 100%;
+    background-color: #fff;
+    border-radius: 10px;
+    border: solid 1px #ccc;
+    margin-top: 10px;
+}
+
+.card-preview-front-header { 
+    padding: 10px;
+    text-align: center;
+    /* border-bottom: solid 2px #5b14d5; */
+}
+
+.card-preview-front-body, .card-preview-back-body {
+    padding: 10px;
+}
+
 .bus-img-container {
     min-height: 220px;
     max-height: 220px;

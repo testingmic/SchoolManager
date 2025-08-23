@@ -206,7 +206,6 @@ var initPlugins = () => {
     $(`div[class~="trix-button-row"] span[class~="trix-button-group--file-tools"], div[class~="trix-button-row"] span[class~="trix-button-group-spacer"]`).remove();
 }
 
-
 var complete_setup_process = () => {
     swal({
         title: "Complete Setup",

@@ -629,6 +629,11 @@ class Account extends Myschoolgh {
             $preference["billing"]["registration_code"] = strtoupper($preference["billing"]["registration_code"]);
         }
 
+        // if the id card is not empty
+        if(!empty($client_data->client_preferences->id_card)) {
+            $preference["id_card"] = $client_data->client_preferences->id_card;
+        }
+
         // unset the values
         unset($params->general["opening_days"]);
         unset($params->general["academics"]);
@@ -666,6 +671,35 @@ class Account extends Myschoolgh {
             return ["code" => 400, "data" => $e->getMessage()];
         }
 
+    }
+
+    public function update_card_settings(stdClass $params) {
+        // get the client data
+        $client_data = $this->iclient;
+        
+        $preference = $client_data->client_preferences;
+        $preference->id_card = [
+            'front_color' => $params->front_color,
+            'back_color' => $params->back_color,
+            'front_text_color' => $params->front_text_color,
+            'back_text_color' => $params->back_text_color,
+            'back_found_message' => $params->back_found_message
+        ];
+
+        try {
+
+            // run the update of the account information
+            $stmt = $this->db->prepare("UPDATE clients_accounts 
+                SET client_preferences	= ? ".(!empty($params->contact_numbers) ? ", client_contact='{$params->contact_numbers}'" : "")." WHERE client_id = ? LIMIT 1");
+            $stmt->execute([json_encode($preference), $params->clientId]);
+
+            // return success message
+            return ["code" => 200, "data" => "Card settings were successfully updated."];
+
+        } catch(PDOException $e) {
+            return ["code" => 400, "data" => $e->getMessage()];
+        }
+        
     }
 
     /**

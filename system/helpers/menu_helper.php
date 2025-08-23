@@ -290,6 +290,15 @@
             </li>
         <?php } ?>
     <?php } ?>
+    <?php if($accessObject->hasAccess("view", "id_cards")) { ?>
+        <li class="dropdown">
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-qrcode"></i><span>ID Cards Setup</span></a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link" href="<?= $baseUrl ?>card_generated">Generated Cards</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>card_settings">ID Card Settings</a></li>
+            </ul>
+        </li>
+    <?php } ?>
     <?php if(in_array("leave", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>leave" class="nav-link"><i class="far fa-check-square"></i><span>Leave Applications</span></a></li>
     <?php } ?>
