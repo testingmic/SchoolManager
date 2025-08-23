@@ -188,14 +188,6 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                                         <div class="font-medium" id="userClass"></div>
                                     </div>
                                 </div>
-                                
-                                <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                    <i class="fas fa-envelope text-gray-500 w-5"></i>
-                                    <div>
-                                        <div class="text-sm text-gray-500">Gender</div>
-                                        <div class="font-medium" id="userGender"></div>
-                                    </div>
-                                </div>
                             </div>
                             
                             <div class="mt-6 space-y-3">
@@ -213,7 +205,6 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                                     <i class="fas fa-check-circle text-green-600 text-3xl"></i>
                                 </div>
                                 <h3 class="text-xl font-semibold text-gray-900 mb-2">Attendance Logged Successfully!</h3>
-                                <p class="text-gray-600 mb-4">User attendance has been successfully logged.</p>
                                 <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                                     <div class="flex items-center space-x-2 text-green-700">
                                         <i class="fas fa-clock"></i>
@@ -270,6 +261,7 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                     html5QrcodeScanner.render(onScanSuccess, onScanError);
                     isScanning = true;
                     
+                    document.getElementById('successMessage').classList.add('hidden');
                     document.getElementById('startBtn').classList.add('hidden');
                     document.getElementById('stopBtn').classList.remove('hidden');
                 }
@@ -338,7 +330,7 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                     document.getElementById('userType').textContent = user.user_type || user.user_type || 'N/A';
                     document.getElementById('userId').textContent = user.unique_id || user.user_id || 'N/A';
                     document.getElementById('userClass').textContent = user.class_name || 'N/A';
-                    document.getElementById('userGender').textContent = user.gender || 'N/A';
+                    // document.getElementById('userGender').textContent = user.gender || 'N/A';
                 }
 
                 // Show error message
