@@ -300,8 +300,8 @@ if(!empty($buses_list)) {
                         </div>
                     </div>
 
-                    <div class="mt-4 text-center">
-                        <a id="goBack" style="max-width: 400px;" href="<?= $baseUrl ?>qr_code?request=<?= $logType ?>&client=<?= $clientId ?>" class="bg-blue-400 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 text-center transition-colors">
+                    <div class="mt-2 text-center mb-6">
+                        <a id="goBack" style="max-width: 400px;" href="<?= $baseUrl ?>qr_code?request=<?= $logType ?>&client=<?= $clientId ?>" class="bg-blue-400 hover:bg-blue-600 text-white px-4 py-4 rounded-lg flex items-center space-x-2 text-center transition-colors">
                             <i class="fas fa-arrow-left"></i>
                             <span>Go Back</span>
                         </a>
