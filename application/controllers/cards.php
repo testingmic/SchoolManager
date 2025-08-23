@@ -120,7 +120,7 @@ class Cards extends Myschoolgh {
             $qr_string = "{$type}:[{$userData->user_id}]/admissionId:[{$userData->unique_id}]/userType:[{$userData->user_type}]";
 
             // create new qr code object
-            $qrObject = load_class("Qr", "controllers");
+            $qrObject = load_class("qr", "controllers");
             $qr_code = $qrObject->generate(["filename" => "{$userData->user_id}.png", "client_id" => $userData->client_id, "text" => $qr_string]);
 
             // append some more variables to the card settings
