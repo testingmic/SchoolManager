@@ -234,7 +234,6 @@ function render_qr_code_header() {
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="text-sm text-gray-500">School Manager</div>
                     <div class="text-xs text-gray-400" id="current-time"></div>
                 </div>
             </div>
