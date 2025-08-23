@@ -6192,7 +6192,7 @@ class Forms extends Myschoolgh {
                     <div class="modal-body pb-0">
                         <div class="idcard-preview"></div>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer mt-0 pt-0">
                         <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
                     </div>
                 </div>

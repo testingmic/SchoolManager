@@ -98,7 +98,7 @@ $response->html = '
                     <a class="btn btn-sm btn-outline-primary" onclick="return id_card_modal();" href="#">
                         <i class="fa fa-plus"></i> Generate ID Cards
                     </a>
-                    <a class="btn btn-sm btn-outline-success" target="_blank" href="'.$baseUrl.'cards_preview">
+                    <a class="btn btn-sm btn-outline-success" target="_blank" href="'.$baseUrl.'download/idcard">
                         <i class="fa fa-qrcode"></i> Preview Cards
                     </a>
                 </div>

@@ -275,7 +275,7 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
             <div class="card-preview-front">
                 <div class="card-preview-front-header pb-0" style="width: 100%; padding-right: 10px; padding-left: 10px; padding-top: 5px;">
                     <div style="float: left; width: 15%;">
-                        <img width="50" height="40" src="'.$defaultClientData->client_logo.'" alt="'.$defaultClientData->client_name.'">
+                        <img width="50" height="40" src="'.($defaultClientData->baseUrl ?? "").''.$defaultClientData->client_logo.'" alt="'.$defaultClientData->client_name.'">
                     </div>
                     <div class="text-center" style="float: left; width: 85%;">
                         <div class="mb-0" style="font-size: 22px; margin-bottom: 0px; font-weight: bold;">'.$defaultClientData->client_name.'</div>

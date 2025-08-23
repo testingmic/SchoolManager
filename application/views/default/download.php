@@ -24,6 +24,12 @@ $file_name = "Test Document";
 // run this section if not a support user
 if(!$isSupport) {
     
+    // set the params
+    $param = (object) [
+        "clientId" => $defaultUser->client_id,
+        "client_data" => $defaultUser->client
+    ];
+
     /** check if the file to download has been parsed */
     if((isset($_GET["file"]) && !empty($_GET["file"])) || (isset($_GET["file_id"], $_GET["file_uid"]))) {
         
@@ -487,6 +493,24 @@ if(!$isSupport) {
         // get the user data to export
         $file_name = "Export_Student_Data.pdf";
         $pages_content = $usersClass->export($param);
+    }
+
+    elseif(confirm_url_id(1, "idcard")) {
+        $file_name = "ID_Card.pdf";
+        $param->download_list = true;
+
+        // $orientation = "portrait";
+
+        // set the parameters
+        foreach(['card_preview_id', 'class_id', 'user_type'] as $key) {
+            $param->{$key} = $_GET[$key] ?? null;
+        }
+
+        $pages_content = load_class("cards", "controllers")->preview($param);
+        $pages_content = $pages_content["data"]["cards_list"];
+
+        print_r($pages_content);
+        exit;
     }
 
 }

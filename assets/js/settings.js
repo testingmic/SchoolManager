@@ -35,7 +35,12 @@ var card_preview = (card_preview_id) => {
         if (response.code == 200) {
             $(`div[id="previewCardModal"]`).modal("show");
             let result = response.data.result;
-            $(`div[id="previewCardModal"] div[class="idcard-preview"]`).html(`${result.idcard}`);
+            $(`div[id="previewCardModal"] div[class="idcard-preview"]`).html(`
+                ${result.idcard}
+                <div class="text-center mt-3 border-top pt-2">
+                    <a href="${baseUrl}download/idcard/?card_preview_id=${card_preview_id}" target="_blank" class="btn btn-primary">Download ID Card</a>
+                </div>
+            `);
         }
     }).catch((error) => {
         console.log(error);

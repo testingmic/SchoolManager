@@ -26,6 +26,11 @@ class Qr {
             mkdir($root_dir, 0755, true);
         }
 
+        // check if the file already exists
+        if(is_file($filename) && file_exists($filename)) {
+            return str_ireplace(ROOT_DIRECTORY, "", $filename);
+        }
+
         // create file if not already existing
         if (!is_file($filename) || !file_exists($filename)) {
             $file = fopen($filename, 'w');

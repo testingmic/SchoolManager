@@ -59,45 +59,109 @@ class Cards extends Myschoolgh {
      * @return Array
      */
     public function preview(stdClass $params) {
-        
 
+        // get the data
         $data = $this->list($params)['data'];
 
         if(empty($data)) {
             return ["code" => 400, "data" => "Sorry! No card found."];
         }
 
-        $cardSettings = $this->iclient->client_preferences->id_card ?? [];
-        $defaultClientData = $this->iclient;
+        $clientData = !empty($this->iclient) ? $this->iclient : $params->client_data;
+        $defaultClientData = $clientData;
 
         // set the base url for the client
         $defaultClientData->baseUrl = $this->baseUrl;
 
+        $cards_list = "
+        <style>
+        .card-preview-front,
+        .card-preview-back {
+            min-height: 275px;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 10px;
+            border: solid 1px #ccc;
+            margin-top: 10px;
+        }
+        .card-preview-front-header { 
+            text-align: center;
+        }
+        .card-preview-front-body, .card-preview-back-body {
+            padding: 10px;
+        }
+        </style>
+        <table border='0' width='100%' style='border:solid 1px #dee2e6'>";
+
+        // boolean for download
+        $isPDF = !empty($params->download_list);
+
+        $curCount = 0;
+
         // get the first item in the array
-        $userData = $data[0];
+        foreach($data as $key => $userData) {
 
-        // get the type of the user
-        $type = $userData->user_type == "student" ? "studentId" : "employeeId";
+            $curCount += 1;
+            
+            if($isPDF && $curCount == 1) {
+                $cards_list .= "<tr>";
+            }
 
-        $qr_string = "{$type}:[{$userData->user_id}]/admissionId:[{$userData->unique_id}]/userType:[{$userData->user_type}]";
+            if($isPDF) {
+                $cards_list .= "<td style='padding:7px;border:solid 1px #dee2e6;'>";
+            }
 
-        // create new qr code object
-        $qrObject = load_class("Qr", "controllers");
-        $qr_code = $qrObject->generate(["filename" => "{$userData->user_id}.png", "client_id" => $userData->client_id, "text" => $qr_string]);
+            // reset the card settings
+            $cardSettings = $clientData->client_preferences->id_card ?? [];
 
-        // append some more variables to the card settings
-        foreach($userData as $key => $value) {
-            $cardSettings->{$key} = $value;
+            // get the type of the user
+            $type = $userData->user_type == "student" ? "studentId" : "employeeId";
+
+            $qr_string = "{$type}:[{$userData->user_id}]/admissionId:[{$userData->unique_id}]/userType:[{$userData->user_type}]";
+
+            // create new qr code object
+            $qrObject = load_class("Qr", "controllers");
+            $qr_code = $qrObject->generate(["filename" => "{$userData->user_id}.png", "client_id" => $userData->client_id, "text" => $qr_string]);
+
+            // append some more variables to the card settings
+            foreach($userData as $key => $value) {
+                $cardSettings->{$key} = $value;
+            }
+
+            $cardSettings->qr_code = rtrim($this->baseUrl, "/") . $qr_code;
+
+            // if the user wants to download the list, return the data
+            if(!$isPDF) {
+                return [
+                    "code" => 200,
+                    "data" => [
+                        "user" => $userData,
+                        "idcard" => render_card_preview($cardSettings, $defaultClientData, true),
+                        "qr_code" => $cardSettings->qr_code
+                    ]
+                ];
+            }
+
+            $cards_list .= render_card_preview($cardSettings, $defaultClientData, true);
+
+            if($isPDF) {
+                $cards_list .= "</td>";
+            }
+            
+            if($isPDF && $curCount == 3) {
+                $cards_list .= "</tr>";
+                $curCount = 0;
+            }
+
         }
 
-        $cardSettings->qr_code = rtrim($this->baseUrl, "/") . $qr_code;
+        $cards_list .= "</table>";
 
         return [
             "code" => 200,
             "data" => [
-                "user" => $userData,
-                "idcard" => render_card_preview($cardSettings, $defaultClientData, true),
-                "qr_code" => $cardSettings->qr_code
+                "cards_list" => $cards_list,
+                "userData" => $data
             ]
         ];
 
@@ -123,7 +187,7 @@ class Cards extends Myschoolgh {
             $expiry_date = !empty($params->expiry_date) ? $params->expiry_date : date("Y-m-d", strtotime("+3 years"));
             
             // check if the expiry date is the same as the issue date
-            if(strtotime($params->expiry_date) == strtotime(date("Y-m-d"))) {
+            if(strtotime($expiry_date) == strtotime(date("Y-m-d"))) {
                 return ["code" => 400, "data" => "Sorry! The expiry date cannot be the same as today's date."];
             }
 
@@ -174,7 +238,7 @@ class Cards extends Myschoolgh {
                     expiry_date='{$expiry_date}',
                     class_id='{$user->class_id}', 
                     gender='{$user->gender}',
-                    enrollment_date='{$user->enrollment_date}',
+                    ".(!empty($user->enrollment_date) ? ", enrollment_date='{$user->enrollment_date}'" : "")."
                     day_boarder='{$user->day_boarder}', 
                     unique_id='{$user->unique_id}'
                     ".(!empty($user->date_of_birth) ? ", date_of_birth='{$user->date_of_birth}'" : "")."
@@ -192,7 +256,7 @@ class Cards extends Myschoolgh {
             ];
         
         } catch(PDOException $e) {
-            return $this->unexpected_error;
+            return $e->getMessage();
         } 
         
     }
