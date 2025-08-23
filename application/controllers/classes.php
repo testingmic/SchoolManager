@@ -156,6 +156,7 @@ class Classes extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
+            return $e->getMessage();
             return $this->unexpected_error;
         } 
 
@@ -201,17 +202,18 @@ class Classes extends Myschoolgh {
             // execute the statement
             $stmt = $this->db->prepare("
                 INSERT INTO classes SET client_id = ?, created_by = ?, rooms_list = ?, item_id = ?
-                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
-                ".(isset($params->class_code) ? ", class_code = '{$params->class_code}'" : null)."
-                ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
-                ".(isset($params->payment_module) ? ", payment_module = '{$params->payment_module}'" : null)."
-                ".(isset($params->class_teacher) ? ", class_teacher = '{$params->class_teacher}'" : null)."
-                ".(isset($params->class_size) ? ", class_size = '{$params->class_size}'" : null)."
-                ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
-                ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
-                ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
-                ".(isset($params->class_assistant) ? ", class_assistant = '{$params->class_assistant}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(!empty($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(!empty($params->class_code) ? ", class_code = '{$params->class_code}'" : null)."
+                ".(!empty($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
+                ".(!empty($params->payment_module) ? ", payment_module = '{$params->payment_module}'" : null)."
+                ".(!empty($params->class_teacher) ? ", class_teacher = '{$params->class_teacher}'" : null)."
+                ".(!empty($params->class_size) ? ", class_size = '{$params->class_size}'" : null)."
+                ".(!empty($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
+                ".(!empty($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                ".(!empty($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
+                ".(!empty($params->class_assistant) ? ", class_assistant = '{$params->class_assistant}'" : null)."
+                ".(!empty($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(!empty($params->graduation_level) ? ", is_graduation_level = '{$params->graduation_level}'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId, json_encode($room_ids), $item_id]);
             
@@ -312,6 +314,7 @@ class Classes extends Myschoolgh {
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->class_assistant) ? ", class_assistant = '{$params->class_assistant}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(!empty($params->graduation_level) ? ", is_graduation_level = '{$params->graduation_level}'" : null)."
                 WHERE id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([json_encode($room_ids), $params->class_id, $params->clientId]);
@@ -329,7 +332,7 @@ class Classes extends Myschoolgh {
             return $return;
 
         } catch(PDOException $e) {
-            return $this->unexpected_error;
+            return $e->getMessage();
         } 
         
     }

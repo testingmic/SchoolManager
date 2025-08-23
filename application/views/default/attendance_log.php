@@ -69,7 +69,7 @@ $academics = $defaultUser->client->client_preferences->academics;
 // ensure the school is not on vacation
 if($defaultUser->appPrefs->termEnded) {
     // found
-    $response->html = page_not_found("not_found", "Sorry! The Current Academic Term Ended on <strong>{$academics->term_ends}</strong>.");
+    $response->html = page_not_found("term_ended", "Sorry! The Current Academic Term Ended on <strong>{$academics->term_ends}</strong>.");
 } else {
     // convert to lowercase
     $client_id = strtolower($session->clientId);
@@ -107,7 +107,7 @@ if($defaultUser->appPrefs->termEnded) {
                     } else {
                      $response->html .= '
                      <div class="card">
-                        <div class="card-body pr-3">
+                        <div class="card-body">
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">

@@ -22,3 +22,31 @@ var update_card_preview = () => {
 
     return true;
 }
+
+var id_card_modal = () => {
+    $(`div[id="idCardModal"]`).modal("show");
+    $(`div[id="idCardModal"] h5[class="modal-title"]`).html(`Generate ID Cards`);
+    $(`div[id="idCardModal"] input, div[id="idCardModal"] textarea`).val("");
+}
+
+$(`select[id="user_category"]`).on("change", function() {
+    let value = $(this).val();
+    $(`div[id="attendance_log_list"]`).html(`<div class="text-center font-italic">${no_content_wrapper('Attendance', 'Sorry! The selected date is a weekend which has been excluded from recording attendance.')}</div>`);
+    if (value == "null") {
+        $(`div[class~="user_category_list"]`).addClass("hidden");
+    } else if (value == "student") {
+        $.get(`${baseUrl}api/classes/list?columns=a.id,a.item_id,a.name`).then((response) => {
+            if (response.code == 200) {
+                $(`div[class~="user_category_list"]`).removeClass("hidden");
+                $(`select[name="user_category_list"]`).find('option').remove().end();
+                $(`select[name="user_category_list"]`).append(`<option value="null" selected="selected">Select User</option>`);
+                $.each(response.data.result, (_, e) => {
+                    $(`select[name="user_category_list"]`).append(`<option data-item_id="${e.item_id}" value='${e.id}'>${e.name}</option>'`);
+                });
+            }
+        });
+    } else {
+        $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "flex" });
+        $(`div[class~="user_category_list"]`).addClass("hidden");
+    }
+});

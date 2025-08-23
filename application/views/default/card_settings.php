@@ -20,7 +20,7 @@ $pageTitle = "ID Card Settings";
 $response->title = $pageTitle;
 
 // end query if the user has no permissions
-if(!$accessObject->hasAccess("view", "id_cards")) {
+if(!$accessObject->hasAccess("settings", "id_cards")) {
     // unset the page additional information
     $response->page_programming = [];
     // permission denied information

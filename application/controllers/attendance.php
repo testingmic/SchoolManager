@@ -770,7 +770,7 @@ class Attendance extends Myschoolgh {
                     <label>Filter by Name or Registration ID</label>
                     <input type='search' autocomplete='Off' placeholder='Search by fullname' name='attendance_fullname' class='form-control'>
                 </div>
-                <div class='col-lg-3 col-md-4 pr-4 attendance_control_buttons'>
+                <div class='col-lg-3 col-md-4 attendance_control_buttons'>
                     <div class='form-group'>
                         <label class='font-bold'>Select for Everyone</label>
                         <select data-width='100%' class='form-control cursor selectpicker' id='select_for_all'>
@@ -784,7 +784,7 @@ class Attendance extends Myschoolgh {
                 </div>
             </div>" : "")."
             <div class='table-responsive'>
-            <table border='1' class='table table-bordered mt-0' style='width:98%'>
+            <table border='1' class='table table-bordered mt-0' style='width:100%'>
             <thead>
                 <th width='5%'>&#8470;</th>
                 <th width='25%'>Name</th>
@@ -794,7 +794,7 @@ class Attendance extends Myschoolgh {
             </table>
             </div>
             <div class='table-responsive'>
-            <table border='1' class='table table-bordered mt-2' style='width:98%' id='attendance_logger'>
+            <table border='1' class='table table-bordered mt-2' style='width:100%' id='attendance_logger'>
             <tbody>";
         
         }

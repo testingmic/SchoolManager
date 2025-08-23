@@ -321,7 +321,7 @@ load_helpers(['menu_helper']);
                         </a>
                     </div>
                     <ul class="sidebar-menu <?= !in_array("live_chat", $clientFeatures) ? "mb-5" : null; ?>">
-                        <li class="menu-header">Main</li>
+                        <li class="menu-header text-black">Main</li>
                         <li><a id="dashboard-menu" href="<?= $baseUrl ?>dashboard" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
                         <?php 
                         // set the menu function 

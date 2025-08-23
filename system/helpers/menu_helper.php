@@ -95,7 +95,7 @@
         <?php } ?>
     <?php } ?>
     <?php if($accessObject->hasAccess("view", "class")) { ?>
-    <li class="menu-header">Academics</li>
+    <li class="menu-header text-black">Academics</li>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Class & Departments</span></a>
         <ul class="dropdown-menu">
@@ -190,7 +190,7 @@
     <?php } ?>
 
     <?php if($accessObject->hasAccess("view", "fees")) { ?>
-    <li class="menu-header">Finance & Accounting</li>
+    <li class="menu-header text-black">Finance & Accounting</li>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-server"></i><span>Fees Setup</span></a>
         <ul class="dropdown-menu">
@@ -248,7 +248,7 @@
             <?php } ?>
         </ul>
     </li>
-    <li class="menu-header">Human Resource</li>
+    <li class="menu-header text-black">Human Resource</li>
     <?php if($accessObject->hasAccess("view", "payslip")) { ?>
         <?php if(in_array("payroll", $clientFeatures)) { ?>
             <li class="dropdown">
@@ -295,7 +295,9 @@
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-qrcode"></i><span>ID Cards Setup</span></a>
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>card_generated">Generated Cards</a></li>
-                <li><a class="nav-link" href="<?= $baseUrl ?>card_settings">ID Card Settings</a></li>
+                <?php if($accessObject->hasAccess("settings", "id_cards")) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>card_settings">ID Card Settings</a></li>
+                <?php } ?>
             </ul>
         </li>
     <?php } ?>
@@ -328,7 +330,7 @@
     <?php } ?>
     <?php if(in_array("exeats", $clientFeatures)) { ?>
         <?php if($isAdmin) { ?>
-            <li class="menu-header">Exeats Management</li>
+            <li class="menu-header text-black">Exeats Management</li>
             <li class="dropdown">
                 <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Manage Exeats</span></a>
                 <ul class="dropdown-menu">
@@ -340,7 +342,7 @@
             </li>
         <?php } ?>
     <?php } ?>
-    <li class="menu-header">Communication</li>
+    <li class="menu-header text-black">Communication</li>
     <?= communication_menu() ?>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <?php if($accessObject->hasAccess("update", "events")) { ?>
@@ -385,7 +387,7 @@
     <?php if(in_array("incidents", $clientFeatures)) { ?>
         <!-- <li><a class="nav-link" href="<?= $baseUrl ?>staff_weekly_reports"><i class="fas fa-weight"></i> Weekly Reports</a></li> -->
     <?php } ?>
-    <li class="menu-header">Academics</li>
+    <li class="menu-header text-black">Academics</li>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Subjects Manager</span></a>
         <ul class="dropdown-menu">
@@ -449,7 +451,7 @@
             </li>
         <?php } ?>
     <?php } ?>
-    <li class="menu-header">Finance / HR Management</li>
+    <li class="menu-header text-black">Finance / HR Management</li>
     <?php if(in_array("payroll", $clientFeatures)) { ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
@@ -461,7 +463,7 @@
     <?php if(in_array("leave", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>leave" class="nav-link"><i class="far fa-check-square"></i><span>Leave Applications</span></a></li>
     <?php } ?>
-    <li class="menu-header">Communication</li>
+    <li class="menu-header text-black">Communication</li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>
@@ -482,7 +484,7 @@
                 </ul>
             </li>
         <?php } ?>
-        <li class="menu-header">Academics</li>
+        <li class="menu-header text-black">Academics</li>
         <li class="dropdown">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Subjects Manager</span></a>
             <ul class="dropdown-menu">
@@ -512,9 +514,9 @@
         </li>
         <?php } ?>
     <?php } ?>
-    <li class="menu-header">Finance</li>
+    <li class="menu-header text-black">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
-    <li class="menu-header">Communication</li>
+    <li class="menu-header text-black">Communication</li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>
@@ -538,7 +540,7 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Logs</a></li>
         </ul>
     </li>                    
-    <li class="menu-header">Academics</li>
+    <li class="menu-header text-black">Academics</li>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Subjects Manager</span></a>
         <ul class="dropdown-menu">
@@ -586,11 +588,11 @@
         </li>
         <?php } ?>
     <?php } ?>
-    <li class="menu-header">Finance</li>
+    <li class="menu-header text-black">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
     <li><a href="<?= $baseUrl ?>fees_bill" class="nav-link"><i class="fas fa-money-bill"></i><span>This <?= $academicSession; ?> Bill</span></a></li>
     
-    <li class="menu-header">Communication</li>
+    <li class="menu-header text-black">Communication</li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>
@@ -618,7 +620,7 @@
         </ul>
     </li>
     <?php } ?>
-    <li class="menu-header">Finance / HR Management</li>
+    <li class="menu-header text-black">Finance / HR Management</li>
     <?php if(in_array("front_office", $clientFeatures)) { ?>
         <li class="dropdown">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-database"></i><span>Front Office</span></a>
@@ -659,7 +661,7 @@
             </li>
         <?php } ?>
     <?php } ?>
-    <li class="menu-header">Communication</li>
+    <li class="menu-header text-black">Communication</li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>

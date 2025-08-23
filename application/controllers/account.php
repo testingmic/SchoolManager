@@ -673,6 +673,13 @@ class Account extends Myschoolgh {
 
     }
 
+    /**
+     * Update Card Settings
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
     public function update_card_settings(stdClass $params) {
         // get the client data
         $client_data = $this->iclient;
@@ -821,6 +828,11 @@ class Account extends Myschoolgh {
         $_academic_term = $_academics["academic_term"];
         $_next_academic_year = $_academics["next_academic_year"];
         $_next_academic_term = $_academics["next_academic_term"];
+
+        // if the id card is not empty
+        if(!empty($client_data->client_preferences->id_card)) {
+            $preference["id_card"] = $client_data->client_preferences->id_card;
+        }
 
         // confirm if the next academic year and term is equal to the current academic year and term
         if("{$_next_academic_year}_{$_next_academic_term}" == "{$_academic_year}_{$_academic_term}") {

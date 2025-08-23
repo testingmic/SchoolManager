@@ -302,14 +302,18 @@ function save_form_data() {
  * @return String
  */
 function page_not_found($request = "not_found", $string = "The resource you trying to access for could not be found.") {
-    global $baseUrl, $_SERVER;
+    // global variables
+    global $baseUrl, $clientPrefs, $academics;
 
     $notFound = (bool) ($request == "not_found");
+    $termEnded = (bool) ($request == "term_ended");
     $featureDisabled = (bool) ($request == "feature_disabled");
-    $message = $notFound ? $string : ($featureDisabled ? "The feature you are trying to access is disabled. Please contact the administrator." : "You don't have permission to access the requested object. It is either read-protected or not readable on this server.");
-    $title = $notFound ? "Record Not Found" : ($featureDisabled ? "Feature Disabled" : "Permission Denied");
+    $message = $notFound ? $string : ($featureDisabled ? "The feature you are trying to access is disabled. Please contact the administrator." : 
+    ($termEnded ? "The current Academic Term ended on <strong>{$clientPrefs->academics->term_ends}</strong>. You need to update the academic calendar to reflect the new academic year and term." : 
+    "You don't have permission to access the requested object. It is either read-protected or not readable on this server."));
+    $title = $notFound ? "Record Not Found" : ($featureDisabled ? "Feature Disabled" : ($termEnded ? "Academic Term Ended" : "Permission Denied"));
 
-    return no_record_found($title, $message, $baseUrl."dashboard", "Home", true);
+    return no_record_found($title, $message, $baseUrl."dashboard", "Home", true, $termEnded ? "fa-clock" : null);
 }
 
 /**

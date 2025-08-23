@@ -110,6 +110,7 @@ class Myschoolgh extends Models {
 		$fix[] = ("ALTER TABLE `books` ADD COLUMN `publisher` VARCHAR(128) NULL DEFAULT NULL AFTER `description`;");
 		$fix[] = ("ALTER TABLE `books` ADD COLUMN `publish_date` DATE NULL DEFAULT NULL AFTER `publisher`;");
 		$fix[] = ("ALTER TABLE `books` ADD COLUMN `price` DECIMAL(10, 2) NULL DEFAULT NULL AFTER `publish_date`;");
+		$fix[] = ("ALTER TABLE `classes` ADD COLUMN `is_graduation_level` VARCHAR(12) NULL DEFAULT NULL");
 		
 		$fix[] = ("CREATE TABLE IF NOT EXISTS `exeats` (
 				`id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -138,8 +139,8 @@ class Myschoolgh extends Models {
 
 		foreach($fix as $stmt) {
 			try {
-				$query = $this->db->prepare($stmt);
-				$query->execute();
+				// $query = $this->db->prepare($stmt);
+				// $query->execute();
 			} catch(PDOException $e) {}
 		}
 	}

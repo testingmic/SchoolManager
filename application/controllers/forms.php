@@ -2703,7 +2703,7 @@ class Forms extends Myschoolgh {
         $response = '
         <form autocomplete="Off" class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/classes/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
-                <div class="col-lg-12"><h5>CLASS INFORMATION</h5></div>
+                <div class="col-lg-12 border-bottom border-primary text-primary mb-3"><h5>CLASS INFORMATION</h5></div>
                 <div class="col-lg-6 col-md-6">
                     <div class="form-group">
                         <label for="name">Class Name<span class="required">*</span></label>
@@ -2744,7 +2744,7 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="'.($isData ? "col-lg-4 col-md-4" : "col-lg-4 col-md-4").'">
+                <div class="'.($isData ? "col-lg-4 col-md-6" : "col-lg-4 col-md-6").'">
                     <div class="form-group">
                         <label for="department_id">Department ID</label>
                         <select data-width="100%" name="department_id" id="department_id" class="form-control selectpicker">
@@ -2755,7 +2755,7 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="'.($isData ? "col-lg-4 col-md-4" : "col-lg-4 col-md-4").'">
+                <div class="'.($isData ? "col-lg-4 col-md-6" : "col-lg-4 col-md-6").'">
                     <div class="form-group">
                         <label for="class_assistant">Class Prefect</label>
                         <select data-width="100%" name="class_assistant" id="class_assistant" class="form-control selectpicker">
@@ -2766,7 +2766,7 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="'.($isData ? "col-lg-4 col-md-4" : "col-lg-4 col-md-4").'">
+                <div class="'.($isData ? "col-lg-4 col-md-6" : "col-lg-4 col-md-6").'">
                     <div class="form-group">
                         <label for="payment_module">Payment Module</label>
                         <select data-width="100%" name="payment_module" id="payment_module" class="form-control selectpicker">';
@@ -2776,6 +2776,17 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
+                <div class="col-lg-12 border-bottom border-primary text-primary mb-3"><h5>CLASS STATUS</h5></div>
+                <div class="col-lg-4 col-md-4">
+                    <div class="form-group">
+                        <label class="text-black" for="graduation_level">Graduation Level</label>
+                        <select data-width="100%" name="graduation_level" id="graduation_level" class="form-control selectpicker ">
+                            <option '.($isData && $itemData?->is_graduation_level == "No" ? "selected" : null).' value="No">No</option>
+                            <option '.($isData && $itemData?->is_graduation_level == "Yes" ? "selected" : null).' value="Yes">Yes</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-12 border-bottom border-primary text-primary mb-3"><h5>DESCRIPTION</h5></div>
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
                         <input type="hidden" readonly name="class_id" id="class_id" value="'.($itemData->id ?? null).'">
@@ -6073,6 +6084,85 @@ class Forms extends Myschoolgh {
                                 <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
                                 <button data-form_id="ajax-data-form-content" type="button-submit" class="btn btn-primary">Save Record</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>';
+
+        return $html;
+
+    }
+
+    /**
+     * Generate the Bus Form
+     * 
+     * @param Object $defaultUser
+     * @param Array $permissions
+     * 
+     * @return string
+     */
+    public function id_card_form($defaultUser = null, $permissions = []) {
+
+        /** Set parameters for the data to attach */
+        $html = '<div data-backdrop="static" data-keyboard="false" class="modal fade" id="idCardModal">
+            <form method="POST" autocomplete="Off" action="'.$this->baseUrl.'api/account/generate_cards" class="ajax-data-form" id="ajax-data-form-content">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Allowance / Deduction Types</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body pb-0">
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="form-group">
+                                        <label for="user_category">Select Category <span class="required">*</span></label>
+                                        <select data-width="100%" class="form-control selectpicker" name="user_category" id="user_category">
+                                            <option value="null">Please select group</option>';
+                                            foreach($permissions[$defaultUser->user_type] as $key => $value) {
+                                                $html .= "<option value=\"{$key}\">{$value}</option>";
+                                            }
+                                        $html .= '</select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 form-group user_category_list hidden">
+                                    <label for="user_category_list">Select User</label>
+                                    <select data-width="100%" class="form-control selectpicker" name="user_category_list" id="user_category_list">
+                                        <option value="">Please select User</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-12 col-md-12">
+                                    <div class="row">
+                                        <div class="col-lg-6 col-md-6 form-group">
+                                            <label for="issue_date">Issued Date <span class="required">*</span></label>
+                                            <input type="text" class="form-control datepicker" value="'.date("Y-m-d").'" name="issue_date" id="issue_date">
+                                        </div>
+                                        <div class="col-lg-6 col-md-6 form-group">
+                                            <label for="expiry_date">Expiry Date</label>
+                                            <input type="text" class="form-control datepicker" data-maxdate="'.date("Y-m-d", strtotime("+3 years")).'" value="'.date("Y-m-d", strtotime("+3 years")).'" name="expiry_date" id="expiry_date">
+                                            <span class="text-muted text-small text-italic">If empty, card validity period will be set to expiry three years from the issued date if left blank.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12">
+                                    <div class="mt-2 p-3 border rounded-lg">
+                                        <ul class="ml-3 list-square">
+                                            <li>Students & Staff who already have an active ID card will be skipped</li>
+                                            <li>The default card validity period is set to expiry three years from the issued date.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="hidden" name="bus_id">
+                            <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
+                            <button data-form_id="ajax-data-form-content" type="button-submit" class="btn btn-primary">Generate Cards</button>
                         </div>
                     </div>
                 </div>

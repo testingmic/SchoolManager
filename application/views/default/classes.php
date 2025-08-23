@@ -73,7 +73,7 @@ foreach($item_list["data"] as $key => $each) {
     $classes .= "<td>{$each->class_size}</td>";
     $classes .= "<td>{$each->students_count}</td>";
     $classes .= "<td><span class='user_name'>".($each->class_teacher_info->name ?? null)."</span></td>";
-    $classes .= "<td><span class='user_name'>".($each->class_assistant_info->name ?? null)."</span></td>";
+    $classes .= "<td class='text-center'><span class='user_name' title='".($each->is_graduation_level == "Yes" ? "Yes" : "No")."'>".($each->is_graduation_level == "Yes" ? "<i class='fa fa-check-circle text-success'></i>" : "<i class='fa fa-times-circle text-danger'></i>")."</span></td>";
     $classes .= "<td align='center'>{$action}</td>";
     $classes .= "</tr>";
 }
@@ -103,7 +103,7 @@ $response->html = '
                                         <th>Class Size</th>
                                         <th width="15%">Students Count</th>
                                         <th>Class Teacher</th>
-                                        <th>Class Prefect</th>
+                                        <th class="text-center">Graduation Level</th>
                                         <th align="center" width="18%"></th>
                                     </tr>
                                 </thead>

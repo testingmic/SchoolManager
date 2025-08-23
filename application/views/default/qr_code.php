@@ -12,8 +12,6 @@ $baseUrl = $myClass->baseUrl;
 // get the client data
 $defaultClientData = !empty($defaultClientData) ? $defaultClientData : $myClass->client_session_data($clientId, false);
 $clientState = $defaultClientData->client_state ?? "Inactive";
-print_r($defaultClientData);
-exit;
 ?>
 <!DOCTYPE html>
 <html lang="en">
