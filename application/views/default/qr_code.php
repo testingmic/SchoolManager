@@ -8,6 +8,7 @@ $clientId = !empty($session->clientId) ? $session->clientId : (
 
 // base url
 $baseUrl = $myClass->baseUrl;
+$appName = $myClass->appName;
 
 // get the client data
 $defaultClientData = isset($defaultClientData->client_id) ? $defaultClientData : $myClass->client_session_data($clientId, false);
@@ -23,8 +24,14 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code User Verification - School Manager</title>
+    <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="theme-color" content="#2196F3">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="App - <?= $appName ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
         tailwind.config = {
