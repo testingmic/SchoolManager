@@ -47,6 +47,10 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
         }
     </script>
     <style>
+        #html5-qrcode-button-camera-permission {
+            color: #ff4000;
+            font-weight: bold;
+        }
         #html5-qrcode-button-camera-start {
             border: solid 1px #2563eb;
             padding: 5px;
