@@ -112,7 +112,7 @@ class Cards extends Myschoolgh {
             }
 
             // reset the card settings
-            $cardSettings = $clientData->client_preferences->id_card ?? [];
+            $cardSettings = $clientData->client_preferences->id_card ?? (object)[];
 
             // get the type of the user
             $type = $userData->user_type == "student" ? "studentId" : "employeeId";
