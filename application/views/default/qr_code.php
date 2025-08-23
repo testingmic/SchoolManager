@@ -238,14 +238,6 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                 let isScanning = false;
                 let recentScans = [];
 
-                // Update current time
-                function updateTime() {
-                    const now = new Date();
-                    document.getElementById('current-time').textContent = now.toLocaleTimeString();
-                }
-                setInterval(updateTime, 1000);
-                updateTime();
-
                 // Initialize scanner
                 function initializeScanner() {
                     const config = {
