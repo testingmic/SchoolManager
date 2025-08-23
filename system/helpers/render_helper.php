@@ -233,9 +233,6 @@ function render_qr_code_header() {
                         <p class="text-gray-600">Scan the Card QR Code to Capture Attendance</p>
                     </div>
                 </div>
-                <div class="text-right">
-                    <div class="text-xs text-gray-400" id="current-time"></div>
-                </div>
             </div>
         </div>
     </div>';
