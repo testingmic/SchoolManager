@@ -239,42 +239,88 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                 let html5QrcodeScanner = null;
                 let isScanning = false;
                 let recentScans = [];
+                let html5Qrcode = null;
 
                 // Initialize scanner
-                function initializeScanner() {
-                    const config = {
-                        fps: 10,
-                        qrbox: { width: 250, height: 250 },
-                        aspectRatio: 1.0,
-                        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-                    };
+                async function initializeScanner() {
+                    try {
+                        const devices = await Html5Qrcode.getCameras();
+                        if (devices && devices.length) {
+                            const config = {
+                                fps: 10,
+                                qrbox: { width: 250, height: 250 },
+                                aspectRatio: 1.0
+                            };
 
-                    html5QrcodeScanner = new Html5QrcodeScanner("reader", config);
+                            html5Qrcode = new Html5Qrcode("reader");
+                            const cameraId = devices[0].id;
+                            
+                            await html5Qrcode.start(
+                                cameraId, 
+                                config,
+                                onScanSuccess,
+                                onScanError
+                            );
+                            
+                            isScanning = true;
+                            document.getElementById('successMessage').classList.add('hidden');
+                            document.getElementById('startBtn').classList.add('hidden');
+                            document.getElementById('stopBtn').classList.remove('hidden');
+                        } else {
+                            showError('No camera devices found');
+                        }
+                    } catch (err) {
+                        if (err.toString().includes('Permission denied')) {
+                            showError('Camera permission was denied. Please grant camera access and try again.');
+                        } else {
+                            showError('Failed to initialize camera: ' + err);
+                        }
+                        console.error('Error initializing scanner:', err);
+                    }
                 }
 
                 // Start scanner
-                function startScanner() {
-                    if (!html5QrcodeScanner) {
-                        initializeScanner();
+                async function startScanner() {
+                    if (!html5Qrcode) {
+                        await initializeScanner();
+                    } else if (!isScanning) {
+                        try {
+                            const devices = await Html5Qrcode.getCameras();
+                            if (devices && devices.length) {
+                                await html5Qrcode.start(
+                                    devices[0].id,
+                                    {
+                                        fps: 10,
+                                        qrbox: { width: 250, height: 250 },
+                                        aspectRatio: 1.0
+                                    },
+                                    onScanSuccess,
+                                    onScanError
+                                );
+                                isScanning = true;
+                                document.getElementById('successMessage').classList.add('hidden');
+                                document.getElementById('startBtn').classList.add('hidden');
+                                document.getElementById('stopBtn').classList.remove('hidden');
+                            }
+                        } catch (err) {
+                            console.error('Error starting scanner:', err);
+                            showError('Failed to start camera: ' + err);
+                        }
                     }
-                    
-                    html5QrcodeScanner.render(onScanSuccess, onScanError);
-                    isScanning = true;
-                    
-                    document.getElementById('successMessage').classList.add('hidden');
-                    document.getElementById('startBtn').classList.add('hidden');
-                    document.getElementById('stopBtn').classList.remove('hidden');
                 }
 
                 // Stop scanner
-                function stopScanner() {
-                    if (html5QrcodeScanner && isScanning) {
-                        html5QrcodeScanner.clear();
-                        isScanning = false;
+                async function stopScanner() {
+                    if (html5Qrcode && isScanning) {
+                        try {
+                            await html5Qrcode.stop();
+                            isScanning = false;
+                            document.getElementById('startBtn').classList.remove('hidden');
+                            document.getElementById('stopBtn').classList.add('hidden');
+                        } catch (err) {
+                            console.error('Error stopping scanner:', err);
+                        }
                     }
-                    
-                    document.getElementById('startBtn').classList.remove('hidden');
-                    document.getElementById('stopBtn').classList.add('hidden');
                 }
 
                 // Handle successful scan
@@ -347,13 +393,13 @@ $acceptedLog = ["fa-bus" => "bus", "fa-ticket-alt" => "daily"];
                 }
 
                 // Reset scanner for new scan
-                function resetForNewScan() {
+                async function resetForNewScan() {
                     document.getElementById('userInfo').classList.add('hidden');
                     document.getElementById('successMessage').classList.add('hidden');
                     document.getElementById('errorMessage').classList.add('hidden');
                     document.getElementById('loadingState').classList.add('hidden');
                     
-                    startScanner();
+                    await startScanner();
                 }
 
                 // Event listeners
