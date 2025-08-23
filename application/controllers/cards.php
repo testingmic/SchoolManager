@@ -236,11 +236,11 @@ class Cards extends Myschoolgh {
                     user_type='{$user->user_type}',
                     issue_date='{$issue_date}',
                     expiry_date='{$expiry_date}',
-                    class_id='{$user->class_id}', 
+                    class_id='{$user->class_id}' 
                     ".(!empty($user->gender) ? ", gender='{$user->gender}'" : "")."
                     ".(!empty($user->enrollment_date) ? ", enrollment_date='{$user->enrollment_date}'" : "")."
                     ".(!empty($user->day_boarder) ? ", day_boarder='{$user->day_boarder}'" : "")."
-                    unique_id='{$user->unique_id}'
+                    ".(!empty($user->unique_id) ? ", unique_id='{$user->unique_id}'" : "")."
                     ".(!empty($user->date_of_birth) ? ", date_of_birth='{$user->date_of_birth}'" : "")."
                 ");
             }
