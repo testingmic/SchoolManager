@@ -3,7 +3,7 @@
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
 
-class Qr {
+class Qr extends Myschoolgh {
 
     /**
      * Generate the QR Code for use using the Google Charts Api
@@ -52,5 +52,37 @@ class Qr {
         file_put_contents($filename, $qrcode);
 
         return str_ireplace(ROOT_DIRECTORY, "", $filename);
+    }
+
+    /**
+     * Lookup the user by the user id
+     * 
+     * @param Object $params
+     * 
+     * @return Array
+     */
+    public function lookup($params = null) {
+
+        if(empty($params->user_id)) {
+            return ["code" => 400, "data" => "User ID is required"];
+        }
+
+        $explodedUserId = explode(":", $params->user_id);
+
+        // search for the user
+        $users = $this->pushQuery(
+            "u.id, u.name, u.gender, u.class_id, u.day_boarder, u.unique_id, u.date_of_birth, u.user_type, u.enrollment_date, c.name AS class_name", 
+            "users u LEFT JOIN classes c ON u.class_id=c.id", 
+            "u.client_id='{$params->clientId}' AND u.id='{$explodedUserId[1]}' AND u.user_status='active'"
+        );
+
+        if(empty($users)) {
+            return ["code" => 404, "data" => "User not found"];
+        }
+
+        return [
+            "code" => 200,
+            "data" => $users[0]
+        ];
     }
 }

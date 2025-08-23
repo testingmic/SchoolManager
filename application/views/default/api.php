@@ -152,9 +152,7 @@ if( !empty($paramChecker) && ($paramChecker['code'] !== 100)) {
     // print the json output
     echo json_encode($output);
 } else {
-    
     // finalize the handler
     $handler->finalize($Api, $params, $remote);
-
 }
 ?>

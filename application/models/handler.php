@@ -108,7 +108,6 @@ class Handler {
 
         // run the request
         $ApiRequest = $Api->requestHandler($param, $this->requestMethod);
-        
         // remove access token if in
         if(isset($params->access_token)) {
             unset($params->access_token);
@@ -320,7 +319,7 @@ class Handler {
         $invalidToken = false;
 
         // check if the endpoint is not the auth endpoint
-        if(!in_array($endpoint, ["api/auth"])) {
+        if(!in_array($endpoint, ["api/auth", "qr/lookup", "qr/scan", "qr/save"])) {
 
             // confirm that the access token parameter was parsed but did not pass the test
             // confirm if a valid api access key was parsed
@@ -402,8 +401,8 @@ class Handler {
         }
 
         // set the user id and client id
-        $this->userId = $defaultUser->user_id ?? ($defaultUser->userId ?? $session->userdata['userId']);
-        $this->clientId = $defaultUser->client_id ?? ($defaultUser->clientId ?? $session->userdata['clientId']);
+        $this->userId = $defaultUser->user_id ?? ($defaultUser->userId ?? ($session->userdata['userId'] ?? null));
+        $this->clientId = $defaultUser->client_id ?? ($defaultUser->clientId ?? ($session->userdata['clientId'] ?? $params->client_id));
 
         /* Usage of the Api Class */
         $Api = load_class('api', 'models', 

@@ -340,10 +340,12 @@ class Api {
         $params->userData = !empty($this->userData) ? (object) $this->userData : $this->defaultUser;
 
         // if the user type is empty
-        if(is_array($params->userData)) {
-            $params->userData['user_type'] = $defaultUser->user_type;
-        } else {
-            $params->userData->user_type = $defaultUser->user_type;
+        if(!empty($defaultUser->user_type)) {
+            if(is_array($params->userData)) {
+                $params->userData['user_type'] = $defaultUser->user_type;
+            } else {
+                $params->userData->user_type = $defaultUser->user_type;
+            }
         }
         
         // parse the code to return
@@ -375,7 +377,9 @@ class Api {
             
             // if the client id is empty and yet the user is not selecting which account to manage
             if(empty($this->userId) && (!in_array($this->outer_url, ["select", "pay", "verify"]) && !in_array($this->inner_url, ["account", "payment"]))) {
-                return $this->output($code, $result);
+                if(!in_array($this->inner_url, ["qr"])) {
+                    return $this->output($code, $result);
+                }
             }
 
             // do not change the academic year and term in these instances
