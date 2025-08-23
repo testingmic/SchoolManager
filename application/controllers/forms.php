@@ -6106,7 +6106,7 @@ class Forms extends Myschoolgh {
 
         /** Set parameters for the data to attach */
         $html = '<div data-backdrop="static" data-keyboard="false" class="modal fade" id="idCardModal">
-            <form method="POST" autocomplete="Off" action="'.$this->baseUrl.'api/account/generate_cards" class="ajax-data-form" id="ajax-data-form-content">
+            <form method="POST" autocomplete="Off" action="'.$this->baseUrl.'api/cards/generate" class="ajax-data-form" id="ajax-data-form-content">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -6138,11 +6138,11 @@ class Forms extends Myschoolgh {
                                     <div class="row">
                                         <div class="col-lg-6 col-md-6 form-group">
                                             <label for="issue_date">Issued Date <span class="required">*</span></label>
-                                            <input type="text" class="form-control datepicker" value="'.date("Y-m-d").'" name="issue_date" id="issue_date">
+                                            <input type="text" class="form-control datepicker" data-mindate="'.date("Y-m-d", strtotime("-3 years")).'" value="'.date("Y-m-d").'" name="issue_date" id="issue_date">
                                         </div>
                                         <div class="col-lg-6 col-md-6 form-group">
                                             <label for="expiry_date">Expiry Date</label>
-                                            <input type="text" class="form-control datepicker" data-maxdate="'.date("Y-m-d", strtotime("+3 years")).'" value="'.date("Y-m-d", strtotime("+3 years")).'" name="expiry_date" id="expiry_date">
+                                            <input type="text" class="form-control datepicker" data-mindate="'.date("Y-m-d", strtotime("-3 years")).'" data-maxdate="'.date("Y-m-d", strtotime("+6 years")).'" value="'.date("Y-m-d", strtotime("+3 years")).'" name="expiry_date" id="expiry_date">
                                             <span class="text-muted text-small text-italic">If empty, card validity period will be set to expiry three years from the issued date if left blank.</span>
                                         </div>
                                     </div>

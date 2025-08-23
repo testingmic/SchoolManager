@@ -101,47 +101,35 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("ALTER TABLE fees_category ADD COLUMN boarding_fees ENUM('No', 'Yes') NOT NULL DEFAULT 'No'");
-		$fix[] = ("ALTER TABLE fees_category ADD COLUMN frequency ENUM('Daily', 'Weekly', 'Monthly', 'Termly', 'Yearly', 'One-Time') NOT NULL DEFAULT 'Termly'");
-		$fix[] = ("ALTER TABLE `grading_terminal_scores` ADD `distinct_record` VARCHAR(32) NULL DEFAULT NULL AFTER `report_id`, ADD UNIQUE (`distinct_record`);");
-		$fix[] = ("ALTER TABLE `users_bills` CHANGE `bill` `bill` MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;");
-		$fix[] = ("ALTER TABLE `smsemail_templates` CHANGE `module` `module` VARCHAR(24) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;");
-		$fix[] = ("ALTER TABLE `books_type` ADD COLUMN `language` VARCHAR(12) NOT NULL DEFAULT 'en' AFTER `description`;");
-		$fix[] = ("ALTER TABLE `books` ADD COLUMN `publisher` VARCHAR(128) NULL DEFAULT NULL AFTER `description`;");
-		$fix[] = ("ALTER TABLE `books` ADD COLUMN `publish_date` DATE NULL DEFAULT NULL AFTER `publisher`;");
-		$fix[] = ("ALTER TABLE `books` ADD COLUMN `price` DECIMAL(10, 2) NULL DEFAULT NULL AFTER `publish_date`;");
-		$fix[] = ("ALTER TABLE `classes` ADD COLUMN `is_graduation_level` VARCHAR(12) NULL DEFAULT NULL");
-		
-		$fix[] = ("CREATE TABLE IF NOT EXISTS `exeats` (
-				`id` INT(11) NOT NULL AUTO_INCREMENT,
-				`item_id` VARCHAR(12) NOT NULL,
-				`client_id` VARCHAR(16) NOT NULL,
-				`created_by` VARCHAR(16) NOT NULL,
-				`student_id` VARCHAR(16) NOT NULL,
-				`status` VARCHAR(12) NOT NULL,
-				`exeat_type` VARCHAR(12) NOT NULL,
-				`departure_date` date NOT NULL,
-				`pickup_by` VARCHAR(12) NOT NULL,
-				`guardian_contact` VARCHAR(64) NOT NULL,
-				`reason` VARCHAR(1000) NOT NULL,
-				`return_date` date NOT NULL,
-				`created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-				`last_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+		$fix[] = ("CREATE TABLE IF NOT EXISTS `generated_cards` (
+			`id` INT(11) NOT NULL AUTO_INCREMENT,
+			`client_id` VARCHAR(16) NOT NULL,
+			`unique_id` VARCHAR(16) NOT NULL,
+			`user_id` VARCHAR(16) NOT NULL,
+			`name` VARCHAR(128) NOT NULL,
+			`user_type` VARCHAR(12) NOT NULL,
+			`gender` VARCHAR(12) NOT NULL,
+			`issue_date` DATE NULL DEFAULT NULL,
+			`expiry_date` DATE NULL DEFAULT NULL,
+			`class_id` VARCHAR(16) NULL DEFAULT NULL,
+			`day_boarder` VARCHAR(12) NULL DEFAULT NULL,
+			`date_of_birth` DATE NULL DEFAULT NULL,
+			`created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			`last_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (`id`),
-			UNIQUE KEY `item_id` (`item_id`),
 			INDEX `client_id` (`client_id`),
-			INDEX `created_by` (`created_by`),
-			INDEX `student_id` (`student_id`),
-			INDEX `status` (`status`),
-			INDEX `exeat_type` (`exeat_type`),
-			INDEX `pickup_by` (`pickup_by`)
+			INDEX `user_id` (`user_id`),
+			INDEX `user_type` (`user_type`),
+			INDEX `class_id` (`class_id`),
+			INDEX `day_boarder` (`day_boarder`),
+			INDEX `unique_id` (`unique_id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
 		foreach($fix as $stmt) {
 			try {
-				// $query = $this->db->prepare($stmt);
-				// $query->execute();
-			} catch(PDOException $e) {}
+				$query = $this->db->prepare($stmt);
+				$query->execute();
+			} catch(PDOException $e) { }
 		}
 	}
 
@@ -685,8 +673,6 @@ class Myschoolgh extends Models {
 			return $query_style === "OBJ" ? $stmt->fetchAll(PDO::FETCH_OBJ) : $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 		} catch(PDOException $e) {
-			print $e->getMessage();
-			exit;
 			return [];
 		}
 

@@ -230,7 +230,7 @@ function render_qr_code_header() {
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900">QR Scanner</h1>
-                        <p class="text-gray-600">Scan QR codes for verification</p>
+                        <p class="text-gray-600">Scan the Card QR Code to Capture Attendance</p>
                     </div>
                 </div>
                 <div class="text-right">

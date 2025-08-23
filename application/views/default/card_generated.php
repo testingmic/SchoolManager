@@ -50,6 +50,36 @@ $response->scripts = ["assets/js/settings.js"];
 // get the card form
 $the_card_form = load_class("forms", "controllers")->id_card_form($defaultUser, $permissions);
 
+$params = (object) [
+    "clientId" => $clientId
+];
+
+// get the list of cards
+$list_cards = load_class("cards", "controllers")->list($params);
+
+$cards_listing = "";
+
+// loop through the list of cards
+foreach($list_cards["data"] as $key => $each) {
+    
+    $key = $key + 1;
+    $cards_listing .= "<tr data-row_id=\"{$each->id}\">";
+    $cards_listing .= "<td>{$key}</td>";
+    $cards_listing .= "<td>{$each->name}</td>";
+    $cards_listing .= "<td>{$each->unique_id}</td>";
+    $cards_listing .= "<td>{$each->gender}</td>";
+    $cards_listing .= "<td>".ucwords($each->user_type)."</td>";
+    $cards_listing .= "<td>{$each->class_name}</td>";
+    $cards_listing .= "<td>{$each->issue_date}</td>";
+    $cards_listing .= "<td align='center'>
+        <button onclick='return card_preview({$each->id});' class='btn btn-sm btn-outline-success'>
+            <i class='fa fa-eye'></i> Preview
+        </button>
+    </td>";
+    $cards_listing .= "</tr>";
+
+}
+
 $response->html = '
     <section class="section">
         <div class="section-header">
@@ -66,23 +96,27 @@ $response->html = '
                     <a class="btn btn-sm btn-outline-primary" onclick="return id_card_modal();" href="#">
                         <i class="fa fa-plus"></i> Generate ID Cards
                     </a>
+                    <a class="btn btn-sm btn-outline-success" target="_blank" href="'.$baseUrl.'cards_preview">
+                        <i class="fa fa-qrcode"></i> Preview Cards
+                    </a>
                 </div>
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table data-empty="" class="table table-sm table-bordered table-striped datatable">
+                            <table data-empty="" class="table table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%">ID</th>
                                         <th>Name</th>
-                                        <th>Admission Number</th>
+                                        <th>Card Number</th>
                                         <th>Gender</th>
                                         <th>Category</th>
+                                        <th>Level</th>
                                         <th>Issued On</th>
-                                        <th align="center" width="18%"></th>
+                                        <th align="center" width="10%"></th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
+                                <tbody>'.$cards_listing.'</tbody>
                             </table>
                         </div>
                     </div>

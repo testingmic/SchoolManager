@@ -120,7 +120,7 @@ $clientState = $defaultClientData->client_state ?? "Inactive";
                             <h3 class="text-lg font-semibold text-gray-900">QR Code Detected</h3>
                             <p class="text-gray-600 text-sm">Processing user information...</p>
                         </div>
-                        <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="bg-gray-50 rounded-lg p-3 text-center">
                             <code id="scannedId" class="text-sm text-gray-700 break-all"></code>
                         </div>
                     </div>
@@ -263,7 +263,14 @@ $clientState = $defaultClientData->client_state ?? "Inactive";
             // Handle successful scan
             function onScanSuccess(decodedText) {
                 stopScanner();
-                
+
+                if(decodedText) {
+                    const match = decodedText.match(/employeeId:\[(\d+)\]/);
+                    if (match) {
+                        // decodedText = `employeeId:${match[1]}`;
+                    }
+                }
+                                
                 // Show scan result
                 document.getElementById('scanResult').classList.remove('hidden');
                 document.getElementById('scannedId').textContent = decodedText;

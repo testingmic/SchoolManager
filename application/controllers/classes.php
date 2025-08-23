@@ -156,7 +156,6 @@ class Classes extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
-            return $e->getMessage();
             return $this->unexpected_error;
         } 
 
