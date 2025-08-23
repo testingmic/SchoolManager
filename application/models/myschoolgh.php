@@ -109,6 +109,7 @@ class Myschoolgh extends Models {
 			`name` VARCHAR(128) NOT NULL,
 			`user_type` VARCHAR(12) NOT NULL,
 			`gender` VARCHAR(12) NOT NULL,
+			`enrollment_date` DATE NULL DEFAULT NULL,
 			`issue_date` DATE NULL DEFAULT NULL,
 			`expiry_date` DATE NULL DEFAULT NULL,
 			`class_id` VARCHAR(16) NULL DEFAULT NULL,

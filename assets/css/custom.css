@@ -1220,7 +1220,7 @@ h4 {
 
 .card-preview-front,
 .card-preview-back {
-    min-height: 270px;
+    min-height: 275px;
     width: 100%;
     background-color: #fff;
     border-radius: 10px;
@@ -1229,9 +1229,7 @@ h4 {
 }
 
 .card-preview-front-header { 
-    padding: 10px;
     text-align: center;
-    /* border-bottom: solid 2px #5b14d5; */
 }
 
 .card-preview-front-body, .card-preview-back-body {

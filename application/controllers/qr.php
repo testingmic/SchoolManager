@@ -1,7 +1,5 @@
 <?php
 
-namespace App\Libraries;
-
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
 
@@ -15,10 +13,10 @@ class Qr {
      * 
      * @return Mixed
      */
-    public function generate($text, $option = []) {
+    public function generate($option = []) {
 
         // set the directory root
-        $root_dir = ROOT_DIRECTORY . 'assets/uploads/qrcodes/';
+        $root_dir = ROOT_DIRECTORY . '/assets/uploads/qrcodes/' . (!empty($option['client_id']) ? $option['client_id'] . '/' : '');
 
         // set the filename to use in the creation of the code
         $filename = $root_dir . (!empty($option['filename']) ? $option['filename'] : 'qrcode.png');
@@ -30,22 +28,24 @@ class Qr {
 
         // create file if not already existing
         if (!is_file($filename) || !file_exists($filename)) {
-            $f = fopen($filename, 'w');
-            fclose($f);
+            $file = fopen($filename, 'w');
+            fclose($file);
         }
 
+        // set the options for the QR Code
         $options = new QROptions([
             'version'      => 7,
             'scale'        => 6,
             'imageBase64'  => false,
+            'outputType'   => QRCode::OUTPUT_IMAGE_PNG,
         ]);
 
         // generate qr code
         $qrObj = new QRCode($options);
-        $qrcode = $qrObj->render($text);
+        $qrcode = $qrObj->render($option['text']);
 
         file_put_contents($filename, $qrcode);
 
-        return true;
+        return str_ireplace(ROOT_DIRECTORY, "", $filename);
     }
 }

@@ -29,6 +29,7 @@ class Cards extends Myschoolgh {
             $query .= !empty($params->user_type) ? " AND a.user_type IN ({$params->user_type})" : "";
             $query .= !empty($params->issue_date) ? " AND a.issue_date = '{$params->issue_date}'" : "";
             $query .= !empty($params->day_boarder) ? " AND a.day_boarder = '{$params->day_boarder}'" : "";
+            $query .= !empty($params->card_preview_id) ? " AND a.id = '{$params->card_preview_id}'" : "";
 
             // get the list of users based on the request 
             $stmt = $this->db->prepare("SELECT a.*, b.name AS class_name 
@@ -51,6 +52,58 @@ class Cards extends Myschoolgh {
     }
 
     /**
+     * Preview Card
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function preview(stdClass $params) {
+        
+
+        $data = $this->list($params)['data'];
+
+        if(empty($data)) {
+            return ["code" => 400, "data" => "Sorry! No card found."];
+        }
+
+        $cardSettings = $this->iclient->client_preferences->id_card ?? [];
+        $defaultClientData = $this->iclient;
+
+        // set the base url for the client
+        $defaultClientData->baseUrl = $this->baseUrl;
+
+        // get the first item in the array
+        $userData = $data[0];
+
+        // get the type of the user
+        $type = $userData->user_type == "student" ? "studentId" : "employeeId";
+
+        $qr_string = "{$type}:[{$userData->user_id}]/admissionId:[{$userData->unique_id}]/userType:[{$userData->user_type}]";
+
+        // create new qr code object
+        $qrObject = load_class("Qr", "controllers");
+        $qr_code = $qrObject->generate(["filename" => "{$userData->user_id}.png", "client_id" => $userData->client_id, "text" => $qr_string]);
+
+        // append some more variables to the card settings
+        foreach($userData as $key => $value) {
+            $cardSettings->{$key} = $value;
+        }
+
+        $cardSettings->qr_code = rtrim($this->baseUrl, "/") . $qr_code;
+
+        return [
+            "code" => 200,
+            "data" => [
+                "user" => $userData,
+                "idcard" => render_card_preview($cardSettings, $defaultClientData, true),
+                "qr_code" => $cardSettings->qr_code
+            ]
+        ];
+
+    }
+
+    /**
      * Generate Cards
      * 
      * @param stdClass $params
@@ -69,6 +122,11 @@ class Cards extends Myschoolgh {
             $issue_date = !empty($params->issue_date) ? $params->issue_date : date("Y-m-d");
             $expiry_date = !empty($params->expiry_date) ? $params->expiry_date : date("Y-m-d", strtotime("+3 years"));
             
+            // check if the expiry date is the same as the issue date
+            if(strtotime($params->expiry_date) == strtotime(date("Y-m-d"))) {
+                return ["code" => 400, "data" => "Sorry! The expiry date cannot be the same as today's date."];
+            }
+
             if(strtotime($issue_date) > strtotime($expiry_date)) {
                 return ["code" => 400, "data" => "Sorry! The issue date cannot be greater than the expiry date."];
             }
@@ -88,7 +146,7 @@ class Cards extends Myschoolgh {
 
             // get the list of users based on the request payload
             $users = $this->pushQuery(
-                "id, name, gender, class_id, day_boarder, unique_id, date_of_birth, user_type", 
+                "id, name, gender, class_id, day_boarder, unique_id, date_of_birth, user_type, enrollment_date", 
                 "users", 
                 "client_id='{$params->clientId}' AND user_type IN ({$user_category}) {$query} AND user_status='active'"
             );
@@ -116,6 +174,7 @@ class Cards extends Myschoolgh {
                     expiry_date='{$expiry_date}',
                     class_id='{$user->class_id}', 
                     gender='{$user->gender}',
+                    enrollment_date='{$user->enrollment_date}',
                     day_boarder='{$user->day_boarder}', 
                     unique_id='{$user->unique_id}'
                     ".(!empty($user->date_of_birth) ? ", date_of_birth='{$user->date_of_birth}'" : "")."

@@ -6173,6 +6173,35 @@ class Forms extends Myschoolgh {
 
     }
 
+    /**
+     * Preview Card Form
+     * 
+     * @return string
+     */
+    public function preview_card_form() {
+
+        $html = '<div data-backdrop="static" data-keyboard="false" class="modal fade" id="previewCardModal">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Preview Card</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body pb-0">
+                        <div class="idcard-preview"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>';
+
+        return $html;
+    }
+
 
     /**
      * Display the submitted assignment by the student

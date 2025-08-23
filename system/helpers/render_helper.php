@@ -261,48 +261,53 @@ function card_found_message($schoolName = null) {
  */
 function render_card_preview($cardSettings = null, $defaultClientData = null, $useData = false) {
     
-    $start = $cardSettings->admission_date ?? "2020-01-01";
-    $end = $cardSettings->valid_until ?? "2025-01-01";
+    $start = $cardSettings->issue_date ?? "2020-01-01";
+    $end = $cardSettings->expiry_date ?? "2025-01-01";
+
+    $type = "Student";
+    if($useData) {
+        $type = $cardSettings->user_type == "student" ? "Student" : "Employee";
+    }
 
     $html = '
     <div class="card-preview" style="min-width: 300px;">
         <div class="card-preview-body">
             <div class="card-preview-front">
-                <div class="card-preview-front-header pb-0" style="width: 100%;">
-                    <div style="float: left; margin-right: 10px; width: 15%;">
+                <div class="card-preview-front-header pb-0" style="width: 100%; padding-right: 10px; padding-left: 10px; padding-top: 5px;">
+                    <div style="float: left; width: 15%;">
                         <img width="50" height="40" src="'.$defaultClientData->client_logo.'" alt="'.$defaultClientData->client_name.'">
                     </div>
-                    <div class="text-center" style="float: left; width: 80%;">
-                        <h4 class="mb-0 font-weight-bold">'.$defaultClientData->client_name.'</h4>
-                        <p class="mb-0" data-item="card_type">Student Identification Card</p>
+                    <div class="text-center" style="float: left; width: 85%;">
+                        <div class="mb-0" style="font-size: 22px; margin-bottom: 0px; font-weight: bold;">'.$defaultClientData->client_name.'</div>
+                        <p class="mb-0" data-item="card_type" style="font-size: 15px; font-weight: bold;">'.$type.' Identification Card</p>
                     </div>
                 </div>
                 <div class="card-preview-front-body" style="width:100%; float: left; background-color: '.($cardSettings->front_color ?? "#1E40AF").'; color: '.($cardSettings->front_text_color ?? "#ffffff").';">
                     <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 10px;">
                         '.($useData ? $cardSettings->name : "Emmanuel Obeng").'
-                        <div style="font-size: 13px; font-weight: normal;">
-                            '.($useData ? $cardSettings->user_id : "M000000001").'
+                        <div style="font-size: 15px; font-weight: bold;">
+                            '.($useData ? $cardSettings->unique_id : "M000000001").'
                         </div>
                     </div>
                     <div style="width: 100px; float: left; height: 100px; background-color: #fff; padding: 5px; border-radius: 7px;">
-                        <img src="'.$defaultClientData->baseUrl.'assets/img/avatar.png" style="border-radius: 7px;" width="100%">
+                        <img src="'.($defaultClientData->baseUrl ?? "").'assets/img/avatar.png" style="border-radius: 7px;" width="100%">
                     </div>
                     <div style="margin-left: 30px;float: left; font-size: 13px;" data-item="front_card_details">
                         <div><strong>Gender:</strong></div>
                         <div><strong>Date of Birth:</strong></div>
                         <div><strong>Admission:</strong></div>
-                        <div><strong>Student Type:</strong></div>
+                        <div><strong>'.$type.' Type:</strong></div>
                         '.($useData && !empty($cardSettings->house) ? "<div><strong>House:</strong></div>" : "").'
                     </div>
                     <div style="margin-left: 30px;float: left; font-size: 13px;" data-item="front_card_details">
                         <div>'.($useData ? $cardSettings->gender : "Male").'</div>
-                        <div>'.($useData ? $cardSettings->dob : "1990-01-01").'</div>
-                        <div>'.($useData ? $cardSettings->admission_date : "2020-01-01").'</div>
-                        <div>'.($useData ? $cardSettings->student_type : "Regular").'</div>
+                        <div>'.($useData ? (empty($cardSettings->date_of_birth) ? "N/A" : $cardSettings->date_of_birth) : "1990-01-01").'<br></div>
+                        <div>'.($useData ? (empty($cardSettings->enrollment_date) ? "N/A" : $cardSettings->enrollment_date) : "1990-01-01").'<br></div>
+                        <div>'.($useData ? (empty($cardSettings->day_boarder) ? "Regular" : $cardSettings->day_boarder) : "Regular").'<br></div>
                         '.($useData && !empty($cardSettings->house) ? "<div>".$cardSettings->house."</div>" : "").'
                     </div>
-                    <div style="width: 100px; text-align: center; font-size: 14px; float: right; background-color: #fff; color: #000; border-radius: 5px; padding: 5px; height: 100px;">
-                        QR Code
+                    <div style="width: 105px; text-align: center; font-size: 14px; float: right; background-color: #fff; color: #000; border-radius: 5px; height: 100px;">
+                        '.($useData ? '<img src="'.$cardSettings->qr_code.'" style="border-radius: 5px;" width="100%">' : "QR Code Here").'
                     </div>
                 </div>
                 <div style="text-align: center; font-size: 13px; padding-top: 5px; font-weight: normal;width: 100%; float: left;">

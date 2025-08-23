@@ -49,6 +49,7 @@ $response->scripts = ["assets/js/settings.js"];
 
 // get the card form
 $the_card_form = load_class("forms", "controllers")->id_card_form($defaultUser, $permissions);
+$preview_card_form = load_class("forms", "controllers")->preview_card_form();
 
 $params = (object) [
     "clientId" => $clientId
@@ -71,6 +72,7 @@ foreach($list_cards["data"] as $key => $each) {
     $cards_listing .= "<td>".ucwords($each->user_type)."</td>";
     $cards_listing .= "<td>{$each->class_name}</td>";
     $cards_listing .= "<td>{$each->issue_date}</td>";
+    $cards_listing .= "<td>{$each->expiry_date}</td>";
     $cards_listing .= "<td align='center'>
         <button onclick='return card_preview({$each->id});' class='btn btn-sm btn-outline-success'>
             <i class='fa fa-eye'></i> Preview
@@ -113,6 +115,7 @@ $response->html = '
                                         <th>Category</th>
                                         <th>Level</th>
                                         <th>Issued On</th>
+                                        <th>Expiry On</th>
                                         <th align="center" width="10%"></th>
                                     </tr>
                                 </thead>
@@ -123,7 +126,7 @@ $response->html = '
                 </div>
             </div>
         </div>
-    </section>' . $the_card_form;
+    </section>' . $the_card_form . $preview_card_form;
 // print out the response
 echo json_encode($response);
 ?>

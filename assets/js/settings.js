@@ -29,6 +29,19 @@ var id_card_modal = () => {
     $(`div[id="idCardModal"] input, div[id="idCardModal"] textarea`).val("");
 }
 
+var card_preview = (card_preview_id) => {
+
+    $.get(`${baseUrl}api/cards/preview?card_preview_id=${card_preview_id}`).then((response) => {
+        if (response.code == 200) {
+            $(`div[id="previewCardModal"]`).modal("show");
+            let result = response.data.result;
+            $(`div[id="previewCardModal"] div[class="idcard-preview"]`).html(`${result.idcard}`);
+        }
+    }).catch((error) => {
+        console.log(error);
+    });
+}
+
 $(`select[id="user_category"]`).on("change", function() {
     let value = $(this).val();
     $(`div[id="attendance_log_list"]`).html(`<div class="text-center font-italic">${no_content_wrapper('Attendance', 'Sorry! The selected date is a weekend which has been excluded from recording attendance.')}</div>`);
