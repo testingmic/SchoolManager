@@ -237,9 +237,9 @@ class Cards extends Myschoolgh {
                     issue_date='{$issue_date}',
                     expiry_date='{$expiry_date}',
                     class_id='{$user->class_id}', 
-                    gender='{$user->gender}',
+                    ".(!empty($user->gender) ? ", gender='{$user->gender}'" : "")."
                     ".(!empty($user->enrollment_date) ? ", enrollment_date='{$user->enrollment_date}'" : "")."
-                    day_boarder='{$user->day_boarder}', 
+                    ".(!empty($user->day_boarder) ? ", day_boarder='{$user->day_boarder}'" : "")."
                     unique_id='{$user->unique_id}'
                     ".(!empty($user->date_of_birth) ? ", date_of_birth='{$user->date_of_birth}'" : "")."
                 ");
