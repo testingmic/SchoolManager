@@ -44,7 +44,7 @@ if(!empty($buses_list)) {
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="App - <?= $appName ?>">
+    <meta name="apple-mobile-web-app-title" content="Attendance Taker - <?= $appName ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <?php if($logBusAttendance && !$busId) { ?>
