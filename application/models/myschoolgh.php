@@ -330,6 +330,23 @@ class Myschoolgh extends Models {
 	}
 
 	/**
+	 * Get the Bus List
+	 * 
+	 * @param String $clientId
+	 * 
+	 * @return Array
+	 */
+	final function bus_list($clientId) {
+		try {
+			$stmt = $this->db->prepare("SELECT * FROM buses WHERE client_id = ? AND status = '1'");
+			$stmt->execute([$clientId]);
+			return $stmt->fetchAll(PDO::FETCH_OBJ);
+		} catch(PDOException $e) {
+			return [];
+		}
+	}
+
+	/**
 	 * Get the Grading System
 	 * 
 	 * @return Object

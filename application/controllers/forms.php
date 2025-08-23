@@ -6021,7 +6021,7 @@ class Forms extends Myschoolgh {
                                 <div class="col-md-8">
                                     <div class="form-group">
                                         <label for="name">Brand Name <span class="required">*</span></label>
-                                        <input type="text" maxlength="100" name="brand" id="brand" class="form-control">
+                                        <input type="text" maxlength="64" name="brand" id="brand" class="form-control">
                                     </div>
                                 </div>
                                 <div class="col-md-4">

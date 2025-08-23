@@ -1,0 +1,53 @@
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #607D8B;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 40px;
+}
+
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+    border-color: #e4e6fc;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 38px;
+}
+
+.select2-selection--single{
+    min-height: 40px;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: #95a0f4;
+}
+.text-uppercase {
+    text-transform: uppercase;
+}
+#html5-qrcode-button-camera-permission {
+    color: #ff4000;
+    font-weight: bold;
+}
+#html5-qrcode-button-camera-start {
+    border: solid 1px #2563eb;
+    padding: 5px;
+    margin-top: 5px;
+    border-radius: 5px;
+    color: #2563eb;
+}
+#html5-qrcode-button-camera-stop {
+    border: solid 1px #ff0000;
+    padding: 5px;
+    margin-top: 5px;
+    border-radius: 5px;
+    color: #ff0000;
+}
+#html5-qrcode-button-camera-stop:hover {
+    background-color: #ff0000;
+    color: #fff;
+}
+#html5-qrcode-button-camera-start:hover {
+    background-color: #2563eb;
+    color: #fff;
+}
