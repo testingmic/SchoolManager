@@ -76,7 +76,7 @@ if(!empty($buses_list)) {
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen relative">
     <!-- Header -->
-    <?= render_qr_code_header($baseUrl) ?>
+    <?= render_qr_code_header($baseUrl, $clientId) ?>
 
     <?php if($clientState !== "Active") { ?>
         <?= render_qr_code_inactive($baseUrl) ?>
