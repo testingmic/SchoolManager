@@ -79,7 +79,7 @@ if($logBusAttendance) {
         }
     </script>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen relative">
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-[calc(100vh-100px)] relative">
     <!-- Header -->
     <?= render_qr_code_header($baseUrl, $clientId) ?>
 
