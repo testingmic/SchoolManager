@@ -27,6 +27,11 @@ if(!empty($buses_list)) {
     });
     $selectedBus = !empty($selectedBus) ? $selectedBus[array_key_first($selectedBus)] : null;
 }
+
+$goBackUrl = $baseUrl . "qr_code?client=" . $clientId;
+if($logBusAttendance) {
+    $goBackUrl .= "&request=" . $logType;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -311,7 +316,7 @@ if(!empty($buses_list)) {
                     </div>
 
                     <div class="mt-2 text-center mb-12">
-                        <a id="goBack" style="max-width: 400px;" href="<?= $baseUrl ?>qr_code?request=<?= $logType ?>&client=<?= $clientId ?>" class="bg-blue-400 hover:bg-blue-600 text-white px-4 py-4 rounded-lg flex items-center space-x-2 text-center transition-colors">
+                        <a id="goBack" style="max-width: 400px;" href="<?= $goBackUrl ?>" class="bg-blue-400 hover:bg-blue-600 text-white px-4 py-4 rounded-lg flex items-center space-x-2 text-center transition-colors">
                             <i class="fas fa-arrow-left"></i>
                             <span>Go Back</span>
                         </a>
