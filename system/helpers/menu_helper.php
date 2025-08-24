@@ -179,7 +179,7 @@
         <li class="dropdown">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
             <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Manage Collection</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Collection</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
                 <?php if($accessObject->hasAccess("add", "library")) { ?>

@@ -122,7 +122,7 @@ if(!empty($item_id)) {
                     <div class="card-body pt-0 pb-0">
                         <div class="py-3 pt-0">
                             <p class="clearfix">
-                                <span class="float-left">Category</span>
+                                <span class="float-left">Collection</span>
                                 <span class="float-right text-muted">'.($data->category_name ?? null).'</span>
                             </p>
                             <p class="clearfix">
@@ -141,10 +141,10 @@ if(!empty($item_id)) {
                                 <span class="float-left">Code</span>
                                 <span class="float-right text-muted">'.($data->code ?? null).'</span>
                             </p>
-                            <p class="clearfix">
-                                <span class="float-left">Author</span>
-                                <span class="float-right text-muted">'.($data->author ?? null).'</span>
-                            </p>
+                            <div class="clearfix flex">
+                                <div class="w-1/2">Author</div>
+                                <div class="w-1/2 text-right text-muted">'.($data->author ?? null).'</div>
+                            </div>
                             <p class="clearfix">
                                 <span class="float-left">ISBN</span>
                                 <span class="float-right text-muted">'.($data->isbn ?? null).'</span>
@@ -153,6 +153,14 @@ if(!empty($item_id)) {
                                 <span class="float-left">Stock Quantity</span>
                                 <span class="float-right text-muted">'.($data->books_stock ?? null).'</span>
                             </p>
+                            <p class="clearfix">
+                                <span class="float-left">Publish Date</span>
+                                <span class="float-right text-muted">'.($data->publish_date ?? null).'</span>
+                            </p>
+                            <div class="clearfix flex">
+                                <div class="w-1/2">Publisher</div>
+                                <div class="w-1/2 text-right text-muted">'.($data->publisher ?? null).'</div>
+                            </div>
                             <p class="clearfix">
                                 <span class="float-left">Rack Number</span>
                                 <span class="float-right text-muted">'.($data->rack_no ?? null).'</span>

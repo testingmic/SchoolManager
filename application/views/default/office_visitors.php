@@ -107,7 +107,7 @@ if(!$accessObject->hasAccess("view", "visitor_book")) {
         // set the application data
         $request_data = '
         <div class="col-md-5">
-            <div class="card">
+            <div class="card stick_to_top">
                 <div class="card-body">
 
                     <div class="font-17 text-uppercase mb-2">
@@ -176,7 +176,7 @@ if(!$accessObject->hasAccess("view", "visitor_book")) {
                     <div class="slim-scroll">
                         <div class="p-0 m-0">
                             '.$comment_form.'
-                            <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$request_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
+                            <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$request_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0"></div>
                             <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-outline-secondary btn-sm">Loading comments <i class="fa fa-spin fa-spinner"></i></button></div>
                         </div>
                     </div>
