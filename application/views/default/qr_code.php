@@ -322,7 +322,7 @@ if(!empty($buses_list)) {
                         function initializeScanner() {
                             const config = {
                                 fps: 10,
-                                qrbox: { width: 250, height: 250 },
+                                qrbox: { width: 260, height: 260 },
                                 aspectRatio: 1.0,
                                 supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
                             };
