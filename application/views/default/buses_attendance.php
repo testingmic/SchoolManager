@@ -19,7 +19,7 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $response->title = "Bus Attendance";
 
 // end query if the user has no permissions
-if(!in_array("attendance", $clientFeatures)) {
+if(!in_array("bus_manager", $clientFeatures)) {
     // permission denied information
     $response->html = page_not_found("feature_disabled");
     echo json_encode($response);
@@ -53,13 +53,11 @@ $response->html = '
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
-                                        <th>Bus Information</th>
-                                        <th>Driver</th>
-                                        <th>Date & Time</th>
-                                        <th>Teachers Count</th>
-                                        <th>Students Count</th>
+                                        <th>Passenger</th>
+                                        <th>Action</th>
+                                        <th>Type</th>
                                         <th>Details</th>
-                                        <th align="center" width="13%"></th>
+                                        <th>Date & Time</th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$books_list.'</tbody>

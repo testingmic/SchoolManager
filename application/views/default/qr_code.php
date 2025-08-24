@@ -315,11 +315,13 @@ if($logBusAttendance) {
                         </div>
                     </div>
 
-                    <div class="mt-2 text-center mb-12">
-                        <a id="goBack" style="max-width: 400px;" href="<?= $goBackUrl ?>" class="bg-blue-400 hover:bg-blue-600 text-white px-4 py-4 rounded-lg flex items-center space-x-2 text-center transition-colors">
-                            <i class="fas fa-arrow-left"></i>
-                            <span>Go Back</span>
-                        </a>
+                    <div class="mt-2 text-center mb-12 grid lg:grid-cols-2 gap-4">
+                        <div>
+                            <a id="goBack" href="<?= $goBackUrl ?>" class="bg-blue-400 hover:bg-blue-600 text-white px-4 py-4 rounded-lg flex items-center space-x-2 text-center transition-colors">
+                                <i class="fas fa-arrow-left"></i>
+                                <span>Go Back</span>
+                            </a>
+                        </div>
                     </div>
 
                     <script src="<?= $baseUrl; ?>assets/js/app.min.js"></script>

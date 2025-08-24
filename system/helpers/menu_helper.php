@@ -313,7 +313,11 @@
     <?php } ?>
     <?php if(in_array("bus_manager", $clientFeatures)) { ?>
         <li class="dropdown">
-            <a href="<?= $baseUrl ?>buses" class="nav-link"><i class="fas fa-bus-alt"></i><span>Bus Management</span></a>
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-bus-alt"></i><span>Bus Management</span></a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link" href="<?= $baseUrl ?>buses">Manage Buses</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>buses_attendance">Bus Attendance</a></li>
+            </ul>
         </li>
     <?php } ?>
     <?php if($isAdmin && in_array("online_applications", $clientFeatures)) { ?>

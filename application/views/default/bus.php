@@ -153,7 +153,7 @@ if(empty($bus_id)) {
                                     <thead>
                                         <tr>
                                             <th width="5%" class="text-center">#</th>
-                                            <th>Driver</th>
+                                            <th>Passenger</th>
                                             <th>Action</th>
                                             <th>Type</th>
                                             <th>Details</th>

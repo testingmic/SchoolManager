@@ -6006,6 +6006,8 @@ class Forms extends Myschoolgh {
             "item_id" => $data->item_id ?? null
         ];
 
+        $driver_list = $this->pushQuery("name, item_id, unique_id", "users", "client_id='{$this->clientId}' AND status='1' AND user_type IN ('employee', 'admin', 'teacher')");
+
         $html = '<div data-backdrop="static" data-keyboard="false" class="modal fade" id="busModal">
             <form method="POST" autocomplete="Off" action="'.$this->baseUrl.'api/buses/save" class="ajax-data-form" id="ajax-data-form-content">
                 <div class="modal-dialog modal-lg" role="document">
@@ -6064,6 +6066,17 @@ class Forms extends Myschoolgh {
                                     <div class="form-group">
                                         <label for="insurance_date">Date of Insurance <span class="required">*</span></label>
                                         <input type="text" maxlength="12" name="insurance_date" class="form-control datepicker">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="driver_id">Driver Name <span class="required">*</span></label>
+                                        <select data-width="100%" class="form-control selectpicker" name="driver_id" id="driver_id">
+                                            <option value="">Please select driver</option>
+                                            '.implode("", array_map(function($driver) {
+                                                return "<option value='{$driver->item_id}'>{$driver->name} ({$driver->unique_id})</option>";
+                                            }, $driver_list)).'
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col-md-12">

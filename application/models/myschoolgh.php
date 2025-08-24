@@ -101,7 +101,9 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("ALTER TABLE `bus_attendance` ADD `action` VARCHAR(16) NULL DEFAULT 'checkin' AFTER `bus_id`;");
+		$fix[] = ("ALTER TABLE `bus_attendance` ADD `created_by` VARCHAR(32) NULL");
+		$fix[] = ("ALTER TABLE `bus_attendance` ADD `driver_id` VARCHAR(32) NULL");
+		$fix[] = ("ALTER TABLE `buses` ADD `driver_id` VARCHAR(32) NULL");
 
 		foreach($fix as $stmt) {
 			try {

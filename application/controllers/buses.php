@@ -36,7 +36,8 @@ class Buses extends Myschoolgh {
                         SELECT b.description FROM files_attachment b 
                         WHERE b.resource='buses' AND b.record_id = a.item_id 
                         ORDER BY b.id DESC LIMIT 1
-                    ) AS attachment
+                    ) AS attachment,
+					(SELECT b.name FROM users b WHERE b.item_id = a.driver_id LIMIT 1) AS driver_name
 				FROM buses a LEFT JOIN users u ON u.item_id = a.created_by
 				WHERE {$filters} AND a.status = ? ORDER BY a.id DESC LIMIT {$limit}"
 			);
@@ -90,12 +91,19 @@ class Buses extends Myschoolgh {
 
 			// set the data to update
 			$data = [
-				"brand" => $params->brand, "item_id" => $bus_id, "client_id" => $params->clientId, 
-				"reg_number" => $reg_number, "created_by" => $params->userId,
+				"brand" => $params->brand, 
+				"item_id" => $bus_id, 
+				"client_id" => $params->clientId, 
+				"reg_number" => $reg_number,
+				"created_by" => $params->userId,
 				"insurance_company" => $params->insurance_company,
 				"annual_premium" => $params->annual_premium ?? 0,
 				"insurance_date" => date("Y-m-d", strtotime($params->insurance_date))
 			];
+
+			if(!empty($params->driver_id)) {
+				$data["driver_id"] = $params->driver_id;
+			}
 
 			// set the insurance expiry date
 			$data["expiry_date"] = date("Y-m-d", strtotime("{$data["insurance_date"]} +1 year"));
@@ -188,6 +196,10 @@ class Buses extends Myschoolgh {
 				"insurance_company" => $params->insurance_company, 
 				"insurance_date" => date("Y-m-d", strtotime($params->insurance_date))
 			];
+
+			if(!empty($params->driver_id)) {
+				$data["driver_id"] = $params->driver_id;
+			}
 
 			// set the insurance expiry date
 			$data["expiry_date"] = date("Y-m-d", strtotime("{$data["insurance_date"]} +1 year"));

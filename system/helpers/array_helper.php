@@ -391,6 +391,7 @@ function format_bus_item($value, $no_container = false, $no_buttons = false, $wi
                 <img src='{$myClass->baseUrl}{$image}' class='bus-img' width='100%'>
             </div>
             <div class='text-left pb-2 pt-2 pr-0 pl-0 description'>
+                <div class='mb-2'><span class='font-bold text-primary'>Driver's Name:</span><span class='float-right'>".(empty($value->driver_name) ? "N/A" : $value->driver_name)."</span></div>
                 <div class='mb-2'><span class='font-bold text-primary'>Color:</span><span class='float-right'>".(!empty($value->color) ? "<span style='Background:{$value->color}' class='badge'>&nbsp;</span>" : "-")."</span></div>
                 <div class='mb-2'><span class='font-bold text-primary'>Registration Number:</span><span class='float-right'>{$value->reg_number}</span></div>
                 <div class='mb-2'><span class='font-bold text-primary'>Purchase Price:</span><span class='float-right'>".(!empty($value->purchase_price) ? number_format($value->purchase_price, 2) : "-")."</span></div>

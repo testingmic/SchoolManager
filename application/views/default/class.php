@@ -57,6 +57,9 @@ if(!empty($item_id)) {
         // set the page title
         $response->title = $data->name;
 
+        // set the graduation year
+        $isGraduationYear = (bool) ($data->is_graduation_level == "Yes");
+
         // set the user_id id in the console
         $response->array_stream['url_link'] = "class/{$item_id}/";
 
