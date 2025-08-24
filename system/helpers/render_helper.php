@@ -86,6 +86,35 @@ function render_class_attendance($attendance = [], $class_id = null, $baseUrl = 
 }
 
 /**
+ * Render the summary card
+ * 
+ * @param string $label
+ * @param string $icon
+ * @param string $color
+ * 
+ * @return string
+ */
+function render_summary_card($value = 0, $label = null, $icon = null, $color = null, $column = "col-lg-3") {
+    return '<div class="'.$column.' col-md-4">
+            <div class="card">
+                <div class="card-body p-3 card-type-3">
+                    <div class="row">
+                        <div class="col">
+                            <h6 class="text-muted mb-0">'.$label.'</h6>
+                            <span data-count="'.strtolower(str_ireplace(" ", "_", $label)).'" class="font-weight-bold font-25 mb-0">'.$value.'</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="card-circle l-bg-'.$color.' text-white">
+                                <i class="fas '.$icon.'"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>';
+}
+
+/**
  * Render the class student attendance
  * 
  * @param array $attendance

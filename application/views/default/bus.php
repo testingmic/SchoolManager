@@ -89,6 +89,13 @@ if(empty($bus_id)) {
         }
     }
 
+    $statistics = [
+        'total' => 0,
+        'checkin' => 0,
+        'checkout' => 0,
+        'type' => []
+    ];
+
     // if the attendance page is active
     if($attendancePage && $permissions["markAttendance"]) {
         // get the attendance history
@@ -96,11 +103,18 @@ if(empty($bus_id)) {
         
         $bus_attendance = "";
         foreach($attendanceHistory["data"] as $key => $attendance) {
+
+            $statistics['total']++;
+            if($attendance->action == "checkin") {
+                $statistics['checkin']++;
+            } else {
+                $statistics['checkout']++;
+            }
             $bus_attendance .= "<tr>
                 <td>".($key + 1)."</td>
                 <td>".$attendance->fullname."</td>
-                <td>".$attendance->action."</td>
-                <td>".$attendance->user_type."</td>
+                <td>".ucwords($attendance->action)."</td>
+                <td>".ucwords($attendance->user_type)."</td>
                 <td>".$attendance->brand."</td>
                 <td>".$attendance->date_created."</td>
             </tr>";
@@ -141,6 +155,11 @@ if(empty($bus_id)) {
                         <a class="btn btn-outline-success" target="_blank" href="'.$baseUrl.'qr_code/?request=bus&bus_id='.$bus_id.'&client='.$clientId.'"><i class="fa fa-bus"></i> Take Attendance</a>
                     </div>
                     ' : '').'
+                    <div class="row">
+                        '.($attendancePage ? render_summary_card($statistics["total"], "Total Records", "fa fa-bus", "orange", "col-lg-4") : "").'
+                        '.($attendancePage ? render_summary_card($statistics["checkin"], "Total Checkins", "fa fa-check", "green", "col-lg-4") : "").'
+                        '.($attendancePage ? render_summary_card($statistics["checkout"], "Total Checkouts", "fa fa-check", "red", "col-lg-4") : "").'
+                    </div>
                     <div class="card">
                         '.($attendancePage ? '
                         <div class="card-header">

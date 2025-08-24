@@ -100,7 +100,11 @@ if($defaultUser->appPrefs->termEnded) {
                 </div>
             </div>
             <div class="row">
-                <div class="col-12 col-sm-12 col-lg-12">';
+                <div class="col-12 col-sm-12 col-lg-12">
+                    <div class="text-right mb-2">
+                        <a class="btn btn-outline-success" href="'.$baseUrl.'attendance_log?date='.$selected_date.'"><i class="fa fa-calendar"></i> Daily Attendance Log</a>
+                        <a class="btn btn-outline-success anchor" target="_blank" href="'.$baseUrl.'qr_code?request=daily&client='.$session->clientId.'"><i class="fa fa-qrcode"></i> QR Code Attendance Log</a>
+                    </div>';
                     // set the content
                     if($isReadOnly) {
                         $response->html .= notification_modal("Readonly Mode", $myClass->error_logs["readonly_mode"]["msg"], $myClass->error_logs["readonly_mode"]["link"]);

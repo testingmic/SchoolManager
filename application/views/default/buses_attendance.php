@@ -39,6 +39,7 @@ $filter = (object) array_map("xss_clean", $_POST);
 // set the parameters
 $params = (object) [
     "clientId" => $session->clientId,
+    "request" => "bus",
     "client_data" => $defaultUser->client
 ];
 
@@ -72,8 +73,31 @@ $attendanceHistory = $busObj->attendance_history($params);
 // set the attendance history
 $attendance_history = "";
 
+$statistics = [
+    'total' => 0,
+    'checkin' => 0,
+    'checkout' => 0,
+    'type' => [],
+    'days' => [],
+    'unique_days' => []
+];
+
 // loop through the attendance history
 foreach($attendanceHistory["data"] as $key => $attendance) {
+    // set the total
+    $statistics['total']++;
+    if($attendance->action == "checkin") {
+        $statistics['checkin']++;
+    } else {
+        $statistics['checkout']++;
+    }
+
+    if(!isset($statistics['days'][$attendance->date_logged])) {
+        $statistics['days'][$attendance->date_logged] = 0;
+    }
+    $statistics['days'][$attendance->date_logged]++;
+
+    // set the color
     $color = $attendance->action == "checkin" ? "text-green-500" : "text-red-500";
     $attendance_history .= "<tr>
         <td>".($key + 1)."</td>
@@ -82,9 +106,8 @@ foreach($attendanceHistory["data"] as $key => $attendance) {
             ".(!empty($attendance->driver_unique_id) ? "<div><strong>Employee ID:</strong> ".$attendance->driver_unique_id."</div>" : "")."
         </td>
         <td>
-            <div>".$attendance->brand."</div>
+            <div><a class='text-blue-500' href='{$baseUrl}bus/{$attendance->bus_id}/attendance'>".$attendance->brand."</a></div>
             <div><strong>Reg Number:</strong> ".$attendance->reg_number."</div>
-            <div><strong>Insurance:</strong> ".$attendance->insurance_company."</div>
         </td>
         <td>".$attendance->fullname."</td>
         <td><span class='{$color}'>".(!empty($attendance->action) ? ucwords($attendance->action) : "N/A")."</span></td>
@@ -147,6 +170,12 @@ $response->html = '
                         <label class="d-sm-none d-md-block" for="">&nbsp;</label>
                         <button id="filter_Bus_Attendance" type="submit" class="btn btn-outline-warning height-40 btn-block"><i class="fa fa-filter"></i> FILTER</button>
                     </div>
+                </div>
+                <div class="row">
+                    '.render_summary_card($statistics["total"], "Total Records", "fa fa-bus", "orange", "col-lg-3").'
+                    '.render_summary_card($statistics["checkin"], "Total Checkins", "fa fa-check", "green", "col-lg-3").'
+                    '.render_summary_card($statistics["checkout"], "Total Checkouts", "fa fa-check", "red", "col-lg-3").'
+                    '.render_summary_card(count(array_keys($statistics["days"])), "Total Days", "fa-calendar", "cyan", "col-lg-3").'
                 </div>
                 <div class="card">
                     <div class="card-body">
