@@ -324,7 +324,7 @@ if($logBusAttendance) {
                         </div>
                     </div>
 
-                    <script src="<?= $baseUrl; ?>assets/js/qr.js"></script>
+                    <script src="<?= $baseUrl; ?>assets/js/qr.js?v=<?= version() ?>"></script>
                     <script>
                         let html5QrcodeScanner = null;
                         let isScanning = false;

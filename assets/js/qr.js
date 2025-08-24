@@ -2,6 +2,7 @@ let longitude = null, latitude = null;
 const QrManager = {
     latitude: 0,
     longitude: 0,
+    location: null,
     init() {
         this.checkLocation();
     },
@@ -60,9 +61,8 @@ const QrManager = {
                     _lastUpdated: new Date().getTime()
                 };
                 localStorage.setItem('userLocation', JSON.stringify(this.location));
-                longitude = this.location.longitude;
-                latitude = this.location.latitude;
-                this.updateLocationUI();
+                this.longitude = this.location.longitude;
+                this.latitude = this.location.latitude;
             }
         } catch (error) { }
     },
