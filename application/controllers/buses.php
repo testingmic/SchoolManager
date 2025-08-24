@@ -396,8 +396,8 @@ class Buses extends Myschoolgh {
 		$request = $params->request ?? "bus";
 
 		// set the longitude and latitude
-		$longitude = $params->longitude ?? 0;
-		$latitude = $params->latitude ?? 0;
+		$longitude = substr(($params->longitude ?? 0), 0, 12);
+		$latitude = substr(($params->latitude ?? 0), 0, 12);
 
 		// get the user id if the user id is not parsed
 		$userId = !empty($params->userId) ? $params->userId : ($this->session->userId ?? 0);
