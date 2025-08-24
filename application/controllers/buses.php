@@ -388,9 +388,11 @@ class Buses extends Myschoolgh {
             ('{$params->clientId}', '{$user->id}', '{$bus_id}', '{$date_logged}', '{$params->request}', '{$action}')"
         );
 
+		$message = $action == "checkin" ? "{$user->name} has <span class='text-green-500 text-underline'>Checked In</span> to the bus" : "{$user->name} has <span class='text-red-500 text-underline'>Checked Out</span> of the bus";
+
         return [
             "code" => 200,
-            "data" => "Attendance logged successfully"
+            "data" => $message
         ];
     }
 

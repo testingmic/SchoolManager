@@ -74,7 +74,7 @@ if(!empty($buses_list)) {
         }
     </script>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen relative">
     <!-- Header -->
     <?= render_qr_code_header() ?>
 
@@ -100,7 +100,7 @@ if(!empty($buses_list)) {
                 </div>
             </div>
         <?php } else { ?>
-            <div class="max-w-4xl mx-auto px-4 pt-4">
+            <div class="max-w-4xl mx-auto px-4 pt-4 pb-6">
 
                 <div class="grid lg:grid-cols-1 gap-4">
                     <h2 class="text-2xl font-bold text-uppercase text-black text-center pb-2">
@@ -234,7 +234,7 @@ if(!empty($buses_list)) {
                             </div>
 
                             <!-- User Information -->
-                            <div id="userInfo" class="bg-white rounded-2xl shadow-xl p-6 hidden">
+                            <div id="userInfo" class="bg-white rounded-2xl shadow-xl p-6 hidden mb-2">
                                 <div class="text-center mb-6">
                                     <h3 class="text-xl font-semibold text-gray-900" id="userName"></h3>
                                     <p class="text-gray-600" id="userType"></p>
@@ -276,7 +276,7 @@ if(!empty($buses_list)) {
                                     <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <i class="fas fa-check-circle text-green-600 text-3xl"></i>
                                     </div>
-                                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Attendance Logged Successfully!</h3>
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-2" id="successMessageText"></h3>
                                     <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                                         <div class="flex items-center space-x-2 text-green-700">
                                             <i class="fas fa-clock"></i>
@@ -305,7 +305,7 @@ if(!empty($buses_list)) {
                         </div>
                     </div>
 
-                    <div class="mt-2 text-center mb-6">
+                    <div class="mt-2 text-center mb-12">
                         <a id="goBack" style="max-width: 400px;" href="<?= $baseUrl ?>qr_code?request=<?= $logType ?>&client=<?= $clientId ?>" class="bg-blue-400 hover:bg-blue-600 text-white px-4 py-4 rounded-lg flex items-center space-x-2 text-center transition-colors">
                             <i class="fas fa-arrow-left"></i>
                             <span>Go Back</span>
@@ -418,9 +418,10 @@ if(!empty($buses_list)) {
                         }
 
                         // Show success message
-                        function showSuccess() {
+                        function showSuccess(message) {
                             document.getElementById('userInfo').classList.add('hidden');
                             document.getElementById('successMessage').classList.remove('hidden');
+                            document.getElementById('successMessageText').innerHTML = message;
                             document.getElementById('verificationTime').textContent = new Date().toLocaleString();
                         }
 
