@@ -83,11 +83,14 @@ if(!empty($buses_list)) {
     <?php } else { ?>
         <?php if(!in_array($logType, array_values($acceptedLog))) { ?>
             <div class="max-w-4xl mx-auto px-4 pt-4">
-                <div class="grid lg:grid-cols-2 gap-4 py-6">
+                <div class="grid lg:grid-cols-1">
+                    <h2 class="text-2xl font-bold text-uppercase text-green-500 text-center pb-2">
+                        Select Item To Log Attendance For
+                    </h2>
+                </div>
+                
+                <div class="grid lg:grid-cols-2 gap-4">
                     <div class="bg-white rounded shadow-xl p-10">
-                        <h2 class="text-2xl font-bold text-black mb-6 text-center border-b border-b-2 border-blue-200 pb-6">
-                            SELECT LOG TYPE
-                        </h2>
                         <div class="grid grid-cols-1 gap-8">
                             <?php foreach($acceptedLog as $key => $log) { ?>
                                 <a href="<?= $baseUrl ?>qr_code?request=<?= strtolower($log) ?>&client=<?= $clientId ?>" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 text-center hover:to-purple-700 text-white font-semibold py-6 px-2 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
@@ -103,7 +106,7 @@ if(!empty($buses_list)) {
             <div class="max-w-4xl mx-auto px-4 pt-4 pb-6">
 
                 <div class="grid lg:grid-cols-1 gap-4">
-                    <h2 class="text-2xl font-bold text-uppercase text-black text-center pb-2">
+                    <h2 class="text-2xl font-bold text-uppercase text-green-500 text-center pb-2">
                         Log <?= $logType == "bus" ? "Bus Attendance" : "Daily Attendance" ?>
                     </h2>
                 </div>
