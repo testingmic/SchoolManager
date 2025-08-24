@@ -260,6 +260,15 @@ $(`button[id="filter_Daily_Reports_List"]`).on("click", function() {
     loadPage(`${baseUrl}staff_weekly_reports`);
 });
 
+$(`button[id="filter_Bus_Attendance"]`).on("click", function() {
+    let bus_id = $(`div[id="filter_Bus_Driver"] select[name="bus_id"]`).val(),
+        user_id = $(`div[id="filter_Bus_Driver"] select[name="user_id"]`).val(),
+        action = $(`div[id="filter_Bus_Driver"] select[name="action"]`).val(),
+        date_logged = $(`div[id="filter_Bus_Driver"] input[name="date_logged"]`).val();
+    $.form_data = { bus_id, user_id, action, date_logged };
+    loadPage(`${baseUrl}buses_attendance`);
+});
+
 $(`button[id="generate_Transaction_Report"]`).on("click", function() {
     let account_id = $(`div[class~="transaction_report"] select[name="account_id"]`).val(),
         start_date = $(`div[class~="transaction_report"] input[name="start_date"]`).val(),

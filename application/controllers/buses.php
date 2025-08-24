@@ -418,20 +418,26 @@ class Buses extends Myschoolgh {
 	public function attendance_history($params = null) {
 		
 		try {
+
 			// append some filters to apply to the query
 			$query = !empty($params->user_id) ? " AND a.user_id IN ('{$params->user_id}')" : "";
 			$query .= !empty($params->bus_id) ? " AND a.bus_id IN ('{$params->bus_id}')" : "";
 			$query .= !empty($params->date_logged) ? " AND a.date_logged = '{$params->date_logged}'" : "";
 			$query .= !empty($params->request) ? " AND a.request = '{$params->request}'" : "";
+			$query .= !empty($params->action) ? " AND a.action = '{$params->action}'" : "";
+			
 
 			// get the list of users based on the request 
 			$stmt = $this->db->prepare("SELECT 
 					a.*, b.reg_number, u.name AS fullname, u.gender, u.day_boarder, u.unique_id, 
-					u.date_of_birth, u.user_type, b.brand, b.insurance_company, b.insurance_date
+					u.date_of_birth, u.user_type, b.brand, b.insurance_company, b.insurance_date,
+					b.driver_id AS driver_id, d.name AS driver_name, d.unique_id AS driver_unique_id
 				FROM bus_attendance a 
 				LEFT JOIN buses b ON a.bus_id = b.item_id
 				LEFT JOIN users u ON a.user_id = u.id
-				WHERE a.client_id='{$params->clientId}' {$query}");
+				LEFT JOIN users d ON b.driver_id = d.item_id
+				WHERE a.client_id='{$params->clientId}' {$query}
+				ORDER BY a.id DESC");
 			$query = $stmt->execute();
 
 			$data = $stmt->fetchAll(PDO::FETCH_OBJ);

@@ -313,7 +313,7 @@ function page_not_found($request = "not_found", $string = "The resource you tryi
     "You don't have permission to access the requested object. It is either read-protected or not readable on this server."));
     $title = $notFound ? "Record Not Found" : ($featureDisabled ? "Feature Disabled" : ($termEnded ? "Academic Term Ended" : "Permission Denied"));
 
-    return no_record_found($title, $message, $baseUrl."dashboard", "Home", true, $termEnded ? "fa-clock" : null);
+    return no_record_found($title, $message, $baseUrl."dashboard", "Home", true, $termEnded ? "fa-clock" : "fa-lock");
 }
 
 /**

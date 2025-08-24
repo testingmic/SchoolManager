@@ -995,7 +995,8 @@ var initPlugins = () => {
     if (('.daterange').length > 0) {
         $('.daterange').daterangepicker({
             locale: { format: 'YYYY-MM-DD', separator: ':' },
-            drops: 'down'
+            drops: 'down',
+            maxDate: $.today,
         });
     }
 

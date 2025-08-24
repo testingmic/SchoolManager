@@ -249,6 +249,17 @@
         </ul>
     </li>
     <li class="menu-header text-black">Human Resource</li>
+    <?php if($accessObject->hasAccess("view", "id_cards")) { ?>
+        <li class="dropdown">
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-qrcode"></i><span>ID Cards Setup</span></a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link" href="<?= $baseUrl ?>card_generated">Generated Cards</a></li>
+                <?php if($accessObject->hasAccess("settings", "id_cards")) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>card_settings">ID Card Settings</a></li>
+                <?php } ?>
+            </ul>
+        </li>
+    <?php } ?>
     <?php if($accessObject->hasAccess("view", "payslip")) { ?>
         <?php if(in_array("payroll", $clientFeatures)) { ?>
             <li class="dropdown">
@@ -290,17 +301,6 @@
             </li>
         <?php } ?>
     <?php } ?>
-    <?php if($accessObject->hasAccess("view", "id_cards")) { ?>
-        <li class="dropdown">
-            <a href="#" class="nav-link has-dropdown"><i class="fas fa-qrcode"></i><span>ID Cards Setup</span></a>
-            <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>card_generated">Generated Cards</a></li>
-                <?php if($accessObject->hasAccess("settings", "id_cards")) { ?>
-                    <li><a class="nav-link" href="<?= $baseUrl ?>card_settings">ID Card Settings</a></li>
-                <?php } ?>
-            </ul>
-        </li>
-    <?php } ?>
     <?php if(in_array("leave", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>leave" class="nav-link"><i class="far fa-check-square"></i><span>Leave Applications</span></a></li>
     <?php } ?>
@@ -316,7 +316,9 @@
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-bus-alt"></i><span>Bus Management</span></a>
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>buses">Manage Buses</a></li>
-                <li><a class="nav-link" href="<?= $baseUrl ?>buses_attendance">Bus Attendance</a></li>
+                <?php if($accessObject->hasAccess("bus_log", "attendance")) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>buses_attendance">Bus Attendance</a></li>
+                <?php } ?>
             </ul>
         </li>
     <?php } ?>
