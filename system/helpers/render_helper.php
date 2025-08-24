@@ -220,7 +220,7 @@ function render_qr_code_inactive($baseUrl = null) {
  * 
  * @return string
  */
-function render_qr_code_header() {
+function render_qr_code_header($baseUrl = null) {
     return '<div class="bg-white shadow-sm border-b">
         <div class="max-w-4xl mx-auto px-4 py-4">
             <div class="flex items-center justify-between">
@@ -229,7 +229,7 @@ function render_qr_code_header() {
                         <i class="fas fa-qrcode text-white text-lg"></i>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">QR Scanner</h1>
+                        <h1 class="text-2xl font-bold text-gray-900"><a href="'.$baseUrl.'qr_code">QR Scanner</a></h1>
                         <p class="text-gray-600">Scan QR Code to Log Attendance</p>
                     </div>
                 </div>

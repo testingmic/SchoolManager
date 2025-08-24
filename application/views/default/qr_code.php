@@ -50,7 +50,7 @@ if(!empty($buses_list)) {
         <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/select2/select2.css">
         <script src="<?= $baseUrl; ?>assets/bundles/select2/select2.js"></script>
     <?php } ?>
-    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/qr.css">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/qr.css?v=<?= version() ?>">
 
     <script>
         tailwind.config = {
@@ -76,7 +76,7 @@ if(!empty($buses_list)) {
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen relative">
     <!-- Header -->
-    <?= render_qr_code_header() ?>
+    <?= render_qr_code_header($baseUrl) ?>
 
     <?php if($clientState !== "Active") { ?>
         <?= render_qr_code_inactive($baseUrl) ?>
