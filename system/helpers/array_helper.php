@@ -408,7 +408,7 @@ function format_bus_item($value, $no_container = false, $no_buttons = false, $wi
                             ".(!empty($permissions["hasModify"]) && $no_buttons ? "<button class='btn btn-sm mb-1 btn-outline-success' title='Update {$value->brand}' onclick='return update_bus(\"{$value->item_id}\");'><i class='fa fa-edit'></i> Edit</button>" : null)."
                             ".(!$no_buttons ? "<button class='btn btn-sm mb-1 btn-outline-success' title='View {$value->brand}' onclick='return load(\"bus/{$value->item_id}\");'><i class='fa fa-eye'></i> View</button>" : null)."
                             ".(!empty($permissions["markAttendance"]) && $permissions["attendancePage"] ? "<button class='btn btn-sm mb-1 btn-outline-primary' title='View {$value->brand}' onclick='return load(\"bus/{$value->item_id}\");'><i class='fa fa-eye'></i> Manage Interactions</button>" : null)."
-                            ".(!empty($permissions["markAttendance"]) && !$permissions["attendancePage"] ? "<button class='btn btn-sm mb-1 btn-outline-primary' title='View Comments Log for {$value->brand}' onclick='return load(\"bus/{$value->item_id}/attendance\");'><i class='fa fa-bus'></i> Attendance</button>" : null)."
+                            ".(!empty($permissions["markAttendance"]) && !$permissions["attendancePage"] ? "<button class='btn btn-sm mb-1 btn-outline-primary' title='View Comments Log for {$value->brand}' onclick='return load(\"bus/{$value->item_id}/attendance\");'><i class='fa fa-bus'></i> Manage Attendance</button>" : null)."
                         </div>
                     </div>
                 </div>

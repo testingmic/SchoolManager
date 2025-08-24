@@ -103,7 +103,6 @@ if(empty($bus_id)) {
                 <td>".$attendance->user_type."</td>
                 <td>".$attendance->brand."</td>
                 <td>".$attendance->date_created."</td>
-                <td></td>
             </tr>";
         }
     }
@@ -159,7 +158,6 @@ if(empty($bus_id)) {
                                             <th>Type</th>
                                             <th>Details</th>
                                             <th>Date & Time</th>
-                                            <th align="center" width="13%"></th>
                                         </tr>
                                     </thead>
                                     <tbody>'.$bus_attendance.'</tbody>

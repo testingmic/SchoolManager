@@ -2,16 +2,14 @@
 global $defaultClientData, $defaultUser, $myClass;
 
 // get the client id
-$clientId = !empty($session->clientId) ? $session->clientId : (
-    $_GET["client"] ?? null
-);
+$clientId = $_GET["client"] ?? (!empty($session->clientId) ? $session->clientId : null);
 
 // base url
 $baseUrl = $myClass->baseUrl;
 $appName = $myClass->appName;
 
 // get the client data
-$defaultClientData = isset($defaultClientData->client_id) ? $defaultClientData : $myClass->client_session_data($clientId, false);
+$defaultClientData = $myClass->client_session_data($clientId, false, true);
 $clientState = $defaultClientData->client_state ?? "Inactive";
 
 // set the attendance type to log
@@ -114,35 +112,42 @@ if(!empty($buses_list)) {
 
                     <div class="lg:grid-cols-2 gap-4">
                         <!-- Scanner Section -->
-                        <div class="bg-white rounded-2xl shadow-xl p-4">
-                            <div class="text-center mb-6">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-2">Select Bus</h2>
-                                <p class="text-gray-600">Select the bus to log attendance for</p>
+                        <?php if(!empty($buses_list)) { ?>
+                            <div class="bg-white rounded-2xl shadow-xl p-4">
+                                <div class="text-center mb-8">
+                                    <h2 class="text-xl font-semibold text-gray-900 mb-2">Select Bus</h2>
+                                    <p class="text-gray-600">Select the bus to log attendance for</p>
+                                </div>
+                                
+                                <!-- Scanner Container -->
+                                <select data-width="100%" data-select-width="100%" name="bus_id" id="bus_id" class="w-full selectpicker p-2 border border-gray-300 rounded-lg">
+                                    <option value="">Select Bus</option>
+                                    <?php foreach($buses_list as $bus) { ?>
+                                        <option value="<?= $bus->item_id ?>"><?= $bus->brand ?> - Reg No: <?= $bus->reg_number ?></option>
+                                    <?php } ?>
+                                </select>
+                                
+                                <!-- Scanner Controls -->
+                                <div class="mt-6 flex justify-center space-x-3">
+                                    <button id="busSelectBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
+                                        <span>Proceed</span>
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                                
                             </div>
-                            
-                            <!-- Scanner Container -->
-                            <select data-width="100%" data-select-width="100%" name="bus_id" id="bus_id" class="w-full selectpicker p-2 border border-gray-300 rounded-lg">
-                                <option value="">Select Bus</option>
-                                <?php foreach($buses_list as $bus) { ?>
-                                    <option value="<?= $bus->item_id ?>"><?= $bus->brand ?> - Reg No: <?= $bus->reg_number ?></option>
-                                <?php } ?>
-                            </select>
-                            
-                            <!-- Scanner Controls -->
-                            <div class="mt-4 flex justify-center space-x-3">
-                                <button id="busSelectBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
-                                    <i class="fas fa-arrow-right"></i>
-                                    <span>Proceed</span>
-                                </button>
-                            </div>
-                            
-                        </div>
-                        <div id="errorMessage" class="bg-white mt-4 mb-4 rounded-2xl shadow-xl p-6 hidden">
+                        <?php } ?>
+                        <div id="errorMessage" class="bg-white mt-4 mb-4 rounded-2xl shadow-xl p-6 <?= !empty($buses_list) ? "hidden" : "" ?>">
                             <div class="text-center">
                                 <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i class="fas fa-exclamation-triangle text-red-600 text-3xl"></i>
+                                    <i class="fas <?= !empty($buses_list) ? "fa-exclamation-triangle" : "fa-bus" ?> text-red-600 text-3xl"></i>
                                 </div>
-                                <h4 class="text-xl text-gray-900 mb-2">Select a bus to proceed</h4>
+                                <div class="text-xl text-gray-900 mb-2">
+                                    <?= !empty($buses_list) ? "Select a bus to proceed" : 
+                                        "There are no buses available for your school. 
+                                        Please contact the administrator to add a bus or 
+                                        <a class='text-blue-500 hover:text-red-600' href='{$baseUrl}dashboard'>go back</a> to the <a class='text-blue-500 hover:text-red-600' href='{$baseUrl}dashboard'>dashboard</a>." ?>
+                                </div>
                             </div>
                         </div>
 
@@ -476,7 +481,7 @@ if(!empty($buses_list)) {
                 <?php } ?>
             </div>
         <?php } ?>
-
+        <div class="client_name"><?= $defaultClientData->client_name; ?></div>
     <?php } ?>
 </body>
 </html>

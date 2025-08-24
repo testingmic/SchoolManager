@@ -291,7 +291,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Object
 	 */
-	final function client_session_data($clientId, $clear = true) {
+	final function client_session_data($clientId, $clear = true, $force = false) {
 
 		// initial client data
 		$client_data = (object) [];
@@ -302,7 +302,7 @@ class Myschoolgh extends Models {
 		}
 
 		// if the session variable is empty then set a new session
-		if(empty($this->defaultClientData)) {
+		if(empty($this->defaultClientData) || $force === true) {
 			// load the client data
 			$client_data = $this->client_data($clientId);
 			$this->defaultClientData = $client_data;
