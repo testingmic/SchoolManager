@@ -101,14 +101,12 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("ALTER TABLE `bus_attendance` ADD `created_by` VARCHAR(32) NULL");
-		$fix[] = ("ALTER TABLE `bus_attendance` ADD `driver_id` VARCHAR(32) NULL");
-		$fix[] = ("ALTER TABLE `buses` ADD `driver_id` VARCHAR(32) NULL");
+		$fix[] = ("ALTER TABLE `buses_attendance` ADD `created_by` VARCHAR(32) NULL");
 
 		foreach($fix as $stmt) {
 			try {
-				$query = $this->db->prepare($stmt);
-				$query->execute();
+				// $query = $this->db->prepare($stmt);
+				// $query->execute();
 			} catch(PDOException $e) {
 				// print $e->getMessage();
 			}

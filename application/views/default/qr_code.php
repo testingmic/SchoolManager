@@ -50,8 +50,8 @@ if($logBusAttendance) {
     <meta name="apple-mobile-web-app-title" content="Attendance Taker - <?= $appName ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
+    <script src="<?= $baseUrl; ?>assets/js/app.min.js"></script>
     <?php if($logBusAttendance && !$busId) { ?>
-        <script src="<?= $baseUrl; ?>assets/js/app.min.js"></script>
         <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/select2/select2.css">
         <script src="<?= $baseUrl; ?>assets/bundles/select2/select2.js"></script>
     <?php } ?>
@@ -324,7 +324,7 @@ if($logBusAttendance) {
                         </div>
                     </div>
 
-                    <script src="<?= $baseUrl; ?>assets/js/app.min.js"></script>
+                    <script src="<?= $baseUrl; ?>assets/js/qr.js"></script>
                     <script>
                         let html5QrcodeScanner = null;
                         let isScanning = false;
@@ -455,6 +455,8 @@ if($logBusAttendance) {
                                     user_id: userId,
                                     request: logType,
                                     action: action,
+                                    longitude: QrManager.longitude,
+                                    latitude: QrManager.latitude,
                                     bus_id: busId,
                                     client_id: clientId
                                 });

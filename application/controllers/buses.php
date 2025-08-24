@@ -393,11 +393,19 @@ class Buses extends Myschoolgh {
         $date_logged = date("Y-m-d");
         $bus_id = $params->bus_id ?? null;
 		$action = $params->action ?? "checkin";
+		$request = $params->request ?? "bus";
+
+		// set the longitude and latitude
+		$longitude = $params->longitude ?? 0;
+		$latitude = $params->latitude ?? 0;
+
+		// get the user id if the user id is not parsed
+		$userId = !empty($params->userId) ? $params->userId : ($this->session->userId ?? 0);
 
         // log the bus attendance for the user
-        $this->db->query("INSERT INTO bus_attendance 
-            (client_id, user_id, bus_id, date_logged, request, action) VALUES 
-            ('{$params->clientId}', '{$user->id}', '{$bus_id}', '{$date_logged}', '{$params->request}', '{$action}')"
+        $this->db->query("INSERT INTO buses_attendance 
+            (client_id, user_id, bus_id, date_logged, request, action, created_by, longitude, latitude) VALUES 
+            ('{$params->clientId}', '{$user->id}', '{$bus_id}', '{$date_logged}', '{$request}', '{$action}', '{$userId}', '{$longitude}', '{$latitude}')"
         );
 
 		$message = $action == "checkin" ? "{$user->name} has <span class='text-green-500 text-underline'>Checked In</span> to the bus" : "{$user->name} has <span class='text-red-500 text-underline'>Checked Out</span> of the bus";
@@ -432,7 +440,7 @@ class Buses extends Myschoolgh {
 					a.*, b.reg_number, u.name AS fullname, u.gender, u.day_boarder, u.unique_id, 
 					u.date_of_birth, u.user_type, b.brand, b.insurance_company, b.insurance_date,
 					b.driver_id AS driver_id, d.name AS driver_name, d.unique_id AS driver_unique_id
-				FROM bus_attendance a 
+				FROM buses_attendance a 
 				LEFT JOIN buses b ON a.bus_id = b.item_id
 				LEFT JOIN users u ON a.user_id = u.id
 				LEFT JOIN users d ON b.driver_id = d.item_id
