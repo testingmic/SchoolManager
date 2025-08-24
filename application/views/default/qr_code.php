@@ -84,7 +84,7 @@ if(!empty($buses_list)) {
         <?php if(!in_array($logType, array_values($acceptedLog))) { ?>
             <div class="max-w-4xl mx-auto px-4 pt-4">
                 <div class="grid lg:grid-cols-2 gap-4 py-6">
-                    <div class="bg-white rounded-2xl shadow-xl p-10">
+                    <div class="bg-white rounded shadow-xl p-10">
                         <h2 class="text-2xl font-bold text-black mb-6 text-center border-b border-b-2 border-blue-200 pb-6">
                             SELECT LOG TYPE
                         </h2>
@@ -113,7 +113,7 @@ if(!empty($buses_list)) {
                     <div class="lg:grid-cols-2 gap-4">
                         <!-- Scanner Section -->
                         <?php if(!empty($buses_list)) { ?>
-                            <div class="bg-white rounded-2xl shadow-xl p-4">
+                            <div class="bg-white rounded-lg shadow-xl p-4">
                                 <div class="text-center mb-8">
                                     <h2 class="text-xl font-semibold text-gray-900 mb-2">Select Bus</h2>
                                     <p class="text-gray-600">Select the bus to log attendance for</p>
@@ -137,7 +137,7 @@ if(!empty($buses_list)) {
                                 
                             </div>
                         <?php } ?>
-                        <div id="errorMessage" class="bg-white mt-4 mb-4 rounded-2xl shadow-xl p-6 <?= !empty($buses_list) ? "hidden" : "" ?>">
+                        <div id="errorMessage" class="bg-white mt-4 mb-4 rounded-lg shadow-xl p-6 <?= !empty($buses_list) ? "hidden" : "" ?>">
                             <div class="text-center">
                                 <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <i class="fas <?= !empty($buses_list) ? "fa-exclamation-triangle" : "fa-bus" ?> text-red-600 text-3xl"></i>
@@ -178,7 +178,7 @@ if(!empty($buses_list)) {
 
                 <?php } else { ?>
                     <div class="mb-3">
-                        <div class="bg-white rounded-2xl shadow-xl">
+                        <div class="bg-white rounded-lg shadow-xl">
                             <div class="text-center mb-4 p-2">
                                 <div><?= $selectedBus->brand ?></div>
                                 <div><strong>Reg No:</strong> <?= $selectedBus->reg_number ?></div>
@@ -187,7 +187,7 @@ if(!empty($buses_list)) {
                     </div>
                     <div class="grid lg:grid-cols-2 gap-4">
                         <!-- Scanner Section -->
-                        <div class="bg-white rounded-2xl shadow-xl p-4">
+                        <div class="bg-white rounded-lg shadow-xl p-4">
                             <div class="text-center mb-4">
                                 <h2 class="text-xl font-semibold text-gray-900 mb-2">Camera Scanner</h2>
                                 <p class="text-gray-600">Position the QR code within the frame</p>
@@ -212,7 +212,7 @@ if(!empty($buses_list)) {
                         <!-- Results Section -->
                         <div>
                             <!-- Loading State -->
-                            <div id="loadingState" class="bg-white rounded-2xl shadow-xl p-6 hidden">
+                            <div id="loadingState" class="bg-white rounded-lg shadow-xl p-6 hidden">
                                 <div class="flex items-center justify-center space-x-3">
                                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
                                     <span class="text-gray-700">Fetching user information...</span>
@@ -220,7 +220,7 @@ if(!empty($buses_list)) {
                             </div>
 
                             <!-- Scan Result -->
-                            <div id="scanResult" style="margin-top: 0px;" class="bg-white rounded-2xl shadow-xl p-6 hidden">
+                            <div id="scanResult" style="margin-top: 0px;" class="bg-white rounded-lg shadow-xl p-6 hidden">
                                 <div class="text-center mb-4">
                                     <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                         <i class="fas fa-check text-green-600 text-2xl"></i>
@@ -234,7 +234,7 @@ if(!empty($buses_list)) {
                             </div>
 
                             <!-- User Information -->
-                            <div id="userInfo" class="bg-white rounded-2xl shadow-xl p-6 hidden mb-2">
+                            <div id="userInfo" class="bg-white rounded-lg shadow-xl p-6 hidden mb-2">
                                 <div class="text-center mb-6">
                                     <h3 class="text-xl font-semibold text-gray-900" id="userName"></h3>
                                     <p class="text-gray-600" id="userType"></p>
@@ -271,7 +271,7 @@ if(!empty($buses_list)) {
                             </div>
 
                             <!-- Success Message -->
-                            <div id="successMessage" class="bg-white mt-4 mb-4 rounded-2xl shadow-xl p-6 hidden">
+                            <div id="successMessage" class="bg-white mt-4 mb-4 rounded-lg shadow-xl p-6 hidden">
                                 <div class="text-center">
                                     <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <i class="fas fa-check-circle text-green-600 text-3xl"></i>
@@ -290,7 +290,7 @@ if(!empty($buses_list)) {
                             </div>
 
                             <!-- Error Message -->
-                            <div id="errorMessage" class="bg-white mt-4 mb-4 rounded-2xl shadow-xl p-6 hidden">
+                            <div id="errorMessage" class="bg-white mt-4 mb-4 rounded-lg shadow-xl p-6 hidden">
                                 <div class="text-center">
                                     <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <i class="fas fa-exclamation-triangle text-red-600 text-3xl"></i>
