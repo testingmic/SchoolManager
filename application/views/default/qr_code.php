@@ -93,9 +93,9 @@ if(!empty($buses_list)) {
                     <div class="bg-white rounded shadow-xl p-10">
                         <div class="grid grid-cols-1 gap-8">
                             <?php foreach($acceptedLog as $key => $log) { ?>
-                                <a href="<?= $baseUrl ?>qr_code?request=<?= strtolower($log) ?>&client=<?= $clientId ?>" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 text-center hover:to-purple-700 text-white font-semibold py-6 px-2 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                <a href="<?= $baseUrl ?>qr_code?request=<?= strtolower($log) ?>&client=<?= $clientId ?>" class="w-full text-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 text-center hover:to-purple-700 text-white font-semibold py-6 px-2 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                                     <i class="fas <?= $key ?>"></i>
-                                    <span>Log <?= ucwords($log) ?> Attendance</span>
+                                    <span class="text-uppercase"><?= ucwords($log) ?> Attendance</span>
                                 </a>
                             <?php } ?>
                         </div>
@@ -180,6 +180,7 @@ if(!empty($buses_list)) {
                     </script>
 
                 <?php } else { ?>
+                    <?php if(!empty($selectedBus)) { ?>
                     <div class="mb-3">
                         <div class="bg-white rounded-lg shadow-xl">
                             <div class="text-center mb-4 p-2">
@@ -188,6 +189,7 @@ if(!empty($buses_list)) {
                             </div>
                         </div>
                     </div>
+                    <?php } ?>
                     <div class="grid lg:grid-cols-2 gap-4">
                         <!-- Scanner Section -->
                         <div class="bg-white rounded-lg shadow-xl p-4">
