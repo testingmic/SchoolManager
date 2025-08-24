@@ -317,7 +317,7 @@
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>buses">Manage Buses</a></li>
                 <?php if($accessObject->hasAccess("bus_log", "attendance")) { ?>
-                    <li><a class="nav-link" href="<?= $baseUrl ?>buses_attendance">Bus Attendance</a></li>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>buses_attendance">Bus Attendance History</a></li>
                 <?php } ?>
             </ul>
         </li>

@@ -21,6 +21,22 @@ body .btn {
     margin-bottom: 0!important;
 }
 
+.p-5px {
+    padding: 5px!important;
+}
+
+.m-5px {
+    margin: 5px!important;
+}
+
+.pr-5px {
+    padding-right: 5px!important;
+}
+
+.pl-5px {
+    padding-left: 5px!important;
+}
+
 /* Setup Flow Enhancements */
 .setup-tab-nav .nav-link {
     transition: all 0.3s ease;

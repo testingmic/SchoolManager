@@ -439,11 +439,12 @@ class Buses extends Myschoolgh {
 			$stmt = $this->db->prepare("SELECT 
 					a.*, b.reg_number, u.name AS fullname, u.gender, u.day_boarder, u.unique_id, 
 					u.date_of_birth, u.user_type, b.brand, b.insurance_company, b.insurance_date,
-					b.driver_id AS driver_id, d.name AS driver_name, d.unique_id AS driver_unique_id
+					b.driver_id AS driver_id, d.name AS driver_name, d.unique_id AS driver_unique_id, c.name AS class_name
 				FROM buses_attendance a 
-				LEFT JOIN buses b ON a.bus_id = b.item_id
-				LEFT JOIN users u ON a.user_id = u.id
-				LEFT JOIN users d ON b.driver_id = d.item_id
+					LEFT JOIN buses b ON a.bus_id = b.item_id
+					LEFT JOIN users u ON a.user_id = u.id
+					LEFT JOIN classes c ON u.class_id = c.id
+					LEFT JOIN users d ON b.driver_id = d.item_id
 				WHERE a.client_id='{$params->clientId}' {$query}
 				ORDER BY a.id DESC");
 			$query = $stmt->execute();

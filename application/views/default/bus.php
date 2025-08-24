@@ -110,10 +110,16 @@ if(empty($bus_id)) {
             } else {
                 $statistics['checkout']++;
             }
+
+            $color = $attendance->action == "checkin" ? "text-green-500" : "text-red-500";
+
             $bus_attendance .= "<tr>
                 <td>".($key + 1)."</td>
-                <td>".$attendance->fullname."</td>
-                <td>".ucwords($attendance->action)."</td>
+                <td>
+                    <div>".$attendance->fullname."</div>
+                    ".(!empty($attendance->class_name) ? "<span class='badge badge-primary p-5px'>".$attendance->class_name."</span>" : "")."
+                </td>
+                <td><span class='{$color}'>".ucwords($attendance->action)."</span></td>
                 <td>".ucwords($attendance->user_type)."</td>
                 <td>".$attendance->brand."</td>
                 <td>".$attendance->date_created."</td>
@@ -168,7 +174,7 @@ if(empty($bus_id)) {
                         <div class="card-body">
                             '.($attendancePage ? '
                             <div class="table-responsive">
-                                <table data-empty="" class="table table-sm table-bordered table-striped datatable">
+                                <table data-empty="" class="table table-bordered table-striped datatable">
                                     <thead>
                                         <tr>
                                             <th width="5%" class="text-center">#</th>

@@ -109,7 +109,10 @@ foreach($attendanceHistory["data"] as $key => $attendance) {
             <div><a class='text-blue-500' href='{$baseUrl}bus/{$attendance->bus_id}/attendance'>".$attendance->brand."</a></div>
             <div><strong>Reg Number:</strong> ".$attendance->reg_number."</div>
         </td>
-        <td>".$attendance->fullname."</td>
+        <td>
+            <div>".$attendance->fullname."</div>
+            ".(!empty($attendance->class_name) ? "<span class='badge badge-primary p-5px'>".$attendance->class_name."</span>" : "")."
+        </td>
         <td><span class='{$color}'>".(!empty($attendance->action) ? ucwords($attendance->action) : "N/A")."</span></td>
         <td>".(!empty($attendance->user_type) ? ucwords($attendance->user_type) : "N/A")."</td>
         <td>".$attendance->date_created."</td>
