@@ -77,7 +77,7 @@ class Qr extends Myschoolgh {
     public function logs($params = null) {
         // create a default object
         $busObject = load_class("buses", "controllers");
-        return $busObject->attendance_list($params);
+        return $busObject->attendance_history($params);
     }
 
     /**

@@ -89,6 +89,25 @@ if(empty($bus_id)) {
         }
     }
 
+    // if the attendance page is active
+    if($attendancePage && $permissions["markAttendance"]) {
+        // get the attendance history
+        $attendanceHistory = $busObj->attendance_history($param);
+        
+        $bus_attendance = "";
+        foreach($attendanceHistory["data"] as $key => $attendance) {
+            $bus_attendance .= "<tr>
+                <td>".($key + 1)."</td>
+                <td>".$attendance->fullname."</td>
+                <td>".$attendance->action."</td>
+                <td>".$attendance->user_type."</td>
+                <td>".$attendance->brand."</td>
+                <td>".$attendance->date_created."</td>
+                <td></td>
+            </tr>";
+        }
+    }
+
     // also return the buses array list
     $response->array_stream["buses_array_list"] = $buses_array_list;
 
@@ -136,14 +155,14 @@ if(empty($bus_id)) {
                                         <tr>
                                             <th width="5%" class="text-center">#</th>
                                             <th>Driver</th>
-                                            <th>Date & Time</th>
-                                            <th>Teachers Count</th>
-                                            <th>Students Count</th>
+                                            <th>Action</th>
+                                            <th>Type</th>
                                             <th>Details</th>
+                                            <th>Date & Time</th>
                                             <th align="center" width="13%"></th>
                                         </tr>
                                     </thead>
-                                    <tbody></tbody>
+                                    <tbody>'.$bus_attendance.'</tbody>
                                 </table>
                             </div>' :
                             '<div class="slim-scroll">

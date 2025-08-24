@@ -105,7 +105,7 @@ if(!empty($buses_list)) {
             <div class="max-w-4xl mx-auto px-4 pt-4">
 
                 <div class="grid lg:grid-cols-1 gap-4">
-                    <h2 class="text-2xl text-uppercase text-black text-center pb-2">
+                    <h2 class="text-2xl font-bold text-uppercase text-black text-center pb-2">
                         Log <?= $logType == "bus" ? "Bus Attendance" : "Daily Attendance" ?>
                     </h2>
                 </div>
