@@ -20,7 +20,7 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 // end query if the user has no permissions
 if(!in_array("library", $clientFeatures)) {
     // permission denied information
-    $response->html = page_not_found("feature_disabled");
+    $response->html = page_not_found("feature_disabled", ["library"]);
     echo json_encode($response);
     exit;
 }

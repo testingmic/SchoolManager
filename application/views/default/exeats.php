@@ -24,7 +24,7 @@ $response->timer = 0;
 // end query if the user has no permissions
 if(!in_array("exeats", $clientFeatures)) {
     // permission denied information
-    $response->html = page_not_found("feature_disabled");
+    $response->html = page_not_found("feature_disabled", ["exeats"]);
     echo json_encode($response);
     exit;
 }

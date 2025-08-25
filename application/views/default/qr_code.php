@@ -112,7 +112,7 @@ if($logBusAttendance) {
 
                 <div class="grid lg:grid-cols-1 gap-4">
                     <h2 class="text-2xl font-bold text-uppercase text-green-500 text-center pb-2">
-                        Log <?= $logType == "bus" ? "Bus Attendance" : "Daily Attendance" ?>
+                        Log <?= $logType == "bus" ? "Bus Attendance" : "School Attendance" ?>
                     </h2>
                 </div>
 
@@ -189,7 +189,7 @@ if($logBusAttendance) {
                     <div class="mb-3">
                         <div class="bg-white rounded-lg shadow-xl">
                             <div class="text-center mb-4 p-2">
-                                <div><?= $selectedBus->brand ?></div>
+                                <div><i class="fas text-red-500 fa-bus"></i> <?= $selectedBus->brand ?></div>
                                 <div><strong>Reg No:</strong> <?= $selectedBus->reg_number ?></div>
                             </div>
                         </div>
@@ -198,9 +198,8 @@ if($logBusAttendance) {
                     <div class="grid lg:grid-cols-2 gap-4">
                         <!-- Scanner Section -->
                         <div class="bg-white rounded-lg shadow-xl p-4">
-                            <div class="text-center mb-4">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-2">Camera Scanner</h2>
-                                <p class="text-gray-600">Position the QR code within the frame</p>
+                            <div class="text-center">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-2">QR Code Scanner</h2>
                             </div>
                             
                             <!-- Scanner Container -->

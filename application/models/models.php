@@ -354,6 +354,7 @@ class Models {
             "library" => "Library Management",
             "timetable" => "Timetable",
             "attendance" => "Attendance Manager",
+            "qr_code_scanner" => "Attendance QR Code Scanner",
             "incidents" => "Incident Manager",
             "payroll" => "Payroll Manager",
             "leave" => "Leave Management",

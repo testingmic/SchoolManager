@@ -26,7 +26,7 @@ $response->title = $pageTitle;
 // end query if the user has no permissions
 if(!in_array("front_office", $clientFeatures)) {
     // permission denied information
-    $response->html = page_not_found("feature_disabled");
+    $response->html = page_not_found("feature_disabled", ["front_office"]);
     echo json_encode($response);
     exit;
 }

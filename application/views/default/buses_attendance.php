@@ -19,9 +19,9 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $response->title = "Bus Attendance";
 
 // end query if the user has no permissions
-if(!in_array("bus_manager", $clientFeatures)) {
+if(!in_array("bus_manager", $clientFeatures) || !in_array("qr_code_scanner", $clientFeatures)) {
     // permission denied information
-    $response->html = page_not_found("feature_disabled");
+    $response->html = page_not_found("feature_disabled", ["bus_manager", "qr_code_scanner"]);
     echo json_encode($response);
     exit;
 }
@@ -136,7 +136,9 @@ $response->html = '
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="text-right mb-2">
-                    <a class="btn btn-outline-success anchor" href="'.$baseUrl.'qr_code?request=bus&client='.$session->clientId.'"><i class="fa fa-qrcode"></i> Scan QR Code to Log Attendance</a>
+                    <a class="btn btn-outline-success anchor" target="_blank" href="'.$baseUrl.'qr_code?request=bus&client='.$session->clientId.'">
+                        <i class="fa fa-qrcode"></i> Take Attendance - QR Code
+                    </a>
                 </div>
                 <div class="row" id="filter_Bus_Driver">
                     <div class="col-xl-3 col-md-6 mb-2 form-group">

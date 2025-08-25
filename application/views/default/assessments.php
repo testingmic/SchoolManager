@@ -24,7 +24,7 @@ $response->title = "Assessments List";
 // end query if the user has no permissions
 if(!in_array("class_assessment", $clientFeatures)) {
     // permission denied information
-    $response->html = page_not_found("feature_disabled");
+    $response->html = page_not_found("feature_disabled", ["class_assessment"]);
     echo json_encode($response);
     exit;
 }

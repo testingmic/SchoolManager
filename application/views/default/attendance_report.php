@@ -25,7 +25,7 @@ if($isWardParent || !in_array("attendance", $clientFeatures)) {
     // unset the page additional information
     $response->page_programming = [];
     // permission denied information
-    $response->html = page_not_found("permission_denied");
+    $response->html = page_not_found("feature_disabled", ["attendance"]);
     echo json_encode($response);
     exit;
 }

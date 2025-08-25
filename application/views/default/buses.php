@@ -41,7 +41,7 @@ if(!$hasView) {
 // confirm that the school has the documents manager feature enabled
 if(!in_array("bus_manager", $clientFeatures)) {
     // permission denied
-    $response->html = page_not_found("not_found");
+    $response->html = page_not_found("feature_disabled", ["bus_manager"]);
 } else {
 
     // permission to modify and validate

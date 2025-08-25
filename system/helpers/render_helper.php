@@ -95,12 +95,12 @@ function render_class_attendance($attendance = [], $class_id = null, $baseUrl = 
  * @return string
  */
 function render_summary_card($value = 0, $label = null, $icon = null, $color = null, $column = "col-lg-3") {
-    return '<div class="'.$column.' col-md-4">
+    return '<div class="'.$column.' col-md-4 transition-all duration-300 transform hover:-translate-y-1">
             <div class="card">
-                <div class="card-body p-3 card-type-3">
+                <div class="card-body pb-2 card-type-3">
                     <div class="row">
                         <div class="col">
-                            <h6 class="text-muted mb-0">'.$label.'</h6>
+                            <h6 class="text-black mb-0">'.$label.'</h6>
                             <span data-count="'.strtolower(str_ireplace(" ", "_", $label)).'" class="font-weight-bold font-25 mb-0">'.$value.'</span>
                         </div>
                         <div class="col-auto">

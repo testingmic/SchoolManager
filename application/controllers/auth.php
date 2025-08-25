@@ -1094,9 +1094,9 @@ class Auth extends Myschoolgh {
             $defaultFeatures = $this->features_list;
 
             // remove the features that are not available for the trial account
-            unset($defaultFeatures["documents_manager"]);
-            unset($defaultFeatures["bulk_action"]);
-            unset($defaultFeatures["online_applications"]);
+            foreach(["documents_manager", "bulk_action", "online_applications", "qr_code_scanner"] as $remove) {
+                unset($defaultFeatures[$remove]);
+            }
 
             // the preferences
             $preference = (object) [

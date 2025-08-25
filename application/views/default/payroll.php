@@ -21,7 +21,7 @@ $filter = (object) array_map("xss_clean", $_POST);
 // end query if the user has no permissions
 if(!in_array("payroll", $clientFeatures)) {
     // permission denied information
-    $response->html = page_not_found("feature_disabled");
+    $response->html = page_not_found("feature_disabled", ["payroll"]);
     echo json_encode($response);
     exit;
 }
