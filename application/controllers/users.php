@@ -616,7 +616,7 @@ class Users extends Myschoolgh {
 							(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name, a.enrollment_date,
 							(SELECT b.name FROM departments b WHERE b.id = a.department LIMIT 1) AS department_name
 						FROM users a 
-						WHERE a.status='1' AND a.guardian_id LIKE '%{$result->user_id}%' AND a.user_type='student' LIMIT 10
+						WHERE a.status='1' AND a.client_id='{$result->client_id}' AND a.guardian_id LIKE '%{$result->user_id}%' AND a.user_type='student' LIMIT 20
 					");
 					$qr->execute();
 					$result->wards_list = $qr->fetchAll(PDO::FETCH_ASSOC);
@@ -2582,14 +2582,36 @@ class Users extends Myschoolgh {
 	 */
 	public function set_default_student(stdClass $params) {
 
+		if(empty($params->student_id)) {
+			return [
+				"code" => 400,
+				"data" => "Sorry! Please provide a valid student id."
+			];
+		}
+
+		// if the student id is to be removed
+		if($params->student_id == "remove") {
+			$this->session->set([
+				"student_id" => null,
+				"student_class_row_id" => null,
+				"student_class_id" => null,
+				"student_courses_id" => null,
+				"last_TimetableId" => null
+			]);
+			return [
+				"code" => 200,
+				"data" => "Student Id successfully removed"
+			];
+		}
+
 		// get the student class id
 		$stmt = $this->db->prepare("SELECT 
 				c.id AS class_row_id, c.item_id AS class_guid, u.last_timetable_id
-			FROM classes c
-			LEFT JOIN users u ON u.class_id = c.id
-			WHERE u.item_id = ? LIMIT 1
+			FROM users u
+			LEFT JOIN classes c ON u.class_id = c.id
+			WHERE u.item_id = ? AND u.client_id = ? LIMIT 1
 		");
-		$stmt->execute([$params->student_id]);
+		$stmt->execute([$params->student_id, $params->clientId]);
 		$result = $stmt->fetch(PDO::FETCH_OBJ);
 
 		// if the class guid was set and also not empty

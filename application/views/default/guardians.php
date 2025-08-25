@@ -48,12 +48,19 @@ foreach($guardian_list as $kkey => $each) {
     $wards_list = "";
     if(!empty($each->wards_list)) {
 
+        $processedIds = [];
         // loop through the list of wards
         foreach($each->wards_list as $key => $ward) {
+
             // convert to object
             $ward = (object) $ward;
 
+            if(in_array($ward->student_guid, $processedIds)) {
+                continue;
+            }
+
             $imageToUse = "";
+            $processedIds[] = $ward->student_guid;
 
             // append to the list
             $wards_list .= "

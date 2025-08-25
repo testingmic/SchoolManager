@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser, $clientFeatures, $defaultCurrency; 
+global $myClass, $SITEURL, $defaultUser, $clientFeatures, $defaultCurrency, $isWardParent; 
 
 // initial variables
 $appName = $myClass->appName;
@@ -261,7 +261,7 @@ if(!empty($item_id)) {
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="books_list" role="tabpanel" aria-labelledby="books_list-tab2">
-                                    <div class="d-flex justify-content-between">
+                                    <div class="d-flex justify-content-end">
                                         '.($isEditable ? 
                                             ($hasIssue && $isRequested ? 
                                                 "<div><button onclick='return approve_Cancel_Books_Request(\"{$item_id}\",\"approve_request\");' class='btn btn-outline-success'><i class='fa fa-save'></i> Approve Request</button></div>" : 

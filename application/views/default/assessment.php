@@ -515,7 +515,7 @@ if(!empty($item_id)) {
                             '    
                         ) : null
                     ).'
-                    <li class="nav-item">
+                    <li class="nav-item '.($isWardParent ? "d-none" : null).'">
                         <a class="nav-link '.($url_link === "_grading" ? "active" : null).'" onclick="return appendToUrl(\'_grading\')" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
                             '.($isTutorAdmin ? "Grading" : "Handin Answers").'
                         </a>

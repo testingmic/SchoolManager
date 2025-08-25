@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $accessObject, $defaultUser;
+global $myClass, $accessObject, $defaultUser, $isWardParent, $isTeacher, $isAccountant, $isAdmin;
 
 // initial variables
 $appName = $myClass->appName;
@@ -17,9 +17,9 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 
-$hasRequest = $accessObject->hasAccess("request", "library");
+$hasRequest = $accessObject->hasAccess("request", "library") || $isWardParent;
 
-$pageTitle = "Request Book";
+$pageTitle = "Request for Book(s)";
 
 $response->title = $pageTitle;
 
@@ -28,13 +28,19 @@ if(!$hasRequest) {
 } else {
 
     $userId = !empty($session->student_id) ? $session->student_id : $session->userId;
-    $user_role = !empty($session->student_id) ? "student" : $defaultUser->user_type;
+    $user_role = $defaultUser->user_type;
 
     $response->scripts = ["assets/js/library.js"];
     $search = (object)["search_form" => true, "clientId" => $clientId];
     $search_form = load_class("forms", "controllers")->library_book_issue_form($search);
     
-    $form = (object)["request_form" => true, "user_id" => $userId, "clientId" => $clientId, "user_role" => $user_role];
+    $form = (object)[
+        "request_form" => true, 
+        "user_id" => $userId, 
+        "clientId" => $clientId, 
+        "user_role" => $user_role, 
+        "wards_list" => $defaultUser->wards_list ?? []
+    ];
     $request_form = load_class("forms", "controllers")->library_book_issue_form($form);
 
     $response->html = '

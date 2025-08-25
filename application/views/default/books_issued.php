@@ -78,7 +78,8 @@ foreach($item_list["data"] as $key => $each) {
     }
 
     $books_list .= "<td>{$books_}</td>";
-    $books_list .= "<td>{$each->issued_date}</td>";
+    $books_list .= "<td>".($hasIssue ? $each->issued_date : $each->created_at)."</td>";
+    $books_list .= !$hasIssue ? "<td>".($each->issued_date ?? null)."</td>" : "";
     $books_list .= "<td>{$each->return_date}</td>";
     $books_list .= "<td>".($each->fine ?? null)."</td>";
     $books_list .= "<td>".$myClass->the_status_label($each->state)."</td>";
@@ -111,7 +112,8 @@ $response->html = '
                                         '.($hasIssue ? '<th>Fullname</th>' : '').'
                                         <th>Books List</th>
                                         '.($hasIssue ? '<th>Date of Issue</th>' : '<th>Date of Request</th>').'
-                                        <th>Date of Expiry</th>
+                                        '.(!$hasIssue ? '<th>Approval Date</th>' : '').'
+                                        <th>Return Date</th>
                                         <th width="10%">Fine</th>
                                         <th width="10%">Status</th>
                                         <th align="center" width="10%"></th>

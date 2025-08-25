@@ -269,6 +269,14 @@ $(`button[id="filter_Bus_Attendance"]`).on("click", function() {
     loadPage(`${baseUrl}buses_attendance`);
 });
 
+$(`button[id="filter_Daily_Attendance"]`).on("click", function() {
+    let user_id = $(`div[id="filter_Daily_Attendance"] select[name="user_id"]`).val(),
+        action = $(`div[id="filter_Daily_Attendance"] select[name="action"]`).val(),
+        date_logged = $(`div[id="filter_Daily_Attendance"] input[name="date_logged"]`).val();
+    $.form_data = { user_id, action, date_logged };
+    loadPage(`${baseUrl}attendance_history`);
+});
+
 $(`button[id="generate_Transaction_Report"]`).on("click", function() {
     let account_id = $(`div[class~="transaction_report"] select[name="account_id"]`).val(),
         start_date = $(`div[class~="transaction_report"] input[name="start_date"]`).val(),

@@ -154,23 +154,24 @@ class Library extends Myschoolgh {
 		// append to the parameter based on the user type logged in
 		if($params->userData->user_type == "teacher") {
 			$params->user_role = "teacher";
-			$params->user_id = $params->userData->user_id;
+			$params->user_id = [$params->userData->user_id];
 		}
 
 		// if the user is an employee and does not have the permission to issue
 		if(in_array($params->userData->user_type, ["accountant", "employee"]) && !$accessObject->hasAccess("issue", "library")) {
 			$params->user_role = $params->userData->user_type;
-			$params->user_id = $params->userData->user_id;
+			$params->user_id = [$params->userData->user_id];
 		}
 
 		// if the user is a student or parent
 		if(in_array($params->userData->user_type, ["student", "parent"])) {
 			$params->user_role = "student";
-			$user_id = $params->userData->user_id;
+			$user_id = [$params->userData->user_id];
 
 			// if the user is a parent
 			if($params->userData->user_type == "parent") {
-				$user_id = $this->session->student_id;
+				unset($params->user_role);
+				$user_id = array_merge($user_id, array_column($params->userData->wards_list, "student_guid"));
 			}
 
 			// set the user id
@@ -187,8 +188,9 @@ class Library extends Myschoolgh {
 		$params->query .= !empty($params->status) ? " AND a.status='{$params->status}'" : null;
         $params->query .= !empty($params->user_role) ? " AND a.user_role='{$params->user_role}'" : null;
         $params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= !empty($params->user_id) ? " AND a.user_id='{$params->user_id}'" : null;
+        $params->query .= !empty($params->user_id) ? " AND a.user_id IN ('".implode("','", $params->user_id)."')" : null;
 		$params->query .= !empty($params->borrowed_id) ? " AND a.item_id='{$params->borrowed_id}'" : null;
+		
 
         try {
 
@@ -755,6 +757,12 @@ class Library extends Myschoolgh {
 		// confirm that the return date is not empty
 		if(!isset($data->return_date)) {
 			return ["code" => 400, "data" => "Sorry! The return date for this request must be set."];
+		}
+
+		// if the ward id is not empty
+		if(!empty($data->ward_id)) {
+			$data->user_id = $data->ward_id;
+			$data->user_role = "student";
 		}
 
 		// confirm that the user id was selected

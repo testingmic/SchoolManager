@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $clientFeatures, $defaultCurrency;
+global $myClass, $accessObject, $defaultUser, $clientFeatures, $defaultCurrency, $isWardParent;
 
 // initial variables
 $appName = $myClass->appName;
@@ -32,7 +32,7 @@ $filter = (object) array_map("xss_clean", $_POST);
 // set the parameters
 $params = (object) [
     "clientId" => $session->clientId,
-    "request" => "daily",
+    "request" => $isWardParent ? null : "daily",
     "client_data" => $defaultUser->client
 ];
 
@@ -48,7 +48,7 @@ if(!empty($filter->date_logged)) {
 $params->date_range = $date_range;
 
 // loop through the filter parameters
-foreach(['bus_id', 'user_id', 'action'] as $key) {
+foreach(['bus_id', 'user_id', 'action', 'request'] as $key) {
     if(!empty($filter->$key)) {
         $params->$key = $filter->$key;
     }
@@ -59,9 +59,6 @@ $busObj = load_class("buses", "controllers");
 
 // append the scripts
 $response->scripts = ["assets/js/filters.js"];
-
-// get the attendance history
-$attendanceHistory = $busObj->attendance_history($params);
 
 // set the attendance history
 $attendance_history = "";
@@ -74,6 +71,16 @@ $statistics = [
     'days' => [],
     'unique_days' => []
 ];
+
+$users_ids = [$defaultUser->user_id];
+if($isWardParent) {
+    $users_ids = array_column($defaultUser->wards_list, "student_guid");
+}
+
+$params->user_ids = $users_ids;
+
+// get the attendance history
+$attendanceHistory = $busObj->attendance_history($params);
 
 // loop through the attendance history
 foreach($attendanceHistory["data"] as $key => $attendance) {
@@ -105,7 +112,11 @@ foreach($attendanceHistory["data"] as $key => $attendance) {
 }
 
 // get the buses list
-$users_list = $myClass->pushQuery("id, unique_id, name", "users", "client_id='{$params->clientId}' AND user_type NOT IN ('parent', 'guardian')");
+$users_list = $myClass->pushQuery(
+    "id, unique_id, name", 
+    "users", 
+    "client_id='{$params->clientId}' ".($isWardParent ? " AND item_id IN ('".implode("','", $users_ids)."')" : "")
+);
 
 // set the html content
 $response->html = '
@@ -120,11 +131,13 @@ $response->html = '
         </div>
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
+                '.(!$isWardParent ? '
                 <div class="text-right mb-2">
                     <a class="btn btn-outline-success anchor" target="_blank" href="'.$baseUrl.'qr_code?request=daily&client='.$session->clientId.'">
                         <i class="fa fa-qrcode"></i> Take Attendance - QR Code
                     </a>
                 </div>
+                ' : null).'
                 <div class="row" id="filter_Daily_Attendance">
                     <div class="col-xl-3 col-md-6 mb-2 form-group">
                         <label>Select Passenger</label>
@@ -149,7 +162,7 @@ $response->html = '
                     </div>
                     <div class="col-xl-3 col-md-6 form-group">
                         <label class="d-sm-none d-md-block" for="">&nbsp;</label>
-                        <button id="filter_Bus_Attendance" type="submit" class="btn btn-outline-warning height-40 btn-block"><i class="fa fa-filter"></i> FILTER</button>
+                        <button id="filter_Daily_Attendance" type="submit" class="btn btn-outline-warning height-40 btn-block"><i class="fa fa-filter"></i> FILTER</button>
                     </div>
                 </div>
                 <div class="row">

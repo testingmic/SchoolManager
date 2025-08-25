@@ -323,7 +323,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             } else {
 
                 // loop through the wards list
-                foreach($data->wards_list as $ward) {
+                foreach($data->wards_list as $i => $ward) {
 
                     // convert to object
                     $ward = (object) $ward;
@@ -333,31 +333,31 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     $isCurrent = (bool) ($session->student_id == $ward->student_guid);
 
                     $wards_list .= "
-                    <div class='mb-3 border-bottom'>
+                    <div class='".($i+1 !== count($data->wards_list) ? "mb-3 border-bottom" : "")."'>
                         <div class='row'>
-                            <div class='col-lg-2 text-center'>
+                            <div class='col-lg-2 hidden text-center'>
                                 <img title='Click to view full details of {$ward->name}' onclick='load(\"student/{$ward->student_guid}\");' src='{$baseUrl}{$ward->image}' width='80px' class='author-box-picture cursor'>
                             </div>
-                            <div class='col-lg-10'>
+                            <div class='col-lg-12'>
                                 <table width='100%'>
                                     <tr>
-                                        <td class='font-bold p-1' align='right'>Name</td>
+                                        <td class='font-bold p-1'>Name</td>
                                         <td class='pr-2' align='right'>{$ward->name}</td>
                                     </tr>
                                     <tr>
-                                        <td class='font-bold p-1' align='right'>Gender</td>
+                                        <td class='font-bold p-1'>Gender</td>
                                         <td class='pr-2' align='right'>{$ward->gender}</td>
                                     </tr>
                                     <tr>
-                                        <td class='font-bold p-1' align='right'>Class</td>
+                                        <td class='font-bold p-1'>Class</td>
                                         <td class='pr-2' align='right'>{$ward->class_name}</td>
                                     </tr>
                                     <tr>
-                                        <td class='font-bold p-1' align='right'>Admission Id</td>
+                                        <td class='font-bold p-1'>Admission Id</td>
                                         <td class='pr-2' align='right'>{$ward->unique_id}</td>
                                     </tr>
                                     <tr>
-                                        <td class='font-bold p-1' align='right'>Admission Date</td>
+                                        <td class='font-bold p-1'>Admission Date</td>
                                         <td class='pr-2' align='right'>{$ward->enrollment_date}</td>
                                     </tr>
                                     <tr>
@@ -369,6 +369,13 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 </table>
                             </div>
                         </div>
+                    </div>";
+                }
+
+                if(!empty($session->student_id) && !empty($data->wards_list)) {
+                    $wards_list .= "
+                    <div class='mb-0 text-center border-top pt-3 mt-1'>
+                        <button onclick='return set_default_Student(\"remove\")' class='btn btn-sm cursor btn-outline-danger mb-2'>Deselect Student</button>
                     </div>";
                 }
                 
@@ -1130,8 +1137,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card-header">
                                 <h5 class="pb-0 mb-0">My Wards</h5>
                             </div>
-                            <div class="card-body pr-2 trix-slim-scroll mt-0 pt-0 pb-0" style="max-height:575px;min-height:435px;overflow-y:auto;">
-                                <div class="py-2" style="width:98%">
+                            <div class="card-body pr-2 mt-0 pt-0 pb-0">
+                                <div class="py-2">
                                     '.$wards_list.'
                                 </div>
                             </div>'
@@ -1141,18 +1148,18 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     '<div>
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="text-uppercase font-13">Upcoming Events</h4>
+                                <h4 class="text-uppercase font-13 mb-0">Upcoming Events</h4>
                             </div>
                             <div class="card-body p-2 pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
-                                    '.$upcoming_events_list.'
+                                    '.(!empty($upcoming_events_list) ? $upcoming_events_list : no_record_found("No Events Found", "No events have been created yet.", null, "Event", false, "fas fa-calendar-check")).'
                                 </ul>
                             </div>
                         </div>
                     </div>' : null).'
                 </div>
                 <div class="col-lg-8 col-md-12">
-                    <div class="row">
+                    <div class="row stick_to_top">
                         '.($isParent ?                             
                             '<div class="col-lg-4 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
                                 <div class="card card-statistic-1 border border-left-lg border-green border-left-solid bg-gradient-to-br from-green-300 to-green-100">
@@ -1191,11 +1198,11 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     '<div class="col-lg-4 col-md-6 col-12 col-sm-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="text-uppercase font-13">Upcoming Events</h4>
+                                <h4 class="text-uppercase font-13 mb-0">Upcoming Events</h4>
                             </div>
                             <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
-                                    '.$upcoming_events_list.'
+                                    '.(!empty($upcoming_events_list) ? $upcoming_events_list : no_record_found("No Events Found", "No events have been created yet.", null, "Event", false, "fas fa-calendar-check")).'
                                 </ul>
                             </div>
                         </div>

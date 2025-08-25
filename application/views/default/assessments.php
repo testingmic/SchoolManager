@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $defaultClientData, $clientFeatures, $isTutorAdmin;
+global $myClass, $accessObject, $defaultUser, $defaultClientData, $clientFeatures, $isTutorAdmin, $isWardParent;
 
 // initial variables
 $appName = $myClass->appName;
@@ -30,6 +30,11 @@ if(!in_array("class_assessment", $clientFeatures)) {
 }
 
 $response->scripts = ["assets/js/filters.js", "assets/js/lessons.js"];
+
+// if the class_id is not empty
+if($isWardParent) {
+    $filter->class_id = empty($filter->class_id) ? $session->student_class_id : $filter->class_id;
+}
 
 // the query parameter to load the user information
 $assignments_param = (object) [
@@ -114,11 +119,17 @@ $response->html = '
                     $response->html .= '
                 </select>
             </div>
-            <div class="col-xl-2 col-md-2 col-12 form-group">
+            <div class="'.($isWardParent ? "col-md-3" : "col-xl-2 col-md-2").' col-12 form-group">
                 <label>Select Class</label>
                 <select class="form-control selectpicker" data-width="100%" name="class_id">
                     <option value="">Please Select Class</option>';
                     foreach($class_list as $each) {
+
+                        // if the class is not the student class and the user is a ward parent
+                        if($isWardParent && $each->item_id !== $session->student_class_id) {
+                            continue;
+                        }
+
                         $response->html .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->item_id) ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";
                     }
                     $response->html .= '
@@ -134,7 +145,7 @@ $response->html = '
                     $response->html .= '
                 </select>
             </div>
-            <div class="col-lg-2 col-md-2 col-12 form-group">
+            <div class="'.($isWardParent ? "col-md-3" : "col-xl-2 col-md-2").' col-12 form-group">
                 <label>Select SBA Type</label>
                 <select class="form-control selectpicker" data-width="100%" name="assessment_group">
                     <option value="">Please Select SBA Type</option>';

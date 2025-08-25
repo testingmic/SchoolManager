@@ -3491,6 +3491,8 @@ class Forms extends Myschoolgh {
         if(isset($data->search_form)) {
             //get the books category list
             $category_list = $this->pushQuery("id, name", "books_type", "status='1' AND client_id='{$data->clientId}'");
+
+            // get the books list
             $books_list = $this->pushQuery("a.item_id, a.isbn, a.author, a.rack_no, a.book_image, a.row_no, a.description, a.class_id, 
                 a.title, (SELECT quantity FROM books_stock WHERE books_id = a.item_id) AS books_stock", "books a", "a.status='1' AND a.client_id='{$data->clientId}'");
 
@@ -3571,12 +3573,28 @@ class Forms extends Myschoolgh {
 
         // if the request includes the request_form
         if(isset($data->request_form)) {
+
+            // if the wards list is not empty
+            if(!empty($data->wards_list)) {
+                $html_content .= '
+                <div class="form-group">
+                    <label>Select Ward</label>
+                    <select data-width="100%" name="ward_id" id="ward_id" class="form-control selectpicker">
+                        <option value="">Please Select</option>';
+                        foreach($data->wards_list as $each) {
+                            $html_content .= "<option value=\"{$each["student_guid"]}\">{$each["name"]}</option>";                            
+                        }
+                    $html_content .= '
+                    </select>
+                </div>';
+            }
+
             // set the html_content to display
             $html_content .= '
                 <input type="hidden" readonly name="user_role" id="user_role" value="'.$data->user_role.'">
                 <input type="hidden" readonly name="user_id" id="user_id" value="'.$data->user_id.'">
                 <div class="form-group">
-                    <label>Return Date <span class="required">*</span></label>
+                    <label>Proposed Return Date <span class="required">*</span></label>
                     <input type="text" data-mindate="'.date("Y-m-d").'" data-maxdate="'.date("Y-m-d", strtotime("+3 month")).'" value="'.($data->return_date ?? date("Y-m-d", strtotime("+1 week"))).'" name="return_date" id="return_date" class="form-control datepicker">
                 </div>
                 <div class="text-right">

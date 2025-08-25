@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $clientFeatures;
+global $myClass, $accessObject, $defaultUser, $clientFeatures, $isWardParent, $isTeacher;
 
 // initial variables
 $appName = $myClass->appName;
@@ -72,11 +72,12 @@ $response->html = '
         </div>
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
-                '.($hasAdd ? '
-                    <div class="text-right mb-2">
-                        <a class="btn btn-outline-primary" href="'.$baseUrl.'book_category_add"><i class="fa fa-plus"></i> Add Collection</a>
-                    </div>' : ''
-                ).'
+                <div class="text-right mb-2">
+                '.($hasAdd ? '<a class="btn btn-outline-primary" href="'.$baseUrl.'book_category_add"><i class="fa fa-plus"></i> Add Collection</a>' : '').'
+                '.($isTeacher || $isWardParent ? '
+                    <a class="btn btn-outline-success" href="'.$baseUrl.'request-book"><i class="fa fa-book-open"></i> Request for Books</a>
+                ' : '').'
+                </div>
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
