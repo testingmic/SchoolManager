@@ -225,12 +225,14 @@ class Attendance extends Myschoolgh {
             }
 
             //log the user activity
-            if(isset($classData)) {
-                // if the class data was parsed and set
-                $this->userLogs("attendance_log", $params->finalize ?? null, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}. {$info}", $params->userId);
-            } else {
-                // update the for user type
-                $this->userLogs("attendance_log", $params->finalize ?? 1, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$params->user_type}</strong> on {$params->date}. {$info}", $params->userId);
+            if(!empty($params->userData)) {
+                if(isset($classData)) {
+                    // if the class data was parsed and set
+                    $this->userLogs("attendance_log", $params->finalize ?? null, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}. {$info}", $params->userId);
+                } else {
+                    // update the for user type
+                    $this->userLogs("attendance_log", $params->finalize ?? 1, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$params->user_type}</strong> on {$params->date}. {$info}", $params->userId);
+                }
             }
         }
 
@@ -941,8 +943,8 @@ class Attendance extends Myschoolgh {
                             </div>
                             ".(!empty($check) ? "
                                 <div class='pt-2 border-top mt-2'>
-                                    <p class='mb-0 pb-0'>Created By: <strong>{$check[0]->created_by_name}</strong></p>
-                                    <p class='mb-0 pb-0'>Email Address: <strong>{$check[0]->created_by_email}</strong></p>
+                                    <p class='mb-0 pb-0'>Created By: <strong>".(!empty($check[0]->created_by_name) ? $check[0]->created_by_name : "System")."</strong></p>
+                                    <p class='mb-0 pb-0'>Email Address: <strong>".(!empty($check[0]->created_by_email) ? $check[0]->created_by_email : "System")."</strong></p>
                                     <p class='mb-0 pb-0'>Last Updated: <strong>{$check[0]->date_created}</strong></p>
                                 </div>
                                 " : 
@@ -950,7 +952,7 @@ class Attendance extends Myschoolgh {
                         </td>
                         <td colspan='2' valign='top'>
                             <div class='text-right'>
-                                <p class='mb-0 pb-0'>Finanlized By: <strong>{$check[0]->finalized_by_name}</strong></p>
+                                <p class='mb-0 pb-0'>Finalized By: <strong>{$check[0]->finalized_by_name}</strong></p>
                                 <p class='mb-0 pb-0'>Email Address: <strong>{$check[0]->finalized_by_email}</strong></p>
                             </div>
                             <div class='pt-2 text-right border-top mt-2'>
