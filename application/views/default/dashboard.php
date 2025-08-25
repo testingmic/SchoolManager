@@ -298,14 +298,41 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
         // load the use information
         $expenses_list = null;
+        $total_payments = 0;
+        $total_outstanding = 0;
         $timetableClass = load_class("timetable", "controllers", $global_params);
+
+        // load fees allocation list for class
+        $allocation_param = (object) [
+            "limit" => 200,
+            "clientId" => $clientId, 
+            "userData" => $defaultUser,
+            "client_data" => $defaultUser->client, 
+            "parse_owning" => true, 
+            "student_array_ids" => $defaultUser->wards_list_ids,
+            "raw_array_response" =>  true, 
+            "group_by" => "GROUP BY a.payment_id"
+        ];
+
+        // append the academic year and term
+        $allocation_param->academic_year = $defaultAcademics->academic_year;
+        $allocation_param->academic_term = $defaultAcademics->academic_term;
+
+        // create a new object
+        $feesObject = load_class("fees", "controllers", $allocation_param);
+                    
+        // load fees allocation list for the students
+        $feesAllocation = $feesObject->student_allocation_array($allocation_param);
+
+        $total_amount_due = array_sum(array_column($feesAllocation, "amount_due"));
+        $total_fees_payments = array_sum(array_column($feesAllocation, "amount_paid"));
+        $total_outstanding = $total_amount_due - $total_fees_payments;
 
         // load the wards list
         if($isParent) {
             
             // wards count
             $wards_count = 0;
-            $total_expenditure = 0;
             
             // stream nothing if the student id has not been set yet
             if(!empty($session->student_id)) {
@@ -315,7 +342,6 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 // set parameters
                 $data_stream = "";
             }
-
 
             // if the wards array is not empty
             if(empty($data->wards_list)) {
@@ -405,7 +431,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 foreach($item_list as $key => $each) {
 
                     // add up to the expenses
-                    $total_expenditure += $each->amount;
+                    $total_payments += $each->amount_paid;
 
                     // list the items
                     $action = "";
@@ -1162,9 +1188,9 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="row stick_to_top">
                         '.($isParent ?                             
                             '<div class="col-lg-4 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
-                                <div class="card card-statistic-1 border border-left-lg border-green border-left-solid bg-gradient-to-br from-green-300 to-green-100">
+                                <div class="card card-statistic-1 border border-left-lg border-yellow border-left-solid bg-gradient-to-br from-yellow-300 to-yellow-100">
                                     <div class="flex items-center justify-between p-4">
-                                        <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-yellow-600 to-yellow-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                             <i class="fas fa-users text-white text-xl"></i>
                                         </div>
                                         <div class="card-wrap text-right">
@@ -1175,14 +1201,27 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 </div>
                             </div>
                             <div class="col-lg-4 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
-                                <div class="card card-statistic-1 border border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
+                                <div class="card card-statistic-1 border border-left-lg border-green border-left-solid bg-gradient-to-br from-green-300 to-green-100">
                                     <div class="flex items-center justify-between p-4">
-                                        <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                             <i class="fas fa-money-bill text-white text-xl"></i>
                                         </div>
                                         <div class="card-wrap text-right">
-                                            <h3 data-attendance_count="Payments" class="font-light text-black mb-0">'.number_format($total_expenditure, 2).'</h3>
+                                            <h3 data-attendance_count="Payments" class="font-light text-black mb-0">'.number_format($total_payments, 2).'</h3>
                                             <span class="text-dark">Total Payments</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
+                                <div class="card card-statistic-1 border border-left-lg border-red border-left-solid bg-gradient-to-br from-red-300 to-red-100">
+                                    <div class="flex items-center justify-between p-4">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-red-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                            <i class="fas fa-money-bill text-white text-xl"></i>
+                                        </div>
+                                        <div class="card-wrap text-right">
+                                            <h3 data-attendance_count="Payments" class="font-light text-black mb-0">'.number_format($total_outstanding, 2).'</h3>
+                                            <span class="text-dark">Total Outstanding</span>
                                         </div>
                                     </div>
                                 </div>

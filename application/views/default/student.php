@@ -108,7 +108,7 @@ if(!empty($user_id)) {
             // load fees allocation list for the students
             $fees_category_list = "";
             $student_fees_list = $feesObject->list($allocation_param)["data"];
-            $allocation_param->limit = 100;
+            $allocation_param->limit = 200;
             $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
             $fees_category_array = $feesObject->category_list($allocation_param)["data"];
 

@@ -77,11 +77,15 @@ foreach($item_list["data"] as $key => $each) {
         $action .= "&nbsp;<a title='Delete this requested book record' href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
+    if($isWardParent) {
+        $books_list .= "<td>{$each->user_info->name}</td>";
+    }
+
     $books_list .= "<td>{$books_}</td>";
     $books_list .= "<td>".($hasIssue ? $each->issued_date : $each->created_at)."</td>";
     $books_list .= !$hasIssue ? "<td>".($each->issued_date ?? null)."</td>" : "";
     $books_list .= "<td>{$each->return_date}</td>";
-    $books_list .= "<td>".($each->fine ?? null)."</td>";
+    $books_list .= !$isWardParent ? "<td>".($each->fine ?? null)."</td>" : "";
     $books_list .= "<td>".$myClass->the_status_label($each->state)."</td>";
     $books_list .= "<td align='center'>{$action}</td>";
     $books_list .= "</tr>";
@@ -109,12 +113,13 @@ $response->html = '
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
+                                        '.($isWardParent ? '<th>Ward</th>' : '').'
                                         '.($hasIssue ? '<th>Fullname</th>' : '').'
                                         <th>Books List</th>
                                         '.($hasIssue ? '<th>Date of Issue</th>' : '<th>Date of Request</th>').'
                                         '.(!$hasIssue ? '<th>Approval Date</th>' : '').'
                                         <th>Return Date</th>
-                                        <th width="10%">Fine</th>
+                                        '.(!$isWardParent ? '<th width="10%">Fine</th>' : '').'
                                         <th width="10%">Status</th>
                                         <th align="center" width="10%"></th>
                                     </tr>

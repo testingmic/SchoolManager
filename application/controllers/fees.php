@@ -333,8 +333,11 @@ class Fees extends Myschoolgh {
         /** Init the user type */
         $student_id = isset($params->student_id) ? $params->student_id : $student_id;
 
+        // append the student id
+        $student_id = isset($params->student_array_ids) ? $params->student_array_ids : $student_id;
+
         $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
-        $params->query .= !empty($student_id) ? " AND a.student_id='{$student_id}'" : null;
+        $params->query .= !empty($student_id) ? " AND a.student_id IN {$this->inList($student_id)}" : "";
         $params->query .= !empty($params->record_id) ? " AND a.id='{$params->record_id}'" : null;
         $params->query .= !empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : null;
         $params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
@@ -447,6 +450,11 @@ class Fees extends Myschoolgh {
         $allocated = false;
         $student_allocation_list = "";
         $student_allocation_array = $this->students_fees_allocation($params)["data"];
+        
+        // if the raw array response was parsed
+        if(!empty($params->raw_array_response)) {
+            return $student_allocation_array;
+        }
 
         // if the result is not empty
         if(!empty($student_allocation_array)) {
