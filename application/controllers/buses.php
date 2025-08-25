@@ -345,7 +345,7 @@ class Buses extends Myschoolgh {
 
         // search for the user
         $users = $this->pushQuery(
-            "u.id, u.name, u.gender, u.class_id, u.day_boarder, u.unique_id, u.date_of_birth, u.user_type, u.enrollment_date, c.name AS class_name", 
+            "u.id, u.item_id, u.name, u.gender, u.class_id, u.day_boarder, u.unique_id, u.date_of_birth, u.user_type, u.enrollment_date, c.name AS class_name", 
             "users u LEFT JOIN classes c ON u.class_id=c.id", 
             "u.client_id='{$params->clientId}' AND u.id='{$explodedUserId[1]}' AND u.user_status='active'"
         );
@@ -401,6 +401,32 @@ class Buses extends Myschoolgh {
 
 		// get the user id if the user id is not parsed
 		$userId = !empty($params->userId) ? $params->userId : ($this->session->userId ?? 0);
+
+		// handle the daily attendance if the request is daily and the action is checkin
+		if($request == "daily" && $action == "checkin") {
+			$bus_id = null;
+			$attendanceObject = load_class("attendance", "controllers");
+
+			// set the parameters
+			$param = (object) [
+				"date" => $date_logged,
+				"clientId" => $params->clientId,
+				"userId" => $params->userId ?? 0,
+				"appendExisting" => true,
+				"academic_year" => $params->academic_year ?? null,
+				"academic_term" => $params->academic_term ?? null,
+				"user_type" => $user->user_type == "student" ? "student" : "staff",
+				"class_id" => !empty($user->class_id) ? $user->class_id : 0,
+				"attendance" => (array)[
+					"{$user->item_id}" => [
+						"status" => "present",
+						"comments" => "",
+					]
+				]
+			];
+			// log the attendance
+			$attendanceObject->log($param);
+		}
 
         // log the bus attendance for the user
         $this->db->query("INSERT INTO buses_attendance 

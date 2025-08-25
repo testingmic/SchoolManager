@@ -85,17 +85,44 @@ class Attendance extends Myschoolgh {
             }
         }
 
+        // set the class id to 0 if it is empty
+        $params->class_id = empty($params->class_id) ? 0 : $params->class_id;
+
+        // confirm existing record
+        $check = $this->pushQuery("users_list, users_data, finalize, id, date_created, date_finalized", 
+            "users_attendance_log", 
+            "log_date='{$params->date}' AND client_id = '{$params->clientId}' {$the_query} ".(!empty($params->class_id) ? " AND class_id='{$params->class_id}'" : "")." LIMIT 1"
+        );
+
+        // Return error message if finalize was parsed and yet no results was found
+        if(isset($params->finalize) && empty($check)) {
+            return ["code" => 400, "data" => "Sorry! An invalid record id was supplied."];
+        }
+
         // if the attendance parameter was parsed
         if(isset($params->attendance)) {
             
             // set a new user type
             $the_user_type = $params->user_type == "staff" ? ["teacher","employee","admin","accountant"] : [$params->user_type];
 
+            if(!empty($check) && !empty($params->appendExisting)) {
+                $check[0]->users_data = json_decode($check[0]->users_data, true);
+
+                // loop through the users data
+                foreach($check[0]->users_data as $key => $eachInfo) {
+                    if(!isset($params->attendance[$key])) {
+                        $params->attendance[$key] = $eachInfo;
+                    }
+                }
+            }
+
             // loop through the array list
             foreach($params->attendance as $key => $eachInfo) {
 
                 // set the value
-                $value = $eachInfo["status"] ?? '';
+                $value = $eachInfo["status"] ?? (
+                    $eachInfo["state"] ?? ""
+                );
 
                 // append to the list of present users array
                 if($value == "present") {
@@ -118,17 +145,6 @@ class Attendance extends Myschoolgh {
                 $user_data[$key] = $data[0];
             }
 
-        }
-
-        // confirm existing record
-        $check = $this->pushQuery("users_list, users_data, finalize, id, date_created, date_finalized", 
-            "users_attendance_log", 
-            "log_date='{$params->date}' AND client_id = '{$params->clientId}' {$the_query} ".(!empty($params->class_id) ? " AND class_id='{$params->class_id}'" : "")." LIMIT 1"
-        );
-
-        // Return error message if finalize was parsed and yet no results was found
-        if(isset($params->finalize) && empty($check)) {
-            return ["code" => 400, "data" => "Sorry! An invalid record id was supplied."];
         }
 
         // insert the record into the database
@@ -163,7 +179,7 @@ class Attendance extends Myschoolgh {
         } else {
 
             // confirm that the user has not finalize the attendance log
-            if((int)$check[0]->finalize === 1) {
+            if((int)$check[0]->finalize === 1 && empty($params->appendExisting)) {
 
                 // decode the json data
                 $check[0]->users_list = json_decode($check[0]->users_list, true);
