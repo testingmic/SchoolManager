@@ -535,7 +535,7 @@ if(!empty($user_id)) {
                     </div>
                 </div>
                 '.($isAdmin || $user_id == $defaultUser->user_id ?         
-                    '<div class="card">
+                    '<div class="card stick_to_top">
                         <div class="card-header">
                             <h4 class="mb-0">LOGIN INFORMATION</h4>
                         </div>
@@ -572,7 +572,7 @@ if(!empty($user_id)) {
                 ).'
             </div>
             <div class="col-12 col-md-12 col-lg-8" id="single_user_data">
-                <div class="card">
+                <div class="card stick_to_top">
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">

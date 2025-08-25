@@ -459,6 +459,7 @@ class Buses extends Myschoolgh {
 			$query .= !empty($params->date_logged) ? " AND a.date_logged = '{$params->date_logged}'" : "";
 			$query .= !empty($params->request) ? " AND a.request = '{$params->request}'" : "";
 			$query .= !empty($params->action) ? " AND a.action = '{$params->action}'" : "";
+			$query .= !empty($params->user_ids) ? " AND a.user_id IN ('".implode("','", $params->user_ids)."')" : "";
 			
 
 			// get the list of users based on the request 

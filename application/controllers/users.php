@@ -611,7 +611,7 @@ class Users extends Myschoolgh {
 				// if the user wants to load wards as well
 				if($loadWards && ($result->user_type === "parent")) {
 					$qr = $this->db->prepare("SELECT 
-							a.item_id AS student_guid, a.unique_id, a.firstname, a.lastname, a.othername,
+							a.id, a.item_id AS student_guid, a.unique_id, a.firstname, a.lastname, a.othername,
 							a.name, a.image, a.guardian_id, a.date_of_birth, a.blood_group, a.gender, a.email,
 							(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name, a.enrollment_date,
 							(SELECT b.name FROM departments b WHERE b.id = a.department LIMIT 1) AS department_name

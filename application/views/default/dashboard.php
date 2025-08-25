@@ -1207,7 +1207,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                             <i class="fas fa-money-bill text-white text-xl"></i>
                                         </div>
                                         <div class="card-wrap text-right">
-                                            <h3 data-attendance_count="Payments" class="font-light text-black mb-0">'.number_format($total_payments, 2).'</h3>
+                                            <h3 data-attendance_count="Payments" class="font-light text-black mb-0">'.(!empty($total_payments) ? number_format($total_payments, 2) : 0).'</h3>
                                             <span class="text-dark">Total Payments</span>
                                         </div>
                                     </div>
@@ -1220,7 +1220,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                             <i class="fas fa-money-bill text-white text-xl"></i>
                                         </div>
                                         <div class="card-wrap text-right">
-                                            <h3 data-attendance_count="Payments" class="font-light text-black mb-0">'.number_format($total_outstanding, 2).'</h3>
+                                            <h3 data-attendance_count="Payments" class="font-light text-black mb-0">'.(!empty($total_outstanding) ? number_format($total_outstanding, 2) : 0).'</h3>
                                             <span class="text-dark">Total Outstanding</span>
                                         </div>
                                     </div>

@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $clientFeatures, $defaultCurrency;
+global $myClass, $accessObject, $defaultUser, $clientFeatures, $defaultCurrency, $isWardTutorParent, $isTeacher;
 
 // initial variables
 $appName = $myClass->appName;
@@ -26,8 +26,11 @@ if(!in_array("bus_manager", $clientFeatures) || !in_array("qr_code_scanner", $cl
     exit;
 }
 
+// check if the user has permission to log bus attendance
+$hasPermission = $accessObject->hasAccess("bus_log", "attendance");
+
 // if the user has no permission to log bus attendance
-if(!$accessObject->hasAccess("bus_log", "attendance")) {
+if(!$hasPermission && !$isWardTutorParent) {
     $response->html = page_not_found("permission_denied");
     echo json_encode($response);
     exit;
@@ -67,6 +70,16 @@ $busObj = load_class("buses", "controllers");
 // append the scripts
 $response->scripts = ["assets/js/filters.js"];
 
+$users_ids = [$defaultUser->user_row_id];
+if($isWardParent) {
+    $params->user_ids = array_column($defaultUser->wards_list, "id");
+    $users_ids = array_column($defaultUser->wards_list, "student_guid");
+}
+
+if(!$hasPermission) {
+    $users_ids[] = $defaultUser->user_id;
+}
+
 // get the attendance history
 $attendanceHistory = $busObj->attendance_history($params);
 
@@ -97,6 +110,12 @@ foreach($attendanceHistory["data"] as $key => $attendance) {
     }
     $statistics['days'][$attendance->date_logged]++;
 
+    $bus_name = $attendance->brand;
+
+    if($hasPermission) {
+        $bus_name = "<a class='text-blue-500' href='{$baseUrl}bus/{$attendance->bus_id}/attendance'>".$attendance->brand."</a>";
+    }
+
     // set the color
     $color = $attendance->action == "checkin" ? "text-green-500" : "text-red-500";
     $attendance_history .= "<tr>
@@ -106,7 +125,7 @@ foreach($attendanceHistory["data"] as $key => $attendance) {
             ".(!empty($attendance->driver_unique_id) ? "<div><strong>Employee ID:</strong> ".$attendance->driver_unique_id."</div>" : "")."
         </td>
         <td>
-            <div><a class='text-blue-500' href='{$baseUrl}bus/{$attendance->bus_id}/attendance'>".$attendance->brand."</a></div>
+            <div>{$bus_name}</div>
             <div><strong>Reg Number:</strong> ".$attendance->reg_number."</div>
         </td>
         <td>
@@ -121,7 +140,13 @@ foreach($attendanceHistory["data"] as $key => $attendance) {
 
 // get the buses list
 $buses_list = $myClass->bus_list($session->clientId);
-$users_list = $myClass->pushQuery("id, unique_id, name", "users", "client_id='{$params->clientId}' AND user_type NOT IN ('parent', 'guardian')");
+
+// get the buses list
+$users_list = $myClass->pushQuery(
+    "id, unique_id, name", 
+    "users", 
+    "client_id='{$params->clientId}' ".($isWardParent || $isTeacher ? " AND item_id IN ('".implode("','", $users_ids)."')" : "")
+);
 
 // set the html content
 $response->html = '
@@ -135,11 +160,12 @@ $response->html = '
         </div>
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
+                '.($hasPermission ? '
                 <div class="text-right mb-2">
                     <a class="btn btn-outline-success anchor" target="_blank" href="'.$baseUrl.'qr_code?request=bus&client='.$session->clientId.'">
                         <i class="fa fa-qrcode"></i> Take Attendance - QR Code
                     </a>
-                </div>
+                </div>' : null).'
                 <div class="row" id="filter_Bus_Driver">
                     <div class="col-xl-3 col-md-6 mb-2 form-group">
                         <label>Select Bus</label>

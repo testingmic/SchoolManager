@@ -486,7 +486,9 @@
             <li class="dropdown">
                 <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
                 <ul class="dropdown-menu">
-                    <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Logs</a></li>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>attendance_history">Attendance History</a></li>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>buses_attendance">Bus Attendance History</a></li>
                 </ul>
             </li>
         <?php } ?>

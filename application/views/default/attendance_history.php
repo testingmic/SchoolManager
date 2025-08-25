@@ -72,12 +72,12 @@ $statistics = [
     'unique_days' => []
 ];
 
-$users_ids = [$defaultUser->user_id];
+$users_ids = [$defaultUser->user_row_id];
 if($isWardParent) {
+    $params->user_ids = array_column($defaultUser->wards_list, "id");
     $users_ids = array_column($defaultUser->wards_list, "student_guid");
+    $users_ids[] = $defaultUser->user_id;
 }
-
-$params->user_ids = $users_ids;
 
 // get the attendance history
 $attendanceHistory = $busObj->attendance_history($params);
@@ -115,7 +115,7 @@ foreach($attendanceHistory["data"] as $key => $attendance) {
 $users_list = $myClass->pushQuery(
     "id, unique_id, name", 
     "users", 
-    "client_id='{$params->clientId}' ".($isWardParent ? " AND item_id IN ('".implode("','", $users_ids)."')" : "")
+    "client_id='{$params->clientId}' ".($isWardParent || $isTeacher ? " AND item_id IN ('".implode("','", $users_ids)."')" : "")
 );
 
 // set the html content
