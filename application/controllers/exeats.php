@@ -11,6 +11,10 @@ class Exeats extends Myschoolgh {
         "Overdue" => "secondary"
     ];
 
+    public $users_statuses = [
+        "Pending" => "warning"
+    ];
+
     /**
      * List the exeats
      * 
@@ -20,7 +24,7 @@ class Exeats extends Myschoolgh {
      */
     public function list($params = null) {
 
-        global $accessObject, $defaultUser;
+        global $accessObject, $defaultUser, $isWardParent;
 
         $params->query = "1";
 
@@ -37,8 +41,16 @@ class Exeats extends Myschoolgh {
         $params->query .= !empty($params->pickup_by) ? " AND a.pickup_by='{$params->pickup_by}'" : null;
         $params->query .= !empty($params->return_date) ? " AND a.return_date='{$params->return_date}'" : null;
 
-        if($defaultUser->user_type == "student") {
-            $params->query .= " AND a.student_id='{$defaultUser->user_id}'";
+        // if the user does not have the permission to add an exeat
+        $hasPermission = $accessObject->hasAccess("add", "exeats");
+
+        // if the user does not have the permission to add an exeat
+        if(!$hasPermission) {
+            $studentIds = [$defaultUser->user_id];
+            if($isWardParent) {
+                $studentIds = array_merge($studentIds, array_column($defaultUser->wards_list, "student_guid"));
+            }
+            $params->query .= " AND a.student_id IN {$this->inList($studentIds)}";
         }
 
         try {
@@ -47,7 +59,8 @@ class Exeats extends Myschoolgh {
                 FROM exeats a
                 LEFT JOIN users b ON a.student_id = b.item_id
                 LEFT JOIN classes c ON c.id = b.class_id
-                WHERE {$params->query} AND a.status != 'Deleted' ORDER BY a.id LIMIT {$params->limit}
+                WHERE {$params->query} AND a.status != 'Deleted' 
+                ORDER BY a.id DESC LIMIT {$params->limit}
             ");
             $stmt->execute();
 
@@ -237,10 +250,28 @@ class Exeats extends Myschoolgh {
      */
     public function create($params = null) {
         
-        global $accessObject;
+        global $accessObject, $isWardParent, $isAdmin, $defaultUser;
+
+        $byPass = true;
+        $hasPermission = $accessObject->hasAccess("add", "exeats");
+        if(!$hasPermission) {
+            $byPass = false;
+
+            $studentIds = [$defaultUser->user_id];
+
+            if($isWardParent) {
+                $studentIds = array_merge($studentIds, array_column($defaultUser->wards_list, "student_guid"));
+            }
+
+            if(!in_array($params->student_id, $studentIds)) {
+                return ["code" => 400, "data" => "Sorry! You are not authorized to create an exeat for this student."];
+            }
+
+            $byPass = true;
+        }
 
         // check permission
-        if(!$accessObject->hasAccess("add", "exeats")) {
+        if(!$byPass) {
             return ["code" => 400, "data" => $this->permission_denied];
         }
 

@@ -16,6 +16,18 @@
         </li>
     <?php } ?>
 <?php } ?>
+<?php function exeats_menu() { global $baseUrl, $accessObject, $clientFeatures, $isAdmin; ?>
+    <?php if(in_array("exeats", $clientFeatures)) { ?>
+        <li class="menu-header text-black">Exeats Management</li>
+        <li class="dropdown">
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Manage Exeats</span></a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link" href="<?= $baseUrl ?>exeats">Exeats Dashboard</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>exeats_log">Exeats Logs</a></li>
+            </ul>
+        </li>
+    <?php } ?>
+<?php } ?>
 <?php function general_menu($isAdmin = false) { global $baseUrl, $accessObject, $clientFeatures, $academicSession, $isReadOnly; ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>Students</span></a>
@@ -334,20 +346,7 @@
             </ul>
         </li>
     <?php } ?>
-    <?php if(in_array("exeats", $clientFeatures)) { ?>
-        <?php if($isAdmin) { ?>
-            <li class="menu-header text-black">Exeats Management</li>
-            <li class="dropdown">
-                <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Manage Exeats</span></a>
-                <ul class="dropdown-menu">
-                    <li><a class="nav-link" href="<?= $baseUrl ?>exeats">Exeats Dashboard</a></li>
-                    <?php if($accessObject->hasAccess("add", "exeats") || $accessObject->hasAccess("update", "exeats")) { ?>
-                        <li><a class="nav-link" href="<?= $baseUrl ?>exeats_log">Exeats Logs</a></li>
-                    <?php } ?>
-                </ul>
-            </li>
-        <?php } ?>
-    <?php } ?>
+    <?= exeats_menu() ?>
     <li class="menu-header text-black">Communication</li>
     <?= communication_menu() ?>
     <?php if(in_array("events", $clientFeatures)) { ?>
@@ -389,9 +388,6 @@
             <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
         </ul>
     </li>
-    <?php } ?>
-    <?php if(in_array("incidents", $clientFeatures)) { ?>
-        <!-- <li><a class="nav-link" href="<?= $baseUrl ?>staff_weekly_reports"><i class="fas fa-weight"></i> Weekly Reports</a></li> -->
     <?php } ?>
     <li class="menu-header text-black">Academics</li>
     <li class="dropdown">
@@ -511,19 +507,28 @@
             </ul>
         </li>
         <?php } ?>
-        <?php if(in_array("library", $clientFeatures)) { ?>
-        <li class="dropdown">
-            <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
+    <?php } ?>
+    <?php if(in_array("library", $clientFeatures)) { ?>
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Collection</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
+        </ul>
+    </li>
+    <?php } ?>
+    <?php if(in_array("class_assessment", $clientFeatures)) { ?>
+       <li class="dropdown">
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-project-diagram"></i><span>Terminal Reports</span></a>
             <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Collection</a></li>
-                <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
-                <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>results-generate">Generate Report</a></li>
             </ul>
         </li>
-        <?php } ?>
     <?php } ?>
     <li class="menu-header text-black">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
+    <?= exeats_menu() ?>
     <li class="menu-header text-black">Communication</li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
@@ -599,7 +604,7 @@
     <li class="menu-header text-black">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
     <li><a href="<?= $baseUrl ?>fees_bill" class="nav-link"><i class="fas fa-money-bill"></i><span>This <?= $academicSession; ?> Bill</span></a></li>
-    
+    <?= exeats_menu() ?>
     <li class="menu-header text-black">Communication</li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>

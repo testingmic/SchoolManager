@@ -21,6 +21,7 @@ $additional = (object) [
     "client_data" => $defaultUser->client,
     "user_type" => $defaultUser->user_type,
     "class_guid" => $defaultUser->class_guid,
+    "wards_list" => $defaultUser->wards_list ?? [],
 ];
 $pageTitle = "Generate Report Cards";
 $response->title = $pageTitle;

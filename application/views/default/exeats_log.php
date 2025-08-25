@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $defaultUser, $defaultAcademics;
+global $myClass, $defaultUser, $defaultAcademics, $isWardParent;
 
 // initial variables
 $appName = $myClass->appName;
@@ -150,6 +150,9 @@ if(!empty($session->clientId)) {
         }
     }
 
+    // get the statuses list
+    $statuses_list = !$isAdmin ? $exeatClass->users_statuses : $exeatClass->exeat_statuses;
+
     // load the scripts
     $response->scripts = ["assets/js/exeats.js"];
 
@@ -165,7 +168,7 @@ if(!empty($session->clientId)) {
         </div>
         <div class="row" id="filter_Exeats_List">
             <div class="col-xl-3 col-md-4 mb-2 form-group">
-                <label for="exeat_type">Select Exeat Type</label>
+                <label for="exeat_type">Filter By Exeat Type</label>
                 <select data-width="100%" class="form-control selectpicker" id="exeat_type" name="exeat_type">
                     <option value="">Select Exeat Type</option>
                     '.implode("", array_map(function($each) use ($filter_exeat_type) {
@@ -174,7 +177,7 @@ if(!empty($session->clientId)) {
                 </select>
             </div>
             <div class="col-xl-3 col-md-4 mb-2 form-group">
-                <label for="pickup_by">Pickup By</label>
+                <label for="pickup_by">Filter By Pickup By</label>
                 <select name="pickup_by" id="pickup_by" class="form-control selectpicker" data-width="100%">
                     <option value="">Select Pickup By</option>
                     '.implode("", array_map(function($each) use ($filter_pickup_by) {
@@ -183,7 +186,7 @@ if(!empty($session->clientId)) {
                 </select>
             </div>
             <div class="col-xl-3 col-md-4 mb-2 form-group">
-                <label for="status">Pickup By</label>
+                <label for="status">Filter By Status</label>
                 <select name="status" id="status" class="form-control selectpicker" data-width="100%">
                     <option value="">Select Status</option>
                     '.implode("", array_map(function($each) use ($filter_status) {
@@ -195,7 +198,9 @@ if(!empty($session->clientId)) {
                 <a class="btn btn-sm btn-outline-primary"  onclick="return filter_exeats();" href="#"><i class="fa fa-filter"></i> Filter Records</a>
             </div>
             <div class="col-md-2 col-lg-2 flex items-center">
-                <a class="btn btn-sm btn-block btn-outline-primary"  onclick="return create_exeat();" href="#"><i class="fa fa-plus"></i> Add Exeat</a>
+                <a class="btn btn-sm btn-block btn-outline-success"  onclick="return create_exeat();" href="#">
+                    <i class="fas fa-sign-out-alt"></i> '.($isWardParent ? 'Request Exeat' : 'Create Exeat').'
+                </a>
             </div>
             <div class="col-12 col-sm-12 col-lg-12 mt-2">
                 <div class="card">
@@ -296,20 +301,22 @@ if(!empty($session->clientId)) {
                                 <div class="form-group">
                                     <label for="status">Status</label>
                                     <select name="status" id="status" class="form-control selectpicker" data-width="100%">
-                                        <option value="">Select Status</option>
-                                        '.implode("", array_map(function($each) {
+                                        '.(!$isAdmin ? "<option value='Pending'>Pending</option>" : "<option value=''>Select Status</option>").'
+                                        '.($isAdmin ? implode("", array_map(function($each) {
                                             if(!in_array($each, ['Overdue', 'Cancelled'])) {
                                                 return "<option value=\"{$each}\">{$each}</option>";
                                             }
-                                        }, array_keys($exeatClass->exeat_statuses))).'
+                                        }, array_keys($statuses_list))).' : ' : "").'
                                     </select>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer p-0">
                             <input type="hidden" name="exeat_id">
-                            <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
-                            <button data-form_id="ajax-data-form-content" type="button-submit" class="btn btn-primary">Create Exeat</button>
+                            <button type="reset" class="btn btn-light" data-dismiss="modal">Cancel</button>
+                            <button data-form_id="ajax-data-form-content" type="button-submit" class="btn btn-success">
+                                <i class="fas fa-sign-out-alt"></i> '.($isWardParent ? 'Request Exeat' : 'Create Exeat').'
+                            </button>
                         </div>
                     </div>
                 </div>

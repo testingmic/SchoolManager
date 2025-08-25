@@ -118,7 +118,7 @@ class Terminal_reports extends Myschoolgh {
 
         try {
 
-            global $usersClass;
+            global $usersClass, $defaultUser;
             
             $groupStudent = false;
             $where_clause = !empty($result_id) ? "a.report_id = '{$result_id}'" : $where;
@@ -131,6 +131,22 @@ class Terminal_reports extends Myschoolgh {
                 }
             }
 
+            // if the user is a student
+            if($defaultUser->user_type == "student") {
+                $where_clause .= " AND a.student_item_id IN {$this->inList($defaultUser->user_id)}";
+            }
+
+            // if the user is a parent
+            if($defaultUser->user_type == "parent") {
+
+                // if the wards list is empty then return
+                if(empty($defaultUser->wards_list_ids)) return [];
+
+                // append the wards list to the where clause
+                $where_clause .= " AND a.student_item_id IN {$this->inList($defaultUser->wards_list_ids)}";
+            }
+
+            // prepare the query
             $stmt = $this->db->prepare("SELECT 
                     a.*, (
                         SELECT CONCAT(
@@ -1221,7 +1237,7 @@ class Terminal_reports extends Myschoolgh {
             // set the parameters
             $param = (object) [
                 "group_by_student" => true,
-                "class_id" => $params->class_id,
+                "class_id" => $params->class_id ?? null,
                 "academic_year" => $params->academic_year ?? $this->academic_year,
                 "academic_term" => $params->academic_term ?? $this->academic_term,
                 "student_item_id" => isset($params->student_id) && !empty($params->student_id) && ($params->student_id !== "null") ? $params->student_id : null,
@@ -1230,11 +1246,15 @@ class Terminal_reports extends Myschoolgh {
 
             // get the user attendance results
             $attendance_param = (object) [
-                "clientId" => $this->clientId, "academic_year" => $params->academic_year,
+                "clientId" => $this->clientId, 
+                "academic_year" => $params->academic_year,
                 "academic_term" => $params->academic_term,
                 "user_types_list" => ["student"], "the_user_type" => "student",
-                "period" => "this_term", "is_finalized" => 1, "is_present_check" => 1,
-                "start_date" => $this->this_term_starts, "end_date" => $this->this_term_ends,
+                "period" => "this_term", 
+                "is_finalized" => 1, 
+                "is_present_check" => 1,
+                "start_date" => $this->this_term_starts, 
+                "end_date" => $this->this_term_ends,
             ];
             // create a new object of the attendance class
             $attendanceObj = load_class("attendance", "controllers", $params);
@@ -1268,10 +1288,6 @@ class Terminal_reports extends Myschoolgh {
 
             $defaultFontSize = "font-size:12px";
             $increaseFontSize = "font-size:18px";
-
-            // header("Content-Type: application/json");
-            // echo json_encode($report_data);
-            // exit;
 
             // loop through the report set
             foreach($report_data as $key => $student) {

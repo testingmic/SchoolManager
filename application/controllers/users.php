@@ -95,6 +95,10 @@ class Users extends Myschoolgh {
 			$params->query .= !empty($params->user_id) ? " AND a.item_id IN {$this->inList($params->user_id)}" : null;
 			$params->query .= !empty($params->gender) ? " AND a.gender IN {$this->inList($params->gender)}" : null;
 				
+			if(!empty($defaultUser->wards_list_ids)) {
+				$params->query .= " AND a.item_id IN {$this->inList($defaultUser->wards_list_ids)}";
+			}
+
 			// if the item quick_user_search was not parsed
 			if(empty($params->quick_user_search)) {
 

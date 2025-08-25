@@ -309,7 +309,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             "userData" => $defaultUser,
             "client_data" => $defaultUser->client, 
             "parse_owning" => true, 
-            "student_array_ids" => $defaultUser->wards_list_ids,
+            "student_array_ids" => $defaultUser->wards_list_ids ?? [],
             "raw_array_response" =>  true, 
             "group_by" => "GROUP BY a.payment_id"
         ];
@@ -412,7 +412,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     "academic_year" => $defaultAcademics->academic_year ?? null,
                     "academic_term" => $defaultAcademics->academic_term ?? null,
                     "client_data" => $defaultUser->client,
-                    "student_array_ids" => $defaultUser->wards_list_ids,
+                    "student_array_ids" => $defaultUser->wards_list_ids ?? [],
                     "group_by" => "GROUP BY a.payment_id"
                 ];
 
