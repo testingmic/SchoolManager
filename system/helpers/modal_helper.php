@@ -308,7 +308,7 @@ function page_not_found($request = "not_found", $string = "The resource you tryi
     $notFound = (bool) ($request == "not_found");
     $termEnded = (bool) ($request == "term_ended");
     $featureDisabled = (bool) ($request == "feature_disabled");
-    $message = $notFound ? $string : ($featureDisabled ? "The feature you are trying to access is disabled. Please contact the administrator." : 
+    $message = $notFound ? (is_array($string) ? json_encode($string) : $string) : ($featureDisabled ? "The feature you are trying to access is disabled. Please contact the administrator." : 
     ($termEnded ? "The current Academic Term ended on <strong>{$clientPrefs->academics->term_ends}</strong>. You need to update the academic calendar to reflect the new academic year and term." : 
     "You don't have permission to access the requested object. It is either read-protected or not readable on this server."));
     $title = $notFound ? "Record Not Found" : ($featureDisabled ? "Feature Disabled" : ($termEnded ? "Academic Term Ended" : "Permission Denied"));

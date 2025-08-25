@@ -38,6 +38,9 @@ $param = (object)[
     "clientId" => $clientId,
 ];
 
+// confirm that the attendance feature is enabled
+$attandenceEnabled = in_array("qr_code_scanner", $clientFeatures) && in_array("bus_manager", $clientFeatures);
+
 // confirm that the school has the documents manager feature enabled
 if(empty($bus_id)) {
     // permission denied
@@ -156,7 +159,7 @@ if(empty($bus_id)) {
                 </div>
 
                 <div class="col-md-8">
-                    '.($attendancePage ? '
+                    '.($attendancePage && $attandenceEnabled ? '
                     <div class="text-right mb-2">
                         <a class="btn btn-outline-success" target="_blank" href="'.$baseUrl.'qr_code/?request=bus&bus_id='.$bus_id.'&client='.$clientId.'">
                             <i class="fa fa-qrcode"></i> Take Attendance - QR Code
