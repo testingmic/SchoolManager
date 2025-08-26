@@ -16,18 +16,22 @@
         </li>
     <?php } ?>
 <?php } ?>
-<?php function exeats_menu() { global $baseUrl, $accessObject, $clientFeatures, $isAdmin; ?>
+
+<?php function exeats_menu() { global $baseUrl, $clientFeatures, $isWardTutorParent, $accessObject; ?>
     <?php if(in_array("exeats", $clientFeatures)) { ?>
         <li class="menu-header text-black">Exeats Management</li>
         <li class="dropdown">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Manage Exeats</span></a>
             <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>exeats">Exeats Dashboard</a></li>
+                <?php if($accessObject->hasAccess("manage", "exeats")) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>exeats">Exeats Dashboard</a></li>
+                <?php } ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>exeats_log">Exeats Logs</a></li>
             </ul>
         </li>
     <?php } ?>
 <?php } ?>
+
 <?php function general_menu($isAdmin = false) { global $baseUrl, $accessObject, $clientFeatures, $academicSession, $isReadOnly; ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>Students</span></a>
@@ -363,12 +367,15 @@
         <?php } ?>
     <?php } ?>
 <?php } ?>
+
 <?php function admin_menu() { global $baseUrl; ?>
     <?php general_menu(true); ?>
 <?php } ?>
+
 <?php function accountant_menu() { global $baseUrl, $accessObject; ?>
     <?php general_menu(); ?>
 <?php } ?>
+
 <?php function teacher_menu() { global $baseUrl, $accessObject, $clientFeatures, $isReadOnly; ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>My Students</span></a>
@@ -465,12 +472,18 @@
     <?php if(in_array("leave", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>leave" class="nav-link"><i class="far fa-check-square"></i><span>Leave Applications</span></a></li>
     <?php } ?>
+    <?php if(in_array("exeats", $clientFeatures)) { ?>
+        <?php if($accessObject->hasAccess("view", "exeats")) { ?>
+            <li><a href="<?= $baseUrl ?>exeats_log" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Exeats Manager</span></a></li>
+        <?php } ?>
+    <?php } ?>
     <li class="menu-header text-black">Communication</li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>
     <?= communication_menu() ?>
 <?php } ?>
+
 <?php function parent_menu() { global $baseUrl, $accessObject, $session, $clientFeatures, $isReadOnly; ?>
     <?php if(in_array("incidents", $clientFeatures)) { ?>
         <li>
@@ -528,13 +541,18 @@
     <?php } ?>
     <li class="menu-header text-black">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
-    <?= exeats_menu() ?>
+    <?php if(in_array("exeats", $clientFeatures)) { ?>
+        <?php if($accessObject->hasAccess("view", "exeats") || $accessObject->hasAccess("add", "exeats")) { ?>
+            <li><a href="<?= $baseUrl ?>exeats_log" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Exeats Manager</span></a></li>
+        <?php } ?>
+    <?php } ?>
     <li class="menu-header text-black">Communication</li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>
     <?= communication_menu() ?>
 <?php } ?>
+
 <?php function student_menu() { global $baseUrl, $accessObject, $clientFeatures, $academicSession, $isReadOnly; ?>
     <?php if(in_array("class_assessment", $clientFeatures)) { ?>
         <li class="dropdown hidden">
@@ -604,13 +622,18 @@
     <li class="menu-header text-black">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
     <li><a href="<?= $baseUrl ?>fees_bill" class="nav-link"><i class="fas fa-money-bill"></i><span>This <?= $academicSession; ?> Bill</span></a></li>
-    <?= exeats_menu() ?>
+    <?php if(in_array("exeats", $clientFeatures)) { ?>
+        <?php if($accessObject->hasAccess("view", "exeats") || $accessObject->hasAccess("add", "exeats")) { ?>
+            <li><a href="<?= $baseUrl ?>exeats_log" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Exeats Manager</span></a></li>
+        <?php } ?>
+    <?php } ?>
     <li class="menu-header text-black">Communication</li>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>
     <?= communication_menu() ?>
 <?php } ?>
+
 <?php function employee_menu() { global $baseUrl, $accessObject, $clientFeatures, $isReadOnly; ?>
     <?php if(in_array("attendance", $clientFeatures)) { ?>
     <li class="dropdown">
@@ -679,6 +702,7 @@
         <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>
 <?php } ?>
+
 <?php function support_menu() { global $baseUrl, $accessObject; ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>List Users</span></a>

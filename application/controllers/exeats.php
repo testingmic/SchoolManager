@@ -28,6 +28,10 @@ class Exeats extends Myschoolgh {
 
         $params->query = "1";
 
+        if(!$accessObject->hasAccess("view", "exeats")) {
+            return ["code" => 400, "data" => $this->permission_denied];
+        }
+
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
         // build the query
@@ -43,14 +47,20 @@ class Exeats extends Myschoolgh {
 
         // if the user does not have the permission to add an exeat
         $hasPermission = $accessObject->hasAccess("add", "exeats");
+        $managePermission = $accessObject->hasAccess("manage", "exeats");
 
         // if the user does not have the permission to add an exeat
-        if(!$hasPermission) {
+        if(!$hasPermission || $isWardParent) {
             $studentIds = [$defaultUser->user_id];
             if($isWardParent) {
                 $studentIds = array_merge($studentIds, array_column($defaultUser->wards_list, "student_guid"));
             }
             $params->query .= " AND a.student_id IN {$this->inList($studentIds)}";
+        }
+
+        // if the user is not a ward parent and not a manager
+        if(!$isWardParent && !$managePermission) {
+            $params->query .= " AND a.created_by = '{$defaultUser->user_id}'";
         }
 
         try {
@@ -68,7 +78,6 @@ class Exeats extends Myschoolgh {
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 // if the minified is true
                 $data[] = $result;
-
             }
 
             return [ "code" => 200, "data" => $data ];
@@ -92,7 +101,7 @@ class Exeats extends Myschoolgh {
         global $accessObject;
 
         // check permission
-        if(!$accessObject->hasAccess("view", "exeats")) {
+        if(!$accessObject->hasAccess("manage", "exeats")) {
             return ["code" => 400, "data" => $this->permission_denied];
         }
 
@@ -254,7 +263,7 @@ class Exeats extends Myschoolgh {
 
         $byPass = true;
         $hasPermission = $accessObject->hasAccess("add", "exeats");
-        if(!$hasPermission) {
+        if(!$hasPermission || $isWardParent) {
             $byPass = false;
 
             $studentIds = [$defaultUser->user_id];
@@ -262,7 +271,6 @@ class Exeats extends Myschoolgh {
             if($isWardParent) {
                 $studentIds = array_merge($studentIds, array_column($defaultUser->wards_list, "student_guid"));
             }
-
             if(!in_array($params->student_id, $studentIds)) {
                 return ["code" => 400, "data" => "Sorry! You are not authorized to create an exeat for this student."];
             }
@@ -336,7 +344,7 @@ class Exeats extends Myschoolgh {
      */
     public function update($params = null) {
         
-        global $accessObject;
+        global $accessObject, $defaultUser;
 
         // check permission
         if(!$accessObject->hasAccess("update", "exeats")) {
@@ -349,8 +357,17 @@ class Exeats extends Myschoolgh {
             }
         }
 
+        // get the permission
+        $managePermission = $accessObject->hasAccess("manage", "exeats");
+        $queryString = "";
+
+        // if the user is not a manager
+        if(!$managePermission) {
+            $queryString .= " AND a.created_by = '{$params->userId}'";
+        }
+
         // check if the exeat record exists
-        $check = $this->pushQuery("id", "exeats", "item_id='{$params->exeat_id}' AND client_id='{$params->clientId}' LIMIT 1");
+        $check = $this->pushQuery("id", "exeats", "item_id='{$params->exeat_id}' AND client_id='{$params->clientId}' AND status != 'Deleted' {$queryString} LIMIT 1");
         if(empty($check)) {
             return ["code" => 400, "data" => "Sorry! The exeat record does not exist."];
         }
@@ -413,6 +430,38 @@ class Exeats extends Myschoolgh {
         if(!$accessObject->hasAccess("delete", "exeats")) {
             return ["code" => 400, "data" => $this->permission_denied];
         }
+
+        // get the permission
+        $managePermission = $accessObject->hasAccess("manage", "exeats");
+        $queryString = "";
+
+        // if the user is not a manager
+        if(!$managePermission) {
+            $queryString .= " AND a.created_by = '{$params->userId}'";
+        }
+
+        // check if the exeat record exists
+        $check = $this->pushQuery("id", "exeats", "item_id='{$params->exeat_id}' AND client_id='{$params->clientId}' AND status != 'Deleted' {$queryString} LIMIT 1");
+        if(empty($check)) {
+            return ["code" => 400, "data" => "Sorry! The exeat record does not exist."];
+        }
+
+        // update the status to deleted
+        $stmt = $this->db->prepare("UPDATE exeats SET status='Deleted', last_updated = now() WHERE item_id='{$params->exeat_id}' AND client_id='{$params->clientId}' LIMIT 1");
+        $stmt->execute();
+
+        // log the user activity
+        $this->userLogs("exeats", $params->exeat_id, null, "{$params->userData->name} deleted the Exeat record for the Student with ID::{$params->student_id}", $params->userId);
+
+        return [
+            "code" => 200, 
+            "data" => "Exeat record successfully deleted.", 
+            "refresh" => 2000, 
+            "additional" => [
+                "clear" => true,
+                "href" => "{$this->baseUrl}exeats_log"
+            ]
+        ];
 
     }
 

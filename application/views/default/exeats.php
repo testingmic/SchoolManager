@@ -29,6 +29,13 @@ if(!in_array("exeats", $clientFeatures)) {
     exit;
 }
 
+// if the user does not have the permission to view the exeat
+if(!$accessObject->hasAccess("manage", "exeats")) {
+    $response->html = page_not_found("permission_denied", ["exeats"]);
+    echo json_encode($response);
+    exit;
+}
+
 // if the client information is not empty
 if(!empty($session->clientId)) {
 

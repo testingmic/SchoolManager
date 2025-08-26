@@ -56,7 +56,9 @@ class Users extends Myschoolgh {
 		
 		try {
 
-			global $defaultUser;
+			global $defaultUser, $accessObject;
+
+			$manageExeats = $accessObject->hasAccess("manage", "exeats");
 
 			// set the user data
 			if(!empty($defaultUser)) {
@@ -130,7 +132,7 @@ class Users extends Myschoolgh {
 
 
 			// if the class was parsed and also not an array list
-			if(!empty($params->class_ids) && is_array($params->class_ids)) {
+			if(!empty($params->class_ids) && is_array($params->class_ids) && !$manageExeats) {
 				// add the class id filter to the query
 				$params->query .= " AND cl.item_id IN {$this->inList($params->class_ids)}";
 			}
@@ -305,7 +307,7 @@ class Users extends Myschoolgh {
 
 		$params->query = " 1 ";
 		
-		global $defaultUser, $defaultClientData;
+		global $defaultUser, $accessObject;
 
 		// load the informatin per the user permissions
 		if(isset($params->userData) || !empty($defaultUser)) {

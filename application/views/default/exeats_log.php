@@ -31,6 +31,13 @@ if(!in_array("exeats", $clientFeatures)) {
     exit;
 }
 
+// if the user does not have the permission to view the exeat
+if(!$accessObject->hasAccess("view", "exeats")) {
+    $response->html = page_not_found("permission_denied", ["exeats"]);
+    echo json_encode($response);
+    exit;
+}
+
 // if the client information is not empty
 if(!empty($session->clientId)) {
 
@@ -67,7 +74,7 @@ if(!empty($session->clientId)) {
 
     $student_param = (object) [
         "clientId" => $clientId,
-        "user_type" => "student",
+        "user_type" => ["student", "teacher", "accountant", "admin"],
         "userId" => $session->userId, 
         "academic_year" => $defaultAcademics->academic_year,
         "academic_term" => $defaultAcademics->academic_term,
@@ -76,6 +83,9 @@ if(!empty($session->clientId)) {
         "minified" => true,
         "quick_list" => true,
     ];
+
+    // check if the user has the permission to manage the exeat
+    $manageExeats = $accessObject->hasAccess("manage", "exeats");
 
     // get the list of students
     $userClass = load_class("users", "controllers");
@@ -105,8 +115,9 @@ if(!empty($session->clientId)) {
 
             // append the exeat list to the array stream
             $response->array_stream['exeat_list'][$each->item_id] = $each;
-        
-            $action = "";
+    
+            // append the action button to the array stream
+            $action = "<a title='Click to view this exeat' href='{$baseUrl}exeats_view/{$each->item_id}' target='_blank' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
             
             if(!in_array($each->status, ['Returned', 'Rejected'])) {
                 if($hasUpdate) {
@@ -137,7 +148,6 @@ if(!empty($session->clientId)) {
                 <div><i class='fa fa-calendar'></i> <span class='font-bold'>Exit:</span> {$each->departure_date}</div>
                 <div><i class='fa fa-calendar'></i> <span class='font-bold'>Return:</span> {$each->return_date}</div>
             </td>";
-            $exeatsList .= "<td>{$each->pickup_by}</td>";
             $exeatsList .= "<td>{$each->guardian_contact}</td>";
             $exeatsList .= "<td width='20%'>{$each->reason}</td>";
             $exeatsList .= "<td class='text-center'>
@@ -213,7 +223,6 @@ if(!empty($session->clientId)) {
                                         <th>Student</th>
                                         <th>Type</th>
                                         <th>Exeat Date</th>
-                                        <th>Pickup By</th>
                                         <th>Contact</th>
                                         <th>Reason</th>
                                         <th class="text-center">Status</th>
@@ -242,13 +251,17 @@ if(!empty($session->clientId)) {
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="student_id">Student</label>
+                                    <label for="student_id">Select '.($isWardParent ? "Ward" : "User").'</label>
                                     <select name="student_id" id="student_id" class="form-control selectpicker" data-width="100%">
-                                        <option value="">Select Student</option>
+                                        '.(!$manageExeats && !$isAdminAccountant ? '<option selected value="'.$defaultUser->user_id.'">'.$defaultUser->name.' ('.$defaultUser->unique_id.')</option>' : null).'
+                                        '.($manageExeats ? '<option value="">Select '.($isWardParent ? "Ward" : "User").'</option>' : null).'
                                         '.implode("", array_map(function($each) {
-                                            return "<option value=\"{$each->user_id}\">{$each->name}</option>";
+                                            return "<option value=\"{$each->user_id}\">{$each->name} ({$each->unique_id})</option>";
                                         }, $userList ?? [])).'
                                     </select>
+                                    '.(!$manageExeats ? "<div class='text-xs text-red-500'>
+                                        Leave empty to request on your own behalf.
+                                    </div>" : "").'
                                 </div>
                             </div>
                             <div class="col-md-6">
