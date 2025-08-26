@@ -167,12 +167,14 @@ class Attendance extends Myschoolgh {
             $data = "Attendance was sucessfully logged for {$params->date}.";
 
             //log the user activity
-            if(isset($classData)) {
-                // update the for the class
-                $this->userLogs("attendance_log", $last_id, null, "{$params->userData->name} logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}.", $params->userId);
-            } else {
-                // update the for user_type
-                $this->userLogs("attendance_log", $last_id, null, "{$params->userData->name} logged attendance for <strong>{$params->user_type}</strong> on {$params->date}.", $params->userId);
+            if(!empty($params->userData)) {
+                if(isset($classData)) {
+                    // update the for the class
+                    $this->userLogs("attendance_log", $last_id, null, "{$params->userData->name} logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}.", $params->userId);
+                } else {
+                    // update the for user_type
+                    $this->userLogs("attendance_log", $last_id, null, "{$params->userData->name} logged attendance for <strong>{$params->user_type}</strong> on {$params->date}.", $params->userId);
+                }
             }
 
             $date_created = date("Y-m-d h:i:s");
