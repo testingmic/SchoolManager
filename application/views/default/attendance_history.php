@@ -32,7 +32,7 @@ $filter = (object) array_map("xss_clean", $_POST);
 // set the parameters
 $params = (object) [
     "clientId" => $session->clientId,
-    "request" => $isWardParent ? null : "daily",
+    "request" => "daily",
     "client_data" => $defaultUser->client
 ];
 
