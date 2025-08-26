@@ -322,10 +322,11 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
         $feesObject = load_class("fees", "controllers", $allocation_param);
                     
         // load fees allocation list for the students
-        $feesAllocation = $feesObject->student_allocation_array($allocation_param);
+        $feesAllocation = !empty($defaultUser->wards_list_ids) ? $feesObject->student_allocation_array($allocation_param) : [];
 
-        $total_amount_due = array_sum(array_column($feesAllocation, "amount_due"));
-        $total_fees_payments = array_sum(array_column($feesAllocation, "amount_paid"));
+        // calculate the total amount due, total fees payments and total outstanding
+        $total_amount_due = empty($defaultUser->wards_list_ids) ? 0 : array_sum(array_column($feesAllocation, "amount_due"));
+        $total_fees_payments = empty($defaultUser->wards_list_ids) ? 0 : array_sum(array_column($feesAllocation, "amount_paid"));
         $total_outstanding = $total_amount_due - $total_fees_payments;
 
         // load the wards list
@@ -345,7 +346,10 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
             // if the wards array is not empty
             if(empty($data->wards_list)) {
-                $wards_list = "<div class='font-italic'>Sorry! You currently do not have any ward in the school.</div>";
+                $wards_list = no_record_found("No Wards Found", "No ward has been added to your account yet.", null, "Student", false, "fas fa-user-graduate");
+                $expenses_list = "<div class='col-lg-12 col-md-12'>";
+                $expenses_list .= no_record_found("No Wards Found", "No ward has been added to your account yet.", null, "Student", false, "fas fa-user-graduate");
+                $expenses_list .= "</div>";
             } else {
 
                 // loop through the wards list
@@ -458,11 +462,10 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 }
 
                 // assign the assignments list
-                $expenses_list = '
-                <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                $expenses_list = '<div class="col-lg-12 col-md-12 col-12 col-sm-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Fees Payments History</h4>
+                            <h4 class="mb-0">Fees Payments History</h4>
                         </div>
                         <div class="card-body trix-slim-scroll">
                             <div class="table-responsive">
@@ -1163,7 +1166,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card-header">
                                 <h5 class="pb-0 mb-0">My Wards</h5>
                             </div>
-                            <div class="card-body pr-2 mt-0 pt-0 pb-0">
+                            <div class="card-body pl-2 pr-2 mt-0 pt-0 pb-0">
                                 <div class="py-2">
                                     '.$wards_list.'
                                 </div>
