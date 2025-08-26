@@ -91,7 +91,7 @@ $response->html = '
                                     <tr>
                                         <th>Department Name</th>
                                         <th>Department Code</th>
-                                        <th width="15%">Students Count</th>
+                                        <th width="15%">Students / Staff Count</th>
                                         <th>Head of Department</th>
                                         <th class="text-center">Latest Reporting Time</th>
                                         <th align="center" width="12%"></th>

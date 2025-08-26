@@ -32,13 +32,13 @@ class Departments extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT COUNT(*) FROM users b WHERE b.user_status IN ({$this->default_allowed_status_users_list}) AND b.deleted='0' AND b.user_type='student' AND b.department = a.id AND b.client_id = a.client_id
+                    (SELECT COUNT(*) FROM users b WHERE b.user_status IN ({$this->default_allowed_status_users_list}) AND b.deleted='0' AND b.department = a.id AND b.client_id = a.client_id
                         AND b.user_status IN {$this->inList($this->default_allowed_status_users_array)}
                     ) AS students_count,
-                    (SELECT COUNT(*) FROM users b WHERE b.user_status IN ({$this->default_allowed_status_users_list}) AND b.deleted='0' AND b.user_type='student' AND b.department = a.id AND b.client_id = a.client_id AND b.gender='Male'
+                    (SELECT COUNT(*) FROM users b WHERE b.user_status IN ({$this->default_allowed_status_users_list}) AND b.deleted='0' AND b.department = a.id AND b.client_id = a.client_id AND b.gender='Male'
                         AND b.user_status IN {$this->inList($this->default_allowed_status_users_array)}
                     ) AS students_male_count,
-                    (SELECT COUNT(*) FROM users b WHERE b.user_status IN ({$this->default_allowed_status_users_list}) AND b.deleted='0' AND b.user_type='student' AND b.department = a.id AND b.client_id = a.client_id AND b.gender='Female'
+                    (SELECT COUNT(*) FROM users b WHERE b.user_status IN ({$this->default_allowed_status_users_list}) AND b.deleted='0' AND b.department = a.id AND b.client_id = a.client_id AND b.gender='Female'
                         AND b.user_status IN {$this->inList($this->default_allowed_status_users_array)}
                     ) AS students_female_count,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
@@ -291,21 +291,28 @@ class Departments extends Myschoolgh {
                 return ["code" => 400, "data" => "Sorry! Ensure that the class id was parsed."];
             }
 
+            // handle staff members
+            $handleStaff = ($params->data["class_id"] === "staff_members");
+
             // confirm that the class is parsed
-            $check = $this->pushQuery("id, name", "classes", "id='{$params->data["class_id"]}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
-            if(empty($check)) {
-                return ["code" => 400, "data" => "Sorry! An invalid class id was supplied."];
+            if(!$handleStaff) {
+                $check = $this->pushQuery("id, name", "classes", "id='{$params->data["class_id"]}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+                if(empty($check)) {
+                    return ["code" => 400, "data" => "Sorry! An invalid class id was supplied."];
+                }
             }
 
             // confirm that the class is parsed
-            $dcheck = $this->pushQuery("id, name", "departments", "id='{$params->data["department_id"]}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+            $dcheck = $this->pushQuery("id, name, opening_days", "departments", "id='{$params->data["department_id"]}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
             if(empty($dcheck)) {
                 return ["code" => 400, "data" => "Sorry! An invalid department_id was supplied."];
             }
 
             // update class department
-            $update = $this->db->prepare("UPDATE classes SET department_id = ? WHERE id = ? AND client_id = ? LIMIT 1");
-            $update->execute([$params->data["department_id"], $params->data["class_id"], $params->clientId]);
+            if(!$handleStaff) {
+                $update = $this->db->prepare("UPDATE classes SET department_id = ? WHERE id = ? AND client_id = ? LIMIT 1");
+                $update->execute([$params->data["department_id"], $params->data["class_id"], $params->clientId]);
+            }
 
             // loop through the students list
             if(isset($params->data["student_id"])) {
@@ -315,20 +322,23 @@ class Departments extends Myschoolgh {
                     return ["code" => 400, "data" => "Sorry! Ensure that the student id parsed is a valid array."];
                 }
 
+                // get the opening days
+                $opening_days = $dcheck[0]->opening_days;
+
                 // update query
-                $update = $this->db->prepare("UPDATE users SET department = ? WHERE id = ? AND client_id = ? AND user_type = ? LIMIT 1");
+                $update = $this->db->prepare("UPDATE users SET department = ?, expected_days = ? WHERE id = ? AND client_id = ? LIMIT 1");
 
                 // loop through the students list
                 foreach($params->data["student_id"] as $student) {
                     // execute the update statement
-                    $update->execute([$params->data["department_id"], $student, $params->clientId, "student"]);
+                    $update->execute([$params->data["department_id"], $opening_days, $student, $params->clientId]);
                 }
             }
 
 			// return the output
             return [
                 "code" => 200, 
-                "data" => "Students of {$check[0]->name} were successfully assigned to {$dcheck[0]->name}."
+                "data" => ($handleStaff ? "Staff members " : "Students of {$check[0]->name}")." were successfully assigned to {$dcheck[0]->name}."
             ];
 
         } catch(PDOException $e) {

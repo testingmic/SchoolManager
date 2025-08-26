@@ -104,6 +104,7 @@ class Myschoolgh extends Models {
 		// prepare and execute the statement
 		$fix[] = ("ALTER TABLE departments ADD COLUMN reporting_time VARCHAR(16) DEFAULT '08:00:00'");
 		$fix[] = ("ALTER TABLE departments ADD COLUMN opening_days VARCHAR(255) DEFAULT 'Monday,Tuesday,Wednesday,Thursday,Friday'");
+		$fix[] = ("ALTER TABLE users ADD COLUMN expected_days VARCHAR(255) DEFAULT 'Monday,Tuesday,Wednesday,Thursday,Friday'");
 
 		foreach($fix as $stmt) {
 			try {

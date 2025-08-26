@@ -316,6 +316,12 @@ if(empty($user_id)) {
             ];
         }
 
+        // expected days to be present in school
+        $expected_days = $myClass->stringToArray($data->expected_days);
+
+        // set the days of the week
+        $daysOfWeek = $myClass->days_of_week;
+
         // append the html content
         $response->html = '
         <section class="section">
@@ -380,11 +386,11 @@ if(empty($user_id)) {
                             </div>
                         </div>
                     </div>
-                    <div class="card stick_to_top">
+                    <div class="card">
                         <div class="card-header">
                             <h4 class="mb-0">PERSONAL INFORMATION</h4>
                         </div>
-                        <div class="card-body pt-0 pb-0 bg-gradient-to-br from-blue-50 to-blue-100">
+                        <div class="card-body pt-0 pb-2">
                             <div class="py-2">
                                 <p class="clearfix">
                                     <span class="float-left">Date of Employment</span>
@@ -444,6 +450,16 @@ if(empty($user_id)) {
                                     </p>' : null
                                 ).'
                             </div>
+                            <div class="font-14 text-uppercase mb-0 border-top border-primary pt-3">
+                                <div class="font-14 text-uppercase mt-0 mb-2 font-weight-bold mb-0">EXPECTED DAYS</div>
+                            '.implode(" ", array_map(function($day) use ($expected_days, $user_id) {
+                                return "
+                                    <div style='padding-left: 2.5rem;' class='custom-control cursor col-lg-12 custom-switch switch-primary'>
+                                        <input onchange='return update_expected_days(\"{$user_id}\", \"users\");' type='checkbox' name='expected_days[]' value='".ucfirst($day)."' class='custom-control-input cursor' id='".$day."' ".(in_array($day, $expected_days) ? "checked='checked'" : null).".>
+                                        <label class='custom-control-label cursor text-black' for='".$day."'>".$day."</label>
+                                    </div>";
+                            }, $daysOfWeek)).'
+                            </div>
                         </div>
                     </div>
                     '.($isAdmin || $user_id == $defaultUser->user_id ?         
@@ -475,7 +491,7 @@ if(empty($user_id)) {
                     ).'
                 </div>
                 <div class="col-12 col-md-12 col-lg-8">
-                    <div class="card">
+                    <div class="card stick_to_top">
                     <div class="padding-20">
                         <ul class="nav nav-tabs" id="myTab2" role="tablist">
                         '.($isCurrentUser || $isAdminAccountant ? '

@@ -65,7 +65,7 @@ if(!empty($item_id)) {
         $receivePayment = $accessObject->hasAccess("receive", "fees");
 
         // load the section students list
-        $student_param = (object) ["clientId" => $clientId, "department_id" => $item_id, "user_type" => "student"];
+        $student_param = (object) ["clientId" => $clientId, "department_id" => $item_id, "user_type" => ["student", "employee", "teacher", "accountant", "admin"]];
         $student_list = load_class("users", "controllers")->quick_list($student_param);
 
         // student update permissions
@@ -88,9 +88,11 @@ if(!empty($item_id)) {
                 $balance += $student->debt;
             }
 
+            $url_path = $student->user_type === "student" ? "student" : "staff";
+            
             // view link
             $count++;
-            $action = "<button title='View Student Record' onclick='return load(\"student/{$student->user_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></button>";
+            $action = "<button title='View User Record' onclick='return load(\"{$url_path}/{$student->user_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></button>";
 
             // show the payment button if the user has the permission to receive fees payment
             if($receivePayment && $student->debt > 0) {
@@ -101,7 +103,7 @@ if(!empty($item_id)) {
             $students .= "<td>
                 <div class='d-flex justify-content-start'>
                     <div>
-                        <span onclick='return load(\"student/{$student->user_id}\");' class='user_name text-primary'>{$student->name}</span>
+                        <span onclick='return load(\"{$url_path}/{$student->user_id}\");' class='user_name text-primary'>{$student->name}</span>
                     </div>
                 </div>
             </td>";
@@ -122,7 +124,7 @@ if(!empty($item_id)) {
             <table data-empty="" class="table table-sm table-bordered table-striped raw_datatable">
                 <thead>
                     <tr>
-                        <th>Student Name</th>
+                        <th>Fullname</th>
                         <th>Class</th>
                         <th>Gender</th>
                         '.($viewAllocation ? "<th>DEBT</th>" : null).'
@@ -162,7 +164,7 @@ if(!empty($item_id)) {
                     <div class="card-body card-type-3">
                         <div class="row">
                             <div class="col">
-                                <h6 class="font-14 text-uppercase font-weight-bold mb-0">STUDENTS</h6>
+                                <h6 class="font-14 text-uppercase font-weight-bold mb-0">STUDENTS / STAFF</h6>
                                 <h2 class="mb-0">'.$data->students_count.'</h2>
                             </div>
                             <div class="col-auto">
@@ -233,9 +235,11 @@ if(!empty($item_id)) {
                                 '.$data->description.'
 
                                 <div class="font-14 text-uppercase mt-3 mb-2 font-weight-bold mb-0">OPENING DAYS</div>
-                                <div class="font-14 text-uppercase mb-0">'.implode(" ", array_map(function($day) use ($openingDays) {
+                                <div class="font-14 text-uppercase mb-0">
+                                '.implode(" ", array_map(function($day) use ($openingDays) {
                                     return "<div class='mb-2'><i class='fa ".(in_array($day, $openingDays) ? "fa-check-circle text-success" : "fa-times-circle text-danger")."'></i> {$day}</div>";
-                                }, $daysOfWeek)).'</div>
+                                }, $daysOfWeek)).'
+                                </div>
                             </div>
                         </div>
                     </div>' : null
@@ -308,7 +312,7 @@ if(!empty($item_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(empty($url_link) || $url_link === "students" ? "active" : null).'" onclick="return appendToUrl(\'students\')" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">Student List</a>
+                        <a class="nav-link '.(empty($url_link) || $url_link === "students" ? "active" : null).'" onclick="return appendToUrl(\'students\')" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">Users List</a>
                     </li>';
 
                     if($hasUpdate) {

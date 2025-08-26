@@ -36,3 +36,9 @@ var upload_Employee_Documents = (employee_id) => {
         }
     });
 }
+
+var update_expected_days = (user_id, table) => {
+    // get all the selected days
+    const expected_days = $(`input[name="expected_days[]"]:checked`).map((index, element) => $(element).val()).get();
+    $.post(`${baseUrl}api/${table}/expected_days`, { user_id, table, expected_days }).then((response) => {});
+}

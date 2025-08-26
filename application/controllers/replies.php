@@ -514,7 +514,7 @@ class Replies extends Myschoolgh {
             $stmt = $this->db->prepare("INSERT INTO e_learning_comments SET type = ?, comment_id = ?,
                 comment = ?, user_id = ?, record_id = ?, ipaddress = ?, user_agent = ?");
             $stmt->execute([
-                $type, $params->comment_id ?? NULL, $comment, $params->userId, $params->record_id, 
+                $type, $params->comment_id ?? 0, $comment, $params->userId, $params->record_id ?? 0, 
                 $this->ip_address, $this->agent
             ]);
             
