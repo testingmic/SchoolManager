@@ -124,7 +124,9 @@ class Classes extends Myschoolgh {
                     }
                 }
 
-                $result->description = clean_html($result->description);
+                if(!empty($result->description)) {
+                    $result->description = clean_html($result->description);
+                }
 
                 // init
                 $result->class_rooms_list = [];

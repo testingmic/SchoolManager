@@ -372,6 +372,10 @@ class Attendance extends Myschoolgh {
 
         $query = " AND (user_type IN {$user_type})";
         $query .= !empty($class_id) ? " AND class_id='{$params->class_id}'" : null;
+
+        if(!empty($params->user_id)) {
+            $query .= " AND item_id='{$params->user_id}'";
+        }
         
         // get the list of students
         $names_array = $this->pushQuery("name, item_id, user_type", "users", "1 {$query} AND client_id='{$params->clientId}' AND status='1' AND user_status IN ({$this->default_allowed_status_users_list})");
@@ -399,14 +403,14 @@ class Attendance extends Myschoolgh {
                         !empty($class_info->class_size) ? $class_info->class_size : count($names_array)
                     )."</span><br>
                     <span><hr></span>
-                    <span><strong>Month/Year:</strong> ".date("F Y", strtotime($start_date))."</span>
+                    <span><strong>Period:</strong> ".date("jS M Y", strtotime($start_date))." to ".date("jS M Y", strtotime($params->end_date))."</span>
                 ";
             } else {
                 // more information
                 $information = "
                     <span><strong>User Type:</strong> {$the_user_type}</span><br>
                     <span><hr></span>
-                    <span><strong>Month/Year:</strong> ".date("F Y", strtotime($start_date))."</span>
+                    <span><strong>Period:</strong> ".date("jS M Y", strtotime($start_date))." to ".date("jS M Y", strtotime($params->end_date))."</span>
                 ";
             }
 
@@ -1141,6 +1145,8 @@ class Attendance extends Myschoolgh {
                     // loop through the results set
                     foreach($theQuery as $today) {
                         
+                        $getItem = false;
+
                         // convert the users list into an array
                         $present = !empty($today->users_list) ? json_decode($today->users_list, true) : [];
                         $_user_data = !empty($today->users_data) ? json_decode($today->users_data, true) : [];
@@ -1181,7 +1187,6 @@ class Attendance extends Myschoolgh {
 
                         // if the user is not an admin/accountant then verify if the user was present or absent
                         if($checkPresent) {
-
                             // confirm if present
                             $is_present = (bool) in_array($params->the_current_user_id, $present);
 
@@ -1190,7 +1195,8 @@ class Attendance extends Myschoolgh {
                             }
 
                             // set the label for the day
-                            $the_state = $is_present ? "present" : (!empty($getItem) ? $getItem : "absent");
+                            $the_state = $is_present ? "present" : (!empty($getItem) ? $getItem : "present");
+                            
                             $users_count["days_list"][$the_day] = ucwords($the_state);
                             $users_count["days_comments"][$the_day] = $_user_data[$params->the_current_user_id]["comments"] ?? "";
                             $users_count["days_log_time"][$the_day] = empty($today->date_finalized) ? 0 : $today->date_finalized;

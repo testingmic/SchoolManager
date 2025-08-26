@@ -170,6 +170,7 @@ $(`select[id="attendance_class"]`).on("change", function() {
 var refresh_AttendanceLog = () => {
     let class_id = $(`select[id="attendance_class"]`).val(),
         category = $(`select[name="attendance_category"]`).val();
+    $(`div[id="attendance_log_summary"]`).html(``);
     $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "flex" });
     $(`button[class~="refresh"]`).html(`Refreshing record <i class='fa fa-spin fa-spinner'></i>`).prop("disabled", true);
     class_id = category === "staff" ? "" : class_id;

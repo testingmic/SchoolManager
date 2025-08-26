@@ -72,7 +72,7 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="row" id="attendance_report">
-                            <div class="col-lg-2 col-md-3">
+                            <div class="col-lg-3 col-md-3">
                                 <div class="form-group">
                                     <label>Select Category</label>
                                     <select data-width="100%" class="form-control selectpicker" name="user_type" id="user_type">

@@ -279,6 +279,7 @@ if(!$isSupport) {
         // set some parameters
         $getObject->download = true;
         $getObject->client_data = $defaultUser->client;
+        $getObject->user_id = $getObject->user_id ?? null;
         $getObject->user_type = $getObject->user_type ?? null;
         $getObject->clientId = $defaultUser->client->client_id;
         $getObject->academic_year = $defaultUser->client->client_preferences->academics->academic_year;

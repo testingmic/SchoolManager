@@ -84,8 +84,8 @@ if(!empty($item_id)) {
                 // add up the values
                 $amount_due += $student->debt + $student->amount_paid;
                 $amount_paid += $student->amount_paid;
-                $arrears += $student->arrears;
-                $balance += $student->debt;
+                $arrears += $student->arrears ?? 0;
+                $balance += $student->debt ?? 0;
             }
 
             $url_path = $student->user_type === "student" ? "student" : "staff";
@@ -95,7 +95,7 @@ if(!empty($item_id)) {
             $action = "<button title='View User Record' onclick='return load(\"{$url_path}/{$student->user_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></button>";
 
             // show the payment button if the user has the permission to receive fees payment
-            if($receivePayment && $student->debt > 0) {
+            if(!empty($student->debt) &&$receivePayment && $student->debt > 0) {
                 $action .= "&nbsp;<button title='Pay Fees' onclick='return load(\"fees-payment?student_id={$student->user_id}&class_id={$student->class_id}\");' class='btn btn-sm btn-outline-success'><i class='fa fa-adjust'></i> Pay Fees</button>";
             }
                         
@@ -109,7 +109,7 @@ if(!empty($item_id)) {
             </td>";
             $students .= "<td>{$student->class_name}</td>";
             $students .= "<td>{$student->gender}</td>";
-            $students .= $viewAllocation ? "<td>{$defaultCurrency} {$student->total_debt_formated}</td>" : null;
+            $students .= $viewAllocation ? "<td>{$defaultCurrency} ".($student->total_debt_formated ?? 0)."</td>" : null;
             $students .= "<td align='center' width='22%'>{$action}</td>";
             $students .= "</tr>";
         }

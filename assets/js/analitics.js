@@ -1058,6 +1058,12 @@ if ($(`div[id="data-report_stream"]`).length) {
     if(_attendance_period) {
         d_period += `&label[attendance_period]=${_attendance_period}`;
     }
+
+    // get the start and end date for the single user data
+    if($(`div[id="single_user_data"]`).length) {
+        d_period += `&label[start_date]=${$(`input[data-item="attendance"][name="group_start_date"]`).val()}`;
+        d_period += `&label[end_date]=${$(`input[data-item="attendance"][name="group_end_date"]`).val()}`;
+    }
     
     loadDashboardAnalitics(d_period);
 
