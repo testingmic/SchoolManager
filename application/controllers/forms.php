@@ -1661,6 +1661,8 @@ class Forms extends Myschoolgh {
      */
     public function incident_log_form(stdClass $params, $user_id = null) {
         
+        global $defaultUser;
+
         // description
         $html_content = "";
         $message = isset($params->data->description) ? htmlspecialchars_decode($params->data->description) : null;
@@ -1672,6 +1674,13 @@ class Forms extends Myschoolgh {
 
         /** init content */
         $preloaded_attachments = "";
+
+        // visibilitity checker
+        $visibilityDropdown = (bool) (
+            !empty($params->module['additional']) && 
+            ($params->module['additional'] == 'teacher') && 
+            $params->module['item_id'] !== $params->userId
+        );
 
         /** Set parameters for the data to attach */
         $form_params = (object) [
@@ -1789,13 +1798,13 @@ class Forms extends Myschoolgh {
                             <input value='".($params->data->reported_by ?? null)."' type='text' name='reported_by' id='reported_by' class='form-control'>
                         </div>
                     </div>
-                    <div class='col-md-5'>
+                    <div class='col-md-6'>
                         <div class='form-group'>
                             <label>Incident Date <span class='required'>*</span></label>
                             <input value='".($params->data->incident_date ?? null)."' type='text' name='incident_date' id='incident_date' class='form-control datepicker'>
                         </div>
                     </div>
-                    <div class=\"col-md-7\">
+                    <div class=\"col-md-6\">
                         <div class=\"form-group\">
                             <label for=\"assigned_to\">Assigned To</label>
                             <select data-width=\"100%\" name=\"assigned_to\" id=\"assigned_to\" class=\"form-control selectpicker\">
@@ -1805,8 +1814,36 @@ class Forms extends Myschoolgh {
                                 }
                             $html_content .= "</select>
                         </div>
-                    </div>    
-                    <div class='col-md-".($title ? 8 : 12)."'>
+                    </div>";
+
+                    if($visibilityDropdown) { 
+                        $html_content .= "
+                            <div class=\"col-md-6\">
+                                <div class=\"form-group\">
+                                    <label for=\"can_view_incident\">".(ucwords($params->module['additional']))." Can View Incident</label>
+                                    <select data-width=\"100%\" name=\"can_view_incident\" id=\"can_view_incident\" class=\"form-control selectpicker\">";
+                                        foreach(['No', 'Yes'] as $each) {
+                                            $html_content .= "<option value=\"{$each}\">".strtoupper($each)."</option>";                            
+                                        }
+                                $html_content .= "
+                                </select>
+                            </div>
+                        </div>";
+                        $html_content .= "
+                            <div class=\"col-md-6\">
+                                <div class=\"form-group\">
+                                    <label for=\"can_view_comments\">".(ucwords($params->module['additional']))." Can Read Comments</label>
+                                    <select data-width=\"100%\" name=\"can_view_comments\" id=\"can_view_comments\" class=\"form-control selectpicker\">";
+                                        foreach(['No', 'Yes'] as $each) {
+                                            $html_content .= "<option value=\"{$each}\">".strtoupper($each)."</option>";                            
+                                        }
+                                $html_content .= "
+                                </select>
+                            </div>
+                        </div>";
+                    }
+
+                    $html_content .= "<div class='col-md-".($title ? 8 : 12)."'>
                         <div class='form-group'>
                             <label>Incident Location</label>
                             <input value='".($params->data->location ?? null)."' type='text' name='location' id='location' class='form-control'>
@@ -2563,7 +2600,9 @@ class Forms extends Myschoolgh {
         $response = '
         <form autocomplete="Off" class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/departments/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
-                <div class="col-lg-12"><h5>DEPARTMENT INFORMATION</h5></div>
+                <div class="col-lg-12">
+                    <div class=" text-primary border-bottom border-primary mb-3"><h5>DEPARTMENT INFORMATION</h5></div>
+                </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Department Image</label>
@@ -2587,10 +2626,16 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-12 col-md-6">
+                <div class="col-lg-9 col-md-9">
                     <div class="form-group">
                         <label for="name">Department Name<span class="required">*</span></label>
                         <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <div class="form-group">
+                        <label for="reporting_time">Latest Reporting Time<span class="required">*</span></label>
+                        <input type="time" value="'.($itemData->reporting_time ?? null).'" name="reporting_time" id="reporting_time" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12">

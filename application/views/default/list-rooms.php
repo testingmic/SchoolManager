@@ -50,7 +50,7 @@ foreach($item_list["data"] as $key => $each) {
     $rooms_list .= "<td>{$each->code}</td>";
     $rooms_list .= "<td>{$each->room_classes}</td>";
     $rooms_list .= "<td>{$each->capacity}</td>";
-    $rooms_list .= "<td align='center'>{$action}</td>";
+    $rooms_list .= "<td class='text-center'>{$action}</td>";
     $rooms_list .= "</tr>";
 }
 

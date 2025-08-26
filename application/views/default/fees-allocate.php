@@ -206,7 +206,7 @@ elseif(!empty($user_id)) {
                         <td><input style='min-width:90px' value='{$amount_due}' disabled class='form-control font-weight-bold font-17 text-center'></td>
                         <td><input style='min-width:90px' value='{$amount_paid}' disabled class='form-control font-17 text-center'></td>
                         <td><input style='min-width:90px' min='0' max='{$amount_due}' value='{$balance}' {$idisabled} ".($disabled ? $disabled : "data-item='amount' data-category_id='{$allocation->category_id}'")." class='form-control font-weight-bold font-17 p-0 text-center {$exempt_class}' type='number'></td>
-                        <td align='center'>{$b}{$save_btn}{$delete_btn}{$undo_button}{$e}</td>
+                        <td class='text-center'>{$b}{$save_btn}{$delete_btn}{$undo_button}{$e}</td>
                     </tr>";
             }
 
@@ -245,7 +245,7 @@ elseif(!empty($user_id)) {
                         <td><input style='min-width:90px' value='{$category->amount}' disabled class='form-control font-weight-bold font-17 text-center'></td>
                         <td><input style='min-width:90px' value='0' disabled class='form-control font-17 text-center'></td>
                         <td><input style='min-width:90px' min='0' value='{$category->amount}' data-item='amount' data-category_id='{$category->id}' class='form-control font-weight-bold font-17 p-0 text-center' type='number'></td>
-                        <td align='center'>{$b}{$save_btn}{$delete_btn}{$undo_button}{$e}</td>
+                        <td class='text-center'>{$b}{$save_btn}{$delete_btn}{$undo_button}{$e}</td>
                     </tr>";
                 }
             }
@@ -259,7 +259,7 @@ elseif(!empty($user_id)) {
             <td><input style='min-width:90px' value='{$total_amount}' readonly class='form-control bg-dark text-white font-weight-bold font-20 text-center'></td>
             <td><input style='min-width:90px' value='{$total_paid}' readonly class='form-control bg-dark text-white font-20 text-center'></td>
             <td><input style='min-width:90px' min='0' data-input_function='total_amount' max='{$total_balance}' readonly value='{$total_balance}' class='form-control bg-dark text-white font-weight-bold font-20 p-0 text-center' type='number'></td>
-            <td align='center'>-</td>
+            <td class='text-center'>-</td>
         </tr>";
 
         // append the html content

@@ -212,6 +212,10 @@ if(!empty($item_id)) {
                             <img width="100%" alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
                         </div>
                         <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
+                        <div class="author-box-center border-top border-primary pt-2 text-uppercase font-15 mb-0 p-0">
+                            <span class="text-muted">Latest Reporting Time: </span>
+                            <div class="font-weight-bold font-18">'.$data->reporting_time.'</div>
+                        </div>
                     </div>
                 </div>
                 </div>

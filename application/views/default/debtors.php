@@ -127,7 +127,7 @@ if(!$accessObject->hasAccess("view", "fees")) {
                     // set the button
                     $action = "";
                     if($receivePayment) {
-                        $action = "<td align='center'>";
+                        $action = "<td class='text-center'>";
                         $action .= "<span title='Click to pay current fees balance' onclick='load(\"fees-payment?student_id={$student->student_id}&class_id={$student->class_id}\");' class='btn mb-1 btn-sm btn-outline-success'>Pay Fees</span>";
 
                         if($student->arrears_total > 0) {
@@ -157,7 +157,7 @@ if(!$accessObject->hasAccess("view", "fees")) {
                         <td>{$defaultCurrency} {$student->debt}</td>
                         <td>{$defaultCurrency} {$student->arrears_total}</td>
                         <td>{$defaultCurrency} {$total}</td>
-                        <td align='center'>{$percentage}%</td>
+                        <td class='text-center'>{$percentage}%</td>
                         {$action}
                     </tr>";
 
@@ -214,7 +214,7 @@ if(!$accessObject->hasAccess("view", "fees")) {
                 // set the button
                 $action = "";
                 if($receivePayment) {
-                    $action = "<td align='center'>";
+                    $action = "<td class='text-center'>";
                     $action .= "&nbsp;<button title='Click to pay current fees balance' onclick='load(\"fees-payment?student_id={$student->item_id}&class_id={$student->class_id}\");' class='btn btn-sm btn-outline-primary'>Pay Fees</button>";
                     $action .= "</td>";
                 }
@@ -240,7 +240,7 @@ if(!$accessObject->hasAccess("view", "fees")) {
                     <td>{$defaultCurrency} {$student->debt}</td>
                     <td>{$defaultCurrency} 0</td>
                     <td>{$defaultCurrency} {$total}</td>
-                    <td align='center'>{$percentage}%</td>
+                    <td class='text-center'>{$percentage}%</td>
                     {$action}
                 </tr>";
             }
@@ -264,8 +264,8 @@ if(!$accessObject->hasAccess("view", "fees")) {
                 <td>{$defaultCurrency} ".number_format($total_term_bill_balance, 2)."</td>
                 <td>{$defaultCurrency} ".number_format($total_term_bill_arrears, 2)."</td>
                 <td>{$defaultCurrency} ".number_format($total_term_bill_total, 2)."</td>
-                <td align='center'>{$percentage}%</td>
-                <td align='center'></td>
+                <td class='text-center'>{$percentage}%</td>
+                <td class='text-center'></td>
             </tr>";
     }
 

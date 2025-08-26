@@ -154,7 +154,7 @@ if(!empty($session->clientId)) {
                 <span class='badge badge-{$exeatClass->exeat_statuses[$status]}'>{$status}</span>
             </td>";
             if($hasUpdate || $hasDelete || $isWardParent) {
-                $exeatsList .= "<td align='center'>{$action}</td>";
+                $exeatsList .= "<td class='text-center'>{$action}</td>";
             }
             $exeatsList .= "</tr>";
         }

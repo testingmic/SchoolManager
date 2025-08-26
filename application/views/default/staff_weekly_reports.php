@@ -83,7 +83,7 @@ foreach($reports as $key => $each) {
     </td>";
     $daily_reports .= "<td>".date("Y-m-d", strtotime($each->date_created))."</td>";
     $daily_reports .= "<td><div style='max-height:80px; overflow:hidden;'>{$each->description}</div></td>";
-    $daily_reports .= "<td align='center'>{$action}</td>";
+    $daily_reports .= "<td class='text-center'>{$action}</td>";
     $daily_reports .= "</tr>";
 }
 

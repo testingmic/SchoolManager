@@ -86,7 +86,7 @@ if(!$accessObject->hasAccess("view", "visitor_book")) {
             $results_list .= "<td>{$each->content->phone_number}</td>";
             $results_list .= "<td>{$each->content->date}</td>";
             $results_list .= "<td><strong>{$each->content->time_in}</strong> to <strong>{$each->content->time_out}</strong></td>";
-            $results_list .= "<td align='center'>{$action}</td>";
+            $results_list .= "<td class='text-center'>{$action}</td>";
             $results_list .= "</tr>";
         }
 

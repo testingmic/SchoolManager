@@ -108,7 +108,7 @@ foreach($student_list["data"] as $key => $each) {
     } else {
         $students .= "<td>{$each->email}</td>";
     }
-    $students .= "<td align='center'>{$action}</td>";
+    $students .= "<td class='text-center'>{$action}</td>";
     $students .= "</tr>";
 }
 

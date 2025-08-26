@@ -64,7 +64,7 @@ foreach($item_list["data"] as $key => $each) {
     $books_list .= "<td><a href='#' class='text-primary' onclick='return load(\"book_category/{$each->category_item_id}\");'>".($each->category_name ?? null)."</a></td>";
     $books_list .= "<td>".($each->isbn ?? null)."</td>";
     $books_list .= "<td>".($defaultCurrency ?? null).' '.number_format($each->price ?? 0, 2)."</td>";
-    $books_list .= "<td align='center'>{$action}</td>";
+    $books_list .= "<td class='text-center'>{$action}</td>";
     $books_list .= "</tr>";
 }
 

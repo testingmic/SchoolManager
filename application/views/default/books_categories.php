@@ -57,7 +57,7 @@ foreach($item_list["data"] as $key => $each) {
     $category_list .= "<td>{$each->description}</td>";
     $category_list .= "<td>{$language}</td>";
     $category_list .= "<td>{$each->books_count}</td>";
-    $category_list .= "<td align='center'>{$action}</td>";
+    $category_list .= "<td class='text-center'>{$action}</td>";
     $category_list .= "</tr>";
 }
 

@@ -141,6 +141,7 @@ class Departments extends Myschoolgh {
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(!empty($fileName) ? ", image='{$fileName}'" : null)."
                 ".(!empty($item_id) ? ", item_id='{$item_id}'" : null)."
+                ".(!empty($params->reporting_time) ? ", reporting_time = '{$params->reporting_time}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->department_code) ? ", department_code = '{$params->department_code}'" : null)."
                 ".(isset($params->department_head) ? ", department_head = '{$params->department_head}'" : null)."
@@ -230,6 +231,7 @@ class Departments extends Myschoolgh {
                 UPDATE departments SET date_updated = now()
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(!empty($fileName) ? ", image='{$fileName}'" : null)."
+                ".(!empty($params->reporting_time) ? ", reporting_time = '{$params->reporting_time}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->department_code) ? ", department_code = '{$params->department_code}'" : null)."
                 ".(isset($params->department_head) ? ", department_head = '{$params->department_head}'" : null)."

@@ -54,7 +54,7 @@ foreach($fees_category_array_list["data"] as $key => $each) {
     $fees_cateories .= "<td>{$houseLabel}</td>";
     $fees_cateories .= "<td>{$each->amount}</td>";
     $fees_cateories .= "<td>{$each->fees_count}</td>";
-    $fees_cateories .= "<td align='center'>{$action}</td>";
+    $fees_cateories .= "<td class='text-center'>{$action}</td>";
     $fees_cateories .= "</tr>";
 }
 

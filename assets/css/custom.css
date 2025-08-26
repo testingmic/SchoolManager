@@ -620,7 +620,7 @@ table.dataTable.table-sm>thead>tr>th {
 .modal-dialog-right.right .modal-dialog {
     position: fixed;
     margin: auto;
-    max-width: 600px;
+    max-width: 650px;
     -webkit-transform: translate3d(0%, 0, 0);
     -ms-transform: translate3d(0%, 0, 0);
     -o-transform: translate3d(0%, 0, 0);

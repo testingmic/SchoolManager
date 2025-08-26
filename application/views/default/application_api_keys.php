@@ -53,7 +53,7 @@ foreach($item_list as $key => $each) {
         <input type='text' ".(!$isExpired ? "style='width:130px' data-api_key_date='{$each->id}' data-mindate='".date("Y-m-d")."' data-maxdate='".date("Y-m-d", strtotime("today +6 months"))."' class='datepicker'" : "disabled style='max-width:150px' class='form-control'")." value='{$each->expiry_date}'>
         ".(!$isExpired ? "<span onclick='return extend_api_expiry(\"{$each->id}\");' title='Update Expiry Date' class='ml-1 cursor btn-outline-success btn btn-sm'><i class='fa fa-save'></i></span>
             <span onclick='return delete_api_key(\"{$each->id}\");' title='Delete API Key' class='ml-1 cursor btn-outline-danger btn btn-sm'><i class='fa fa-trash'></i></span>" : null)."</td>";
-    $application_list .= "<td align='center'>{$status}</td>";
+    $application_list .= "<td class='text-center'>{$status}</td>";
     $application_list .= "</tr>";
 }
 

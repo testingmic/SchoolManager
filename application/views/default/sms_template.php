@@ -69,7 +69,7 @@ foreach($templates_array as $key => $template) {
     $list_templates .= "<td>{$template->name}</td>";
     $list_templates .= "<td>{$template->message}</td>";
     $list_templates .= "<td>".date("jS M Y", strtotime($template->date_created))."</td>";
-    $list_templates .= "<td align='center'>{$action}</td>";
+    $list_templates .= "<td class='text-center'>{$action}</td>";
     $list_templates .= "</tr>";
 }
 

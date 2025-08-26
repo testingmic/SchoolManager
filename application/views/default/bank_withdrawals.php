@@ -91,7 +91,7 @@ foreach($list_data as $key => $each) {
     </td>";
     $type_list .= "<td><span class='badge badge-danger'>".($each->transaction_type)."</span></td>";
     $type_list .= "<td>{$each->amount}</td>";
-    $type_list .= "<td align='center'>{$action}</td>";
+    $type_list .= "<td class='text-center'>{$action}</td>";
     $type_list .= "</tr>";
 }
 

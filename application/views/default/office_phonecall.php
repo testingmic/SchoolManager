@@ -85,7 +85,7 @@ if(!$accessObject->hasAccess("view", "phone_call_log")) {
             $results_list .= "<td>{$each->content->phone_number}</td>";
             $results_list .= "<td>{$each->content->date}</td>";
             $results_list .= "<td>{$each->content->type}</td>";
-            $results_list .= "<td align='center'>{$action}</td>";
+            $results_list .= "<td class='text-center'>{$action}</td>";
             $results_list .= "</tr>";
         }
 

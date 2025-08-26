@@ -58,7 +58,7 @@ foreach($department_list["data"] as $key => $each) {
     $sections .= "<td>{$each->section_code}</td>";
     $sections .= "<td>{$each->students_count}</td>";
     $sections .= "<td><span ".(isset($each->section_leader_info->name) ? "onclick='return load(\"student/{$each->section_leader_info->user_id}\")'" : null)." class='user_name'>".($each->section_leader_info->name ?? null)."</span></td>";
-    $sections .= "<td align='center'>{$action}</td>";
+    $sections .= "<td class='text-center'>{$action}</td>";
     $sections .= "</tr>";
 }
 

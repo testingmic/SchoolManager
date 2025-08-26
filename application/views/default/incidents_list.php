@@ -80,7 +80,7 @@ foreach($item_list["data"] as $key => $each) {
     $incidents .= "<td>{$each->reported_by}</td>";
     $incidents .= "<td>{$each->incident_date}</td>";
     $incidents .= "<td>".$myClass->the_status_label($each->status)."</td>";
-    $incidents .= "<td align='center'>{$action}</td>";
+    $incidents .= "<td class='text-center'>{$action}</td>";
     $incidents .= "</tr>";
 }
 

@@ -424,7 +424,7 @@ class Fees extends Myschoolgh {
                 $class_allocation_list .= "<td>".strtoupper($each->class_name)."</td>";
                 $class_allocation_list .= "<td>".($each->category_name ?? $each->category_list)."</td>";
                 $class_allocation_list .= "<td>{$each->currency} ".number_format($each->amount, 2)."</td>";
-                $class_allocation_list .= "<td align='center'><a class='btn btn-sm btn-primary' target='_blank' 
+                $class_allocation_list .= "<td class='text-center'><a class='btn btn-sm btn-primary' target='_blank' 
                     href='{$this->baseUrl}download/student_bill?class_id={$each->class_id}&academic_year={$params->academic_year}&academic_term={$params->academic_term}".($showOutstanding ? "&current_bal=true" : null)."'>
                         <i class='fa fa-print'></i> Print Bill</a></td>";
                 $class_allocation_list .= "</tr>";
@@ -2363,7 +2363,7 @@ class Fees extends Myschoolgh {
                                 <div style='margin-top:5px;margin-bottom:5px'>
                                     <table width='100%' cellpadding='5px' border='0'>
                                         <tr style='color:#2196F3'>
-                                            <td align='center'><strong>Period:</strong> From ".date("jS M, Y", strtotime($params->start_date))." <strong>TO</strong> ".date("jS M, Y", strtotime($params->end_date))."</td>
+                                            <td class='text-center'><strong>Period:</strong> From ".date("jS M, Y", strtotime($params->start_date))." <strong>TO</strong> ".date("jS M, Y", strtotime($params->end_date))."</td>
                                             ".($category_name ? "<td align='center' width='33%'><strong>Category:</strong> {$category_name}</td>" : null)."
                                             ".($class_name ? "<td align='center' width='33%'><strong>Class:</strong> {$class_name}</td>" : null)."
                                         </tr>

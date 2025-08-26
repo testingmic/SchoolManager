@@ -88,7 +88,7 @@ if(!$accessObject->hasAccess("view", "postal_dispatch")) {
             $results_list .= "<td>{$each->content->reference}</td>";
             $results_list .= "<td>{$each->content->from}</td>";
             $results_list .= "<td>{$each->content->date}</td>";
-            $results_list .= "<td align='center'>{$action}</td>";
+            $results_list .= "<td class='text-center'>{$action}</td>";
             $results_list .= "</tr>";
         }
 

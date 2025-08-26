@@ -64,7 +64,7 @@ if(!$accessObject->hasAccess("promote", "promotion")) {
         $promotion_list .= "<td>{$each->academic_term} {$academicSession} - {$each->academic_year}</td>";
         $promotion_list .= "<td>{$each->from_class_name}</td>";
         $promotion_list .= "<td>{$each->to_class_name}</td>";
-        $promotion_list .= "<td align='center'>{$each->students_count}</td>";
+        $promotion_list .= "<td class='text-center'>{$each->students_count}</td>";
         $promotion_list .= "<td>{$each->date_created}</td>";
         $promotion_list .= "<td width='10%'>{$myClass->the_status_label($each->status)}</td>";
         $promotion_list .= "<td  width='15%' align='center'><button title='Click to View this Promotion Log' onclick='return load(\"promotion/{$each->history_log_id}\")' onthisone='return view_Promotion_Log(\"{$each->history_log_id}\")' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i> View</button></td>";

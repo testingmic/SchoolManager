@@ -72,7 +72,7 @@ foreach($password_requests as $key => $request) {
                 <div>{$request->reset_agent}</div>
                 <div><span id='change_status_{$request->item_id}' class='font-weight-bold text-{$color[$request->token_status]}'>{$request->token_status}</span></div>
             </td>
-            <td align='center'>
+            <td class='text-center'>
                 ".(!in_array($request->token_status, ["PENDING"]) ? 
                     "<div class='change_password_{$request->item_id}'>
                         <button onclick='return show_ChangePasword_Form(\"{$request->item_id}\", \"{$request->request_token}\")' class='btn btn-outline-success btn-sm mr-1 mb-1'><i class='fa fa-edit'></i></outline>

@@ -391,7 +391,7 @@ class Assignments extends Myschoolgh {
     
             $assignments_list .= "<td>{$each->date_created}</td>";
             $assignments_list .= "<td class='text-center'>".($hasUpdate ? $this->the_status_label($each->state) : $each->handedin_label)."</td>";
-            $assignments_list .= "<td align='center'>{$action}</td>";
+            $assignments_list .= "<td class='text-center'>{$action}</td>";
             $assignments_list .= "</tr>";
         }
 
@@ -1790,7 +1790,7 @@ class Assignments extends Myschoolgh {
         // if no result was found
         if(empty($questions_array_list)) {
             // return error
-            $question_html .= "<tr><td align='center'>Sorry! No result was found for the request.</td></tr>";
+            $question_html .= "<tr><td class='text-center'>Sorry! No result was found for the request.</td></tr>";
         } else {
 
             // if the user is still in the quiz mode checker

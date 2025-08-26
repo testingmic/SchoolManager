@@ -70,7 +70,7 @@ foreach($list_data as $key => $each) {
     $type_list .= "<td>".($key+1)."</td>";
     $type_list .= "<td>{$each->name}</td>";
     $type_list .= "<td><span class='badge badge-".($each->type == "Income" ? "success" : "danger")."'>".($each->type)."</span></td>";
-    $type_list .= $hasUpdate ? "<td align='center'>{$action}</td>" : null;
+    $type_list .= $hasUpdate ? "<td class='text-center'>{$action}</td>" : null;
     $type_list .= "</tr>";
 }
 

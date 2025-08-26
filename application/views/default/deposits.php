@@ -90,7 +90,7 @@ foreach($transactions_list as $key => $transaction) {
     $list_transactions .= "<td>".number_format($transaction->amount, 2)."</td>";
     $list_transactions .= "<td>".date("jS M Y", strtotime($transaction->record_date))."</td>";
     $list_transactions .= "<td>{$transaction->state_label}</td>";
-    $list_transactions .= "<td align='center'><span data-action_id='{$transaction->item_id}'>{$action}</span></td>";
+    $list_transactions .= "<td class='text-center'><span data-action_id='{$transaction->item_id}'>{$action}</span></td>";
     $list_transactions .= "</tr>";
 }
 $response->array_stream["transactions_array_list"] = $transactions_array_list;

@@ -91,7 +91,7 @@ if(!$accessObject->hasAccess("manage", "settings")) {
         $users_list .= "<td class='text-center'>
             <span data-status-item='{$user->item_id}'>".$myClass->the_status_label($user->user_status)."</span>
         </td>";
-        $users_list .= "<td align='center'>{$action}</td>";
+        $users_list .= "<td class='text-center'>{$action}</td>";
         $users_list .= "</tr>";
 
     }

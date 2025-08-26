@@ -962,7 +962,7 @@ class Accounting extends Myschoolgh {
                                 ".(!empty($params->client_data->client_logo) ? "<img width=\"70px\" src=\"{$this->client_logo}\">" : "")."
                                 <h4 style=\"color:#6777ef;font-family:helvetica;padding:0px;margin:0px;\">".strtoupper($params->client_data->client_name)."</h4>
                             </td>
-                            <td align='center'>
+                            <td class='text-center'>
                                 <div style='padding-bottom:5px;font-size:20px'><strong>STATEMENT OF ACCOUNT</strong></div>
                                 <div style='padding-bottom:5px;font-size:13px;'><strong>FOR ACCOUNT NUMBER: {$account->account_number}</strong></div>
                                 <div style='padding-bottom:5px;'><strong>{$account->account_name}</strong></div>
@@ -1225,7 +1225,7 @@ class Accounting extends Myschoolgh {
                                     <td align='center' width='15%'>
                                         ".(!empty($params->client_data->client_logo) ? "<img width=\"70px\" src=\"{$this->client_logo}\">" : "")."
                                     </td>
-                                    <td align='center'>
+                                    <td class='text-center'>
                                         <h2 style=\"color:#6777ef;font-family:helvetica;padding:0px;margin:0px;\">".strtoupper($params->client_data->client_name)."</h2>
                                         <div style='padding-bottom:5px;font-size:20px'><strong>NOTES OF ACCOUNT</strong></div>
                                         <div style='padding-bottom:5px;font-size:15px;'><strong>FOR ACCOUNT NUMBER: {$account->account_number}</strong></div>

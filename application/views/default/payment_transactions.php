@@ -117,7 +117,7 @@ $response->html = '
                                             ".($payment_data->customer->email ?? null)."
                                         </td>
                                         <td>{$item->reference_id}</td>
-                                        <td align='center'>
+                                        <td class='text-center'>
                                             ".($payment_data->authorization->channel ?? null)."
                                         </td>
                                         <td>
@@ -126,7 +126,7 @@ $response->html = '
                                         <td>
                                             ".(!empty($payment_data->gateway_response) ? "<span class='badge badge-{$responses[$payment_data->status]}'>{$payment_data->status}</span>" : "")."
                                         </td>
-                                        <td align='center'>
+                                        <td class='text-center'>
                                             <button onclick='load(\"payment_transactions/{$item->reference_id}\")' class='btn btn-outline-primary btn-sm'>
                                                 <i class='fa fa-eye'></i> View
                                             </button>

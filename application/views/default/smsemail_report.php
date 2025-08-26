@@ -54,7 +54,7 @@ foreach($array_list as $message) {
     $messages_list[$message->type] .= "<td>{$message->recieved_count} / ".count($message->recipient_ids)."</td>";
     $messages_list[$message->type] .= "<td>{$message->sent_status}</td>";
     $messages_list[$message->type] .= "<td>{$message->date_created}</td>";
-    $messages_list[$message->type] .= "<td align='center'>{$action}</td>";
+    $messages_list[$message->type] .= "<td class='text-center'>{$action}</td>";
     $messages_list[$message->type] .= "</tr>";
 }
 

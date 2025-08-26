@@ -580,7 +580,7 @@ class Attendance extends Myschoolgh {
             <tr>";
             foreach($colors as $key => $color) {
                 $table_content .= "
-                <td align='center'>
+                <td class='text-center'>
                     <span style='font-weight:bold;color:{$color["color"]}'>{$key}: {$color["title"]}</span>
                 </td>";
             }

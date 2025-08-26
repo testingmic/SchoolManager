@@ -108,7 +108,7 @@ if(!empty($item_id)) {
 
             // if the item is not yet overdue
             if($isRequested && !$isOverdue) {
-                $books_list .= "<td align='center'>";
+                $books_list .= "<td class='text-center'>";
                 $books_list .= "<button onclick=\"return remove_Book('{$item_id}','{$book->book_id}');\" class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button>";
                 $books_list .= "&nbsp;<button onclick=\"return save_Book_Quantity('{$item_id}','{$book->book_id}');\" id='save_book_{$book->book_id}' class='btn btn-sm hidden btn-outline-success'><i class='fa fa-save'></i></button>";
                 $books_list .= "</td>";

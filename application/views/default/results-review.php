@@ -157,7 +157,7 @@ if(empty($result_id)) {
 
                 // append to the item
                 $marks_list .= "
-                <td align='center'>
+                <td class='text-center'>
                     ".(!$is_disabled ?
                         "<input data-result_student_id='{$score->student_item_id}' min='0' ".(!$is_disabled ? "data-input_type_q='marks' data-max_value='{$simp_value}' data-input_row_id='{$score->student_row_id}'" : "disabled='disabled'")." type='number' data-input_name='{$s_key}' data-input_type='score' style='width:7rem' value='{$marks}' class='form-control text-center'>"
                         : "<span>{$marks}</span>"
@@ -190,13 +190,13 @@ if(empty($result_id)) {
                     <strong class='text-primary'>{$score->student_unique_id}</strong>
                 </td>
                 ".$marks_list."
-                <td align='center'>
+                <td class='text-center'>
                     <span class='font-20' data-result_student_id='{$score->student_item_id}' data-input_row_id='{$score->student_row_id}' data-school_based_assessment='{$sbaPercentage}'>{$sbaPercentage}</span>
                 </td>
-                <td align='center'>
+                <td class='text-center'>
                     <span class='font-20' data-result_student_id='{$score->student_item_id}' data-input_row_id='{$score->student_row_id}' data-examination='{$examsPercentage}'>{$examsPercentage}</span>
                 </td>
-                <td align='center'>
+                <td class='text-center'>
                     <span class='font-20' data-result_student_id='{$score->student_item_id}' data-input_row_id='{$score->student_row_id}' data-student_percentage='{$totalPercentage}'>{$totalPercentage}%</span>
                 </td>
                 <td>

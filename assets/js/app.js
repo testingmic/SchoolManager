@@ -1221,11 +1221,13 @@ var select_option_filter = () => {
     });
 }
 
-var form_loader = async(form_module, module_item_id) => {
+var form_loader = async(form_module, module_item_id, additional = '') => {
+
     let $module = {
         label: form_module,
         item_id: module_item_id,
-        content: "form"
+        content: "form",
+        additional
     }
     $form_loaded.attr("value", 0);
     $form_loaded.attr("data-form", "none");
@@ -1274,7 +1276,7 @@ var form_loader = async(form_module, module_item_id) => {
     });
 }
 
-var load_quick_form = async(_module, module_item_id) => {
+var load_quick_form = async(_module, module_item_id, additional = '') => {
     $replies_modal.modal("hide");
     $form_header.html(form_modules[_module]);
 
@@ -1291,7 +1293,7 @@ var load_quick_form = async(_module, module_item_id) => {
     $form_modal.modal("show");
     $form_body.html($form_loader);
 
-    form_loader(_module, module_item_id);
+    form_loader(_module, module_item_id, additional);
 }
 
 var delete_existing_file_attachment = async(record_id) => {

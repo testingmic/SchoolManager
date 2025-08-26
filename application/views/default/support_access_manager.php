@@ -77,7 +77,7 @@ $response->html = '
                                 <tr>
                                     <td>{$key}</td>
                                     <td>{$access->name}</td>
-                                    <td align='center'>
+                                    <td class='text-center'>
                                         <button onclick='return access_permission(\"{$key}\")' class='btn btn-sm btn-outline-primary'>
                                             <i class='fa fa-edit'></i> Edit
                                         </button>

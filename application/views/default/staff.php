@@ -130,7 +130,7 @@ if(empty($user_id)) {
         if(!empty($incidents["data"])) {
             
             // begin the html contents
-            $incidents_list = "<div class='row mb-3'>";
+            $incidents_list = "<div class='row mb-3 pt-2'>";
 
             // loop through the list of all incidents
             foreach($incidents["data"] as $each) {
@@ -192,7 +192,9 @@ if(empty($user_id)) {
 
         // if the incident is empty
         if(empty($incidents_list)) {
-            $incidents_list = "<div class='text-center font-italic'>No recorded incidents</div>";
+            $incidents_list = "<div class='mt-2'>";
+            $incidents_list .= no_record_found("Incidents", "No recorded incents", null, null, false);
+            $incidents_list .= "</div>";
         }
 
         // set the first key
@@ -604,7 +606,7 @@ if(empty($user_id)) {
                                     <div class="mb-2"></div>
                                     '.($addIncident ? '
                                         <div>
-                                            <button type="button" onclick="return load_quick_form(\'incident_log_form\',\''.$user_id.'\');" class="btn btn-primary"><i class="fa fa-plus"></i> Log Incident</button>
+                                            <button type="button" onclick="return load_quick_form(\'incident_log_form\',\''.$user_id.'\',\''.$data->user_type.'\');" class="btn btn-primary"><i class="fa fa-plus"></i> Log Incident</button>
                                         </div>' 
                                     : null ).'
                                 </div>

@@ -134,7 +134,7 @@ if(!empty($item_id)) {
                             <td>{$ii}</td>
                             <td>{$question->question}</td>
                             <td class='text-center'>{$question->marks}</td>
-                            <td align='center'>";
+                            <td class='text-center'>";
                                 if(!$isActive && !$isClosed) {
                                     $questions_list .= "<a href='{$baseUrl}add-assessment/add_question?qid={$item_id}&q_id={$question->item_id}' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>&nbsp;";
                                 }

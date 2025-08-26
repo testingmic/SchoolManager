@@ -57,7 +57,7 @@ foreach($item_list["data"] as $key => $each) {
     </td>";
     $application_list .= "<td></td>";
     $application_list .= "<td>".$myClass->the_status_label($each->state)."</td>";
-    $application_list .= "<td align='center'>{$action}</td>";
+    $application_list .= "<td class='text-center'>{$action}</td>";
     $application_list .= "</tr>";
 }
 

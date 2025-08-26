@@ -101,7 +101,7 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("delete from users_attendance_log where log_date = '2025-08-25'");
+		$fix[] = ("ALTER TABLE departments ADD COLUMN reporting_time VARCHAR(16) DEFAULT '08:00:00'");
 
 		foreach($fix as $stmt) {
 			try {

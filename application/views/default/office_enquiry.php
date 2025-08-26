@@ -90,7 +90,7 @@ if(!$accessObject->hasAccess("view", "admission_enquiry")) {
             $results_list .= "<td>{$each->content->date}</td>";
             $results_list .= "<td>{$each->content->followup}</td>";
             $results_list .= "<td>".$myClass->the_status_label($each->state)."</td>";
-            $results_list .= "<td align='center'>{$action}</td>";
+            $results_list .= "<td class='text-center'>{$action}</td>";
             $results_list .= "</tr>";
         }
         

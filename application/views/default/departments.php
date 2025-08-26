@@ -61,7 +61,8 @@ foreach($item_list["data"] as $key => $each) {
     $departments .= "<td>{$each->department_code}</td>";
     $departments .= "<td>{$each->students_count}</td>";
     $departments .= "<td><span class='underline'>".($each->department_head_info->name ?? null)."</span></td>";
-    $departments .= "<td align='center'>{$action}</td>";
+    $departments .= "<td class='text-center'>{$each->reporting_time}</td>";
+    $departments .= "<td class='text-center'>{$action}</td>";
     $departments .= "</tr>";
 }
 
@@ -86,6 +87,7 @@ $response->html = '
                                         <th>Department Code</th>
                                         <th width="15%">Students Count</th>
                                         <th>Head of Department</th>
+                                        <th class="text-center">Latest Reporting Time</th>
                                         <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>

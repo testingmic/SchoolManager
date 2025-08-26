@@ -104,7 +104,7 @@ foreach($api_staff_list["data"] as $i => $each) {
     $staff_list .= "<td>{$each->date_of_birth}</td>";
     $staff_list .= "<td>{$each->enrollment_date}</td>";
     $staff_list .= "<td>".(!empty($each->department_name) ? ucwords(strtolower($each->department_name)) : 'N/A')."</td>";
-    $staff_list .= "<td align='center'>{$action}</td>";
+    $staff_list .= "<td class='text-center'>{$action}</td>";
     $staff_list .= "</tr>";
 }
 

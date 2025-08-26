@@ -58,7 +58,7 @@ if(!$createForm && !$modifyForm) {
         $application_forms .= "<td>{$each->year_enrolled}</td>";
         $application_forms .= "<td>{$each->applications_count}</td>";
         $application_forms .= "<td>".$myClass->the_status_label($each->state)."</td>";
-        $application_forms .= "<td align='center'>{$action}</td>";
+        $application_forms .= "<td class='text-center'>{$action}</td>";
         $application_forms .= "</tr>";
     }
 

@@ -90,7 +90,7 @@ foreach($item_list["data"] as $key => $each) {
         }
     }
 
-    $courses .= "</td><td align='center'>{$action}</td>";
+    $courses .= "</td><td class='text-center'>{$action}</td>";
     $courses .= "</tr>";
 }
 

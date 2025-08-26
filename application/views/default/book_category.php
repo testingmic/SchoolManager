@@ -78,7 +78,7 @@ if(!empty($item_id)) {
             $category_books_list .= "<td>{$book->author}</td>";
             $category_books_list .= "<td>{$book->quantity}</td>";
             $category_books_list .= "<td><span class='underline'>".($book->isbn ?? null)."</span></td>";
-            $category_books_list .= "<td align='center'>{$action}</td>";
+            $category_books_list .= "<td class='text-center'>{$action}</td>";
             $category_books_list .= "</tr>";
         }
 

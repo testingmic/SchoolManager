@@ -271,7 +271,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 $assigments_list .= "<td>{$each->awarded_mark}</td>";
             }
 
-            $assigments_list .= "<td align='center'>{$action}</td>";
+            $assigments_list .= "<td class='text-center'>{$action}</td>";
             $assigments_list .= "</tr>";
         }
         
@@ -606,7 +606,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             $results_list .= "<td>{$each->source}</td>";
             $results_list .= "<td>{$each->content->date}</td>";
             $results_list .= "<td>".$myClass->the_status_label($each->state)."</td>";
-            $results_list .= "<td align='center'>{$action}</td>";
+            $results_list .= "<td class='text-center'>{$action}</td>";
             $results_list .= "</tr>";
         }
 
@@ -1311,7 +1311,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         <br>{$school->client_secondary_contact}</td>
                         <td>{$school->client_address}</td>
                         <td>{$myClass->the_status_label($school->client_state)}</td>
-                        <td align='center'>{$action}</td>
+                        <td class='text-center'>{$action}</td>
                     </tr>";
             }
 

@@ -73,7 +73,7 @@ foreach($list_cards["data"] as $key => $each) {
     $cards_listing .= "<td>{$each->class_name}</td>";
     $cards_listing .= "<td>{$each->issue_date}</td>";
     $cards_listing .= "<td>{$each->expiry_date}</td>";
-    $cards_listing .= "<td align='center'>
+    $cards_listing .= "<td class='text-center'>
         <button onclick='return card_preview({$each->id});' class='btn btn-sm btn-outline-success'>
             <i class='fa fa-eye'></i> Preview
         </button>

@@ -141,7 +141,7 @@ if(!$createAssessmentTest) {
                             </div>
                         </td>
                         <td data-column='mark' class='text-center'>{$question->marks}</td>
-                        <td align='center'>
+                        <td class='text-center'>
                             <button class='btn btn-outline-success btn-sm' onclick='return review_AssignmentQuestion(\"{$assignment_id}\",\"{$question->item_id}\")'><i class='fa ".($isActive ? "fa-edit" : "fa-eye")."'></i></button>
                             ".($isActive ? "<button class='btn btn-outline-danger btn-sm' onclick='return remove_AssignmentQuestion(\"{$assignment_id}\",\"{$question->item_id}\")'><i class='fa fa-trash'></i></button>" : "")."
                         </td>                

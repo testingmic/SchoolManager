@@ -87,7 +87,7 @@ foreach($item_list["data"] as $key => $each) {
     $books_list .= "<td>{$each->return_date}</td>";
     $books_list .= !$isWardParent ? "<td>".($each->fine ?? null)."</td>" : "";
     $books_list .= "<td>".$myClass->the_status_label($each->state)."</td>";
-    $books_list .= "<td align='center'>{$action}</td>";
+    $books_list .= "<td class='text-center'>{$action}</td>";
     $books_list .= "</tr>";
 }
 $response->html = '

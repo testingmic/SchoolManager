@@ -160,7 +160,7 @@ foreach($item_list["data"] as $key => $fees) {
         $fees_history .= $fees->cheque_number ? "<br><strong>#{$fees->cheque_number}</strong>" : null;
     }
     $fees_history .= "</td><td> ".(isset($fees->created_by_info->name) ? "{$fees->created_by_info->name} <br>" : null)."  <i class='fa fa-calendar'></i> {$fees->recorded_date}</td>";
-    $fees_history .= "<td align='center'><span data-action_id='{$fees->payment_id}'>{$action}</span></td>";
+    $fees_history .= "<td class='text-center'><span data-action_id='{$fees->payment_id}'>{$action}</span></td>";
     $fees_history .= "</tr>";
 }
 
