@@ -361,8 +361,11 @@ class Attendance extends Myschoolgh {
         $information = "";
         $table_content = "<div class=\"table-responsive\">\n";
 
+        // confirm if the days range list is an array
+        $array_list["days_range_list"] = is_array($array_list["days_range_list"]) ? $array_list["days_range_list"] : [];
+        
         // width for each column
-        $width = number_format((85/count($array_list["days_range_list"])), 2);
+        $width = number_format((85 / count($array_list["days_range_list"])), 2);
 
         // join the names list
         $names_array = [];
@@ -645,9 +648,9 @@ class Attendance extends Myschoolgh {
         }
 
         // confirm that the days range is a maximum of 14 days
-        if(count($list_days) > 31) {
+        if(count($list_days) > 90) {
             return [
-                "data" => "Sorry! The maximum days range must be at most 31."
+                "data" => "Sorry! The maximum days range must be at most 90."
             ];
         }
 

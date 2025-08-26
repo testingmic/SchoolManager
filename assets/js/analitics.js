@@ -1017,6 +1017,25 @@ var filter_ClassGroup_Attendance = (append_query = "") => {
     });
 }
 
+var filter_Single_UserGroup_Attendance = (append_query = "", url_path = "") => {
+    let start_date = $(`input[data-item="attendance"][name="group_start_date"]`).val(),
+        end_date = $(`input[data-item="attendance"][name="group_end_date"]`).val();
+    $(`div[id="users_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "flex" });
+    $.get(`${baseUrl}api/analitics/generate?label[stream]=attendance_report&label[start_date]=${start_date}&label[end_date]=${end_date}${append_query}&class_only=true&is_summary=true`).then((response) => {
+        if (response.code === 200) {
+            if (response.data.result.attendance_report !== undefined) {
+                attendanceReport(response.data.result.attendance_report);
+            }
+        }
+        $(`a[data-href_path="attendance_summary"]`).attr({"href": `${baseUrl}download/attendance?start_date=${start_date}&end_date=${end_date}&${url_path}&att_d=true`});
+        setTimeout(() => {
+            $(`div[id="users_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
+        }, refresh_seconds);
+    }).catch(() => {
+        $(`div[id="users_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
+    });
+}
+
 var filter_UserGroup_Attendance = (append_query = "") => {
     let start_date = $(`input[data-item="attendance"][name="group_start_date"]`).val(),
         end_date = $(`input[data-item="attendance"][name="group_end_date"]`).val();

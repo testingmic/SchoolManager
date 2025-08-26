@@ -574,7 +574,9 @@ if(empty($user_id)) {
                                     <div id="data-report_stream" data-report_stream="attendance_report&label[staff_id]='.$user_id.'">
                                         <div class="row p-2">
                                             <div class="col-lg-6 col-md-5">
-                                                <h4 class="text-uppercase font-20"></h4>
+                                                <a target="_blank" data-href_path="attendance_summary" class="btn btn-outline-success" href="'.$baseUrl.'download/attendance?user_id='.$user_id.'&start_date='.$start_date.'&end_date='.$end_date.'&user_type='.$data->user_type.'&att_d=true">
+                                                    <i class="fa fa-download"></i> Download Attendance Report
+                                                </a>
                                             </div>
                                             <div class="col-lg-6 col-md-7 text-right">
                                                 <div class="input-group mb-3">
@@ -584,7 +586,7 @@ if(empty($user_id)) {
                                                     <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.date("Y-m-d", strtotime("first day of this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
                                                     <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.date("Y-m-d").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
                                                     <div class="input-group-append">
-                                                        <button style="border-radius:0px" onclick="return filter_UserGroup_Attendance(\'&label[staff_id]='.$user_id.'\')" class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
+                                                        <button style="border-radius:0px" onclick="return filter_Single_UserGroup_Attendance(\'&label[staff_id]='.$user_id.'\',\'user_id='.$user_id.'&user_type='.$data->user_type.'\')" class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
                                                     </div>
                                                 </div>
                                             </div>
