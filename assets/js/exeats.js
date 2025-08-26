@@ -8,6 +8,21 @@ var create_exeat = () => {
     $(`div[id="exeatModal"] select[name="pickup_by"]`).val("Self").trigger("change");
 }
 
+$(`select[id="exeats_status"]`).on("change", function() {
+	let status = $(this).val(),
+        exeat_id = $(this).attr("data-request_id"),
+		request_url = $(this).attr("data-request_url");
+
+	$.post(`${baseUrl}api/exeats/status`, {status, exeat_id}).then((response) => {
+		notify(response.data.result, responseCode(response.code));
+		if(response.code == 200) {
+			setTimeout(() => {
+				load(`${request_url}/${exeat_id}`);
+			}, reference_id);
+		}
+	});
+});
+
 function filter_exeats() {
     let class_id = $(`div[id="filter_Exeats_List"] select[name="class_id"]`).val(),
         status = $(`div[id="filter_Exeats_List"] select[name="status"]`).val(),

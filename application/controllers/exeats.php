@@ -28,7 +28,7 @@ class Exeats extends Myschoolgh {
 
         $params->query = "1";
 
-        if(!$accessObject->hasAccess("view", "exeats")) {
+        if(!$accessObject->hasAccess("view", "exeats") && !$isWardParent) {
             return ["code" => 400, "data" => $this->permission_denied];
         }
 
@@ -460,6 +460,43 @@ class Exeats extends Myschoolgh {
             "additional" => [
                 "clear" => true,
                 "href" => "{$this->baseUrl}exeats_log"
+            ]
+        ];
+
+    }
+
+    /**
+     * Update the exeat status
+     * 
+     * @param StdClass $params
+     * 
+     * @return Array
+     */
+    public function status($params = null) {
+        
+        global $accessObject;
+
+        // check permission
+        if(!$accessObject->hasAccess("manage", "exeats")) {
+            return ["code" => 400, "data" => $this->permission_denied];
+        }
+
+        // check if the exeat record exists
+        $check = $this->pushQuery("id", "exeats", "item_id='{$params->exeat_id}' AND client_id='{$params->clientId}' AND status != 'Deleted' LIMIT 1");
+        if(empty($check)) {
+            return ["code" => 400, "data" => "Sorry! The exeat record does not exist."];
+        }
+
+        // update the status to deleted
+        $stmt = $this->db->prepare("UPDATE exeats SET status='{$params->status}', last_updated = now() WHERE item_id='{$params->exeat_id}' AND client_id='{$params->clientId}' LIMIT 1");
+        $stmt->execute();
+        
+        return [
+            "code" => 200, 
+            "data" => "Exeat record successfully updated.", 
+            "additional" => [
+                "clear" => true,
+                "refresh" => 2000, 
             ]
         ];
 

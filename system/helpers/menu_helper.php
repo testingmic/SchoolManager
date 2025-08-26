@@ -542,9 +542,7 @@
     <li class="menu-header text-black">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
     <?php if(in_array("exeats", $clientFeatures)) { ?>
-        <?php if($accessObject->hasAccess("view", "exeats") || $accessObject->hasAccess("add", "exeats")) { ?>
-            <li><a href="<?= $baseUrl ?>exeats_log" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Exeats Manager</span></a></li>
-        <?php } ?>
+        <li><a href="<?= $baseUrl ?>exeats_log" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Exeats Manager</span></a></li>
     <?php } ?>
     <li class="menu-header text-black">Communication</li>
     <?php if(in_array("events", $clientFeatures)) { ?>

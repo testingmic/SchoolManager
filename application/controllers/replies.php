@@ -2,6 +2,10 @@
 
 class Replies extends Myschoolgh {
 
+    public $accepted_resources = [
+        "assignments", "events", "ebook", "books_request", "document", "bus", "application", "daily_report", "leave", "frontoffice", "exeats"
+    ];
+
     public function __construct()
     {
         parent::__construct();
@@ -154,6 +158,8 @@ class Replies extends Myschoolgh {
                 unset($result->deleted);
                 unset($result->id);
 
+                $result->message = str_replace("<br><br><br>", " ", trim($result->message));
+
                 $result->modified_date = date("l, F jS, Y \a\\t h:i:sA", strtotime($result->date_created));
 
                 $data[] = $result;
@@ -191,7 +197,7 @@ class Replies extends Myschoolgh {
     public function add(stdClass $params) {
 
         /** Validate the request */
-        if(!in_array($params->resource, ['assignments', 'document', 'daily_report', 'leave'])) {
+        if(!in_array($params->resource, $this->accepted_resources)) {
             return ["code" => 400, "data" => "Invalid request parsed"];
         }
 
@@ -216,6 +222,9 @@ class Replies extends Myschoolgh {
 
             // clean the content
             $ur_agent = $this->platform .' | '.$this->browser . ' | '.ip_address();
+
+            // clean the content
+            $params->message = str_replace("<br><br><br>", " ", trim($params->message));
             
             // insert the record
             $stmt = $this->db->prepare("
@@ -223,10 +232,10 @@ class Replies extends Myschoolgh {
                 ".(isset($params->userId) ? ",user_id='{$params->userId}'" : null)."
                 ".(isset($params->record_id) ? ",resource_id='{$params->record_id}'" : null)."
                 ".(isset($params->_item_id) ? ",item_id='{$params->_item_id}'" : null)."
-                ".(isset($params->resource) ? ",resource='{$params->resource}'" : null)."
-                ".(isset($params->subject) ? ",subject='{$params->subject}'" : null)."                
-                ".(isset($params->message) ? ",message='{$params->message}'" : null)."
-                ".(isset($params->mentions) ? ",mentions='{$params->mentions}'" : null)."
+                ".(isset($params->resource) ? ",resource='".trim($params->resource)."'" : null)."
+                ".(isset($params->subject) ? ",subject='".trim($params->subject)."'" : null)."                
+                ".(isset($params->message) ? ",message='".trim($params->message)."'" : null)."
+                ".(isset($params->mentions) ? ",mentions='".trim($params->mentions)."'" : null)."
                 ".(isset($params->userData->user_type) ? ",user_type='{$params->userData->user_type}'" : null)."
             ");
 
@@ -315,7 +324,7 @@ class Replies extends Myschoolgh {
         $resource = $params->resource;
 
         /** If the resource is not in the array */
-        if(!in_array($resource, ["assignments", "events", "ebook", "books_request", "document", "bus", "application", "daily_report", "leave", "frontoffice"])) {
+        if(!in_array($resource, $this->accepted_resources)) {
             return ["code" => 400, "data" => "Invalid request parsed"];
         }
 
@@ -357,15 +366,18 @@ class Replies extends Myschoolgh {
             // clean the content
             $ur_agent = $this->platform .' | '.$this->browser . ' | '.ip_address();
 
+            // clean the content
+            $params->comment = str_replace("<br><br><br>", " ", trim($params->comment));
+
             // insert the record
             $stmt = $this->db->prepare("
                 INSERT INTO users_feedback SET date_created = now(), user_agent = ?, feedback_type = 'comment'
                 ".(isset($params->userId) ? ",user_id='{$params->userId}'" : null)."
                 ".(isset($params->item_id) ? ",resource_id='{$params->item_id}'" : null)."
                 ".(isset($params->_item_id) ? ",item_id='{$params->_item_id}'" : null)."         
-                ".(isset($params->resource) ? ',resource="'.$params->resource.'"' : null)."
-                ".(isset($params->comment) ? ',message="'.$params->comment.'"' : null)."
-                ".(isset($params->mentions) ? ",mentions='{$params->mentions}'" : null)."
+                ".(isset($params->resource) ? ",resource='".trim($params->resource)."'" : null)."
+                ".(isset($params->comment) ? ",message='".trim($params->comment)."'" : null)."
+                ".(isset($params->mentions) ? ",mentions='".trim($params->mentions)."'" : null)."
                 ".(isset($params->userData->user_type) ? ",user_type='{$params->userData->user_type}'" : null)."
             ");
 

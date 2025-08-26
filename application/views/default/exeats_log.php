@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $defaultUser, $defaultAcademics, $isWardParent;
+global $myClass, $defaultUser, $defaultAcademics, $isWardParent, $exeatClass;
 
 // initial variables
 $appName = $myClass->appName;
@@ -32,7 +32,7 @@ if(!in_array("exeats", $clientFeatures)) {
 }
 
 // if the user does not have the permission to view the exeat
-if(!$accessObject->hasAccess("view", "exeats")) {
+if(!$accessObject->hasAccess("view", "exeats") && !$isWardParent) {
     $response->html = page_not_found("permission_denied", ["exeats"]);
     echo json_encode($response);
     exit;
@@ -117,7 +117,7 @@ if(!empty($session->clientId)) {
             $response->array_stream['exeat_list'][$each->item_id] = $each;
     
             // append the action button to the array stream
-            $action = "<a title='Click to view this exeat' href='{$baseUrl}exeats_view/{$each->item_id}' target='_blank' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $action = "<a title='Click to view this exeat' href='{$baseUrl}exeats_view/{$each->item_id}' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
             
             if(!in_array($each->status, ['Returned', 'Rejected'])) {
                 if($hasUpdate) {
@@ -139,9 +139,9 @@ if(!empty($session->clientId)) {
             $exeatsList .= "<td class='text-center'>".$key."</td>";
             $exeatsList .= "<td>
                 {$each->student_name}
-                <div class='text-xs text-gray-500'>
+                ".(!empty($each->class_name) ? "<div class='text-xs text-gray-500'>
                     <span class='badge badge-primary'>{$each->class_name}</span>
-                </div>
+                </div>" : null)."
             </td>";
             $exeatsList .= "<td>{$each->exeat_type}</td>";
             $exeatsList .= "<td width='14%'>
@@ -153,7 +153,7 @@ if(!empty($session->clientId)) {
             $exeatsList .= "<td class='text-center'>
                 <span class='badge badge-{$exeatClass->exeat_statuses[$status]}'>{$status}</span>
             </td>";
-            if($hasUpdate || $hasDelete) {
+            if($hasUpdate || $hasDelete || $isWardParent) {
                 $exeatsList .= "<td align='center'>{$action}</td>";
             }
             $exeatsList .= "</tr>";
@@ -226,7 +226,7 @@ if(!empty($session->clientId)) {
                                         <th>Contact</th>
                                         <th>Reason</th>
                                         <th class="text-center">Status</th>
-                                        '.($hasUpdate || $hasDelete ? "<th class='text-center' width='11%'>Actions</th>" : "").'
+                                        '.($hasUpdate || $hasDelete || $isWardParent ? "<th class='text-center' width='13%'>Actions</th>" : "").'
                                     </tr>
                                 </thead>
                                 <tbody>'.$exeatsList.'</tbody>
