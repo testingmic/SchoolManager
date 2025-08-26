@@ -519,6 +519,20 @@ function custom_clean($str) {
 }
 
 /**
+ * Clean HTML
+ *
+ * @param string $str
+ * @return string
+ */
+function clean_html($str = null) {
+	if(empty($str)) {
+		return null;
+	}
+
+	return custom_clean(htmlspecialchars_decode($str));
+}
+
+/**
  * Set cookie
  *
  * Accepts an arbitrary number of parameters (up to 7) or an associative

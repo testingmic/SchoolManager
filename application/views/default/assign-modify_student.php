@@ -86,7 +86,7 @@ $response->html = '
         </div>
         <div class="row send_smsemail">
             <div class="col-12 col-sm-12 col-lg-12">
-                <div class="card">
+                <div class="card stick_to_top">
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-3" id="class_select">

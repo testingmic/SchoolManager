@@ -2603,16 +2603,16 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-12">
                     <div class=" text-primary border-bottom border-primary mb-3"><h5>DEPARTMENT INFORMATION</h5></div>
                 </div>
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-3 col-md-3">
                     <div class="form-group">
                         <label for="image">Department Image</label>
                         <input accept=".jpg,.jpeg,.png,.gif" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-9 col-md-9">
                     <div class="form-group">
-                        <label for="department_code">Department Code (optional)</label>
-                        <input type="text" value="'.($itemData->department_code ?? null).'" name="department_code" id="department_code" class="form-control">
+                        <label for="name">Department Name<span class="required">*</span></label>
+                        <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2626,23 +2626,45 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-9 col-md-9">
-                    <div class="form-group">
-                        <label for="name">Department Name<span class="required">*</span></label>
-                        <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-3">
+                <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="reporting_time">Latest Reporting Time<span class="required">*</span></label>
                         <input type="time" value="'.($itemData->reporting_time ?? null).'" name="reporting_time" id="reporting_time" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-12 col-md-12">
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="department_code">Department Code (optional)</label>
+                        <input type="text" value="'.($itemData->department_code ?? null).'" name="department_code" id="department_code" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-12 mt-1">
+                    <div class=" text-primary border-bottom border-primary mb-3"><h5>OPENING DAYS & DESCRIPTION</h5></div>
+                </div>
+                <div class="col-lg-3 col-md-3 settings-form">
+                    <div class="form-group">
+                        <label for="opening_days">Department Opening Days</label>';
+                        // loop through the count 7
+                        $openingDays = $itemData->opening_days ?? $this->default_opening_days;
+                        $openingDays = stringToArray($openingDays);
+
+                        for($i = 0; $i < 7; $i++) {
+                            // set the day
+                            $today = date("l", strtotime("Monday +$i day"));
+                            $response .= '
+                                <div style="padding-left: 3.5rem;" class="custom-control col-lg-12 custom-switch switch-primary">
+                                    <input type="checkbox" name="opening_days[]" value="'.ucfirst($today).'" class="custom-control-input" id="opening_days_'.$today.'" '.(in_array($today, $openingDays) ? "checked=\"checked\"" : null).'>
+                                    <label class="custom-control-label text-black" for="opening_days_'.$today.'">'.$today.'</label>
+                                </div>';
+                        }
+                        $response .= '
+                    </div>
+                </div>
+                <div class="col-lg-9 col-md-9">
                     <div class="form-group">
                         <input type="hidden" readonly name="department_id" id="department_id" value="'.($itemData->id ?? null).'">
                         <label for="description">Description</label>
-                        <textarea type="text" rows="5" name="description" id="description" class="form-control">'.($itemData->description ?? null).'</textarea>
+                        '.$this->textarea_editor($itemData->description ?? null, "faketext", "ajax-form-content", "description").'
                     </div>
                 </div>
             </div>
@@ -2716,7 +2738,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <input type="hidden" readonly name="section_id" id="section_id" value="'.($itemData->id ?? null).'">
                         <label for="description">Description</label>
-                        <textarea type="text" rows="5" name="description" id="description" class="form-control">'.($itemData->description ?? null).'</textarea>
+                        '.$this->textarea_editor($itemData->description ?? null, "faketext", "ajax-form-content", "description").'
                     </div>
                 </div>
             </div>
@@ -2836,7 +2858,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <input type="hidden" readonly name="class_id" id="class_id" value="'.($itemData->id ?? null).'">
                         <label for="description">Description</label>
-                        <textarea type="text" rows="5" name="description" id="description" class="form-control">'.($itemData->description ?? null).'</textarea>
+                        '.$this->textarea_editor($itemData->description ?? null, "faketext", "ajax-form-content", "description").'
                     </div>
                 </div>
             </div>

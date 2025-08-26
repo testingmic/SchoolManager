@@ -27,6 +27,7 @@ $department_list = load_class("sections", "controllers")->list($department_param
 
 $hasDelete = $accessObject->hasAccess("delete", "section");
 $hasUpdate = $accessObject->hasAccess("update", "section");
+$hasAdd = $accessObject->hasAccess("add", "section");
 
 $sections = "";
 foreach($department_list["data"] as $key => $each) {
@@ -73,6 +74,11 @@ $response->html = '
         </div>
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
+                <div class="text-right mb-2">
+                    '.($hasAdd ? '
+                        <a class="btn btn-outline-success" href="'.$baseUrl.'sections_add"><i class="fa fa-plus"></i> Create New Section</a>' : ''
+                    ).'
+                </div>
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">

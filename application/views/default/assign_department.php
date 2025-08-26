@@ -49,16 +49,17 @@ $response->html = '
                 <h4 class="font-italic">Use this panel to assign department to a class of students.</h4>
             </div>
             <div class="col-12 col-sm-12 col-md-4">
-                <div class="card">
+                <div class="card stick_to_top">
                     <div class="card-body">
                         <div class="form-group">
-                            <label>Select Class <span class="required">*</span></label>
+                            <label>Select Class or Staff Category <span class="required">*</span></label>
                             <select name="class_id" data-width="100%" class="form-control selectpicker">
                                 <option value="">Please Select Class</option>';
                                 foreach($class_list as $each) {
                                     $response->html .= "<option data-department_id='{$each->department_id}' data-class_name='{$each->name}' value=\"{$each->id}\">".strtoupper($each->name)."</option>";
                                 }
                                 $response->html .= '
+                                    <option value="staff_members">ALL STAFF MEMBERS</option>
                             </select>
                         </div>
                         <div class="form-group">

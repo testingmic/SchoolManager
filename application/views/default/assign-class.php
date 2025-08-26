@@ -65,7 +65,7 @@ $response->html = '
                 <h4 class="font-italic">Use this panel to assign class to students that has not been set yet.</h4>
             </div>
             <div class="col-12 col-sm-12 col-md-4">
-                <div class="card">
+                <div class="card stick_to_top">
                     <div class="card-body">
                         <div class="form-group">
                             <label>Select Class <span class="required">*</span></label>

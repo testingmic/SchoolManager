@@ -58,6 +58,7 @@ class Myschoolgh extends Models {
 	
 	// class opening days
     public $default_opening_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+	public $days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 	public function __construct() {
 
@@ -102,6 +103,7 @@ class Myschoolgh extends Models {
 		
 		// prepare and execute the statement
 		$fix[] = ("ALTER TABLE departments ADD COLUMN reporting_time VARCHAR(16) DEFAULT '08:00:00'");
+		$fix[] = ("ALTER TABLE departments ADD COLUMN opening_days VARCHAR(255) DEFAULT 'Monday,Tuesday,Wednesday,Thursday,Friday'");
 
 		foreach($fix as $stmt) {
 			try {

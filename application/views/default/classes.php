@@ -29,7 +29,9 @@ $item_list = load_class("classes", "controllers", $classes_param)->list($classes
 
 $hasDelete = $accessObject->hasAccess("delete", "class");
 $hasUpdate = $accessObject->hasAccess("update", "class");
+$hasAdd = $accessObject->hasAccess("add", "class");
 $viewAllocation = $accessObject->hasAccess("view_allocation", "fees");
+
 $classes = "";
 
 foreach($item_list["data"] as $key => $each) {
@@ -92,6 +94,11 @@ $response->html = '
         $response->html .= '
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
+                <div class="text-right mb-2">
+                    '.($hasAdd ? '
+                        <a class="btn btn-outline-success" href="'.$baseUrl.'class_add"><i class="fas fa-graduation-cap"></i> Create New Class</a>' : ''
+                    ).'
+                </div>
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">

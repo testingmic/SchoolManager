@@ -116,17 +116,8 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Class & Departments</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>classes">List Classes</a></li>
-            <?php if($isAdmin && !$isReadOnly) { ?>
-            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>class_add">Add Class</a></li>
-            <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>departments">List Departments</a></li>
-            <?php if($isAdmin && !$isReadOnly) { ?>
-            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>department_add">Add Department</a></li>
-            <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>sections">List Sections</a></li>
-            <?php if($isAdmin && !$isReadOnly) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>section_add">Add Section</a></li>
-            <?php } ?>
         </ul>
     </li>
     <?php } ?>

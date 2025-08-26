@@ -101,6 +101,11 @@ class Users extends Myschoolgh {
 				$params->query .= " AND a.item_id IN {$this->inList($defaultUser->wards_list_ids)}";
 			}
 
+			if(!empty($params->class_id) && ($params->class_id === "staff_members")) {
+				$params->query .= " AND a.user_type NOT IN {$this->inList(["student", "parent", "guardian"])}";
+				$params->user_type = null;
+			}
+
 			// if the item quick_user_search was not parsed
 			if(empty($params->quick_user_search)) {
 
@@ -129,7 +134,6 @@ class Users extends Myschoolgh {
 				// add the class id filter to the query
 				$params->query .= " AND a.class_id IN {$this->inList($params->class_id)}";
 			}
-
 
 			// if the class was parsed and also not an array list
 			if(!empty($params->class_ids) && is_array($params->class_ids) && !$manageExeats) {

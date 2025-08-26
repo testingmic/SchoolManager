@@ -124,6 +124,8 @@ class Classes extends Myschoolgh {
                     }
                 }
 
+                $result->description = clean_html($result->description);
+
                 // init
                 $result->class_rooms_list = [];
                 $result->class_courses_list = [];
@@ -211,7 +213,7 @@ class Classes extends Myschoolgh {
                 ".(!empty($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(!empty($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(!empty($params->class_assistant) ? ", class_assistant = '{$params->class_assistant}'" : null)."
-                ".(!empty($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(!empty($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
                 ".(!empty($params->graduation_level) ? ", is_graduation_level = '{$params->graduation_level}'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId, json_encode($room_ids), $item_id]);
@@ -312,7 +314,7 @@ class Classes extends Myschoolgh {
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->class_assistant) ? ", class_assistant = '{$params->class_assistant}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
                 ".(!empty($params->graduation_level) ? ", is_graduation_level = '{$params->graduation_level}'" : null)."
                 WHERE id = ? AND client_id = ? LIMIT 1
             ");

@@ -48,6 +48,8 @@ class Sections extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
+                $result->description = clean_html($result->description);
+                
                 // loop through the information
                 foreach(["section_leader_info"] as $each) {
                     // convert the created by string into an object
@@ -130,7 +132,7 @@ class Sections extends Myschoolgh {
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->section_code) ? ", section_code = '{$params->section_code}'" : null)."
                 ".(isset($params->section_leader) ? ", section_leader = '{$params->section_leader}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
                 ".(!empty($params->color_code) ? ", color_code = '{$params->color_code}'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId]);
@@ -223,7 +225,7 @@ class Sections extends Myschoolgh {
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->section_code) ? ", section_code = '{$params->section_code}'" : null)."
                 ".(isset($params->section_leader) ? ", section_leader = '{$params->section_leader}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
                 ".(!empty($params->color_code) ? ", color_code = '{$params->color_code}'" : null)."
                 WHERE id = ? AND client_id = ? LIMIT 1
             ");

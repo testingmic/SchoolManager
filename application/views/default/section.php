@@ -221,7 +221,7 @@ if(!empty($item_id)) {
                 </div>
                 </div>
                 '.(!empty($data->description) ? 
-                    '<div class="card stick_to_top">
+                    '<div class="card">
                         <div class="card-header">
                             <h4 class="mb-0">DESCRIPTION</h4>
                         </div>
@@ -232,7 +232,7 @@ if(!empty($item_id)) {
                         </div>
                     </div>' : null
                 ).'
-                <div class="card stick_to_top">
+                <div class="card">
                     <div class="card-header">
                         <h4 class="mb-0">SECTION LEADER DETAILS</h4>
                     </div>
@@ -294,7 +294,7 @@ if(!empty($item_id)) {
                 ).'
             </div>
             <div class="col-12 col-md-12 col-lg-8">
-                <div class="card">
+                <div class="card stick_to_top">
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">

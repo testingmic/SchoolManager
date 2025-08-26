@@ -51,6 +51,8 @@ class Departments extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
+                $result->description = clean_html($result->description);
+
                 // if the minified is true
                 if($isMinified) {
 					$data[] = [
@@ -142,10 +144,11 @@ class Departments extends Myschoolgh {
                 ".(!empty($fileName) ? ", image='{$fileName}'" : null)."
                 ".(!empty($item_id) ? ", item_id='{$item_id}'" : null)."
                 ".(!empty($params->reporting_time) ? ", reporting_time = '{$params->reporting_time}'" : null)."
+                ".(isset($params->opening_days) ? ", opening_days = '".implode(",", $params->opening_days)."'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->department_code) ? ", department_code = '{$params->department_code}'" : null)."
                 ".(isset($params->department_head) ? ", department_head = '{$params->department_head}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(!empty($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId]);
             
@@ -156,7 +159,7 @@ class Departments extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Department successfully created.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["clear" => true];
+			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}department/{$item_id}"];
 
 			// return the output
             return $return;
@@ -233,9 +236,10 @@ class Departments extends Myschoolgh {
                 ".(!empty($fileName) ? ", image='{$fileName}'" : null)."
                 ".(!empty($params->reporting_time) ? ", reporting_time = '{$params->reporting_time}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
+                ".(isset($params->opening_days) ? ", opening_days = '".implode(",", $params->opening_days)."'" : null)."
                 ".(isset($params->department_code) ? ", department_code = '{$params->department_code}'" : null)."
                 ".(isset($params->department_head) ? ", department_head = '{$params->department_head}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
                 WHERE id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([$params->department_id, $params->clientId]);

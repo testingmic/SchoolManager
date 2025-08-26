@@ -112,6 +112,10 @@ if(!empty($item_id)) {
             $students .= "</tr>";
         }
 
+        // set the opening days
+        $openingDays = !empty($data->opening_days) ? stringToArray($data->opening_days) : $myClass->default_opening_days;
+        $daysOfWeek = $myClass->days_of_week;
+
         // student listing
         $student_listing = '
         <div class="table-responsive table-student_staff_list">
@@ -219,19 +223,24 @@ if(!empty($item_id)) {
                     </div>
                 </div>
                 </div>
-                '.(!empty($data->description) ? 
-                    '<div class="card stick_to_top">
+                '.(!empty($data->description) || !empty($openingDays) ? 
+                    '<div class="card">
                         <div class="card-header">
                             <h4>DESCRIPTION</h4>
                         </div>
-                        <div class="card-body pt-0">
+                        <div class="card-body pb-0 pt-0">
                             <div class="py-3 pt-0">
                                 '.$data->description.'
+
+                                <div class="font-14 text-uppercase mt-3 mb-2 font-weight-bold mb-0">OPENING DAYS</div>
+                                <div class="font-14 text-uppercase mb-0">'.implode(" ", array_map(function($day) use ($openingDays) {
+                                    return "<div class='mb-2'><i class='fa ".(in_array($day, $openingDays) ? "fa-check-circle text-success" : "fa-times-circle text-danger")."'></i> {$day}</div>";
+                                }, $daysOfWeek)).'</div>
                             </div>
                         </div>
                     </div>' : null
                 ).'
-                <div class="card stick_to_top">
+                <div class="card">
                     <div class="card-header">
                         <h4 class="mb-0">DEPARTMENT HEAD</h4>
                     </div>
@@ -295,7 +304,7 @@ if(!empty($item_id)) {
                 ).'
             </div>
             <div class="col-12 col-md-12 col-lg-8">
-                <div class="card">
+                <div class="card stick_to_top">
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">

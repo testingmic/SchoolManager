@@ -329,7 +329,7 @@ if(!empty($item_id)) {
                 ).'
             </div>
             <div class="col-12 col-md-12 col-lg-8">
-                <div class="card">
+                <div class="card stick_to_top">
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
