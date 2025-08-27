@@ -96,6 +96,12 @@ class Records extends Myschoolgh {
                 "where" => "item_id='{$record_id}'",
                 "query" => "SELECT id FROM courses_plan WHERE plan_type='lesson' AND item_id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
+            "delegates" => [
+                "table" => "delegates",
+                "update" => "status='0'",
+                "where" => "id='{$record_id}'",
+                "query" => "SELECT id FROM delegates WHERE id='{$record_id}' {$whereClause} AND status = '1' LIMIT 1"
+            ],
             "incident" => [
                 "table" => "incidents",
                 "update" => "deleted='1'",

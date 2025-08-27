@@ -50,6 +50,7 @@ if(!empty($user_id)) {
 
         // user permissions
         $hasUpdate = $accessObject->hasAccess("update", "guardian");
+        $addDelegate = $accessObject->hasAccess("add", "delegates");
         $updateDelegate = $accessObject->hasAccess("update", "delegates");
 
         // set the first key
@@ -272,7 +273,7 @@ if(!empty($user_id)) {
                                     <div class='card-body p-2 pl-0'>
                                         <div class='d-flex mb-3 justify-content-between'>
                                             <div><h5></h5></div>
-                                            ".($hasUpdate ? "<div><button onclick='return load_quick_form(\"load_delegate_form\",\"{$data->user_id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-user'></i> Create Delegate</button></div>" : "")."
+                                            ".($addDelegate ? "<div><button onclick='return load_quick_form(\"load_delegate_form\",\"{$data->user_id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-user'></i> Create Delegate</button></div>" : "")."
                                         </div>
                                         {$delegates_list}
                                     </div>

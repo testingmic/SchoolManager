@@ -1057,7 +1057,7 @@ class Users extends Myschoolgh {
 									<span class=\"text-primary\">{$delegate->unique_id}</span><br>
 									".(!empty($delegate->relationship) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-user'></i> {$delegate->relationship}</p>" : "")."
 									".(!empty($delegate->gender) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-user'></i> {$delegate->gender}</p>" : "")."
-									<p class=\"mb-0 pb-0\"><i class='fa fa-calendar-check'></i>".(!empty($delegate->phone) ? " {$delegate->phone} " : " N/A ")."</p>
+									<p class=\"mb-0 pb-0\"><i class='fa fa-phone'></i>".(!empty($delegate->phonenumber) ? " {$delegate->phonenumber} " : " N/A ")."</p>
 								</div>
 							</div>
 						</div>

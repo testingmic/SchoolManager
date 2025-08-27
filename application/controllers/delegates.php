@@ -33,7 +33,25 @@ class Delegates extends Myschoolgh {
             WHERE a.client_id='{$params->clientId}' {$query} AND a.status='1' ORDER BY a.id DESC");
 			$query = $stmt->execute();
 
+            // get the data
             $data = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            if(!empty($data)) {
+                // get the guardian ids
+                $guardian_ids = !empty($data) ? array_column($data, "guardian_ids") : [];
+                $guardian_ids = !empty($guardian_ids) ? array_filter($guardian_ids, function($each) {
+                    return !empty($each);
+                }) : [];
+                $guardian_ids = !empty($guardian_ids) ? array_unique($guardian_ids) : [];
+
+                // get the list of guardians
+                $guardians = !empty($guardian_ids) ? $this->pushQuery("id, item_id, unique_id, phone_number, firstname, lastname", "users", "client_id='{$params->clientId}' AND item_id IN {$this->inList($guardian_ids)} AND user_type='parent' AND status = '1'") : [];
+
+                $regroup = [];
+                foreach($guardians as $each) {
+                    $regroup[$each->item_id][] = $each;
+                }
+            }
 
             return [
                 "code" => 200,
@@ -61,27 +79,31 @@ class Delegates extends Myschoolgh {
             }
         }
 
+        $params->phone = trim($params->phone);
         if(strlen($params->phone) > 12) {
             return ["code" => 400, "data" => "Phone number must be less than 12 characters"];
         }
 
-        $delegate = $this->pushQuery("*", "delegates", "client_id='{$params->clientId}' AND phonenumber='{$params->phone}'");
+        $delegate = $this->pushQuery("*", "delegates", "client_id='{$params->clientId}' AND phonenumber='{$params->phone}' AND status = '1'");
         if(!empty($delegate)) {
             
             // get the guardian ids
-            $guardian_ids = $delegate->guardian_ids;
+            $guardian_ids = $delegate[0]->guardian_ids;
 
             // append the guardian id to the guardian ids
-            if(strpos($guardian_ids, "{$params->guardian_id}") === false) {
-                $guardian_ids .= rtrim($guardian_ids, "|") . "|{$params->guardian_id}";
+            if(!empty($guardian_ids) && strpos($guardian_ids, "{$params->guardian_id}") === false) {
+                $guardian_ids = rtrim($guardian_ids, "|") . "|{$params->guardian_id}";
             }
 
             // update the delegate
-            $this->quickUpdate("guardian_ids='{$guardian_ids}'", "delegates", "id='{$delegate->id}'");
+            $this->quickUpdate("guardian_ids='{$guardian_ids}'", "delegates", "id='{$delegate[0]->id}'");
 
             return [
                 "code" => 200,
-                "data" => "Delegate updated successfully."
+                "data" => "Delegate updated successfully.",
+                "additional" => [
+                    "href" => $this->baseUrl . "guardian/{$params->guardian_id}/delegates"
+                ]
             ];
 
         }
@@ -98,7 +120,7 @@ class Delegates extends Myschoolgh {
             $stmt->execute([
                 $params->clientId, $params->firstname, $params->lastname, 
                 $params->phone, $params->gender, $params->relationship, 
-                $params->guardian_id, $params->userId
+                $params->guardian_id ?? null, $params->userId
             ]);
 
             $insertId = $this->db->lastInsertId();
@@ -107,10 +129,14 @@ class Delegates extends Myschoolgh {
             // update the unique id of the delegate
             $this->db->query("UPDATE delegates SET unique_id='{$delegate_id}' WHERE id='{$insertId}' LIMIT 1");
 
+            $href = !empty($params->guardian_id) ? "guardian/{$params->guardian_id}/delegates" : "delegates";
+
             return [
                 "code" => 200,
                 "data" => "Delegate created successfully.",
-                "additional" => $this->list($params)["data"]
+                "additional" => [
+                    "href" => $this->baseUrl . $href
+                ]
             ];
             
         }

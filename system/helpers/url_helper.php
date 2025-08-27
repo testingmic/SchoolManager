@@ -160,9 +160,10 @@ if ( ! function_exists('auto_link'))
 	 * @param	string	the string
 	 * @param	string	the type: email, url, or both
 	 * @param	bool	whether to create pop-up links
-	 * @return	string
+	 * 
+	 * @return	mixed
 	 */
-	function auto_link(string $str, string $type = 'both', bool $popup = false, $class = ""): string
+	function auto_link($str, $type = 'both', $popup = false, $class = "")
     {
         // Find and replace any URLs.
         if ($type !== 'email' && preg_match_all('#(\w*://|www\.)[^\s()<>;]+\w#i', $str, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER)) {
