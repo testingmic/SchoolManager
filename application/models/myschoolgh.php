@@ -320,7 +320,7 @@ class Myschoolgh extends Models {
         $qr_code = load_class("qr", "controllers")->makepath($item, $record_id, $clientId);
         
 		// remove the root directory from the qr code
-		$qr_code['qrcode'] = ltrim($qr_code['qrcode'], "/") . $qr_code['qrcode'];
+		$qr_code['qrcode'] = ltrim($qr_code['qrcode'], "/");
 
 		if($return_data) {
 			return $qr_code;
