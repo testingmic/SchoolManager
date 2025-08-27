@@ -512,6 +512,16 @@ class Support extends Myschoolgh {
                 );
             }
 
+            // get the list of users
+            if(in_array($record[0]->description, ["parent", "student"])) {
+                // get all the parents list
+                $parents_list = $this->pushQuery("id, item_id, name", "users", "status='1' AND user_type = '{$record[0]->description}'");
+                $get_ids = array_column($parents_list, "item_id");
+                if(!empty($get_ids)) {
+                    $this->quickUpdate("permissions='{$permissions}', last_updated=now()", "users_roles", "user_id IN {$this->inList($get_ids)}");
+                }
+            }
+
             // return the success message
             return ["data" => "Access permission successfully logged."];
 

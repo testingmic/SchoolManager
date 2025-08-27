@@ -744,11 +744,15 @@ class Myschoolgh extends Models {
 
 		try {
 
+			print "UPDATE {$tableName} SET {$columns} WHERE {$whereClause}";exit;
+
 			$stmt = $this->db->prepare("UPDATE {$tableName} SET {$columns} WHERE {$whereClause}");
 			$stmt->execute();
 			return $stmt->rowCount();
 
 		} catch(PDOException $e) {
+			print $e->getMessage();
+			exit;
 			return [];
 		}
 	}
