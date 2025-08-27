@@ -128,10 +128,12 @@ if(!empty($session->userId) && empty($argv)) {
         $isTutor = (bool) in_array($defaultUser->user_type, ["teacher"]);
         $isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
         $isTutorStudent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
+        $isParent = (bool) in_array($defaultUser->user_type, ["parent"]);
         $isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);
         $isWardTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "parent", "student"]);
         $isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
         $isPayableStaff = (bool) in_array($defaultUser->user_type, ["accountant", "admin", "teacher", "employee"]);
+        $notAdminAccountant = (bool) !in_array($defaultUser->user_type, ["admin", "accountant"]);
         $isAccountant = (bool) in_array($defaultUser->user_type, ["accountant"]);
         $isAdmin = (bool) ($defaultUser->user_type == "admin");
 

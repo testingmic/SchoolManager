@@ -336,7 +336,7 @@ class Users extends Myschoolgh {
 			$params->class_id = $this->pushQuery("id", "classes", "item_id='{$params->class_id}' LIMIT 1")[0]->id ?? null;
 		}
 
-		if($isWardParent && !empty($params->user_type) && $params->user_type === "parent") {
+		if($isWardParent && !empty($params->user_type) && ($params->user_type === "parent")) {
 			$params->user_id = $defaultUser->user_id;
 		}
 
@@ -397,9 +397,6 @@ class Users extends Myschoolgh {
 
 		// the number of rows to limit the query
 		$params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
-
-		// refresh the client data
-		// $this->client_session_data($params->clientId);
 
 		// make the request for the record from the model
 		try {

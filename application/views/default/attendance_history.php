@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $clientFeatures, $defaultCurrency, $isWardParent;
+global $myClass, $accessObject, $defaultUser, $clientFeatures, $defaultCurrency, $isWardParent, $notAdminAccountant, $isParent;
 
 // initial variables
 $appName = $myClass->appName;
@@ -79,6 +79,9 @@ if($isWardParent) {
     $users_ids[] = $defaultUser->user_id;
 }
 
+// set the user ids
+$params->user_ids = !$notAdminAccountant ? $users_ids : [];
+
 // get the attendance history
 $attendanceHistory = $busObj->attendance_history($params);
 
@@ -97,26 +100,62 @@ foreach($attendanceHistory["data"] as $key => $attendance) {
     }
     $statistics['days'][$attendance->date_logged]++;
 
-    // set the color
-    $color = $attendance->action == "checkin" ? "text-green-500" : "text-red-500";
-    $attendance_history .= "<tr>
-        <td>".($key + 1)."</td>
-        <td>
-            <div>".$attendance->fullname."</div>
-            ".(!empty($attendance->class_name) ? "<span class='badge badge-primary p-5px'>".$attendance->class_name."</span>" : "")."
-        </td>
-        <td><span class='{$color}'>".(!empty($attendance->action) ? ucwords($attendance->action) : "N/A")."</span></td>
-        <td>".(!empty($attendance->user_type) ? ucwords($attendance->user_type) : "N/A")."</td>
-        <td>".$attendance->date_created."</td>
-    </tr>";
+    if(!$notAdminAccountant) {
+        // set the color
+        $color = $attendance->action == "checkin" ? "text-green-500" : "text-red-500";
+        $attendance_history .= "<tr>
+            <td>".($key + 1)."</td>
+            <td>
+                <div>".$attendance->fullname."</div>
+                ".(!empty($attendance->class_name) ? "<span class='badge badge-primary p-5px'>".$attendance->class_name."</span>" : "")."
+            </td>
+            <td><span class='{$color}'>".(!empty($attendance->action) ? ucwords($attendance->action) : "N/A")."</span></td>
+            <td>".(!empty($attendance->user_type) ? ucwords($attendance->user_type) : "N/A")."</td>
+            <td>".$attendance->date_created."</td>
+        </tr>";
+    }
 }
 
 // get the buses list
-$users_list = $myClass->pushQuery(
+$users_list = $isWardParent ? [] : $myClass->pushQuery(
     "id, unique_id, name", 
     "users", 
     "client_id='{$params->clientId}' ".($isWardParent || $isTeacher ? " AND item_id IN ('".implode("','", $users_ids)."')" : "")
 );
+
+$simplified_attendance_history = "";
+if($notAdminAccountant) {
+
+    if(empty($attendanceHistory["data"])) {
+        $simplified_attendance_history = no_record_found("No Attendance History Found", 
+        "No attendance history has been for any of ".($isWardParent ? "your wards" : "you")." yet.", null, "Student", false, "fas fa-clock");
+    } else {
+        foreach($attendanceHistory["data"] as $key => $attendance) {
+
+            // set the location
+            $location = empty($attendance->location) ? "School" : $attendance->location;
+
+            $color = $attendance->action == "checkin" ? "text-green-500" : "text-red-500";
+
+            $simplified_attendance_history .= "
+            <div class='flex items-center bg-white space-x-3 p-3 mb-2 border rounded-xl'>
+                <i class='fas ".($attendance->action == "checkin" ? "fa-check-circle" : "fa-times-circle")." {$color}'></i>
+                <div class='flex items-center justify-between w-100'>
+                    <div class='flex-1'>
+                        <p class='text-sm font-medium text-gray-900'>
+                            ".($isParent ? "Your ward {$attendance->fullname}" : "You")." ".($isParent ? "was" : "is")." <span class='{$color}'>".ucwords($attendance->action)."</span> at <strong>".ucwords($location)."</strong> on {$attendance->date_created}
+                        </p>
+                        <p class='text-xs text-gray-600'><i class={$attendance->date_created}</p>
+                        <p class='text-xs text-gray-600'><span class='{$color}'>".ucwords($attendance->action)."</span></p>
+                    </div>
+                    <div>
+                        <span class='badge cursor badge-primary'>{$attendance->location}</span>
+                    </div>
+                </div>
+            </div>"; 
+        }
+    }
+}
 
 // set the html content
 $response->html = '
@@ -148,7 +187,7 @@ $response->html = '
                             }, $users_list)).'
                         </select>
                     </div>
-                    <div class="col-xl-3 col-md-6 mb-2 form-group">
+                    <div class="col-xl-3 '.($isWardParent ? "col-lg-4 col-md-4" : "col-md-6").' mb-2 form-group">
                         <label>Select Action</label>
                         <select data-width="100%" class="form-control selectpicker" id="action" name="action">
                             <option value="">Please Select Action</option>
@@ -156,11 +195,11 @@ $response->html = '
                             <option '.(!empty($filter->action) && $filter->action == "checkout" ? "selected" : "").' value="checkout">Check Out</option>
                         </select>
                     </div>
-                    <div class="col-xl-3 col-md-6 mb-2 form-group">
+                    <div class="col-xl-3 '.($isWardParent ? "col-lg-4 col-md-4" : "col-md-6").' mb-2 form-group">
                         <label>Select Date</label>
                         <input type="text" class="form-control daterange" placeholder="Select Date Range" id="date_logged" name="date_logged" value="'.$date_range.'">
                     </div>
-                    <div class="col-xl-3 col-md-6 form-group">
+                    <div class="col-xl-3 '.($isWardParent ? "col-lg-4 col-md-4" : "col-md-6").' form-group">
                         <label class="d-sm-none d-md-block" for="">&nbsp;</label>
                         <button id="filter_Daily_Attendance" type="submit" class="btn btn-outline-warning height-40 btn-block"><i class="fa fa-filter"></i> FILTER</button>
                     </div>
@@ -171,6 +210,7 @@ $response->html = '
                     '.render_summary_card($statistics["checkout"], "Total Checkouts", "fa fa-check", "red", "col-lg-3 col-md-6").'
                     '.render_summary_card(count(array_keys($statistics["days"])), "Total Days", "fa-calendar", "cyan", "col-lg-3 col-md-6").'
                 </div>
+                '.($notAdminAccountant ? $simplified_attendance_history : '
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
@@ -188,7 +228,8 @@ $response->html = '
                             </table>
                         </div>
                     </div>
-                </div>
+                </div>'
+            ).'
             </div>
         </div>
     </section>';

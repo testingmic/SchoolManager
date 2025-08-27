@@ -47,8 +47,10 @@ if(!empty($clientId)) {
     // the default data to stream
     $data_stream = $isAdminAccountant ? "attendance_report,class_attendance_report" : "attendance_report";
     
-    $start_date = date("Y-m-d", strtotime("first day of this month"));
+    $start_date = date("Y-m-d", strtotime("-1 month"));
     $end_date = date("Y-m-d");
+
+    $hasNoRecords = $isWardParent && empty($defaultUser->wards_list);
 
     // load if the user is an admin or an accountant
     if($isAdminAccountant) {
@@ -80,6 +82,9 @@ if(!empty($clientId)) {
         }
 
     }
+
+    $chart_card = $hasNoRecords ? no_record_found("No Records Found", "You do not have any wards assigned to you yet hence unable to view attendance logs.", null, "Class", false, "fas fa-clock") : 
+        '<div id="attendance_chart_list"></div>';
  
     // set the html text to display
     $response->html = '
@@ -91,7 +96,7 @@ if(!empty($clientId)) {
                     <div class="breadcrumb-item">Attendance Log</div>
                 </div>
             </div>
-            <div class="row default_period" data-current_period="this_month">
+            <div class="row default_period" data-current_period="last_1month">
             '.($isAdminAccountant ? 
                 admin_summary_cards() : '
                 <div class="col-lg-3 col-md-6 col-sm-6">
@@ -162,8 +167,8 @@ if(!empty($clientId)) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-calendar-check"></i></span>
                                     </div>
-                                    <input data-item="attendance_performance" data-maxdate="'.$myClass->data_maxdate.'" value="'.date("Y-m-d", strtotime("first day of this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
-                                    <input data-item="attendance_performance" data-maxdate="'.$myClass->data_maxdate.'" value="'.date("Y-m-d").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
+                                    <input data-item="attendance_performance" data-maxdate="'.$myClass->data_maxdate.'" value="'.$start_date.'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
+                                    <input data-item="attendance_performance" data-maxdate="'.$myClass->data_maxdate.'" value="'.$end_date.'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
                                     <div class="input-group-append">
                                         <button style="border-radius:0px" onclick="return filter_ClassGroup_Attendance()" class="btn btn-outline-primary"><i class="fa fa-filter"></i> Filter</button>
                                         '.(!empty($class_id) ? '<button class="btn btn-outline-primary" onclick="return loadPage(\''.$baseUrl.'attendance\')">
@@ -263,7 +268,8 @@ if(!empty($clientId)) {
                 <div class="col-lg-12 col-md-12 col-12 col-sm-12" id="data-report_stream" data-report_stream="'.$data_stream.'">
                 '.((!$isSummary && !$class_id ) || !$isAdminAccountant ? '
                     <div class="card">
-                        <div class="card-header pr-0">
+                        '.(!$hasNoRecords ?
+                        '<div class="card-header pr-0">
                             <div class="row width-100 flex align-items-lg-center">
                                 <div class="col-lg-5 col-md-5">
                                     <h4 class="text-uppercase font-13 mb-0">Attendance Logs by Day</h4>
@@ -282,7 +288,7 @@ if(!empty($clientId)) {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>' : null).'
                         <div class="card-body quick_loader" id="users_attendance_loader">
                             <div class="form-content-loader" style="display: flex; position: absolute">
                                 <div class="offline-content text-center">
@@ -296,8 +302,7 @@ if(!empty($clientId)) {
                                             '.$attendance_logs_by_daychart.'
                                         </table>
                                     </div>
-                                </div>' : 
-                            '<div id="attendance_chart_list"></div>').'
+                                </div>' : $chart_card).'
                         </div>
                     </div>
                 ' : null).'

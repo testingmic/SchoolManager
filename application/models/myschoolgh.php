@@ -1160,9 +1160,13 @@ class Myschoolgh extends Models {
 		if(empty($date)) {
 			return;
 		}
-		
+
+		if(is_array($date) && isset($date['previous']['start'])) {
+			$date = $date['previous']['start'] . ":" . $date['previous']['end'];
+		}
+
 		// process the string
-		$date = explode(':', $date);
+		$date = is_array($date) ? implode(':', $date) : $date;
 		$fPart = (isset($date[0]) && $this->validDate($date[0])) ? $date[0] : '2020-01-01';
 		$lPart = (isset($date[1]) && $this->validDate($date[1])) ? $date[1] : date('Y-m-d');
 

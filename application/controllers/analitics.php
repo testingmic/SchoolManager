@@ -244,17 +244,25 @@ class Analitics extends Myschoolgh {
      */
     public function summary_report(stdClass $params) {
         
-        global $usersClass;
+        global $usersClass, $isWardParent, $isTeacher;
         $result = [];
         $sex_group = [];
 
+        // set the roles to loop through
+        $roles_to_loop = $this->the_user_roles;
+        
         /**
          * Loop through the user roles and get the count per each user category
          * 
          * Also, get the total number of male and female records
          */
-        foreach($this->the_user_roles as $role => $value) {
+        foreach($roles_to_loop as $role => $value) {
             
+            // if the user is a ward parent and the role is not a parent, student or guardian then skip
+            if($isWardParent && !in_array($value["link"], ["parent", "student", "guardian"])) {
+                continue;
+            }
+
             /** Parameter */
             $client_param = (Object) [
                 "reporting" => true,
@@ -324,6 +332,9 @@ class Analitics extends Myschoolgh {
         $class_list = $this->pushQuery("a.id, a.name", "classes a", "a.status='1' AND a.client_id='{$params->clientId}' {$this->class_idd_query} LIMIT {$this->temporal_maximum}");
         $result["students_class_record_count"]["total_classes_count"] = count($class_list);
 
+        // if the user is a ward parent and has no wards assigned to them then return an empty array
+        $class_list = $isWardParent && empty($defaultUser->wards_list) ? [] : $class_list;
+
         // load the fees records
         foreach($class_list as $key => $value) {
             
@@ -338,7 +349,6 @@ class Analitics extends Myschoolgh {
                 "return_where_clause" => true,
             ];
             $where_clause = $usersClass->list($client_param);
-            
 
             // get the fees payment made by each class
             $c_query = $this->db->prepare("SELECT
@@ -486,15 +496,23 @@ class Analitics extends Myschoolgh {
             $amount_paid = $raw_name;
             $value_count = "{$raw_name}_count";
 
-            $query = $this->db->prepare("SELECT 
-                    COUNT(*) AS {$value_count},
-                    SUM(amount) AS {$amount_paid}
-                FROM fees_collection a
-                LEFT JOIN users u ON u.item_id = a.student_id
-                WHERE {$where_clause}
-            ");
-            $query->execute();
-            $q_result = $query->fetch(PDO::FETCH_OBJ);
+            // set the default result
+            $q_result = (object) [
+                $value_count => 0,
+                $amount_paid => 0
+            ];
+
+            if(!is_array($where_clause)) {
+                $query = $this->db->prepare("SELECT 
+                        COUNT(*) AS {$value_count},
+                        SUM(amount) AS {$amount_paid}
+                    FROM fees_collection a
+                    LEFT JOIN users u ON u.item_id = a.student_id
+                    WHERE {$where_clause}
+                ");
+                $query->execute();
+                $q_result = $query->fetch(PDO::FETCH_OBJ);
+            }
             
             // append the result values
             $result["fees_record_count"]["count"][$value->name] = $q_result->{$value_count} ?? 0;
@@ -509,16 +527,18 @@ class Analitics extends Myschoolgh {
                 // set a where clause
                 $_where_clause = $feesClass->list($fees_param);
 
-                // run a query for the user count
-                $_query = $this->db->prepare("SELECT 
-                        COUNT(*) AS {$value_count}, 
-                        SUM(amount) AS {$amount_paid}
-                    FROM fees_collection a 
-                    LEFT JOIN users u ON u.item_id = a.student_id
-                    WHERE {$_where_clause}
-                ");
-                $_query->execute();
-                $_q_result = $_query->fetch(PDO::FETCH_OBJ);
+                if(!is_array($_where_clause)) {
+                    // run a query for the user count
+                    $_query = $this->db->prepare("SELECT 
+                            COUNT(*) AS {$value_count}, 
+                            SUM(amount) AS {$amount_paid}
+                        FROM fees_collection a 
+                        LEFT JOIN users u ON u.item_id = a.student_id
+                        WHERE {$_where_clause}
+                    ");
+                    $_query->execute();
+                    $_q_result = $_query->fetch(PDO::FETCH_OBJ);
+                }
                 
                 // append to the result array
                 $result["fees_record_count"]["comparison"]["count"][$range_key][$value->name] = [
@@ -1387,6 +1407,16 @@ class Analitics extends Myschoolgh {
                 $dateTo = date("Y-m-d", strtotime("today"));
                 $prevFrom = date("Y-m-d", strtotime("-4 weeks"));
                 $prevTo = date("Y-m-d", strtotime("-2 weeks"));
+                break;
+            case 'last_1month':
+                $groupBy = "DATE";
+                $format = "jS M Y";
+                $currentTitle = "Last 1 Month";
+                $previousTitle = "Previous 1 Month";
+                $dateFrom = date("Y-m-d", strtotime("-1 month"));
+                $dateTo = date("Y-m-d", strtotime("today"));
+                $prevFrom = date("Y-m-d", strtotime("-2 months"));
+                $prevTo = date("Y-m-d", strtotime("-1 month"));
                 break;
             case 'last_30days':
                 $groupBy = "DATE";

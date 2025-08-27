@@ -499,6 +499,13 @@ class Models {
                     "value" => ""
                 ]
             ], 
+            "last_1month" => [
+                "title" => "Last 1 Month",
+                "alt" => [
+                    "key" => "",
+                    "value" => ""
+                ]
+            ],
             "last_30days" => [
                 "title" => "Last 30 Days",
                 "alt" => [
