@@ -369,7 +369,7 @@ if($logBusAttendance) {
                         // Handle successful scan
                         function onScanSuccess(decodedText) {
                             stopScanner();
-
+                            console.log(decodedText);
                             if(decodedText) {
                                 const match = decodedText.match(/(employeeId|studentId):\[(\d+)\]/);
                                 if (match) {

@@ -1019,6 +1019,69 @@ class Users extends Myschoolgh {
 	}
 
 	/**
+	 * Guardian Delegates Listing
+	 * 
+	 * @param Array 	$delegates
+	 * @param String 	$guardian_id
+	 * @param Bool		$canupdate
+	 * 
+	 * @return String
+	 */
+	public function guardian_delegatelist(array $delegates, $guardian_id, $canupdate = false) {
+
+		// initialize
+		$delegates_list = "";
+
+		// loop through the array list
+		foreach($delegates as $delegate) {
+			// convert to object
+            $delegate = (object) $delegate;
+
+			$imageToUse = "<img src=\"{$this->baseUrl}{$delegate->image}\" class='rounded-2xl cursor author-box-picture' width='50px'>";
+			if($delegate->image == "assets/img/avatar.png") {
+				$imageToUse = "
+				<div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+					<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-user h-6 w-6 text-white' aria-hidden='true'><path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'></path><circle cx='12' cy='7' r='4'></circle></svg>
+				</div>";
+			}
+
+			// append to the list
+			$delegates_list .= "
+				<div class=\"col-12 col-md-6 load_delegate_information col-lg-6\" data-delegate_id=\"{$delegate->id}\">
+					<div class=\"card card-success\">
+						<div class=\"card-header pr-2 pl-2\" style=\"border-bottom:0px;\">
+							<div class=\"d-flex gap-4 justify-content-start\">
+								<div class='mr-2'>{$imageToUse}</div>
+								<div>
+									<h4 class=\"mb-0 pb-0 font-16 pr-0 mr-0 text-uppercase\">".limit_words($delegate->firstname . " " . $delegate->lastname, 3)."</h4>
+									<span class=\"text-primary\">{$delegate->unique_id}</span><br>
+									".(!empty($delegate->relationship) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-user'></i> {$delegate->relationship}</p>" : "")."
+									".(!empty($delegate->gender) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-user'></i> {$delegate->gender}</p>" : "")."
+									<p class=\"mb-0 pb-0\"><i class='fa fa-calendar-check'></i>".(!empty($delegate->phone) ? " {$delegate->phone} " : " N/A ")."</p>
+								</div>
+							</div>
+						</div>
+						".($canupdate ? 
+							"<div class=\"border-top p-2\">
+								<div class=\"d-flex justify-content-between\">
+									<div>
+										<button onclick=\"return load('delegate/{$delegate->id}')\" class=\"btn btn-sm btn-outline-success\" title=\"View delegate details\"><i class=\"fa fa-eye\"></i> View</button>
+									</div>
+									<div>
+										<a href=\"#\" onclick='return modifyGuardianWard(\"{$guardian_id}_{$delegate->id}\", \"remove\", \"delegate\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Remove</a>
+									</div>
+								</div>
+							</div>" : ""
+						)."
+					</div>
+				</div>
+			";
+		}
+
+		return $delegates_list;
+	}
+
+	/**
 	 * Full Scholarship
 	 * 
 	 * @param String $student_id
@@ -1105,7 +1168,6 @@ class Users extends Myschoolgh {
 		$stmt = $this->db->prepare("UPDATE users SET guardian_id = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
 		$stmt->execute([implode(",", $guardian_id), $expl[1], $params->clientId]);
 
-
 		// return the success response
 		if($params->todo == "remove") {
 
@@ -1144,6 +1206,52 @@ class Users extends Myschoolgh {
 			];
 		}
 
+	}
+
+	/**
+	 * Append/Remove a delegate to the Guardian
+	 * 
+	 * @param String $params->user_id		This is a combination of the guardian id and the delegate id
+	 * @param String $params->todo			This is the action to perform (append / remove)
+	 * 
+	 * @return Array
+	 */
+	public function modify_guardiandelegate(stdClass $params) {
+
+		// split the user id
+		$expl = explode("_", $params->user_id);
+		
+		// if there is no second key then end the query
+		if(!isset($expl[1])) {
+			return ["code" => "Sorry! The delegate id is required."];
+		}
+
+		$delegate = $this->pushQuery("*", "delegates", "client_id='{$params->clientId}' AND id='{$expl[1]}' LIMIT 1");
+		if(empty($delegate)) {
+			return ["code" => 400, "data" => "Sorry! An invalid delegate id was parsed"];
+		}
+
+		if($params->todo == "remove") {
+			$guardians = $this->stringToArray($delegate[0]->guardian_ids);
+			foreach($guardians as $key => $value) {
+				if($value == $expl[0]) {
+					unset($guardians[$key]);
+					break;
+				}
+			}
+
+			$stmt = $this->db->prepare("UPDATE delegates SET guardian_ids = ? WHERE id = ? AND client_id = ? LIMIT 1");
+			$stmt->execute([implode(",", $guardians), $expl[1], $params->clientId]);
+
+			return [
+				"code" => 200,
+				"data" => "Delegate was successfully removed",
+				"additional" => [
+					"removed_id" => $expl[1]
+				]
+			];
+		}
+			
 	}
 
 	/**

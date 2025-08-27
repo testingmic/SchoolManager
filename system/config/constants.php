@@ -25,7 +25,7 @@ defined('SMTP_PORT')  OR define('SMTP_PORT', $ini['smtp_port'] ?? null);
 defined('SMTP_FROM')  OR define('SMTP_FROM', $ini['smtp_from'] ?? null);
 
 defined('TIME_PERIOD')      OR define('TIME_PERIOD', 60);
-defined('RANDOM_STRING')    OR define('RANDOM_STRING', 12);
+defined('RANDOM_STRING')    OR define('RANDOM_STRING', 16);
 defined('ATTEMPTS_NUMBER')  OR define('ATTEMPTS_NUMBER', 7);
 
 defined('DEFAULT_PASS')     OR define('DEFAULT_PASS', 'Password1');

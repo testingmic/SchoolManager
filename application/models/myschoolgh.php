@@ -102,9 +102,7 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("ALTER TABLE departments ADD COLUMN reporting_time VARCHAR(16) DEFAULT '08:00:00'");
-		$fix[] = ("ALTER TABLE departments ADD COLUMN opening_days VARCHAR(255) DEFAULT 'Monday,Tuesday,Wednesday,Thursday,Friday'");
-		$fix[] = ("ALTER TABLE users ADD COLUMN expected_days VARCHAR(255) DEFAULT 'Monday,Tuesday,Wednesday,Thursday,Friday'");
+		$fix[] = ("UPDATE delegates SET image='assets/img/avatar.png' WHERE image='assets/img/avatar.jpg'");
 
 		foreach($fix as $stmt) {
 			try {
@@ -676,6 +674,28 @@ class Myschoolgh extends Models {
 			return [];
 		}
 
+	}
+
+	/**
+	 * Perform a quick update
+	 * 
+	 * @param String $columns
+	 * @param String $tableName
+	 * @param String $whereClause
+	 * 
+	 * @return Array
+	 */
+	final function quickUpdate($columns, $tableName, $whereClause) {
+
+		try {
+
+			$stmt = $this->db->prepare("UPDATE {$tableName} SET {$columns} WHERE {$whereClause}");
+			$stmt->execute();
+			return $stmt->rowCount();
+
+		} catch(PDOException $e) {
+			return [];
+		}
 	}
 
 	/**

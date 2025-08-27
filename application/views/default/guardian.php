@@ -50,6 +50,7 @@ if(!empty($user_id)) {
 
         // user permissions
         $hasUpdate = $accessObject->hasAccess("update", "guardian");
+        $updateDelegate = $accessObject->hasAccess("update", "delegates");
 
         // set the first key
         $data = $data[0];
@@ -65,12 +66,30 @@ if(!empty($user_id)) {
 
         // wards_list
         $wards_list = "<div class='row mb-3' id='guardian_ward_listing'>";
+
+        $delegates_list = "<div class='row mb-3' id='guardian_delegate_listing'>";
+
         // if the wards_list is not empty
         if(!empty($data->wards_list)) {
             // append the guardian wards list
             $wards_list .= $usersClass->guardian_wardlist($data->wards_list, $data->user_id, $hasUpdate);
+        } else {
+            $wards_list .= no_record_found("No Wards Found", "No ward has been added to this guardian account yet.", null, "Student", false, "fas fa-user-graduate", true);
         }
         $wards_list .= "</div>";
+
+        // get the list of delegates for the guardian
+        $guardian_param->guardian_id = $data->user_id;
+        $guardian_delegates_list = load_class("delegates", "controllers", $guardian_param)->list($guardian_param)["data"];
+
+        // if the delegates_list is not empty
+        if(!empty($guardian_delegates_list)) {
+            // append the guardian delegates list
+            $delegates_list .= $usersClass->guardian_delegatelist($guardian_delegates_list, $data->user_id, $updateDelegate);
+        } else {
+            $delegates_list .= no_record_found("No Delegates Found", "No delegate has been added to this guardian account yet.", null, "Student", false, "fas fa-user-friends", true);
+        }
+        $delegates_list .= "</div>";
 
         // set the user_id id in the console
         $response->array_stream['user_id'] = $user_id;
@@ -218,20 +237,23 @@ if(!empty($user_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem || $url_link === "about" ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab" aria-selected="true">Ward Information</a>
+                        <a class="nav-link '.(in_array($url_link, ["about", "view"]) || empty($url_link) ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab" aria-selected="true">Ward Information</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link '.($url_link === "delegates" ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#delegates" role="tab" aria-selected="true">Delegates</a>
                     </li>';
 
                     if($hasUpdate) {
                         $response->html .= '
                         <li class="nav-item">
-                            <a class="nav-link '.($updateItem || $url_link === "update" ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab" aria-selected="false">Update Record</a>
+                            <a class="nav-link '.($url_link === "update" ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab" aria-selected="false">Update Record</a>
                         </li>';
                     }
                     
                     $response->html .= '
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
-                        <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
+                        <div class="tab-pane fade '.(in_array($url_link, ["about", "view"]) || empty($url_link) ? "show active" : null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
                             '.($data ? "
                                 <div class='mb-3'>
                                     <div class='card-body p-2 pl-0'>
@@ -240,6 +262,19 @@ if(!empty($user_id)) {
                                             ".($hasUpdate ? "<div><button onclick='return load_quick_form(\"modify_guardian_ward\",\"{$data->user_id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-user'></i> Add Ward</button></div>" : "")."
                                         </div>
                                         {$wards_list}
+                                    </div>
+                                </div>
+                            " : "").'
+                        </div>
+                        <div class="tab-pane fade '.($url_link === "delegates" ? "show active" : null).'" id="delegates" role="tabpanel" aria-labelledby="home-tab2">
+                            '.($data ? "
+                                <div class='mb-3'>
+                                    <div class='card-body p-2 pl-0'>
+                                        <div class='d-flex mb-3 justify-content-between'>
+                                            <div><h5></h5></div>
+                                            ".($hasUpdate ? "<div><button onclick='return load_quick_form(\"load_delegate_form\",\"{$data->user_id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-user'></i> Create Delegate</button></div>" : "")."
+                                        </div>
+                                        {$delegates_list}
                                     </div>
                                 </div>
                             " : "").'

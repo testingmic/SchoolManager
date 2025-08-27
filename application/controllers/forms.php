@@ -386,6 +386,11 @@ class Forms extends Myschoolgh {
                 $result = $this->daily_report_log_form($params, $the_form);
             }
 
+            /** Load Delegate Form */
+            elseif(method_exists($this, $the_form)) {
+                $result = $this->{$the_form}($params);
+            }
+
         }
 
         // the result set to return
@@ -405,6 +410,83 @@ class Forms extends Myschoolgh {
             "code" => !empty($result) ? 200 : 201,
             "data" => $result_set
         ];
+    }
+
+    /**
+     * Load Delegate Form
+     * 
+     * @param stdClass $params
+     * 
+     * @return String
+     */
+    public function load_delegate_form($params) {
+        
+        $firstname = $params->data->firstname ?? null;
+        $lastname = $params->data->lastname ?? null;
+        $phone = $params->data->phone ?? null;
+        $gender = $params->data->gender ?? null;
+        $delegate_id = $params->data->delegate_id ?? null;
+
+        // get the guardian id
+        $guardian_id = $params->module["item_id"] ?? null;
+
+        $html_content = "
+        <form action='{$this->baseUrl}api/delegates/".(!$delegate_id ? "create" : "update")."' autocomplete='Off' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
+            <div class='row'>
+                <div class='col-lg-6'>
+                    <div class='form-group'>
+                        <label>First Name <span class='required'>*</span></label>
+                        <input value='{$firstname}' type='text' name='firstname' id='firstname' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-lg-6'>
+                    <div class='form-group'>
+                        <label>Last Name <span class='required'>*</span></label>
+                        <input value='{$lastname}' type='text' name='lastname' id='lastname' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-lg-6 col-md-6'>
+                    <div class='form-group'>
+                        <label>Gender <span class='required'>*</span></label>
+                        <select data-width='100%' name='gender' id='gender' class='form-control selectpicker'>
+                            <option value=''>Select Gender</option>
+                            <option ".($gender === "Male" ? "selected" : null)." value='Male'>Male</option>
+                            <option ".($gender === "Female" ? "selected" : null)." value='Female'>Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class='col-lg-6 col-md-6'>
+                    <div class='form-group'>
+                        <label>Relationship <span class='required'>*</span></label>
+                        <select data-width='100%' name='relationship' id='relationship' class='form-control selectpicker'>
+                            <option value=''>Select Relationship</option>
+                            <option value='Relative'>Relative</option>
+                            <option value='Friend'>Trusted Friend</option>
+                            <option value='Driver'>Driver</option>
+                            <option value='Nanny'>Nanny or Caregiver</option>
+                        </select>
+                    </div>
+                </div>
+                <div class='col-lg-6 col-md-6'>
+                    <div class='form-group'>
+                        <label>Phone Number <span class='required'>*</span></label>
+                        <input value='{$phone}' maxlength='12' type='text' name='phone' id='phone' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-lg-12 col-md-12 d-flex justify-content-between mt-4'>
+                    <div class=\"text-right\">
+                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                    </div>
+                    <div class=\"text-left\">
+                        <input type=\"hidden\" name=\"guardian_id\" id=\"guardian_id\" value=\"{$guardian_id}\" hidden class=\"form-control\">
+                        <input type=\"hidden\" name=\"delegate_id\" id=\"delegate_id\" value=\"{$delegate_id}\" hidden class=\"form-control\">
+                        <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
+                    </div>
+                </div>
+            </div>
+        </div>";
+
+        return $html_content;
     }
 
     /**

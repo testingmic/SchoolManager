@@ -131,13 +131,13 @@ if(!empty($item_id)) {
                 $links_list .= "
                 <div id=\"accordion\" data-row_id=\"{$link->item_id}\">
                     <div class=\"accordion\">
-                        <div class=\"accordion-header collapsed\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\">
+                        <div class=\"accordion-header collapsed\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$link->item_id}\">
                             <div class=\"d-flex justify-content-between\">
                                 <div><h4>{$key}. {$link->link_name}</h4></div>
                                 <div class='text-right'><i class=\"fa fa-calendar-check\"></i> {$link->date_created}</div>
                             </div>
                         </div>
-                        <div class=\"accordion-body collapse\" data-row_id=\"{$link->item_id}\" id=\"panel-body-{$key}\" data-parent=\"#accordion\">
+                        <div class=\"accordion-body collapse\" data-row_id=\"{$link->item_id}\" id=\"panel-body-{$link->item_id}\" data-parent=\"#accordion\">
                             <div class='d-flex justify-content-between'>
                                 <div>
                                     <strong>{$link->link_url}</strong> <br>
@@ -411,7 +411,7 @@ if(!empty($item_id)) {
                                 ).'
                             </div>
                             <div class="mt-4"><h5>RESOURCE LINKS</h5></div>
-                            <div class="slim-scroll p-0 m-0" id="resource_link_list" style="max-height:400px; overflow-y:auto;">
+                            <div class="slim-scroll p-0 m-0" id="resource_link_list">
                                 '.($links_list ? $links_list : 
                                     '<div class="text-left font-italic">Subject Tutor has not uploaded any resource links to this course.</div>'
                                 ).'

@@ -59,24 +59,34 @@ var preload_AjaxData = (data) => {
     }
 }
 
-var modifyGuardianWard = (user_id, todo) => {
-    let the_text = (todo == "remove") ? "Are you sure you to remove ward from Guardian? You cannot reverse this action once confirmed." : "Add this student to the list of guardian wards.";
+var modifyGuardianWard = (user_id, todo, item = 'ward') => {
+    let the_text = (todo == "remove") ? `Are you sure you to remove ${item} from Guardian? You cannot reverse this action once confirmed.` : `Add this user to the list of guardian ${item}s.`;
     swal({
-        title: "Modify Ward",
+        title: `Modify ${item}`,
         text: the_text,
         icon: 'warning',
         buttons: true,
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
-            $.post(`${baseUrl}api/users/modify_guardianward`, { user_id, todo }).then((response) => {
+            $.post(`${baseUrl}api/users/modify_guardian${item}`, { user_id, todo }).then((response) => {
                 if (response.code == 200) {
                     if (todo == "remove") {
-                        $.each(response.data.result.removed_list, function(i, e) {
-                            $(`div[class~="load_ward_information"][data-id="${e}"]`).remove();
-                        });
-                    } else {
-                        $(`div[id='guardian_ward_listing']`).html(response.data.result.wards_list);
+                        // if the item is a delegate then remove the delegate from the list
+                        if(item == "delegate") {
+                            $(`div[data-delegate_id="${response?.data?.additional?.removed_id}"]`).remove();
+                            notify(response?.data?.result, "success");
+                            return;
+                        }
+
+                        if(item == "ward") {
+                            notify("Ward was successfully removed", "success");
+                            $.each(response?.data?.result?.removed_list, function(i, e) {
+                                $(`div[class~="load_${item}_information"][data-id="${e}"]`).remove();
+                            });
+                        }
+                    } else if(typeof response?.data?.result?.wards_list !== "undefined") {
+                        $(`div[id='guardian_${item}_listing']`).html(response?.data?.result?.wards_list);
                     }
                     search_usersList("student");
                 }
@@ -123,6 +133,10 @@ var search_usersList = (user_type = "") => {
 
                 if (user_type == "student") {
                     let guardian_id = $(`div[id='user_search_list']`).attr("data-guardian_id");
+                    if(!response.data.result.length) {
+                        $(`div[id="user_search_list"]`).html(no_content_wrapper("No Students Found", `No student was found for the specified search term '${user_name}'.`, "fas fa-user-graduate"));
+                        return;
+                    }
                     $.each(response.data.result, function(i, e) {
                         let is_found = e.guardian_id.length && ($.inArray(guardian_id, e.guardian_id) !== -1) ? true : false;
                         let the_link = is_found ? `<a onclick='return modifyGuardianWard("${guardian_id}_${e.user_id}","remove");' href='javascript:void(0);' class='btn btn-outline-danger btn-sm'>Remove</a>` : `<a onclick='return modifyGuardianWard("${guardian_id}_${e.user_id}","append");' class='btn btn-outline-success btn-sm' href='javascript:void(0);'>Append Ward</a>`;

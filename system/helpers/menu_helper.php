@@ -42,13 +42,15 @@
             <?php } ?>
         </ul>
     </li>
-    <?php if($accessObject->hasAccess("view", "guardian")) { ?>
+    <?php if($accessObject->hasAccess("view", "guardian") || $accessObject->hasAccess("view", "delegates")) { ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-clock"></i><span>Guardians</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>guardians">Guardian List</a></li>
-            <?php if($accessObject->hasAccess("add", "guardian")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>guardian_add">Add Guardian</a></li>
+            <?php if($accessObject->hasAccess("view", "guardian")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>guardians">Guardian List</a></li>
+            <?php } ?>
+            <?php if($accessObject->hasAccess("view", "delegates")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>delegates">Manage Delegates</a></li>
             <?php } ?>
         </ul>
     </li>

@@ -30,6 +30,9 @@ $guardian_list = load_class("users", "controllers", $guardian_param)->list($guar
 
 $hasDelete = $accessObject->hasAccess("delete", "guardian");
 $hasUpdate = $accessObject->hasAccess("update", "guardian");
+$hasAdd = $accessObject->hasAccess("add", "guardian");
+
+$viewDelegates = $accessObject->hasAccess("view", "delegates");
 
 $guardians = "";
 foreach($guardian_list as $kkey => $each) {
@@ -118,6 +121,14 @@ $response->html = '
         $response->html .= '
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
+                <div class="text-right mb-2">
+                    '.($hasAdd ? '
+                        <a class="btn btn-outline-success" href="'.$baseUrl.'guardian_add"><i class="fas fa-user-clock"></i> Add Guardian</a>' : ''
+                    ).'
+                    '.($viewDelegates ? '
+                        <a class="btn btn-primary" href="'.$baseUrl.'delegates"><i class="fas fa-user-friends"></i> Manage Delegates</a>' : ''
+                    ).'
+                </div>
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive table-student_staff_list">
