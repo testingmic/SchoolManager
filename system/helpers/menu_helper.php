@@ -508,6 +508,7 @@
         </li>
         <?php } ?>
     <?php } ?>
+    <li><a class="nav-link" href="<?= $baseUrl ?>delegates"><i class="fas fa-users"></i> Manage Delegates</a></li>
     <?php if(in_array("library", $clientFeatures)) { ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
@@ -526,7 +527,6 @@
             </ul>
         </li>
     <?php } ?>
-    <li><a class="nav-link" href="<?= $baseUrl ?>delegates"><i class="fas fa-hotel"></i> Manage Delegates</a></li>
     <li class="menu-header text-black">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
     <?php if(in_array("exeats", $clientFeatures)) { ?>

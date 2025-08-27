@@ -154,16 +154,16 @@ if(!empty($delegate_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(in_array($url_link, ["about", "view"]) || empty($url_link) ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab" aria-selected="true">Attached Guardians</a>
+                        <a class="nav-link '.(in_array($url_link, ["about", "view"]) || empty($url_link) ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab" aria-selected="true">Guardians</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link '.($url_link === "delegates" ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#delegates" role="tab" aria-selected="true">Attached Students</a>
+                        <a class="nav-link '.($url_link === "delegates" ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#delegates" role="tab" aria-selected="true">Students</a>
                     </li>';
 
                     if($hasUpdate) {
                         $response->html .= '
                         <li class="nav-item">
-                            <a class="nav-link '.($url_link === "update" ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab" aria-selected="false">Update Record</a>
+                            <a class="nav-link '.($url_link === "update" ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab" aria-selected="false">Update</a>
                         </li>';
                     }
                     
