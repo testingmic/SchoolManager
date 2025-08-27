@@ -148,7 +148,9 @@ if(!$createAssessmentTest) {
                 <div class="col-12 col-md-12 col-lg-7">
                     <div class="card stick_to_top">
                         <div class="padding-20">
-                            <div class="text-center" id="init_data">The students list for gradding will appear here.</div>
+                            <div class="text-center" id="init_data">
+                                '.no_record_found("Students List", "The students list to assign grades for the assessment will appear here.", null, "Student", false, "fas fa-book-reader").'
+                            </div>
                             <div id="award_marks" class="hidden">
                                 '.$myClass->quick_student_search_form.'
                                 <div class="mb-4 slim-scroll">

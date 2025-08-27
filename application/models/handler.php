@@ -248,7 +248,7 @@ class Handler {
                 }
             }
 
-            if(isset($response["data"]) &&is_array($response["data"]) && isset($response["data"]["code"])) {
+            if(isset($response["data"]) && is_array($response["data"]) && isset($response["data"]["code"])) {
                 $response["code"] = $response["data"]["code"];
                 unset($response["data"]["code"]);
             }
@@ -278,13 +278,13 @@ class Handler {
                     SELECT a.*, b.item_id AS default_account_id, b.balance AS default_account_balance
                     FROM clients_accounts a
                     LEFT JOIN accounts b ON b.client_id = a.client_id AND b.default_account = '1' AND b.status = '1'
-                    WHERE a.client_id = ? AND a.client_status = ? LIMIT 1
+                    WHERE a.client_id = ? LIMIT 1
                 ");
-                $stmt->execute([$this->session->clientId, 1]);
+                $stmt->execute([$this->session->clientId]);
                 $result = $stmt->fetch(PDO::FETCH_OBJ);
 
                 if(!empty($result)) {
-                    if($result->client_state == "Active") {
+                    if(in_array($result->client_state, ["Active", "Complete"])) {
                         $this->response->result = "Active";
                     }
                 }

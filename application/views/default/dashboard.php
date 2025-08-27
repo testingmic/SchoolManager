@@ -842,7 +842,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-12 mb-2">
-                    <div class="grid grid-cols-4 gap-4 mb-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mb-2">
                         '.$revenue_summary.'
                         <div class="mb-0 amount hidden text-center">
                             <div class="card mb-0">
@@ -880,7 +880,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                 </div>
                             </div>
-                            <div data-chart="class_fees_payment_chart_table" style="max-height:430px; height:435px;">
+                            <div data-chart="class_fees_payment_chart_table" class="table-responsive" style="max-height:430px; height:435px;">
                                 <table class="table table-bordered table-striped reformat_table">
                                     <thead>
                                         <tr>

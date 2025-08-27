@@ -4165,7 +4165,7 @@ class Forms extends Myschoolgh {
                     <input type="text" value="'.($prefs->academics->current_term_name ?? 'Term').'" name="general[academics][current_term_name]" id="current_term_name" class="form-control">
                 </div>
             </div>
-            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">CURRENT ACADEMIC CALENDAR</h5></div>
+            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">CURRENT ACADEMIC TERM</h5></div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="academic_year">Academic Year</label>
@@ -4205,13 +4205,13 @@ class Forms extends Myschoolgh {
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
-                    <label for="term_starts">Academic Session Start</label>
+                    <label for="term_starts">Academic Term Start</label>
                     <input type="text" value="'.($prefs->academics->term_starts ?? null).'" name="general[academics][term_starts]" id="term_starts" data-mindate="'.$min_date.'" data-maxdate="'.$last_date.'" class="form-control datepicker">
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
-                    <label for="term_ends">Academic Session Ends</label>
+                    <label for="term_ends">Academic Term Ends</label>
                     <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[academics][term_ends]" id="term_ends" data-mindate="'.$min_date.'" data-maxdate="'.$last_date.'" class="form-control datepicker">
                 </div>
             </div>
@@ -4222,10 +4222,10 @@ class Forms extends Myschoolgh {
             </div>  
             <div class="col-md-12 text-center mb-2">'.$preloaded_attachments.'</div>
 
-            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">NEXT ACADEMIC CALENDAR</h5></div>
+            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">NEXT ACADEMIC TERM</h5></div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
-                    <label for="term_ends">Session Name</label>
+                    <label for="term_ends">Term Name</label>
                     <input type="text" value="'.($prefs->academics->next_term_name ?? 'Term').'" name="general[academics][next_term_name]" id="next_term_name" class="form-control">
                 </div>
             </div>
@@ -4257,9 +4257,9 @@ class Forms extends Myschoolgh {
             <div class="col-lg-12"></div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
-                    <label for="next_academic_term">Next Academic Session</label>
+                    <label for="next_academic_term">Next Academic Term</label>
                     <select data-width="100%" name="general[academics][next_academic_term]" class="form-control selectpicker">
-                        <option value="">Select Academic Session</option>';
+                        <option value="">Select Academic Term</option>';
                             foreach($this->school_academic_terms as $each) {
                                 $calendar .= "<option ".(($client_data && $each->name === $prefs->academics->next_academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
                             }
@@ -4269,13 +4269,13 @@ class Forms extends Myschoolgh {
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
-                    <label for="next_term_starts">Next Academic Session Start</label>
+                    <label for="next_term_starts">Next Academic Term Start</label>
                     <input type="text" value="'.($prefs->academics->next_term_starts ?? null).'" name="general[academics][next_term_starts]" data-maxdate="'.$last_date.'" id="next_term_starts" class="form-control datepicker">
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
-                    <label for="next_term_ends">Next Academic Session Ends</label>
+                    <label for="next_term_ends">Next Academic Term Ends</label>
                     <input type="text" value="'.($prefs->academics->next_term_ends ?? null).'" name="general[academics][next_term_ends]" data-maxdate="'.$last_date.'" id="next_term_ends" class="form-control datepicker">
                 </div>
             </div>

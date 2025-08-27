@@ -251,7 +251,7 @@ $response->html = '
                     <div class="row">
                         <div class="col">
                             <h6 class="font-14 text-uppercase font-bold mb-0">FEES PAID</h6>
-                            <span class="font-bold text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($fees_paid, 2).'</span>
+                            <span class="font-bold text-primary font-20 mb-0">'.$defaultCurrency.' '.(!empty($fees_paid) ? number_format($fees_paid, 2) : 0).'</span>
                         </div>
                         <div class="col-auto">
                             <div class="bg-info text-white card-circle">
@@ -269,7 +269,7 @@ $response->html = '
                     <div class="row">
                         <div class="col">
                             <h6 class="font-14 text-uppercase font-bold mb-0">ARREARS PAID</h6>
-                            <span class="font-bold text-success text-success font-20 mb-0">'.$defaultCurrency.' '.number_format($arrears_paid, 2).'</span>
+                            <span class="font-bold text-success text-success font-20 mb-0">'.$defaultCurrency.' '.(!empty($arrears_paid) ? number_format($arrears_paid, 2) : 0).'</span>
                         </div>
                         <div class="col-auto">
                             <div class="bg-success text-white card-circle">
@@ -287,7 +287,7 @@ $response->html = '
                     <div class="row">
                         <div class="col">
                             <h6 class="font-14 text-uppercase font-bold mb-0">AVERAGE PAYMENT</h6>
-                            <span class="font-bold text-danger font-20 mb-0">'.$defaultCurrency.' '.number_format($average_fees_paid, 2).'</span>
+                            <span class="font-bold text-danger font-20 mb-0">'.$defaultCurrency.' '.(!empty($average_fees_paid) ? number_format($average_fees_paid, 2) : 0).'</span>
                         </div>
                         <div class="col-auto">
                             <div class="bg-danger text-white card-circle">
@@ -305,7 +305,7 @@ $response->html = '
                     <div class="row">
                         <div class="col">
                             <h6 class="font-14 text-uppercase font-bold mb-0">ARREARS</h6>
-                            <span class="font-bold text-warning font-20 mb-0">'.$defaultCurrency.' '.number_format($total_arrears, 2).'</span>
+                            <span class="font-bold text-warning font-20 mb-0">'.$defaultCurrency.' '.(!empty($total_arrears) ? number_format($total_arrears, 2) : 0).'</span>
                         </div>
                         <div class="col-auto">
                             <div class="bg-amber text-white card-circle">

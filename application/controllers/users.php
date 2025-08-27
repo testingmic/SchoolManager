@@ -508,7 +508,7 @@ class Users extends Myschoolgh {
 			$key = 0;
 			$data = [];
 			$users_group = [];
-
+			
 			// loop through the results
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
 
@@ -624,9 +624,10 @@ class Users extends Myschoolgh {
 					$qr = $this->db->prepare("SELECT 
 							a.id, a.item_id AS student_guid, a.unique_id, a.firstname, a.lastname, a.othername,
 							a.name, a.image, a.guardian_id, a.date_of_birth, a.blood_group, a.gender, a.email,
-							(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name, a.enrollment_date,
+							c.name AS class_name, c.item_id AS class_guid, a.enrollment_date,
 							(SELECT b.name FROM departments b WHERE b.id = a.department LIMIT 1) AS department_name
 						FROM users a 
+						LEFT JOIN classes c ON c.id = a.class_id
 						WHERE a.status='1' AND a.client_id='{$result->client_id}' AND a.guardian_id LIKE '%{$result->user_id}%' AND a.user_type='student' LIMIT 20
 					");
 					$qr->execute();

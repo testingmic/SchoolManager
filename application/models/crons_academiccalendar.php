@@ -930,7 +930,7 @@ class Crons {
 
                 // update the clients preferences
                 $stmt = $this->db->prepare("UPDATE clients_accounts SET client_preferences = ?, client_state = ? WHERE client_id = ? LIMIT 1");
-                $stmt->execute([json_encode($preferences), "Complete", $clientId]);
+                $stmt->execute([json_encode($preferences), "Active", $clientId]);
 
             }
 

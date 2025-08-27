@@ -73,7 +73,14 @@ class Assignments extends Myschoolgh {
         // is student 
         $isAStudent = (bool) ($params->userData->user_type == "student");
 
-        $filtering .= !empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : null;
+        if($defaultUser->user_type == "parent" && empty($defaultUser->wards_list)) {
+            return [
+                "code" => 200,
+                "data" => []
+            ];
+        }
+
+        $filtering .= !empty($params->class_id) ? " AND a.class_id IN {$this->inList($params->class_id)}" : null;
         $filtering .= !empty($params->due_date) ? " AND a.due_date='{$params->due_date}'" : null;
         $filtering .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
         $filtering .= !empty($params->course_id) ? " AND a.course_id='{$params->course_id}'" : null;
@@ -106,8 +113,8 @@ class Assignments extends Myschoolgh {
             ");
             $stmt->execute();
 
-            $isMinified = isset($params->minified) ? true : false;
-            $showMarks = isset($params->show_marks) ? true : false;
+            $isMinified = !empty($params->minified);
+            $showMarks = !empty($params->show_marks);
 
             $data = [];
 
@@ -115,7 +122,7 @@ class Assignments extends Myschoolgh {
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
                 // clean the assignment description
-                $result->assignment_description = !empty($result->assignment_description) ? custom_clean(htmlspecialchars_decode($result->assignment_description)) : null;
+                $result->assignment_description = !empty($result->assignment_description) ? clean_html($result->assignment_description) : null;
 
                 // convert to array
                 $course_tutor = !empty($result->course_tutor) ? json_decode($result->course_tutor, true) : [];
@@ -215,7 +222,9 @@ class Assignments extends Myschoolgh {
                 "data" => $data
             ];
 
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
 
     }
 
@@ -309,90 +318,92 @@ class Assignments extends Myschoolgh {
 
         $export_array = $this->append_groupwork_to_assessment ? ["Homework", "Classwork", "Quiz", "GroupWork"] : $this->assessment_group;
 
-        foreach($the_list["data"] as $key => $each) {
-            // set the assignment label
-            $each->assignment_type_label = $this->assessment_color_group[$each->assignment_type] ?? $each->assignment_type;
-            $assessment_array[$each->item_id] = $each;
-            $action = "<a title='View Assessment record' href='#' onclick='return load(\"assessment/{$each->item_id}/instructions\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
-    
-            // manage questions button
-            if($hasUpdate && $each->questions_type == "multiple_choice") {
-                $action .= "&nbsp;<a title='Manage questions for this Assessment' href='#' onclick='return load(\"add-assessment/add_question/{$each->item_id}?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>
-                    <i class='fa fa-edit'></i>
-                </a>";
-            }
-    
-            // if the state is either closed or graded
-            if(in_array($each->state, ["Closed", "Graded"]) && $hasUpdate) {
-                $action .= "&nbsp;<a href='#' title='View student marks this Assessment' onclick='return view_AssessmentMarks(\"{$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-list'></i></a>";
-            }
-    
-            if($hasDelete && in_array($each->state, ["Pending", "Draft"])) {
-                $action .= "&nbsp;<button title='Delete this Assessment' onclick='return delete_record(\"{$each->id}\", \"assignments\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></button>";
-            }
-            // if the item has not yet been exported
-            if(!$each->exported && $allow_export) {
-                // if in array
-                if(in_array($each->assignment_type, $export_array)) {
-                    // append the export marks button if the creator of the question is the same person logged in
-                    if(($each->created_by === $defaultUser->user_id || $isAdmin) && in_array($each->state, ["Closed"])) {
-                        $action .= " <button onclick='return export_Assessment_Marks(\"{$each->item_id}\",\"{$each->assignment_type}\",\"{$each->class_id}\",\"{$each->course_id}\")' class='btn btn-sm mb-1 btn-outline-warning' title='Export Marks'><i class='fa fa-reply-all'></i></button>";
-                    }
+        if(isset($the_list["data"]) && is_array($the_list["data"])) {
+            foreach($the_list["data"] as $key => $each) {
+                // set the assignment label
+                $each->assignment_type_label = $this->assessment_color_group[$each->assignment_type] ?? $each->assignment_type;
+                $assessment_array[$each->item_id] = $each;
+                $action = "<a title='View Assessment record' href='#' onclick='return load(\"assessment/{$each->item_id}/instructions\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+        
+                // manage questions button
+                if($hasUpdate && $each->questions_type == "multiple_choice") {
+                    $action .= "&nbsp;<a title='Manage questions for this Assessment' href='#' onclick='return load(\"add-assessment/add_question/{$each->item_id}?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>
+                        <i class='fa fa-edit'></i>
+                    </a>";
                 }
-            } elseif($each->exported && $allow_export) {
-                $each->state = "Exported";
-            }
+        
+                // if the state is either closed or graded
+                if(in_array($each->state, ["Closed", "Graded"]) && $hasUpdate) {
+                    $action .= "&nbsp;<a href='#' title='View student marks this Assessment' onclick='return view_AssessmentMarks(\"{$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-list'></i></a>";
+                }
+        
+                if($hasDelete && in_array($each->state, ["Pending", "Draft"])) {
+                    $action .= "&nbsp;<button title='Delete this Assessment' onclick='return delete_record(\"{$each->id}\", \"assignments\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></button>";
+                }
+                // if the item has not yet been exported
+                if(!$each->exported && $allow_export) {
+                    // if in array
+                    if(in_array($each->assignment_type, $export_array)) {
+                        // append the export marks button if the creator of the question is the same person logged in
+                        if(($each->created_by === $defaultUser->user_id || $isAdmin) && in_array($each->state, ["Closed"])) {
+                            $action .= " <button onclick='return export_Assessment_Marks(\"{$each->item_id}\",\"{$each->assignment_type}\",\"{$each->class_id}\",\"{$each->course_id}\")' class='btn btn-sm mb-1 btn-outline-warning' title='Export Marks'><i class='fa fa-reply-all'></i></button>";
+                        }
+                    }
+                } elseif($each->exported && $allow_export) {
+                    $each->state = "Exported";
+                }
 
-            // set the badge color
-            $lableBadge = $this->assessment_color_group[$each->assignment_type] ?? "warning";
+                // set the badge color
+                $lableBadge = $this->assessment_color_group[$each->assignment_type] ?? "warning";
 
-            $assignments_list .= "<tr data-row_id=\"{$each->id}\">";
-            $assignments_list .= "<td>
-                <div class='flex items-center space-x-4'>
-                    <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'
-                            stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'
-                            class='lucide lucide-clipboard-list h-6 w-6 text-white' aria-hidden='true'>
-                            <rect width='8' height='4' x='8' y='2' rx='1' ry='1'></rect>
-                            <path d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'></path>
-                            <path d='M12 11h4'></path>
-                            <path d='M12 16h4'></path>
-                            <path d='M8 11h.01'></path>
-                            <path d='M8 16h.01'></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <a href='#' onclick='return load(\"assessment/{$each->item_id}/instructions\");'>
-                            {$each->assignment_title}
-                        </a> 
-                        <div>
-                        ".($hasUpdate ? 
-                            "Class: <strong>{$each->class_name}</strong>
-                            <br><strong>{$each->course_name}</strong>" : "<br><strong> {$each->course_name}</strong>"
-                        )."
+                $assignments_list .= "<tr data-row_id=\"{$each->id}\">";
+                $assignments_list .= "<td>
+                    <div class='flex items-center space-x-4'>
+                        <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+                            <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'
+                                stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'
+                                class='lucide lucide-clipboard-list h-6 w-6 text-white' aria-hidden='true'>
+                                <rect width='8' height='4' x='8' y='2' rx='1' ry='1'></rect>
+                                <path d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'></path>
+                                <path d='M12 11h4'></path>
+                                <path d='M12 16h4'></path>
+                                <path d='M8 11h.01'></path>
+                                <path d='M8 16h.01'></path>
+                            </svg>
                         </div>
-                        <div><strong class='badge p-1 pr-2 pl-2 badge-{$lableBadge}'>{$each->assignment_type}</strong></div>
+                        <div>
+                            <a href='#' onclick='return load(\"assessment/{$each->item_id}/instructions\");'>
+                                {$each->assignment_title}
+                            </a> 
+                            <div>
+                            ".($hasUpdate ? 
+                                "Class: <strong>{$each->class_name}</strong>
+                                <br><strong>{$each->course_name}</strong>" : "<br><strong> {$each->course_name}</strong>"
+                            )."
+                            </div>
+                            <div><strong class='badge p-1 pr-2 pl-2 badge-{$lableBadge}'>{$each->assignment_type}</strong></div>
+                        </div>
                     </div>
-                </div>
-            </td>";
-            $assignments_list .= "<td>{$each->due_date} ".(!empty($each->due_time) ? "@ {$each->due_time}" : null)."</td>";
-    
-            // show this section if the user has the necessary permissions
-            if($hasUpdate) {
-                $assignments_list .= "<td class='text-center'>{$each->students_assigned}</td>";
-                $assignments_list .= "<td class='text-center'>".($each->students_handed_in + $each->students_graded)."</td>";
-                $assignments_list .= "<td class='text-center'>{$each->students_graded}</td>";
+                </td>";
+                $assignments_list .= "<td>{$each->due_date} ".(!empty($each->due_time) ? "@ {$each->due_time}" : null)."</td>";
+        
+                // show this section if the user has the necessary permissions
+                if($hasUpdate) {
+                    $assignments_list .= "<td class='text-center'>{$each->students_assigned}</td>";
+                    $assignments_list .= "<td class='text-center'>".($each->students_handed_in + $each->students_graded)."</td>";
+                    $assignments_list .= "<td class='text-center'>{$each->students_graded}</td>";
+                }
+                
+                if(!$hasUpdate) {
+                    $assignments_list .= "<td class='text-center'>{$each->grading}</td>";
+                    $assignments_list .= "<td class='text-center'>{$each->awarded_mark}</td>";
+                }
+        
+                $assignments_list .= "<td>{$each->date_created}</td>";
+                $assignments_list .= "<td class='text-center'>".($hasUpdate ? $this->the_status_label($each->state) : $each->handedin_label)."</td>";
+                $assignments_list .= "<td class='text-center'>{$action}</td>";
+                $assignments_list .= "</tr>";
             }
-            
-            if(!$hasUpdate) {
-                $assignments_list .= "<td class='text-center'>{$each->grading}</td>";
-                $assignments_list .= "<td class='text-center'>{$each->awarded_mark}</td>";
-            }
-    
-            $assignments_list .= "<td>{$each->date_created}</td>";
-            $assignments_list .= "<td class='text-center'>".($hasUpdate ? $this->the_status_label($each->state) : $each->handedin_label)."</td>";
-            $assignments_list .= "<td class='text-center'>{$action}</td>";
-            $assignments_list .= "</tr>";
         }
 
         return [
@@ -1444,7 +1455,7 @@ class Assignments extends Myschoolgh {
         global $isStudent, $isWardParent;
 
         // total sum of students who have handed in
-        $handedIn = $data->students_handed_in + $data->students_graded;
+        $handedIn = ($data->students_handed_in ?? 0) + ($data->students_graded ?? 0);
 
         // set the data
         $html_content = '

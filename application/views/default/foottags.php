@@ -40,7 +40,7 @@
 
                 <?php if($isWardParent) { ?>
                 <!-- Fees Navigation -->
-                <a href="<?= $baseUrl ?>/fees-history" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                <a href="<?= $baseUrl ?>fees-history" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                     <div class="relative">
                         <svg class="h-6 w-6 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -49,7 +49,7 @@
                     <span class="text-xs mt-1 font-medium">Fees</span>
                 </a>
                 <?php } ?>
-                <a href="<?= $baseUrl ?>/attendance" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                <a href="<?= $baseUrl ?>attendance" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                     <div class="relative">
                         <i class="fa fa-clock font-24"></i>
                     </div>
@@ -57,7 +57,7 @@
                 </a>
 
                 <!-- Assessments Navigation -->
-                <a href="<?= $baseUrl ?>/assessments" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                <a href="<?= $baseUrl ?>assessments" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                     <div class="relative">
                         <i class="fas fa-book-reader font-24"></i>
                     </div>
@@ -65,7 +65,7 @@
                 </a>
 
                 <!-- Profile Navigation -->
-                <a href="<?= $baseUrl ?>/profile" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                <a href="<?= $baseUrl ?>profile" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                     <div class="relative">
                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
                             <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">

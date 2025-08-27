@@ -62,7 +62,7 @@ class Courses extends Myschoolgh {
             }
         }
 
-        if(!empty($params->class_id) && strlen($params->class_id) < 6) {
+        if(!is_array($params->class_id) && !empty($params->class_id) && strlen($params->class_id) < 6) {
             $check = $this->pushQuery("item_id", "classes", "id='{$params->class_id}'");
             if(!empty($check)) {
                 $params->class_id = $check[0]->item_id;
