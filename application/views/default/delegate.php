@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser, $isAdmin;
+global $myClass, $SITEURL, $defaultUser, $isAdmin, $isWardParent;
 
 // initial variables
 $appName = $myClass->appName;
@@ -21,7 +21,7 @@ $pageTitle = "Delegate Information";
 $response->title = $pageTitle;
 
 // end query if the user has no permissions
-if(!$accessObject->hasAccess("view", "delegates")) {
+if(!$accessObject->hasAccess("view", "delegates") && !$isWardParent) {
     // permission denied information
     $response->html = page_not_found("permission_denied", ["delegates"]);
     echo json_encode($response);
@@ -61,9 +61,9 @@ if(!empty($delegate_id)) {
     } else {
 
         // user permissions
-        $hasUpdate = $accessObject->hasAccess("update", "guardian");
-        $addDelegate = $accessObject->hasAccess("add", "delegates");
-        $updateDelegate = $accessObject->hasAccess("update", "delegates");
+        $hasUpdate = $accessObject->hasAccess("update", "guardian") || $isWardParent;
+        $addDelegate = $accessObject->hasAccess("add", "delegates") || $isWardParent;
+        $updateDelegate = $accessObject->hasAccess("update", "delegates") || $isWardParent;
 
         // set the first key
         $data = $data[0];

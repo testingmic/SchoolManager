@@ -176,8 +176,13 @@ class Classes extends Myschoolgh {
 
         try {
 
-            // global variable
-            global $defaultClientData;
+            // get a default client data
+            global $defaultClientData, $accessObject;
+
+            // check permission
+            if(!$accessObject->hasAccess("update", "class")) {
+                return ["code" => 400, "data" => $this->permission_denied];
+            }
 
             // create a new class code
             if(isset($params->class_code) && !empty($params->class_code)) {
@@ -250,7 +255,12 @@ class Classes extends Myschoolgh {
         try {
 
             // get a default client data
-            global $defaultClientData;
+            global $defaultClientData, $accessObject;
+
+            // check permission
+            if(!$accessObject->hasAccess("update", "class")) {
+                return ["code" => 400, "data" => $this->permission_denied];
+            }
 
             // old record
             $prevData = $this->pushQuery("*", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");

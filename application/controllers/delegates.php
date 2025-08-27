@@ -24,6 +24,13 @@ class Delegates extends Myschoolgh {
         
         try {
 
+            global $isWardParent, $defaultUser;
+
+            // if the user is a ward parent, set the guardian id to the user id
+            if($isWardParent) {
+                $params->guardian_id = $defaultUser->user_id;
+            }
+
             // append some filters to apply to the query
             $query = !empty($params->guardian_id) ? " AND a.guardian_ids LIKE '%{$params->guardian_id}%'" : "";
             $query .= !empty($params->delegate_id) ? " AND a.id='{$params->delegate_id}'" : "";
@@ -85,6 +92,14 @@ class Delegates extends Myschoolgh {
      */
     public function create($params) {
 
+        // get a default client data
+        global $accessObject, $isWardParent, $defaultUser;
+
+        // check permission
+        if(!$accessObject->hasAccess("add", "delegates") && !$isWardParent) {
+            return ["code" => 400, "data" => $this->permission_denied];
+        }
+
         foreach(['firstname', 'lastname', 'phone', 'gender', 'relationship'] as $each) {
             if(empty($params->{$each})) {
                 return ["code" => 400, "data" => "{$each} is required"];
@@ -101,6 +116,11 @@ class Delegates extends Myschoolgh {
             
             // get the guardian ids
             $guardian_ids = $delegate[0]->guardian_ids;
+
+            // if the guardian id is not set and the user is a ward parent, set the guardian id to the user id
+            if(empty($params->guardian_id) && $isWardParent) {
+                $params->guardian_id = $defaultUser->userId;
+            }
 
             // append the guardian id to the guardian ids
             if(!empty($guardian_ids) && strpos($guardian_ids, "{$params->guardian_id}") === false) {
@@ -163,6 +183,14 @@ class Delegates extends Myschoolgh {
      * @return Array
      */
     public function update($params) {
+
+        // get a default client data
+        global $accessObject, $isWardParent;
+
+        // check permission
+        if(!$accessObject->hasAccess("update", "delegates") && !$isWardParent) {
+            return ["code" => 400, "data" => $this->permission_denied];
+        }
 
         foreach(['firstname', 'lastname', 'phone', 'gender', 'relationship'] as $each) {
             if(empty($params->{$each})) {

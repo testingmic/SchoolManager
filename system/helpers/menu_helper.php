@@ -1,4 +1,4 @@
-<?php function communication_menu() { global $baseUrl, $accessObject, $clientFeatures; ?>
+<?php function communication_menu() { global $baseUrl, $accessObject; ?>
     <?php if($accessObject->hasAccess("manage", "communication")) { ?>
         <li class="dropdown">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails & SMS</span></a>
@@ -16,7 +16,7 @@
         </li>
     <?php } ?>
 <?php } ?>
-<?php function exeats_menu() { global $baseUrl, $clientFeatures, $isWardTutorParent, $accessObject; ?>
+<?php function exeats_menu() { global $baseUrl, $clientFeatures, $accessObject; ?>
     <?php if(in_array("exeats", $clientFeatures)) { ?>
         <li class="menu-header text-black">Exeats Management</li>
         <li class="dropdown">
@@ -358,10 +358,10 @@
         <?php } ?>
     <?php } ?>
 <?php } ?>
-<?php function admin_menu() { global $baseUrl; ?>
+<?php function admin_menu() { ?>
     <?php general_menu(true); ?>
 <?php } ?>
-<?php function accountant_menu() { global $baseUrl, $accessObject; ?>
+<?php function accountant_menu() {?>
     <?php general_menu(); ?>
 <?php } ?>
 <?php function teacher_menu() { global $baseUrl, $accessObject, $clientFeatures, $isReadOnly; ?>
@@ -471,7 +471,7 @@
     <?php } ?>
     <?= communication_menu() ?>
 <?php } ?>
-<?php function parent_menu() { global $baseUrl, $accessObject, $session, $clientFeatures, $isReadOnly; ?>
+<?php function parent_menu() { global $baseUrl, $accessObject, $session, $clientFeatures; ?>
     <?php if(in_array("incidents", $clientFeatures)) { ?>
         <li>
             <a href="<?= $baseUrl ?>student_reports" class="nav-link"><i class="fas fa-weight"></i><span>Incident Reports</span></a>
@@ -526,9 +526,7 @@
             </ul>
         </li>
     <?php } ?>
-    <?php if($accessObject->hasAccess("view", "delegates")) { ?>
-        <li><a class="nav-link" href="<?= $baseUrl ?>delegates"><i class="fas fa-hotel"></i> Manage Delegates</a></li>
-    <?php } ?>
+    <li><a class="nav-link" href="<?= $baseUrl ?>delegates"><i class="fas fa-hotel"></i> Manage Delegates</a></li>
     <li class="menu-header text-black">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
     <?php if(in_array("exeats", $clientFeatures)) { ?>
@@ -540,7 +538,7 @@
     <?php } ?>
     <?= communication_menu() ?>
 <?php } ?>
-<?php function student_menu() { global $baseUrl, $accessObject, $clientFeatures, $academicSession, $isReadOnly; ?>
+<?php function student_menu() { global $baseUrl, $accessObject, $clientFeatures, $academicSession; ?>
     <?php if(in_array("class_assessment", $clientFeatures)) { ?>
         <li class="dropdown hidden">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-bookmark"></i><span>Exams Bank</span></a>
@@ -620,7 +618,7 @@
     <?php } ?>
     <?= communication_menu() ?>
 <?php } ?>
-<?php function employee_menu() { global $baseUrl, $accessObject, $clientFeatures, $isReadOnly; ?>
+<?php function employee_menu() { global $baseUrl, $accessObject, $clientFeatures; ?>
     <?php if(in_array("attendance", $clientFeatures)) { ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>

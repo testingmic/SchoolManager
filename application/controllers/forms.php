@@ -419,7 +419,7 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function load_delegate_form($params, $baseUrl, $data = null) {
+    public function load_delegate_form($params, $baseUrl = null, $data = null) {
         
         $firstname = $data->firstname ?? null;
         $lastname = $data->lastname ?? null;

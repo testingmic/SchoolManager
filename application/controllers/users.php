@@ -1027,7 +1027,7 @@ class Users extends Myschoolgh {
 	 * 
 	 * @return String
 	 */
-	public function guardian_delegatelist(array $delegates, $guardian_id, $canupdate = false) {
+	public function guardian_delegatelist(array $delegates, $guardian_id, $canupdate = false, $width = "col-md-6") {
 
 		// initialize
 		$delegates_list = "";
@@ -1047,7 +1047,7 @@ class Users extends Myschoolgh {
 
 			// append to the list
 			$delegates_list .= "
-				<div class=\"col-12 col-md-6 load_delegate_information col-lg-6\" data-delegate_id=\"{$delegate->id}\">
+				<div class=\"col-12 {$width} load_delegate_information\" data-delegate_id=\"{$delegate->id}\">
 					<div class=\"card card-success\">
 						<div class=\"card-header pr-2 pl-2\" style=\"border-bottom:0px;\">
 							<div class=\"d-flex gap-4 justify-content-start\">

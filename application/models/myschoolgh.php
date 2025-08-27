@@ -102,7 +102,7 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("UPDATE delegates SET image='assets/img/avatar.png' WHERE image='assets/img/avatar.jpg'");
+		$fix[] = ("TRUNCATE delegates;");
 
 		foreach($fix as $stmt) {
 			try {
@@ -744,15 +744,11 @@ class Myschoolgh extends Models {
 
 		try {
 
-			print "UPDATE {$tableName} SET {$columns} WHERE {$whereClause}";exit;
-
 			$stmt = $this->db->prepare("UPDATE {$tableName} SET {$columns} WHERE {$whereClause}");
 			$stmt->execute();
 			return $stmt->rowCount();
 
 		} catch(PDOException $e) {
-			print $e->getMessage();
-			exit;
 			return [];
 		}
 	}
