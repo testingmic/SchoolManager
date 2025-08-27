@@ -248,7 +248,7 @@ class Handler {
                 }
             }
 
-            if(is_array($response["data"]) && isset($response["data"]["code"])) {
+            if(isset($response["data"]) &&is_array($response["data"]) && isset($response["data"]["code"])) {
                 $response["code"] = $response["data"]["code"];
                 unset($response["data"]["code"]);
             }

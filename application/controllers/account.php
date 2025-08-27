@@ -497,7 +497,7 @@ class Account extends Myschoolgh {
         $data_to_import = isset($params->data_to_import) ? $this->stringToArray($params->data_to_import) : [];
 
         // set the current timestamp
-        $current_timestamp = date("Y-m-d H:i:s", strtotime("+15 minutes"));
+        $current_timestamp = date("Y-m-d H:i:s", strtotime("+2 minutes"));
 
         // insert a new cron job scheduler for this activity
         $stmt = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = '{$params->clientId}', item_id = ?, user_id = ?, cron_type = ?, subject = ?, active_date = '{$current_timestamp}', query = ?");
