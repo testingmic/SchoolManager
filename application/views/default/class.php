@@ -171,7 +171,7 @@ if(!empty($item_id)) {
             <div class="col-lg-3 col-md-6">
                 <div class="card rounded-2xl">
                     <div class="card-body pt-3 pb-3 pr-2 pl-2 text-center bg-gradient-to-br from-blue-200 to-blue-100 rounded-2xl shadow-lg text-white card-type-3">
-                        <div class="font-22 text-black">CLASS CODE</div>
+                        <div class="font-22 text-black">'.$data->name.'</div>
                         <div class="font-18 font-weight-bold text-uppercase text-black">'.$data->class_code.'</div>
                     </div>
                 </div>
