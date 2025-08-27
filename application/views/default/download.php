@@ -54,7 +54,7 @@ if(!$isSupport) {
         }
 
         // get the record information
-        $attachment_record =  $myClass->columnValue("resource, client_id, resource_id, description", "files_attachment", "record_id='{$record_id}'");
+        $attachment_record = $myClass->columnValue("resource, client_id, resource_id, description", "files_attachment", "record_id='{$record_id}'");
         
         // if no record found
         if(empty($attachment_record)) {
@@ -105,17 +105,7 @@ if(!$isSupport) {
         if(is_file($file_to_download) && file_exists($file_to_download)) {
             if(!isset($_GET["preview"])) {
                 // force the file download
-                header('Content-Description: File Transfer');
-                header('Content-Type: application/octet-stream');
-                header('Content-Disposition: attachment; filename="' . basename($file_to_download) . '"');
-                header('Content-Transfer-Encoding: binary');
-                header('Connection: Keep-Alive');
-                header('Expires: 0');
-                header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-                header('Pragma: public');
-                header('Content-Length: ' . filesize($file_to_download));
-                readfile($file_to_download);
-                exit;
+                $myClass->force_download($file_to_download);
             } else {
                 $file = "{$myClass->baseUrl}{$file_to_download}";
                 die("<style>html, body { margin: 0; padding: 0; height: 100%; }</style><iframe style='width: 100%; height: 100%; border: none;' src='{$file}'></iframe>");
@@ -123,6 +113,11 @@ if(!$isSupport) {
         }
     
         
+    }
+
+    elseif(isset($_GET["qrcode"])) {
+        $file_to_download = ROOT_DIRECTORY . "/assets/uploads/qrcodes/{$_GET["qrcode"]}";
+        $myClass->force_download($file_to_download, $_GET['filename'] ?? 'QR Code');
     }
 
     /** Download Timetables */

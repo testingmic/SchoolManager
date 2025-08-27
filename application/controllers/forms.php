@@ -419,16 +419,19 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function load_delegate_form($params) {
+    public function load_delegate_form($params, $baseUrl, $data = null) {
         
-        $firstname = $params->data->firstname ?? null;
-        $lastname = $params->data->lastname ?? null;
-        $phone = $params->data->phone ?? null;
-        $gender = $params->data->gender ?? null;
-        $delegate_id = $params->data->delegate_id ?? null;
+        $firstname = $data->firstname ?? null;
+        $lastname = $data->lastname ?? null;
+        $phone = $data->phonenumber ?? null;
+        $relationship = $data->relationship ?? null;
+        $gender = $data->gender ?? null;
+        $delegate_id = $data->id ?? null;
 
         // get the guardian id
-        $guardian_id = $params->module["item_id"] ?? null;
+        $guardian_id = $params->module["item_id"] ?? (
+            $data->guardian_ids ?? null
+        );
 
         $html_content = "
         <form action='{$this->baseUrl}api/delegates/".(!$delegate_id ? "create" : "update")."' autocomplete='Off' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
@@ -460,10 +463,10 @@ class Forms extends Myschoolgh {
                         <label>Relationship <span class='required'>*</span></label>
                         <select data-width='100%' name='relationship' id='relationship' class='form-control selectpicker'>
                             <option value=''>Select Relationship</option>
-                            <option value='Relative'>Relative</option>
-                            <option value='Friend'>Trusted Friend</option>
-                            <option value='Driver'>Driver</option>
-                            <option value='Nanny'>Nanny or Caregiver</option>
+                            <option ".($relationship === "Relative" ? "selected" : null)." value='Relative'>Relative</option>
+                            <option ".($relationship === "Trusted Friend" ? "selected" : null)." value='Trusted Friend'>Trusted Friend</option>
+                            <option ".($relationship === "Driver" ? "selected" : null)." value='Driver'>Driver</option>
+                            <option ".($relationship === "Nanny" ? "selected" : null)." value='Nanny'>Nanny or Caregiver</option>
                         </select>
                     </div>
                 </div>

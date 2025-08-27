@@ -16,7 +16,7 @@ class Qr extends Myschoolgh {
     public function generate($option = []) {
 
         // set the directory root
-        $root_dir = ROOT_DIRECTORY . '/assets/uploads/qrcodes/' . (!empty($option['client_id']) ? $option['client_id'] . '/' : '');
+        $root_dir = ROOT_DIRECTORY . '/assets/uploads/qrcodes/' . (!empty($option['client_id']) ? md5($option['client_id'] . $option['text']) . '/' : '');
 
         // set the filename to use in the creation of the code
         $filename = $root_dir . (!empty($option['filename']) ? $option['filename'] : 'qrcode.png');
@@ -40,7 +40,7 @@ class Qr extends Myschoolgh {
         // set the options for the QR Code
         $options = new QROptions([
             'version'      => 7,
-            'scale'        => 6,
+            'scale'        => 10,
             'imageBase64'  => false,
             'outputType'   => QRCode::OUTPUT_IMAGE_PNG,
         ]);
@@ -52,6 +52,30 @@ class Qr extends Myschoolgh {
         file_put_contents($filename, $qrcode);
 
         return str_ireplace(ROOT_DIRECTORY, "", $filename);
+    }
+
+    /**
+     * Generate the path of the QR Code
+     * 
+     * @param String $item
+     * @param String $record_id
+     * @param String $client
+     * 
+     * @return String
+     */
+    public function makepath($item, $record_id, $client) {
+
+        // generate the qr code
+        $qr_code = $this->generate([
+            "filename" => "{$item}_{$record_id}.png", 
+            "client_id" => $client, 
+            "text" => "{$item}Id:[{$record_id}]/userType:[{$item}]"
+        ]);
+
+        return [
+            'qrcode' => $qr_code,
+            'download' => explode("qrcodes/", $qr_code)[1]
+        ];
     }
 
     /**

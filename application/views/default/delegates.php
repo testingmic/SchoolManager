@@ -19,15 +19,24 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $response->title = "Delegates List";
 $response->scripts = [];
 
+// end query if the user has no permissions
+if(!$accessObject->hasAccess("view", "delegates")) {
+    // permission denied information
+    $response->html = page_not_found("permission_denied", ["delegates"]);
+    echo json_encode($response);
+    exit;
+}
+
+$hasDelete = $accessObject->hasAccess("delete", "delegates");
+$hasUpdate = $accessObject->hasAccess("update", "delegates");
+$hasAdd = $accessObject->hasAccess("add", "delegates");
+
 $department_param = (object) [
     "clientId" => $session->clientId
 ];
 
 $item_list = load_class("delegates", "controllers")->list($department_param);
 
-$hasDelete = $accessObject->hasAccess("delete", "delegates");
-$hasUpdate = $accessObject->hasAccess("update", "delegates");
-$hasAdd = $accessObject->hasAccess("add", "delegates");
 $count = 0;
 $delegates = "";
 

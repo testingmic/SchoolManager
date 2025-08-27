@@ -285,6 +285,61 @@ class Myschoolgh extends Models {
     }
 
 	/**
+	 * Force the download of the file
+	 * 
+	 * @param String $file_to_download
+	 * 
+	 * @return void
+	 */
+	final function force_download($file_to_download, $filename = null) {
+		header('Content-Description: File Transfer');
+		header('Content-Type: application/octet-stream');
+		header('Content-Disposition: attachment; filename="' . (!empty($filename) ? $filename : basename($file_to_download)) . '"');
+		header('Content-Transfer-Encoding: binary');
+		header('Connection: Keep-Alive');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: public');
+		header('Content-Length: ' . filesize($file_to_download));
+		readfile($file_to_download);
+		exit;
+	}
+
+	/**
+	 * Render the QR Code
+	 * 
+	 * @param String $item
+	 * @param String $record_id
+	 * @param String $clientId
+	 * @param String $name
+	 * 
+	 * @return String
+	 */
+	final function qr_code_renderer($item, $record_id, $clientId, $name = 'QR Code', $return_data = false) {
+		// generate the qr code
+        $qr_code = load_class("qr", "controllers")->makepath($item, $record_id, $clientId);
+        
+		// remove the root directory from the qr code
+		$qr_code['qrcode'] = ltrim($qr_code['qrcode'], "/") . $qr_code['qrcode'];
+
+		if($return_data) {
+			return $qr_code;
+		}
+
+		$qr_renderer = '
+        <div class="clearfix flex justify-center w-full">
+            <div><img src="'.$this->baseUrl.''.$qr_code['qrcode'].'" alt="QR Code" style="width: 250px;"></div>
+        </div>
+        <div class="text-center mb-2">
+            <a href="'.$this->baseUrl.'download?qrcode='.$qr_code['download'].'&filename='.$name." - ID.png" . '" target="_blank" class="btn btn-primary">
+                <i class="fa fa-download"></i> Download QR Code
+            </a>
+        </div>';
+
+		return $qr_renderer;
+	}
+
+	/**
 	 * Run the Query to Load the Client Data
 	 * Save the results in session and refresh after every 2 minutes
 	 * 

@@ -115,20 +115,14 @@ class Cards extends Myschoolgh {
             $cardSettings = $clientData->client_preferences->id_card ?? (object)[];
 
             // get the type of the user
-            $type = $userData->user_type == "student" ? "studentId" : "employeeId";
-
-            $qr_string = "{$type}:[{$userData->user_id}]/admissionId:[{$userData->unique_id}]/userType:[{$userData->user_type}]";
-
-            // create new qr code object
-            $qrObject = load_class("qr", "controllers");
-            $qr_code = $qrObject->generate(["filename" => "{$userData->user_id}.png", "client_id" => $userData->client_id, "text" => $qr_string]);
+            $qr_code = $this->qr_code_renderer($userData->user_type, $userData->user_id, $userData->client_id, $userData->name, true);
 
             // append some more variables to the card settings
             foreach($userData as $key => $value) {
                 $cardSettings->{$key} = $value;
             }
 
-            $cardSettings->qr_code = rtrim($this->baseUrl, "/") . $qr_code;
+            $cardSettings->qr_code = $this->baseUrl . $qr_code['qrcode'];
 
             // if the user wants to download the list, return the data
             if(!$isPDF) {

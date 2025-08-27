@@ -78,7 +78,12 @@ if(empty($user_id)) {
 
         // confirm that the user is a teacher
         $isTeacher = (bool) ($data["data"][0]->user_type == "teacher");
-        
+
+        // set the start date
+        $start_date = date("Y-m-d", strtotime("-1 month"));
+        // set the end date
+        $end_date = date("Y-m-d");
+
         // set the url
         $url_link = $SITEURL[2] ?? null;
 
@@ -449,6 +454,7 @@ if(empty($user_id)) {
                                         <span class="float-right text-muted">'.$data->country_name.'</span>
                                     </p>' : null
                                 ).'
+                                '.$myClass->qr_code_renderer($data->user_type, $user_id, $clientId, $data->name).'
                             </div>
                             <div class="font-14 text-uppercase mb-0 border-top border-primary pt-3">
                                 <div class="font-14 text-uppercase mt-0 mb-2 font-weight-bold mb-0">EXPECTED DAYS</div>
@@ -574,7 +580,7 @@ if(empty($user_id)) {
                                     <div id="data-report_stream" data-report_stream="attendance_report&label[staff_id]='.$user_id.'">
                                         <div class="row p-2">
                                             <div class="col-lg-6 col-md-5">
-                                                <a target="_blank" data-href_path="attendance_summary" class="btn btn-outline-success" href="'.$baseUrl.'download/attendance?user_id='.$user_id.'&start_date='.$start_date.'&end_date='.$end_date.'&user_type='.$data->user_type.'&att_d=true">
+                                                <a target="_blank" data-href_path="attendance_summary" class="btn btn-outline-success" href="'.$baseUrl.'download/attendance?user_id='.$user_id.'&start_date='.$start_date.'&end_date='.$end_date.'&user_type=staff&att_d=true">
                                                     <i class="fa fa-download"></i> Download Attendance Report
                                                 </a>
                                             </div>
@@ -583,8 +589,8 @@ if(empty($user_id)) {
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text"><i class="fa fa-calendar-check"></i></span>
                                                     </div>
-                                                    <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.date("Y-m-d", strtotime("first day of this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
-                                                    <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.date("Y-m-d").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
+                                                    <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.$start_date.'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
+                                                    <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.$end_date.'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
                                                     <div class="input-group-append">
                                                         <button style="border-radius:0px" onclick="return filter_Single_UserGroup_Attendance(\'&label[staff_id]='.$user_id.'\',\'user_id='.$user_id.'&user_type='.$data->user_type.'\')" class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
                                                     </div>
