@@ -66,8 +66,10 @@ class Delegates extends Myschoolgh {
                 foreach($data as $key => $each) {
                     $explodes = explode("|", $each->guardian_ids);
                     foreach($explodes as $explode) {
-                        $regroup[$explode]->delegate_id = $each->id;
-                        $data[$key]->guardians_list[] = $regroup[$explode];
+                        if(isset($regroup[$explode])) {
+                            $regroup[$explode]->delegate_id = $each->id;
+                            $data[$key]->guardians_list[] = $regroup[$explode];
+                        }
                     }
                 }
             }
@@ -161,7 +163,7 @@ class Delegates extends Myschoolgh {
             // update the unique id of the delegate
             $this->db->query("UPDATE delegates SET unique_id='{$delegate_id}' WHERE id='{$insertId}' LIMIT 1");
 
-            $href = !empty($params->guardian_id) ? "guardian/{$params->guardian_id}/delegates" : "delegates";
+            $href = !empty($params->guardian_id) && !$isWardParent ? "guardian/{$params->guardian_id}/delegates" : "delegates";
 
             return [
                 "code" => 200,

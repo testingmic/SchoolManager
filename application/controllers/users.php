@@ -311,7 +311,7 @@ class Users extends Myschoolgh {
 
 		$params->query = " 1 ";
 		
-		global $defaultUser, $accessObject;
+		global $defaultUser, $accessObject, $isWardParent;
 
 		// load the informatin per the user permissions
 		if(isset($params->userData) || !empty($defaultUser)) {
@@ -334,6 +334,10 @@ class Users extends Myschoolgh {
 		if(isset($params->class_id) && !preg_match("/^[0-9]+$/", $params->class_id)) {
 			$params->minified = "simplified";
 			$params->class_id = $this->pushQuery("id", "classes", "item_id='{$params->class_id}' LIMIT 1")[0]->id ?? null;
+		}
+
+		if($isWardParent && !empty($params->user_type) && $params->user_type === "parent") {
+			$params->user_id = $defaultUser->user_id;
 		}
 
 		// set more parameters
@@ -1218,6 +1222,8 @@ class Users extends Myschoolgh {
 	 */
 	public function modify_guardiandelegate(stdClass $params) {
 
+		global $isWardParent, $defaultUser;
+
 		// split the user id
 		$expl = explode("_", $params->user_id);
 		
@@ -1240,8 +1246,13 @@ class Users extends Myschoolgh {
 				}
 			}
 
-			$stmt = $this->db->prepare("UPDATE delegates SET guardian_ids = ? WHERE id = ? AND client_id = ? LIMIT 1");
-			$stmt->execute([implode(",", $guardians), $expl[1], $params->clientId]);
+			// if the delegate was created by the user, then delete the delegate
+			if(($delegate[0]->created_by == $defaultUser->user_id) || $isWardParent) {
+				$this->quickUpdate("status='0'", "delegates", "id='{$expl[1]}' AND client_id='{$params->clientId}' LIMIT 1");
+			} else {
+				$stmt = $this->db->prepare("UPDATE delegates SET guardian_ids = ? WHERE id = ? AND client_id = ? LIMIT 1");
+				$stmt->execute([implode(",", $guardians), $expl[1], $params->clientId]);
+			}
 
 			return [
 				"code" => 200,

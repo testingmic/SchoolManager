@@ -213,9 +213,9 @@ function color_code_picker($selected = null, $colorsOnly = false) {
  */
 function no_record_found($title = null, $caption = null, $url_link = null, $record = null, $no_button = false, $icon = "fa-search", $div_class = false) {
     $html = "";
-    $html .= !empty($div_class) ? "<div class='col-lg-12 col-md-12'>" : null;
+    $html .= !empty($div_class) ? "<div class='col-lg-12 mb-3 col-md-12'>" : null;
     $html .= "
-    <div id='no_record_found_container' class='backdrop-blur-xl ".($no_button ? "mt-2" : null)." backdrop-saturate-150 rounded-2xl border border-solid-gray dark:bg-opacity-20 transition-all duration-300 p-6 bg-white dark:bg-gray-900/50 border-white/10 dark:border-gray-700/50'>
+    <div id='no_record_found_container' class='backdrop-blur-xl ".($no_button ? "mt-2" : null)." backdrop-saturate-150  mb-3 rounded-2xl border border-solid-gray dark:bg-opacity-20 transition-all duration-300 p-6 bg-white dark:bg-gray-900/50 border-white/10 dark:border-gray-700/50'>
         <div class='dark:text-gray-300'>
             <div class='text-center py-12'>
                 <div

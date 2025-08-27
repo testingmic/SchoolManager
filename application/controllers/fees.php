@@ -31,7 +31,7 @@ class Fees extends Myschoolgh {
 	 **/
 	public function list(stdClass $params) {
 
-        global $usersClass, $isSupport;
+        global $usersClass, $isSupport, $defaultUser;
 
         // set the limit parameter
         $params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
@@ -47,10 +47,12 @@ class Fees extends Myschoolgh {
             /** The user id algorithm */
             if(!isset($params->student_id) && in_array($params->userData->user_type, ["accountant", "admin"])) {
                 $student_id = "";
-            } else if(!isset($params->student_id) && in_array($params->userData->user_type, ["parent"])) {
-                // if the user is a parent
-    			$student_id = isset($params->student_array_ids) ? $params->student_array_ids : $this->session->student_id;
             }
+        }
+
+        if(in_array($defaultUser->user_type, ["parent"]) && empty($defaultUser->wards_list_ids)) {
+            // if the user is a parent
+            return [];
         }
 
         $filters = "a.status='1'";

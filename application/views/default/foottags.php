@@ -1,15 +1,17 @@
         <?php
         // load some global variables
         global $myClass, $baseUrl, $session, $isSupport, $userData, $current_url, $loadedJS, $auto_close_modal, $userPrefs, $announcementNotice, $defaultClientData, $clientName;
+        
         // init indexdb variable
         $idb_init = (bool) (isset($userPrefs->idb_init->init) && (strtotime($userPrefs->idb_init->idb_next_init) < time()));
-        // if the force_cold_boot=1 query parameter has been parsed then set the init to true
-        if(isset($_GET["force_cold_boot"]) && ($_GET["force_cold_boot"] == 1)) {
-            // $idb_init = true;
-        }
+        
+        // set the class position
+        $classPosition = "absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse";
+
         // create a new account object
         $accountObj = load_class("account", "controllers", (object) ["client_data" => $defaultUser->client]);
         ?>
+        <?php if($isAdminAccountant) { ?>
         <footer class="main-footer">
             <div class="footer-left">
                 Copyright &copy; <?= 2023 ?> <div class="bullet"></div> <a href="<?= $myClass->baseUrl; ?>" target="_blank"><?= $appName ?></a>. All rights reserved
@@ -19,6 +21,70 @@
                 <div class="network-notifier"></div>
             </div>
         </footer>
+        <?php } else { ?>
+        <nav id="footerBanner" class="mt-4 bg-white dark:bg-gray-800 shadow-2xl border-t border-gray-200 dark:border-gray-700 fixed bottom-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/95 dark:bg-gray-800/95">
+            <div class="max-w-7xl mx-auto">
+            <div class="flex justify-around">
+                <!-- Home Navigation -->
+                <a href="<?= $baseUrl ?>dashboard" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                    <div class="relative">
+                    <svg class="h-6 w-6 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                    <?php if ($favicon_color == 'dashboard'): ?>
+                        <div class="<?= $classPosition ?>"></div>
+                    <?php endif; ?>
+                    </div>
+                    <span class="text-xs mt-1 font-medium">Dashboard</span>
+                </a>
+
+                <!-- Fees Navigation -->
+                <a href="<?= $baseUrl ?>/fees-history" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                    <div class="relative">
+                        <svg class="h-6 w-6 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span class="text-xs mt-1 font-medium">Fees</span>
+                </a>
+
+                <a href="<?= $baseUrl ?>/attendance" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                    <div class="relative">
+                        <i class="fa fa-clock font-24"></i>
+                    </div>
+                    <span class="text-xs mt-1 font-medium">Attendance</span>
+                </a>
+
+                <!-- Notifications Navigation -->
+                <a href="<?= $baseUrl ?>/notifications" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                    <div class="relative">
+                        <svg class="h-6 w-6 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <div class="<?= $classPosition ?>"></div>
+                    </div>
+                    <span class="text-xs mt-1 font-medium">Alerts</span>
+                </a>
+
+                <!-- Profile Navigation -->
+                <a href="<?= $baseUrl ?>/profile" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                    <div class="relative">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                            <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <span class="text-xs mt-1 font-medium">Profile</span>
+                </a>
+
+            </div>
+            </div>
+
+            <!-- Active Tab Indicator -->
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-green-500"></div>
+        </nav>
+        <?php } ?>
 
         <div class="bg-blur hidden"></div>
         <div class="settingSidebar">

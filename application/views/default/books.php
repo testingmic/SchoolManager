@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $clientFeatures, $defaultCurrency, $isWardParent, $isTeacher;
+global $myClass, $accessObject, $defaultUser, $clientFeatures, $defaultCurrency, $isWardParent, $isTeacher, $isWardTutorParent;
 
 // initial variables
 $appName = $myClass->appName;

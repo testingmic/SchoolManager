@@ -115,13 +115,19 @@ load_helpers(['menu_helper']);
             myPrefs = <?= json_encode($userData->client->client_preferences) ?>;
     </script>
     <?= '';//$myClass->google_analytics_code ?>
-    <?php if(!$isActiveAccount) { ?>
+    
         <style>
+            <?php if(!$isActiveAccount) { ?>
             .main-content {
                 padding-left: 30px;
             }
+            <?php } ?>
+            <?php if(!$isAdminAccountant) { ?>
+                .main-content {
+                    margin-bottom: 100px;
+                }
+            <?php } ?>
         </style>
-    <?php } ?>
 </head>
 <body class="bg-gradient-to-br from-indigo-50 to-indigo-100">
 	<div class="loader"></div>

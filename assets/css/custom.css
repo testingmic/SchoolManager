@@ -492,13 +492,30 @@ table.dataTable.table-sm>thead>tr>th {
     }
 }
 
-@media only screen and (max-width: 575.98px) {
+@media only screen and (max-width: 700px) {
     .settingSidebar {
         display: block!important;
     }
     .settingSidebar {
+        width: 500px;
+        right: -500px;
+    }
+    .main-footer {
+        display: none!important;
+    }
+}
+
+@media only screen and (max-width: 575.98px) {
+    .settingSidebar {
         width: 380px;
         right: -380px;
+    }
+}
+
+@media only screen and (max-width: 390px) {
+    .settingSidebar {
+        width: 345px;
+        right: -345px;
     }
 }
 

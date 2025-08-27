@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $accessObject, $defaultUser, $defaultAcademics, $defaultCurrency;
+global $myClass, $accessObject, $defaultUser, $defaultAcademics, $defaultCurrency, $isAdminAccountant;
 
 // initial variables
 $appName = $myClass->appName;
@@ -104,64 +104,77 @@ $fees_paid = 0;
 $arrears_paid = 0;
 $fees_count = 0;
 
-// loop through the fees list
-foreach($item_list["data"] as $key => $fees) {
+// if the user is not a parent
+if(!$isWardParent) {
 
-    // increment the values
-    $fees_count += 1;
-    $fees_paid += $fees->category_id !== "Arrears" ? $fees->amount : 0;
-    $arrears_paid += $fees->category_id == "Arrears" ? $fees->amount : 0;
+    // loop through the fees list
+    foreach($item_list["data"] as $key => $fees) {
 
-    // set the action button
-    $action = "";
-    $action = "<a href='#' title='View Receipt' onclick='load(\"fees_view/{$fees->payment_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
-    $action .= "&nbsp;<a title='Print Receipt' target='_blank' href=\"{$baseUrl}receipt/{$fees->payment_id}\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
-    
-    $fees->student_info->name = random_names($fees->student_info->name);
-    
-    // add the reversal button key
-    if($hasReversal && $fees->has_reversal && !$fees->reversed) {
-        $action .= "&nbsp;<a title='Reverse Fees Payment' href='#' onclick=\"reverse_payment('{$fees->payment_id}','{$fees->student_info->name}','{$fees->currency} ".number_format($fees->amount_paid, 2)."')\" class='btn btn-sm btn-outline-danger'><i class='fa fa-recycle'></i></a>";
-    }
+        // increment the values
+        $fees_count += 1;
+        $fees_paid += $fees->category_id !== "Arrears" ? $fees->amount : 0;
+        $arrears_paid += $fees->category_id == "Arrears" ? $fees->amount : 0;
 
-    if($fees->reversed) {
-        $action = "<span class='badge font-bold badge-danger'>REVERSED</span>";
-    }
+        // set the action button
+        $action = "";
+        $action = "<a href='#' title='View Receipt' onclick='load(\"fees_view/{$fees->payment_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+        $action .= "&nbsp;<a title='Print Receipt' target='_blank' href=\"{$baseUrl}receipt/{$fees->payment_id}\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
+        
+        $fees->student_info->name = random_names($fees->student_info->name);
+        
+        // add the reversal button key
+        if($hasReversal && $fees->has_reversal && !$fees->reversed) {
+            $action .= "&nbsp;<a title='Reverse Fees Payment' href='#' onclick=\"reverse_payment('{$fees->payment_id}','{$fees->student_info->name}','{$fees->currency} ".number_format($fees->amount_paid, 2)."')\" class='btn btn-sm btn-outline-danger'><i class='fa fa-recycle'></i></a>";
+        }
 
-    $useTheImage = strpos($fees->student_info->image, "assets/img/avatar.png") !== false;
+        if($fees->reversed) {
+            $action = "<span class='badge font-bold badge-danger'>REVERSED</span>";
+        }
 
-    $fees_history .= "<tr data-row_id=\"{$fees->payment_id}\">";
-    $fees_history .= "<td class='text-center'>{$fees_count}</td>";
-    $fees_history .= "
-        <td>
-            <div class='d-flex text-uppercase justify-content-start space-x-2'>
-                ".(!$useTheImage ? "
-                    <div class='mr-2'><img src='{$baseUrl}{$fees->student_info->image}' width='50px' height='50px'></div>" : "
-                    <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-user h-6 w-6 text-white' aria-hidden='true'><path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'></path><circle cx='12' cy='7' r='4'></circle></svg>
-                    </div>"
-                )."
-                <div>
-                    <a href='#' class='user_name' onclick='load(\"student/{$fees->student_info->user_id}\");'>{$fees->student_info->name}</a> <br>
-                    <strong>ID:</strong>
-                    <strong class='text-success'>{$fees->receipt_id}</strong>
+        $useTheImage = strpos($fees->student_info->image, "assets/img/avatar.png") !== false;
+
+        $fees_history .= "<tr data-row_id=\"{$fees->payment_id}\">";
+        $fees_history .= "<td class='text-center'>{$fees_count}</td>";
+        $fees_history .= "
+            <td>
+                <div class='d-flex text-uppercase justify-content-start space-x-2'>
+                    ".(!$useTheImage ? "
+                        <div class='mr-2'><img src='{$baseUrl}{$fees->student_info->image}' width='50px' height='50px'></div>" : "
+                        <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
+                            <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-user h-6 w-6 text-white' aria-hidden='true'><path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'></path><circle cx='12' cy='7' r='4'></circle></svg>
+                        </div>"
+                    )."
+                    <div>
+                        <a href='#' class='user_name' onclick='load(\"student/{$fees->student_info->user_id}\");'>{$fees->student_info->name}</a> <br>
+                        <strong>ID:</strong>
+                        <strong class='text-success'>{$fees->receipt_id}</strong>
+                    </div>
                 </div>
-            </div>
-        </td>";
-    $fees_history .= "<td>{$fees->class_name}</td>";
-    $fees_history .= "<td>{$fees->currency} ".number_format($fees->amount_paid, 2)."</td>";
-    $fees_history .= "<td>".($fees->category_name ? $fees->category_name : $fees->category_id)."</td>";
-    $fees_history .= "<td><strong>{$fees->payment_method}</strong>";
+            </td>";
+        $fees_history .= "<td>{$fees->class_name}</td>";
+        $fees_history .= "<td>{$fees->currency} ".number_format($fees->amount_paid, 2)."</td>";
+        $fees_history .= "<td>".($fees->category_name ? $fees->category_name : $fees->category_id)."</td>";
+        $fees_history .= "<td><strong>{$fees->payment_method}</strong>";
 
-    // if the payment method was a cheque
-    if($fees->payment_method === "Cheque") {
-        $cheque_bank = explode("::", $fees->cheque_bank)[0];
-        $fees_history .= $cheque_bank ? "<br><strong>{$cheque_bank}</strong>" : null;
-        $fees_history .= $fees->cheque_number ? "<br><strong>#{$fees->cheque_number}</strong>" : null;
+        // if the payment method was a cheque
+        if($fees->payment_method === "Cheque") {
+            $cheque_bank = explode("::", $fees->cheque_bank)[0];
+            $fees_history .= $cheque_bank ? "<br><strong>{$cheque_bank}</strong>" : null;
+            $fees_history .= $fees->cheque_number ? "<br><strong>#{$fees->cheque_number}</strong>" : null;
+        }
+        $fees_history .= "</td><td> ".(isset($fees->created_by_info->name) ? "{$fees->created_by_info->name} <br>" : null)."  <i class='fa fa-calendar'></i> {$fees->recorded_date}</td>";
+        $fees_history .= "<td class='text-center'><span data-action_id='{$fees->payment_id}'>{$action}</span></td>";
+        $fees_history .= "</tr>";
     }
-    $fees_history .= "</td><td> ".(isset($fees->created_by_info->name) ? "{$fees->created_by_info->name} <br>" : null)."  <i class='fa fa-calendar'></i> {$fees->recorded_date}</td>";
-    $fees_history .= "<td class='text-center'><span data-action_id='{$fees->payment_id}'>{$action}</span></td>";
-    $fees_history .= "</tr>";
+}
+
+// if the user is a parent
+if($isWardParent) {
+    if(empty($item_list["data"])) {
+        $simplified_fees_history = no_record_found("No Fees Payment Found", "No fees payment has been for any of your wards yet.", null, "Student", false, "fas fa-money-bill");
+    } else {
+        $simplified_fees_history = "hello world";
+    }
 }
 
 // get the average fees paid
@@ -190,7 +203,7 @@ $response->html = '
     }
 
     $response->html .= '<div class="row print_Fees_Collection" id="filter_Department_Class">
-        <div class="col-xl-3 col-md-3 form-group">
+        <div class="col-xl-3 col-md-3 form-group '.($isWardParent ? 'hidden' : '').'">
             <label>Select Class</label>
             <select data-width="100%" class="form-control selectpicker" name="class_id">
                 <option value="">Please Select Class</option>';
@@ -200,7 +213,7 @@ $response->html = '
                 $response->html .= '
             </select>
         </div>
-        <div class="col-xl-3 col-md-3 form-group">
+        <div class="col-xl-3 col-md-3 form-group '.($isWardParent ? 'hidden' : '').'">
             <label>Select Category</label>
             <select data-width="100%" class="form-control selectpicker" name="category_id">
                 <option value="">Please Select Category</option>';
@@ -210,11 +223,11 @@ $response->html = '
             $response->html .= '
             </select>
         </div>
-        <div class="col-xl-3 col-md-3 form-group">
+        <div class="col-xl-3 col-md-3 form-group '.($isWardParent ? 'hidden' : '').'">
             <label>Date Range</label>
             <input type="text" name="date_range" id="date_range" value="'.$date_range.'" class="form-control daterange">
         </div>
-        <div class="col-xl-3 col-md-3 col-12 form-group">
+        <div class="col-xl-3 col-md-3 col-12 form-group '.($isWardParent ? 'hidden' : '').'">
             <div class="d-flex justify-content-between">
                 <div class="col-">
                     <label class="d-sm-none d-md-block" for="">&nbsp;</label>
@@ -231,7 +244,7 @@ $response->html = '
             </div>
         </div>
         
-        '.($feesReport ?
+        '.($feesReport || $isWardParent ?
         '<div class="col-xl-3 col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
             <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-blue">
                 <div class="card-body pr-2 pl-3 card-type-3">
@@ -305,6 +318,7 @@ $response->html = '
         </div>' : null).'
 
         <div class="col-12 col-sm-12 col-lg-12">
+            '.($isWardParent ? $simplified_fees_history : '
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive">
@@ -325,7 +339,7 @@ $response->html = '
                         </table>
                     </div>
                 </div>
-            </div>
+            </div>').'
         </div>
     </div>
 </section>';

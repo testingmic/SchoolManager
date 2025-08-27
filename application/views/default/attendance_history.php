@@ -139,7 +139,7 @@ $response->html = '
                 </div>
                 ' : null).'
                 <div class="row" id="filter_Daily_Attendance">
-                    <div class="col-xl-3 col-md-6 mb-2 form-group">
+                    <div class="col-xl-3 col-md-6 mb-2 form-group '.($isWardParent ? "d-none" : "").'">
                         <label>Select User</label>
                         <select data-width="100%" class="form-control selectpicker" id="user_id" name="user_id">
                             <option value="">Please Select User</option>

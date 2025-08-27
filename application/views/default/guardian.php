@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser, $isAdmin;
+global $myClass, $SITEURL, $defaultUser, $isAdmin, $isWardParent;
 
 // initial variables
 $appName = $myClass->appName;
@@ -50,8 +50,8 @@ if(!empty($user_id)) {
 
         // user permissions
         $hasUpdate = $accessObject->hasAccess("update", "guardian");
-        $addDelegate = $accessObject->hasAccess("add", "delegates");
-        $updateDelegate = $accessObject->hasAccess("update", "delegates");
+        $addDelegate = $accessObject->hasAccess("add", "delegates") || $isWardParent;
+        $updateDelegate = $accessObject->hasAccess("update", "delegates") || $isWardParent;
 
         // set the first key
         $data = $data[0];
@@ -113,7 +113,7 @@ if(!empty($user_id)) {
                 <h1><i class="fa fa-user-friends"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'guardians">Guardians</a></div>
+                    '.(!$isWardParent ? '<div class="breadcrumb-item active"><a href="'.$baseUrl.'guardians">Guardians</a></div>' : '').'
                     <div class="breadcrumb-item">'.$data->name.'</div>
                 </div>
             </div>
