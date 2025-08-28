@@ -161,7 +161,8 @@ $buttons = "";
 $buttons_color = "bg-blue-500 hover:bg-blue-600";
 $currentTimeHour = date("H");
 if($currentTimeHour < 12) {
-    $buttons = $isParent ? "Drop off Child" : "Report for School";
+    $count = $isParent ? count($defaultUser->wards_list) : 1;
+    $buttons = $isParent ? "Drop off {$count} Child".($count > 1 ? "ren" : "") : "Report for School";
 }
 elseif($currentTimeHour >= 14) {
     $buttons_color = "bg-green-500 hover:bg-green-600";
@@ -182,7 +183,7 @@ $response->html = '
         <div class="row" id="daily_attendance_history">
             <div class="col-12 col-sm-12 col-lg-12">
                 '.(
-                    $isParent ? '
+                    $isParent && !empty($defaultUser->wards_list) ? '
                     <div class="rounded-pill '.$buttons_color.' mb-2 mb-3 cursor-pointer text-center font-25 text-white p-6 btn-block">
                         <div class="font-18">Tap to</div>
                         <strong>'.$buttons.'</strong>
@@ -213,7 +214,7 @@ $response->html = '
                             <option '.(!empty($filter->action) && $filter->action == "checkout" ? "selected" : "").' value="checkout">Check Out</option>
                         </select>
                     </div>
-                    <div class="'.($isWardParent ? "col-lg-4 col-md-4" : "col-xl-3 col-md-6").' mb-2 form-group">
+                    <div class="'.($isWardParent ? "col-lg-4 col-md-4" : "col-xl-3 col-md-6").' '.($isParent && empty($defaultUser->wards_list) ? "hidden" : "").' mb-2 form-group">
                         <label>Select Date</label>
                         <input type="text" class="form-control daterange" placeholder="Select Date Range" id="date_logged" name="date_logged" value="'.$date_range.'">
                     </div>

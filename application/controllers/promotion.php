@@ -190,7 +190,7 @@ class Promotion extends Myschoolgh {
 
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-                $split = explode("|", $result->is_promoted);
+                $split = !empty($result->is_promoted) ? explode("|", $result->is_promoted) : [];
                 $result->is_logged = (bool) !empty($split[0]);
                 $result->is_promoted = empty($split[1]) ? 0 : (int) $split[1];
                 $data[$result->item_id] = $result;

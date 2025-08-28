@@ -2608,6 +2608,23 @@ class Fees extends Myschoolgh {
                 $params->class_id = $class_id->id;
             }
 
+            // get the class guid
+            $class_id = $this->itemById("classes", "id", $params->class_id);
+            $class_guid = $class_id->item_id;
+
+            // get the promotion history
+            $promotionObject = load_class("promotion", "controllers");
+            $promotion_history = $promotionObject->history((object) [
+                "clientId" => $params->clientId,
+                "status" => "Processed",
+                "academic_year" => $defaultAcademics->academic_year,
+                "academic_term" => $defaultAcademics->academic_term,
+                "promote_from" => $class_guid
+            ])['data'] ?? [];
+
+            // get the new classname
+            $new_class_name = !empty($promotion_history) ? $promotion_history[0]->to_class_name : null;
+
             // get the student information
             $students_list = $this->pushQuery("
                 a.class_id, a.item_id, a.name, a.image, a.unique_id, a.enrollment_date, a.gender, a.email, a.phone_number,
@@ -2741,7 +2758,9 @@ class Fees extends Myschoolgh {
                                         <h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Student Details</h3>
                                         <div style="text-transform:uppercase;margin-bottom:5px;">Name: <strong>'.$studentRecord->name.'</strong></div>
                                         <div style="text-transform:uppercase;margin-bottom:5px;">Student ID: <strong>'.$studentRecord->unique_id.'</strong></div>
-                                        <div style="text-transform:uppercase;margin-bottom:5px;">Class: <strong>'.$studentRecord->class_name.'<strong></div>
+                                        <div style="text-transform:uppercase;margin-bottom:5px;">Class: <strong>'.
+                                        (!empty($new_class_name) ? $new_class_name : $studentRecord->class_name).'
+                                        </strong></div>
                                     </td>
                                     <td width="50%" align="right">
                                         <h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Academics</h3>
