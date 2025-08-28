@@ -359,7 +359,7 @@ class Users extends Myschoolgh {
 
 		$params->query = " 1 ";
 		
-		global $defaultUser, $accessObject, $isWardParent;
+		global $defaultUser, $isWardParent;
 
 		// load the informatin per the user permissions
 		if(isset($params->userData) || !empty($defaultUser)) {
@@ -384,8 +384,13 @@ class Users extends Myschoolgh {
 			$params->class_id = $this->pushQuery("id", "classes", "item_id='{$params->class_id}' LIMIT 1")[0]->id ?? null;
 		}
 
-		if($isWardParent && !empty($params->user_type) && ($params->user_type === "parent")) {
-			$params->user_id = $defaultUser->user_id;
+		if($isWardParent && !empty($params->user_type)) {
+			if($params->user_type === "parent") {
+				$params->user_id = $defaultUser->user_id;
+			}
+			elseif($params->user_type === "student" && empty($defaultUser->wards_list)) {
+				return [];
+			}
 		}
 
 		// set more parameters
