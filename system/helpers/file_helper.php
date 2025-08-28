@@ -271,7 +271,7 @@ if ( ! function_exists('get_file_info'))
 					break; 
 				case 'clean_date':
 					$timestamp = filemtime($file);
-					$fileinfo['clean_date'] = date("l, F d Y H:iA", strftime($timestamp));
+					$fileinfo['clean_date'] = (new \DateTime())->setTimestamp($timestamp)->format("l, F d Y h:ia");
 					break;
 				case 'readable':
 					$fileinfo['readable'] = is_readable($file);
@@ -481,117 +481,4 @@ function get_file_mime($file_ext, $array_item) {
 			break;
 		}
 	}
-}
-
-
-function show_content($title = null, $file_name = null, $report_content = null, $orientation = "L", $force = false) {
-
-    // base url
-    $appName = config_item("site_name");
-
-    // create a new object
-    require "./system/libraries/pdf/tcpdf_include.php";
-
-    // create new PDF document
-    $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
-	// set document information
-	$pdf->SetCreator(PDF_CREATOR);
-	$pdf->SetAuthor($appName);
-	$pdf->SetTitle("{$appName} {$title}");
-	$pdf->SetSubject('Calendar');
-	$pdf->SetKeywords('myschoolgh, attendance, timetable, manager');
-
-	$pdf->SetHeaderData(NULL);
-	// set header and footer fonts
-	$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-	$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-
-	// set default monospaced font
-	$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-
-	// set margins
-	$pdf->SetMargins(3, 3, 3);
-	$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-	$pdf->SetFooterMargin(4);
-
-	// set auto page breaks
-	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-
-	// set image scale factor
-	$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-
-	// set some language-dependent strings (optional)
-	if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-		require_once(dirname(__FILE__).'/lang/eng.php');
-		$pdf->setLanguageArray($l);
-	}
-
-	// set font
-	$pdf->SetFont('dejavusans', '', 10);
-
-	// if the content is not an array
-	if(!is_array($report_content)) {
-		// add the new page
-		$pdf->AddPage($orientation, "A4");
-		// write the content of the page
-		$pdf->writeHTML($report_content["report"] ?? $report_content, false, false, true, false, '');
-	} else {
-		// loop through the pages
-		foreach($report_content as $content) {
-			// add the new page
-			$pdf->AddPage($orientation, "A4");
-			// write the content of the page
-			$pdf->writeHTML($content["report"] ?? $content, false, false, true, false, '');
-		}
-	}
-
-	// output the HTML content
-    $pdf->Output($file_name);
-}
-
-// create a function
-function dompdf_show_content($title = null, $file_name = null, $report_content = null, $orientation = "landscape", $reportObj = null) {
-		
-	// instantiate and use the dompdf class
-	// $dompdf = new Dompdf();
-	$dompdf = (object) [];
-
-	// get the content
-	$pages_content = "<link rel=\"stylesheet\" type=\"text/css\" href=\"assets/css/dompdf.css\">";
-
-	// if the content is not an array
-	if(!is_array($report_content)) {
-		// add the new page
-		$pages_content .= $report_content["report"];
-	} else {
-		// set the counter
-		$counter = count($report_content);
-		$count = 0;
-		// loop through the pages
-		foreach($report_content as $key => $data) {
-			$count++;
-			// add the new page
-			$pages_content .= $data["report"];
-			if($count !== $counter) {
-				$pages_content  .= "\n<div class=\"page_break\"></div>";
-			}
-		}
-	}
-
-	// load the html content
-	$dompdf->loadHtml($pages_content);
-
-	// (Optional) Setup the paper size and orientation
-	$dompdf->setPaper("A4", "landscape");
-
-	// Render the HTML as PDF
-	$dompdf->render();
-
-	// if the user wants to auto download
-	$download_file = (bool) isset($_GET["auto_download"]);
-
-	// Output the generated PDF to Browser
-	$dompdf->stream("terminal_report.pdf", ["compress" => 1, "Attachment" => $download_file]);
-
 }

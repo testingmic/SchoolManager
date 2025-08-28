@@ -128,6 +128,7 @@ function run($isNotRemote = false, $return = false, $SITEURL =  [], $argv = []) 
 	}
 
 	// default file to include
+	$notFoundFile = config_item('default_view_path').'not_found.php';
 	$defaultFile = config_item('default_view_path').strtolower(preg_replace('/[^\w_]-/','', $SITEURL[0])).'.php';
 
 	// get the request method that was parsed by the user
@@ -150,7 +151,7 @@ function run($isNotRemote = false, $return = false, $SITEURL =  [], $argv = []) 
 	        if($method === "POST") {
 	            no_file_log();
 	        } else {
-	            invalid_route();
+	            return ['file' => $notFoundFile, 'url' => $SITEURL];
 	        }
 	    }
 	}
@@ -163,7 +164,7 @@ function run($isNotRemote = false, $return = false, $SITEURL =  [], $argv = []) 
 	    if($method === "POST") {
 	        no_file_log();
 	    } else {
-	        invalid_route();
+	        return ['file' => $notFoundFile, 'url' => $SITEURL];
 	    }
 	}
 }

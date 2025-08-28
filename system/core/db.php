@@ -18,6 +18,7 @@ class Db {
 	private $username;
 	private $password;
 	private $database;
+	public $dbConnected = false;
 
 	public function __construct() {
 		
@@ -30,7 +31,8 @@ class Db {
 			$this->myschoolgh = $this->db_connect($this->hostname, $this->username, $this->password, $this->database);
 		}
 	}
-	public function get_database(){
+
+	public function connect(){
 		return $this->myschoolgh;
 	}
 
@@ -44,10 +46,14 @@ class Db {
 			$myschoolgh->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_BOTH);
 			$myschoolgh->setAttribute(PDO::MYSQL_ATTR_FOUND_ROWS, TRUE);
 			
+			// set the connection to true
+			$this->dbConnected = true;
+
 			return $myschoolgh;
 			
 		} catch(PDOException $e) {
-			die("It seems there was an error.  Please refresh your browser and try again. ".$e->getMessage());
+			$this->dbConnected = false;
+			return false;
 		}
 		
 	}

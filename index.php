@@ -36,7 +36,7 @@ if (!isset($_SERVER['HTTP_AUTHORIZATION']) || !isset($dataParam['access_token'])
     $session = load_class('Session', 'libraries/Session');
 }
 
-global $session;
+global $session, $dbConnected;
 
 // Load the models class
 load_class('models', 'models');
@@ -198,6 +198,17 @@ $loadedJS = [];
 
 $settings = run($isNotRemote, false, $SITEURL, $argv ?? []);
 
+// if the database connection is not established
+if(!$dbConnected) {
+
+    global $fileCaption, $fileContent, $fileTitle;
+
+    $settings = ['file' => config_item('default_view_path').'not_found.php', 'url' => $SITEURL];
+    $fileTitle = "DB Error";
+
+    $fileCaption = "DB Connection Error";
+    $fileContent = "It seems there was an error.  Please refresh your browser and try again." ;
+}
 if(is_array($settings)) {
 	include($settings['file']);
 }

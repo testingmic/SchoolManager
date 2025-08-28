@@ -37,6 +37,7 @@ class Myschoolgh extends Models {
 	public $agent;
 	public $group_by;
 	public $date_format;
+	public $dbConnected;
 
     public $academic_term;
     public $academic_year;
@@ -64,9 +65,10 @@ class Myschoolgh extends Models {
 
 		parent::__construct();
 		
-		global $myschoolgh, $session;
+		global $myschoolgh, $session, $dbConnected;
 
 		$this->db = $myschoolgh;
+		$this->dbConnected = $dbConnected;
 
 		// load the init
 		$init_data = parse_ini_file(ROOT_DIRECTORY . "/db.ini");

@@ -23,7 +23,9 @@ $dbconn = load_class('db', 'core');
 
 load_file(['security' => 'core']);
 
-$myschoolgh = $dbconn->get_database();
+$myschoolgh = $dbconn->connect();
+$dbConnected = $dbconn->dbConnected;
+
 $config = load_class('config', 'core');
 $session = load_class('Session', 'libraries/Session');
 
