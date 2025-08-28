@@ -587,12 +587,12 @@ if(!empty($user_id)) {
                         <a class="nav-link '.($url_link === "fees" ? "active" : null).'" onclick="return appendToUrl(\'fees\')" id="fees-tab2" data-toggle="tab" href="#fees" role="tab" aria-selected="true">Fees</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link '.($url_link === "payments" ? "active" : null).'" onclick="return appendToUrl(\'payments\')" id="fees_payments-tab2" data-toggle="tab" href="#fees_payments" role="tab" aria-selected="true">Payments</a>
+                        <a class="nav-link '.($url_link === "payments" ? "active" : null).' '.($isWardParent ? "hidden" : null).'" onclick="return appendToUrl(\'payments\')" id="fees_payments-tab2" data-toggle="tab" href="#fees_payments" role="tab" aria-selected="true">Payments</a>
                     </li>' : '').'
                     <li class="nav-item d-none d-sm-block">
                         <a class="nav-link '.($url_link === "documents" ? "active" : null).'" onclick="return appendToUrl(\'documents\')" id="documents-tab2" data-toggle="tab" href="#documents" role="tab" aria-selected="true">Documents</a>
                     </li>
-                    <li class="nav-item '.(!in_array("attendance", $clientFeatures) ? "hidden" : null).'">
+                    <li class="nav-item '.(!in_array("attendance", $clientFeatures) || $isWardParent ? "hidden" : null).'">
                         <a class="nav-link '.($url_link === "attendance" ? "active" : null).'" onclick="return appendToUrl(\'attendance\')" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab" aria-selected="true">Attendance</a>
                     </li>
                     <li class="nav-item '.(!in_array("incidents", $clientFeatures) ? "hidden" : null).'">

@@ -459,7 +459,13 @@ class Buses extends Myschoolgh {
 			$query .= !empty($params->date_logged) ? " AND a.date_logged = '{$params->date_logged}'" : "";
 			$query .= !empty($params->request) ? " AND a.request = '{$params->request}'" : "";
 			$query .= !empty($params->action) ? " AND a.action = '{$params->action}'" : "";
-			$query .= !empty($params->user_ids) ? " AND a.user_id IN ('".implode("','", $params->user_ids)."')" : "";
+			$query .= !empty($params->user_ids) ? " AND a.user_id IN (".implode(",", $params->user_ids).")" : "";
+
+			if(!empty($params->date_range)) {
+				$split = explode(":", $params->date_range);
+				
+				$query .= !empty($split[0]) && !empty($split[1]) ? " AND a.date_logged BETWEEN '{$split[0]}' AND '{$split[1]}'" : "";
+			}
 
 			// get the list of users based on the request 
 			$stmt = $this->db->prepare("SELECT 

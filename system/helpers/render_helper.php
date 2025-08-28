@@ -94,8 +94,8 @@ function render_class_attendance($attendance = [], $class_id = null, $baseUrl = 
  * 
  * @return string
  */
-function render_summary_card($value = 0, $label = null, $icon = null, $color = null, $column = "col-lg-3") {
-    return '<div class="'.$column.' col-md-4 transition-all duration-300 transform hover:-translate-y-1">
+function render_summary_card($value = 0, $label = null, $icon = null, $color = null, $column = "col-lg-3 col-md-4", $icon_class = null) {
+    return '<div class="'.$column.' transition-all duration-300 transform hover:-translate-y-1">
             <div class="card">
                 <div class="card-body pb-2 card-type-3">
                     <div class="row">
@@ -103,7 +103,7 @@ function render_summary_card($value = 0, $label = null, $icon = null, $color = n
                             <h6 class="text-black mb-0">'.$label.'</h6>
                             <span data-count="'.strtolower(str_ireplace(" ", "_", $label)).'" class="font-weight-bold font-25 mb-0">'.$value.'</span>
                         </div>
-                        <div class="col-auto">
+                        <div class="col-auto '.$icon_class.'">
                             <div class="card-circle l-bg-'.$color.' text-white">
                                 <i class="fas '.$icon.'"></i>
                             </div>

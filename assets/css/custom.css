@@ -510,6 +510,24 @@ table.dataTable.table-sm>thead>tr>th {
         width: 380px;
         right: -380px;
     }
+    .attendance-icon {
+        display: none !important;
+    }
+    .section .section-header {
+        flex-wrap: wrap;
+        margin-bottom: 10px !important;
+    }
+}
+
+@media (max-width: 1024px) {
+    .main-content {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    .main-wrapper-1 .section .section-header {
+        margin-left: -0px;
+        margin-right: -0px;
+    }
 }
 
 @media only screen and (max-width: 390px) {

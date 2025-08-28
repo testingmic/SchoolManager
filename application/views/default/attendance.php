@@ -282,8 +282,8 @@ if(!empty($clientId)) {
                                         <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.$start_date.'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
                                         <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.$end_date.'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
                                         <div class="input-group-append">
-                                            <button style="border-radius:0px" onclick="return filter_UserGroup_Attendance()" class="btn btn-outline-primary"><i class="fa fa-filter"></i> Filter</button>
-                                            <button onclick="return loadPage(\''.$baseUrl.'attendance_history\')" class="btn btn-outline-success"><i class="fa fa-history"></i> Daily Attendance History</button>
+                                            <button style="border-radius: 0px; min-height: 40px" onclick="return filter_UserGroup_Attendance()" class="btn btn-outline-primary"><i class="fa fa-filter"></i> Filter</button>
+                                            <button onclick="return loadPage(\''.$baseUrl.'attendance_history\')" class="btn btn-success"><i class="fa fa-history"></i> View Attendance History</button>
                                         </div>
                                     </div>
                                 </div>

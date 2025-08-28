@@ -62,6 +62,24 @@ function no_content_wrapper(title = null, caption = null, icon = "fa-search") {
         </div>`;
 }
 
+var dateFilterClick = false;
+var triggerDateFilterClick = () => {
+    if($(`div[id="daily_attendance_history"]`).length && $(`button[id="filter_Daily_Attendance"]`).length) {
+        $(`button[class~="applyBtn"]`).on("click", function() {
+            setTimeout(() => {
+                $(`button[id="filter_Daily_Attendance"]`).trigger("click");
+            }, 1000);
+        });   
+    }
+    if($(`div[id="daily_attendance_history"]`).length && $(`button[id="filter_Bus_Attendance"]`).length) {
+        $(`button[class~="applyBtn"]`).on("click", function() {
+            setTimeout(() => {
+                $(`button[id="filter_Bus_Attendance"]`).trigger("click");
+            }, 1000);
+        });   
+    }
+}
+
 $(window).on("beforeunload", (evt) => {
     window.location.href = `${baseUrl}dashboard`;
 });

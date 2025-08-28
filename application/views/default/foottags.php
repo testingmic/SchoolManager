@@ -37,6 +37,12 @@
                     </div>
                     <span class="text-xs mt-1 font-medium">Dashboard</span>
                 </a>
+                <a href="<?= $baseUrl ?><?= $isWardParent ? "attendance_history" : "attendance" ?>" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                    <div class="relative">
+                        <i class="fa fa-clock font-24"></i>
+                    </div>
+                    <span class="text-xs mt-1 font-medium">Attendance</span>
+                </a>
 
                 <?php if($isWardParent) { ?>
                 <!-- Fees Navigation -->
@@ -49,12 +55,6 @@
                     <span class="text-xs mt-1 font-medium">Fees</span>
                 </a>
                 <?php } ?>
-                <a href="<?= $baseUrl ?>attendance" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                    <div class="relative">
-                        <i class="fa fa-clock font-24"></i>
-                    </div>
-                    <span class="text-xs mt-1 font-medium">Attendance</span>
-                </a>
 
                 <!-- Assessments Navigation -->
                 <a href="<?= $baseUrl ?>assessments" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
@@ -64,6 +64,7 @@
                     <span class="text-xs mt-1 font-medium">Assessments</span>
                 </a>
 
+                <?php if(!$isWardParent) { ?>
                 <!-- Profile Navigation -->
                 <a href="<?= $baseUrl ?>profile" class="flex flex-col items-center justify-center px-3 py-3 transition-all duration-300 group text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                     <div class="relative">
@@ -75,6 +76,7 @@
                     </div>
                     <span class="text-xs mt-1 font-medium">Profile</span>
                 </a>
+                <?php } ?>
 
             </div>
             </div>

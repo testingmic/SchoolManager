@@ -158,7 +158,7 @@ $response->html = '
                 <div class="breadcrumb-item">Bus Attendance</div>
             </div>
         </div>
-        <div class="row">
+        <div class="row" id="daily_attendance_history">
             <div class="col-12 col-sm-12 col-lg-12">
                 '.($hasPermission ? '
                 <div class="text-right mb-2">
@@ -205,7 +205,7 @@ $response->html = '
                 <div class="row">
                     '.render_summary_card($statistics["total"], "Total Records", "fa fa-bus", "orange", "col-lg-3").'
                     '.render_summary_card($statistics["checkin"], "Total Checkins", "fa fa-check", "green", "col-lg-3").'
-                    '.render_summary_card($statistics["checkout"], "Total Checkouts", "fa fa-check", "red", "col-lg-3").'
+                    '.render_summary_card($statistics["checkout"], "Total Checkouts", "fa fa-arrow-circle-left", "red", "col-lg-3").'
                     '.render_summary_card(count(array_keys($statistics["days"])), "Total Days", "fa-calendar", "cyan", "col-lg-3").'
                 </div>
                 <div class="card">

@@ -164,7 +164,7 @@ if(!empty($user_id)) {
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
                                     <a class="nav-link '.(empty($url_link) || $url_link == "summary" ? "active": null).'" onclick="return appendToUrl(\'summary\')" id="home-tab2" data-toggle="tab" href="#about" role="tab"
-                                    aria-selected="true">Description</a>
+                                    aria-selected="true">Details</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link '.($url_link == "profile" ? "active": null).'" id="profile-tab2" data-toggle="tab" onclick="return appendToUrl(\'profile\')" href="#profile" role="tab"

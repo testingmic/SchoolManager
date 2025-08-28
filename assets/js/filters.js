@@ -253,6 +253,10 @@ $(`button[id="generate_Account_Notes_Report"]`).on("click", function() {
     window.open(`${baseUrl}download/accounting?account_id=${account_id}&start_date=${start_date}&end_date=${end_date}&display=notes`);
 });
 
+$(`input[name="date_logged"]`).on("click", function() {
+    triggerDateFilterClick();
+});
+
 $(`button[id="filter_Daily_Reports_List"]`).on("click", function() {
     let class_id = $(`div[id="report_container"] select[name="class_id"]`).val(),
         student_id = $(`div[id="report_container"] select[name="student_id"]`).val();
