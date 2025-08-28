@@ -155,6 +155,7 @@ var search_usersList = (user_type = "") => {
                                     <div> 
                                         <i class="fa fa-user"></i> ${name}
                                         <br><i class="fa fa-home"></i> ${e.class_name}
+                                        <br><i class="fa fa-user"></i> ${e.gender}
                                         <br><i class="fa fa-calendar-check"></i> ${typeof e.dob_clean !== "undefined" ? e.dob_clean : "N/A"}
                                     </div> 
                                 </div>
@@ -188,7 +189,7 @@ var search_usersList = (user_type = "") => {
                 users_list += "</div>";
                 $(`div[id='user_search_list']`).html(users_list);
             }
-        }).catch(() => {
+        }).catch((error) => {
             $(`div[id='user_search_list']`).html(`<div class='text-center text-danger font-italic'>Sorry! There was an error while processing the request</div>`);
         });
     } else {

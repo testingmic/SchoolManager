@@ -213,9 +213,7 @@ if(!empty($user_id)) {
 
         // if the incident is empty
         if(empty($incidents_list)) {
-            $incidents_list = "<div class='mt-2'>";
-            $incidents_list .= no_record_found("Incidents", "No recorded incents", null, null, false);
-            $incidents_list .= "</div>";
+            $incidents_list .= no_record_found("No incident recorded", "No incident has been recorded for this student yet.", null, "Incidents", false, "fa fa-ambulance", false);
         }
 
         // get the student arrears

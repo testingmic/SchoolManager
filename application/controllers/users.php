@@ -296,6 +296,54 @@ class Users extends Myschoolgh {
 		$params->quick_list = true;
 		return $this->quick_list($params);
 	}
+
+	/**
+	 * Global function to search for item based on the predefined columns and values parsed
+	 * 
+	 * @param StdClass $params
+	 * @param String $params->user_type		The type of the user to load the result
+	 * 
+	 * @return Object
+	 */
+	public function searches($params = null) {
+
+		try {
+
+			// set the client id
+			$params->clientId = $params->clientId ?? $this->clientId;
+			
+			// set the query
+			$query = "a.client_id = '{$params->clientId}'";
+			$query .= !empty($params->user_type) ? " AND a.user_type = '{$params->user_type}'" : null;
+			$query .= !empty($params->q) ? " AND (a.name LIKE '%{$params->q}%' OR a.email LIKE '%{$params->q}%' OR a.phone_number LIKE '%{$params->q}%')" : null;
+
+			// prepare and execute the statement
+			$sql = $this->db->prepare("SELECT a.item_id AS user_id, a.name, 
+					a.email, a.phone_number, a.image, 
+					a.class_id, a.image, a.unique_id,
+					cl.name AS class_name, a.section, 
+					se.name AS section_name, 
+					a.department, dept.name AS department_name
+				FROM users a
+				LEFT JOIN classes cl ON cl.id = a.class_id
+				LEFT JOIN sections se ON se.id = a.section
+				LEFT JOIN departments dept ON dept.id = a.department
+				WHERE {$query} AND a.deleted = '0' AND a.status = '1' ORDER BY a.name LIMIT {$params->limit}
+			");
+			$sql->execute();
+
+			$data = $sql->fetchAll(PDO::FETCH_OBJ);
+
+			// return the data
+			return [
+				"data" => $data,
+				"code" => 200
+			];
+
+		} catch(PDOException $e) {
+			return ["code" => 400, "data" => $e->getMessage()];
+		}
+	}
 	
 	/**
 	 * Global function to search for item based on the predefined columns and values parsed
@@ -479,11 +527,10 @@ class Users extends Myschoolgh {
 			$sql = $this->db->prepare("SELECT 
 				".((isset($params->columns) ? $params->columns : "
 					a.*, a.id AS user_row_id, a.item_id AS user_id,
-					(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name,
+					ut.description AS user_type_description, c.country_name,
 					(SELECT COUNT(*) FROM users b WHERE (b.created_by = a.item_id) AND a.deleted='0') AS clients_count,
 					(SELECT name FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_name,
-					(SELECT name FROM departments WHERE departments.id = a.department LIMIT 1) AS department_name,
-					(SELECT name FROM sections WHERE sections.id = a.section LIMIT 1) AS section_name, a.blood_group AS blood_group_name,
+					dept.name AS department_name, se.name AS section_name, a.blood_group AS blood_group_name,
 					(SELECT phone_number FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_phone
 				")).", a.class_ids, a.changed_password, (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions, 
 					a.course_ids, cl.name AS class_name, cl.item_id AS class_guid,
@@ -498,6 +545,9 @@ class Users extends Myschoolgh {
 				FROM users a 
 				LEFT JOIN country c ON c.id = a.country
 				LEFT JOIN classes cl ON cl.id = a.class_id
+				LEFT JOIN sections se ON se.id = a.section
+				LEFT JOIN departments dept ON dept.id = a.department
+				LEFT JOIN users_types ut ON ut.id = a.access_level
 				{$leftJoin}
 				WHERE {$params->query} AND a.deleted = ? AND a.status = ? {$order_by} LIMIT {$params->limit}
 			");

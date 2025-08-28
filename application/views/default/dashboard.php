@@ -13,7 +13,7 @@ $appName = $myClass->appName;
 $baseUrl = $myClass->baseUrl;
 
 // init values
-$timetable = "<div class='text-center'>No timetable record for today was found in the database.</div>";
+$timetable = no_record_found("No Timetable Record Found", "No timetable record for today was found in the database.", null, "Timetable", false, "fas fa-calendar-check", false);
 $wards_list = "";
 $assigments_list = "";
 $upcoming_events_list = "";
@@ -146,7 +146,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
         // order the array set using the date of the event
         usort($events_array_list, "sort_date");
-        $reversed_array_list = array_reverse($events_array_list);
+        $reversed_array_list = [];// array_reverse($events_array_list);
 
         // loop through the array list
         foreach($reversed_array_list as $event) {
@@ -1073,7 +1073,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 ).'
                 '.($isWardTutorParent || $isEmployee ?
                 '<div class="col-lg-4 col-md-12 mb-2">
-                    '.($isStudent || $isTutor ? '
+                    '.($isWardTutorParent || $isTutor ? '
                         <div class="relative card overflow-hidden rounded-2xl  bg-gradient-to-br from-yellow-200 to-red-50">
                             <div class="card-body mb-2 pl-2 pr-2 pb-2" align="center">
                                 <p class="font-16 p-0 m-0 text-primary text-uppercase">Academic Year</p>
@@ -1179,10 +1179,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13 mb-0">Upcoming Events</h4>
                             </div>
-                            <div class="card-body p-0 pr-2 pl-2 trix-slim-scroll" style="max-height:355px;height:355px;overflow-y:auto;">
-                                <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
-                                    '.(!empty($upcoming_events_list) ? $upcoming_events_list : no_record_found("No Events Found", "No events have been created yet.", null, "Event", false, "fas fa-calendar-check")).'
-                                </ul>
+                            <div class="card-body p-2 pr-2 pl-2 trix-slim-scroll">
+                                '.(!empty($upcoming_events_list) ? $upcoming_events_list : no_record_found("No Events Found", "No events have been created yet.", null, "Event", false, "fas fa-calendar-check")).'
                             </div>
                         </div>
                     </div>' : null).'
@@ -1242,10 +1240,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13 mb-0">Upcoming Events</h4>
                             </div>
-                            <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
-                                <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
-                                    '.(!empty($upcoming_events_list) ? $upcoming_events_list : no_record_found("No Events Found", "No events have been created yet.", null, "Event", false, "fas fa-calendar-check")).'
-                                </ul>
+                            <div class="card-body pr-2 pl-2 trix-slim-scroll">
+                                '.(!empty($upcoming_events_list) ? $upcoming_events_list : no_record_found("No Events Found", "No events have been created yet.", null, "Event", false, "fas fa-calendar-check")).'
                             </div>
                         </div>
                     </div>' : null).'
@@ -1262,7 +1258,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body trix-slim-scroll table-responsive">
+                            <div class="card-body p-2 trix-slim-scroll table-responsive">
                                 '.$timetable.'
                             </div>
                         </div>

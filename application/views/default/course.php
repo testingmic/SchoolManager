@@ -297,9 +297,9 @@ if(!empty($item_id)) {
                 </div>
                 <div class="col-12 col-md-12 col-lg-3">
                 <div class="mb-3">
-                    <button onclick="load(\'gradebook/'.$data->item_id.'/attendance?class_id='.trim($class_ids_list, ",").'\');" class="btn btn-block btn-primary">
+                    <button onclick="load(\'gradebook/'.$data->item_id.'/grading?class_id='.trim($class_ids_list, ",").'\');" class="btn btn-block btn-outline-success">
                         <i class="fa fa-book-open"></i> GRADEBOOK
-                        <span class="badge badge-success">New</span>
+                        <span class="badge badge-success float-right">New</span>
                     </button>
                 </div>
                 <div class="card">
@@ -382,7 +382,7 @@ if(!empty($item_id)) {
                         </div>
 
                         <div class="tab-pane fade '.($url_link === "lessons" ? "show active" : null).'" id="lessons" role="tabpanel" aria-labelledby="lessons-tab2">
-                            <div class="d-flex justify-content-between">
+                            <div class="d-flex justify-content-between mb-2">
                                 <div><h5>LESSON PLANNER</h5></div>
                                 <div class="text-right">
                                     '.(!$unit_lessons ? '<a target="_blank" class="btn btn-sm btn-outline-success mb-1" href="'.$baseUrl.'download/coursematerial?cs_mat='.base64_encode($data->id."_".$data->item_id."_".$data->client_id).'&dw=true"><i class="fa fa-download"></i> Download</a>' : '').'
@@ -394,7 +394,7 @@ if(!empty($item_id)) {
                                 </div>
                             </div>
                             '.(!empty($lessons_list) ? $lessons_list : 
-                                '<div class="text-left font-italic">No lessons have been uploaded under this course.</div>'
+                                no_record_found("No lessons uploaded", "No lessons have been uploaded under this course.", null, "Lessons", false, "fa fa-book", false)
                             ).'
                         </div>
                         

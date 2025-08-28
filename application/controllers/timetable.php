@@ -505,7 +505,7 @@ class Timetable extends Myschoolgh {
                     return $table;
                 }
             } else {
-                $result = "<div class='text-danger text-center'>No timetable has been generated for this class yet. Please check back tomorrow.</div>";
+                $result = no_record_found("No Timetable Record Found", "No timetable has been generated for this class yet. Please check back tomorrow.", null, "Timetable", false, "fas fa-calendar-check", false);
             }
 
             return $result;

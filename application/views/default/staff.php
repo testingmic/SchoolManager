@@ -198,7 +198,7 @@ if(empty($user_id)) {
         // if the incident is empty
         if(empty($incidents_list)) {
             $incidents_list = "<div class='mt-2'>";
-            $incidents_list .= no_record_found("Incidents", "No recorded incents", null, null, false);
+            $incidents_list .= no_record_found("No incident recorded", "No incident has been recorded for this staff member yet.", null, "Incidents", false, "fa fa-ambulance", false);
             $incidents_list .= "</div>";
         }
 
@@ -566,12 +566,12 @@ if(empty($user_id)) {
                             ).'
                             '.($isCurrentUser || $isAdminAccountant ? '
                                 <div class="tab-pane '.(empty($url_link) || $url_link === "documents" ? "show active" : null).' fade" id="documents" role="tabpanel" aria-labelledby="documents-tab2">
-                                    <div class="d-flex justify-content-between">
+                                    <div class="d-flex justify-content-between mb-2">
                                         <div class="mb-2 text-uppercase"></div>
                                         '.($hasUpdate ? "<div><button onclick='return show_eDocuments_Modal();' class='btn btn-outline-primary btn-sm'><i class='fa fa-upload'></i> Upload</button></div>" : null).'
                                     </div>
                                     <div data-ebook_resource_list="'.$user_id.'">
-                                        '.($attachment_html ? $attachment_html : "No documents uploaded yet.").'
+                                        '.($attachment_html ? $attachment_html : no_record_found("No document uploaded", "No document has been uploaded for this staff member yet.", null, "Documents", false, "fa fa-file-alt")).'
                                     </div>
                                 </div>' : null
                             ).'

@@ -181,8 +181,7 @@ class Api {
                 
                 // confirm that the supplied parameters are within the list of expected parameters
                 foreach($params as $key => $value) {
-                    if(!in_array($key,  
-                        ["the_button", "faketext", "faketext_2", "remote", "message", "limit", "date_range"]
+                    if(!in_array($key,  ["the_button", "faketext", "faketext_2", "remote", "message", "limit", "date_range", "columns"]
                     ) && !in_array($key, $endpointKeys)) {
                         // set the error variable to true
                         $errorFound = true;                   
