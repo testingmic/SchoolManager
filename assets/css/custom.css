@@ -499,6 +499,10 @@ table.dataTable.table-sm>thead>tr>th {
     }
 }
 
+.minified-settingSidebar {
+    width: 380px !important;
+}
+
 @media only screen and (max-width: 700px) {
     .settingSidebar {
         display: block!important;
@@ -514,8 +518,8 @@ table.dataTable.table-sm>thead>tr>th {
 
 @media only screen and (max-width: 575.98px) {
     .settingSidebar {
-        width: 385px;
-        right: -385px;
+        width: 380px;
+        right: -380px;
     }
     .attendance-icon {
         display: none !important;

@@ -10,6 +10,8 @@
 
         // create a new account object
         $accountObj = load_class("account", "controllers", (object) ["client_data" => $defaultUser->client]);
+
+        $userQrCode = $myClass->qr_code_renderer($defaultUser->user_type, $defaultUser->user_id, $defaultUser->client_id, $defaultUser->name, true);
         ?>
         <?php if($isAdminAccountant) { ?>
         <footer class="main-footer">
@@ -88,62 +90,87 @@
 
         <div class="bg-blur hidden"></div>
         <div class="settingSidebar">
-            <a href="#" class="settingPanelToggle"> <i class="fa fa-book-reader"></i></a>
+            <a href="#" class="settingPanelToggle" onclick="return open_dictionary_modal()"> <i class="fa fa-book-reader"></i></a>
             <div class="settingSidebar-body ps ps-theme-default">
-                <div class=" fade show active">
+                <div class="fade show active">
                     <div class="setting-panel-header">
                         <h6 class="font-medium m-b-0" data-item="title">
                             <?= $isEmployee || $isWardParent ? "Onboard Dictionary" : "Quick System Search" ?>
                         </h6>
                     </div>
-                    <?php if($isEmployee || $isTutor || $isAdminAccountant) { ?>
-                    <div class="quick_search">
-                        <?php if(!$isEmployee) { ?>
-                        <div data-content="system" class="col-sm-6 selected button">
-                            Search
+                    <?php if($isWardParent) { ?>
+                        <div class="attendance_modal hidden">
+                            <div class="card-body pt-2 trix-slim-scroll">
+                                <div class="text-center font-18 my-3 font-bold text-primary">
+                                    Show QR-Code to School staff for scanning.
+                                </div>
+                                <div class="text-center">
+                                    <img src="<?= $baseUrl ?><?= $userQrCode["qrcode"] ?>" alt="User QR Code" class="w-100 h-100">
+                                    <div id="processing_qr_code" class="text-primary mb-2 hidden">
+                                        <i class="fa fa-spin fa-spinner"></i> Confirming QR-Code...
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <button onclick="return confirm_qr_code_request()" class="btn btn-primary btn-block py-3" id="qr_code_scanned">
+                                        <i class="fa fa-qrcode"></i> Yes, my QR-Code has been scanned.
+                                    </button>
+                                    <div class="text-center mt-2">
+                                        <span class="text-danger cursor" onclick="return cancel_qr_code_request()">Cancel Request</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php } ?>
+                    <div class="search_dictionary">
+                        <?php if($isEmployee || $isTutor || $isAdminAccountant) { ?>
+                        <div class="quick_search">
+                            <?php if(!$isEmployee) { ?>
+                            <div data-content="system" class="col-sm-6 selected button">
+                                Search
+                            </div>
+                            <?php } ?>
+                            <div data-content="dictionary" class="<?= $isEmployee ? "col-sm-12" : "col-sm-6" ?> button">
+                                Dictionary
+                            </div>
                         </div>
                         <?php } ?>
-                        <div data-content="dictionary" class="<?= $isEmployee ? "col-sm-12" : "col-sm-6" ?> button">
-                            Dictionary
-                        </div>
-                    </div>
-                    <?php } ?>
-                    <div class="p-15 border-bottom">
-                        <?php if($isTutor || $isAdminAccountant) { ?>
-                            <div class="system_content">
+                        <div class="p-15 border-bottom">
+                            <?php if($isTutor || $isAdminAccountant) { ?>
+                                <div class="system_content">
+                                    <div class="layout-color">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <label for="system">Search for a user or receipt <small class="text-success">(hit enter to search)</small></label>
+                                            </div>
+                                            <div>
+                                                <span onclick="return clear_quick_search_form('system')" class="cursor text-danger" title="Click to reset form">Clear</span>
+                                            </div>
+                                        </div>
+                                        <input type="search" placeholder="Enter search term here." autocomplete="Off" name="system" id="system" class="form-control">
+                                    </div>
+                                </div>
+                            <?php } ?>
+                            <div class="dictionary_content <?= $isEmployee || $isWardParent ? null : "hidden" ?>">
                                 <div class="layout-color">
                                     <div class="d-flex justify-content-between">
                                         <div>
-                                            <label for="system">Search for a user or receipt <small class="text-success">(hit enter to search)</small></label>
+                                            <label for="dictionary">Search for a Word <small class="text-success">(hit enter to search)</small></label>
                                         </div>
                                         <div>
-                                            <span onclick="return clear_quick_search_form('system')" class="cursor text-danger" title="Click to reset form">Clear</span>
+                                            <span onclick="return clear_quick_search_form('dictionary')" class="cursor text-danger" title="Click to reset form">Clear</span>
                                         </div>
                                     </div>
-                                    <input type="search" placeholder="Enter search term here." autocomplete="Off" name="system" id="system" class="form-control">
+                                    <input type="search" placeholder="Enter word to search for from dictionary." autocomplete="Off" name="dictionary" id="dictionary" class="form-control">
                                 </div>
                             </div>
-                        <?php } ?>
-                        <div class="dictionary_content <?= $isEmployee || $isWardParent ? null : "hidden" ?>">
-                            <div class="layout-color">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <label for="dictionary">Search for a Word <small class="text-success">(hit enter to search)</small></label>
-                                    </div>
-                                    <div>
-                                        <span onclick="return clear_quick_search_form('dictionary')" class="cursor text-danger" title="Click to reset form">Clear</span>
-                                    </div>
-                                </div>
-                                <input type="search" placeholder="Enter word to search for from dictionary." autocomplete="Off" name="dictionary" id="dictionary" class="form-control">
+                        </div>
+                        <div class="card-body pt-2 trix-slim-scroll" style="max-height:700px;overflow-y:auto;">
+                            <div class="text-center hidden" id="quick_search_loader">
+                                <i class="fa fa-spin fa-spinner text-primary"></i>
                             </div>
+                            <div id="dictionary_query_results"></div>
+                            <div id="system_query_results"></div>
                         </div>
-                    </div>
-                    <div class="card-body pt-2 trix-slim-scroll" style="max-height:750px;overflow-y:auto;">
-                        <div class="text-center hidden" id="quick_search_loader">
-                            <i class="fa fa-spin fa-spinner text-primary"></i>
-                        </div>
-                        <div id="dictionary_query_results"></div>
-                        <div id="system_query_results"></div>
                     </div>
                 </div>
             </div>

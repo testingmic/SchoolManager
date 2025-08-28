@@ -184,7 +184,7 @@ $response->html = '
             <div class="col-12 col-sm-12 col-lg-12">
                 '.(
                     $isParent && !empty($defaultUser->wards_list) ? '
-                    <div class="rounded-pill '.$buttons_color.' mb-2 mb-3 cursor-pointer text-center font-25 text-white p-6 btn-block">
+                    <div onclick="return open_attendance_modal()" class="rounded-pill '.$buttons_color.' mb-2 mb-3 cursor-pointer text-center font-25 text-white p-6 btn-block">
                         <div class="font-18">Tap to</div>
                         <strong>'.$buttons.'</strong>
                     </div>' : ''

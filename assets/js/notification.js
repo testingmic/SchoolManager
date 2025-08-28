@@ -61,3 +61,35 @@ var mark_all_notification_as_read = () => {
         }
     });
 }
+
+var open_dictionary_modal = () => {
+    $(".settingSidebar").toggleClass("showSettingPanel");
+    $("div[class~='bg-blur'").toggleClass("hidden");
+    $(".page-wrapper").on("click", function() {
+        $(".settingSidebar").removeClass("showSettingPanel");
+    });
+    $(".settingSidebar").removeClass("minified-settingSidebar");
+    $(`div[class~="attendance_modal"]`).addClass("hidden");
+    $(`div[class~="search_dictionary"]`).removeClass("hidden");
+    $(`div[id="processing_qr_code"]`).addClass("hidden");
+    $(`div[class~="setting-panel-header"] h6`).html("Onboard Dictionary");
+}
+
+var open_attendance_modal = () => {
+    $(`a[class~="settingPanelToggle"]`).trigger("click");
+    $(".settingSidebar").addClass("minified-settingSidebar");
+    $(`div[class~="search_dictionary"]`).addClass("hidden");
+    $(`div[class~="attendance_modal"]`).removeClass("hidden");
+    $(`button[id="qr_code_scanned"]`).removeAttr("disabled");
+    $(`div[class="setting-panel-header"] h6`).html("Check In/Out of School");
+    let isOpened = $(`div[class~="settingSidebar"]`).hasClass("showSettingPanel");
+}
+
+var cancel_qr_code_request = () => {
+    open_attendance_modal();
+}
+
+var confirm_qr_code_request = () => {
+    $(`button[id="qr_code_scanned"]`).attr("disabled", "disabled");
+    $(`div[id="processing_qr_code"]`).removeClass("hidden");
+}
