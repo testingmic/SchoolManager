@@ -2294,6 +2294,7 @@ class Fees extends Myschoolgh {
                                             <h2 style="margin-top:5px;margin-bottom:5px;">'.(!$isPDF ? "Official Receipt" : "Payment History").'</h2>
                                             <span style="font-size:16px;"><strong>Date & Time:</strong> '.date("d-m-Y h:iA").'</span>
                                             <div><strong>Receipt ID:</strong> <strong>'.$data[0]->receipt_id.'</strong></div>
+                                            <div><strong>Payment Method:</strong> <strong>'.ucwords($data[0]->payment_method).'</strong></div>
                                         </div>
                                     </td>
                                     <td align="right">

@@ -173,7 +173,37 @@ if($isWardParent) {
     if(empty($item_list["data"])) {
         $simplified_fees_history = no_record_found("No Fees Payment Found", "No fees payment has been for any of your wards yet.", null, "Student", false, "fas fa-money-bill");
     } else {
-        $simplified_fees_history = "hello world";
+        $simplified_fees_history = "";
+
+        // loop through the fees list
+        foreach($item_list["data"] as $key => $fees) {
+            
+            $fees_count += 1;
+            $fees_paid += $fees->category_id !== "Arrears" ? $fees->amount : 0;
+            $arrears_paid += $fees->category_id == "Arrears" ? $fees->amount : 0;
+            
+            $simplified_fees_history .= "
+            <div class='flex items-center bg-white space-x-3 p-3 mb-2 border rounded-xl'>
+                <i class='fas fa-check-circle text-green-500'></i>
+                <div class='flex items-center justify-between w-100'>
+                    <div class='flex-1'>
+                        <div class='text-sm font-medium text-gray-900'>
+                            <div class='font-15 font-bold'>{$fees->student_info->name}</div>
+                            <div><strong>ID:</strong><strong class='text-success'> {$fees->receipt_id}</strong></div>
+                            <div class='font-bold'>{$fees->currency} {$fees->amount_paid}</div>
+                            <div><i class='fa fa-home'></i> {$fees->class_name}</div>
+                        </div>
+                        <p class='text-gray-600'><i class='fa fa-calendar'></i> {$fees->recorded_date}</p>
+                        <div><span class='badge cursor badge-primary'>{$fees->category_name}</span></div>
+                    </div>
+                    <div>
+                        <a href='#' title='View Receipt' onclick='load(\"fees_view/{$fees->payment_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i> View</a>
+                    </div>
+                </div>
+            </div>";  
+
+        }
+
     }
 }
 
@@ -263,7 +293,7 @@ $response->html = '
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
+        <div class="col-xl-3 col-lg-3 col-md-6 '.(empty($arrears_paid) && $isWardParent ? 'hidden' : '').' hover:scale-105 transition-all duration-300">
             <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-success">
                 <div class="card-body pr-2 pl-3 card-type-3">
                     <div class="row">
@@ -281,7 +311,7 @@ $response->html = '
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
+        <div class="col-xl-3 col-lg-3 col-md-6 '.($isWardParent ? 'hidden' : '').' hover:scale-105 transition-all duration-300">
             <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-danger">
                 <div class="card-body pr-2 pl-3 card-type-3">
                     <div class="row">

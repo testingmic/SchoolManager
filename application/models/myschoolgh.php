@@ -1166,7 +1166,7 @@ class Myschoolgh extends Models {
 		}
 
 		// process the string
-		$date = is_array($date) ? implode(':', $date) : $date;
+		$date = is_array($date) ? $date : explode(':', $date);
 		$fPart = (isset($date[0]) && $this->validDate($date[0])) ? $date[0] : '2020-01-01';
 		$lPart = (isset($date[1]) && $this->validDate($date[1])) ? $date[1] : date('Y-m-d');
 
