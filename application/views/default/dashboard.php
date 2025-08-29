@@ -347,7 +347,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             // if the wards array is not empty
             if(empty($data->wards_list)) {
                 $wards_list = no_record_found("No Wards Found", "No ward has been added to your account yet.", null, "Student", false, "fas fa-user-graduate");
-                $expenses_list = "<div class='col-lg-12 col-md-12'>";
+                $expenses_list = "<div class='col-lg-12 col-md-12 mb-3'>";
                 $expenses_list .= no_record_found("No Wards Found", "No ward has been added to your account yet.", null, "Student", false, "fas fa-user-graduate");
                 $expenses_list .= "</div>";
             } else {
