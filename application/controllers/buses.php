@@ -354,9 +354,18 @@ class Buses extends Myschoolgh {
             return ["code" => 404, "data" => "User not found"];
         }
 
+		// if the user type is parent, then get the children of the parent
+		if($users[0]->user_type == "parent") {
+			$users = $this->pushQuery(
+				"u.id, u.item_id, u.name, u.gender, u.class_id, u.day_boarder, u.unique_id, u.date_of_birth, u.user_type, u.enrollment_date, c.name AS class_name", 
+				"users u LEFT JOIN classes c ON u.class_id=c.id", 
+				"u.client_id='{$params->clientId}' AND u.guardian_id LIKE '%{$users[0]->item_id}%' AND u.user_status='active' AND u.user_type='student'"
+			);
+		}
+
         return [
             "code" => 200,
-            "data" => $users[0]
+            "data" => $users
         ];
     }
 
@@ -379,15 +388,20 @@ class Buses extends Myschoolgh {
             return ["code" => 400, "data" => "Invalid request"];
         }
 
+		// if the request is daily, then set the user id to the user id with the prefix userId
+		if(!empty($params->request) && !empty($params->action)) {
+			$params->user_id = "userId:{$params->user_id}";
+		}
+
         // lookup the user
         $user = $this->user_lookup($params);
 
         if($user['code'] == 404) {
             return ["code" => 404, "data" => "User not found"];
-        }
+		}
 
         // get the user data
-        $user = $user['data'];
+        $user = $user['data'][0];
 
         // set the date logged and bus id
         $date_logged = date("Y-m-d");

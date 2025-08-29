@@ -454,7 +454,7 @@ if(empty($user_id)) {
                                         <span class="float-right text-muted">'.$data->country_name.'</span>
                                     </p>' : null
                                 ).'
-                                '.$myClass->qr_code_renderer($data->user_type, $user_id, $clientId, $data->name).'
+                                '.$myClass->qr_code_renderer('employee', $data->user_row_id, $clientId, $data->name).'
                             </div>
                             <div class="font-14 text-uppercase mb-0 border-top border-primary pt-3">
                                 <div class="font-14 text-uppercase mt-0 mb-2 font-weight-bold mb-0">EXPECTED DAYS</div>

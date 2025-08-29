@@ -150,7 +150,7 @@ if($logBusAttendance) {
                                 <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <i class="fas <?= !empty($buses_list) ? "fa-exclamation-triangle" : "fa-bus" ?> text-red-600 text-3xl"></i>
                                 </div>
-                                <div class="text-xl text-gray-900 mb-2">
+                                <div class="text-xl text-gray-900 mb-2 mt-2">
                                     <?= !empty($buses_list) ? "Select a bus to proceed" : 
                                         "There are no buses available for your school. 
                                         Please contact the administrator to add a bus or 
@@ -241,80 +241,11 @@ if($logBusAttendance) {
                                     <code id="scannedId" class="text-sm text-gray-700 break-all"></code>
                                 </div>
                             </div>
-
-                            <!-- User Information -->
-                            <div id="userInfo" class="bg-white rounded-lg shadow-xl p-6 hidden mb-2">
-                                <div class="text-center mb-6">
-                                    <h3 class="text-xl font-semibold text-gray-900" id="userName"></h3>
-                                    <p class="text-gray-600" id="userType"></p>
-                                </div>
-                                
-                                <div class="space-y-4">
-                                    <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                        <i class="fas fa-id-card text-gray-500 w-5"></i>
-                                        <div>
-                                            <div class="text-sm text-gray-500">Student/Staff ID</div>
-                                            <div class="font-medium" id="userId"></div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                        <i class="fas fa-graduation-cap text-gray-500 w-5"></i>
-                                        <div>
-                                            <div class="text-sm text-gray-500">Class/Department</div>
-                                            <div class="font-medium" id="userClass"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="mt-6 grid grid-cols-2 gap-4">
-                                    <button id="checkInBtn" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
-                                        <i class="fas fa-user-clock"></i>
-                                        <span>Check In</span>
-                                    </button>
-                                    <button id="checkoutOutBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                        <span>Check Out</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Success Message -->
-                            <div id="successMessage" class="bg-white mt-4 mb-4 rounded-lg shadow-xl p-6 hidden">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i class="fas fa-check-circle text-green-600 text-3xl"></i>
-                                    </div>
-                                    <h3 class="text-xl font-semibold text-gray-900 mb-2" id="successMessageText"></h3>
-                                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                                        <div class="flex items-center space-x-2 text-green-700">
-                                            <i class="fas fa-clock"></i>
-                                            <span id="verificationTime"></span>
-                                        </div>
-                                    </div>
-                                    <button id="newScanBtn" class="mt-4 bg-primary-500 hover:bg-primary-600 text-white py-2 px-6 rounded-lg transition-colors">
-                                        Scan Another Code
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Error Message -->
-                            <div id="errorMessage" class="bg-white mt-4 mb-4 rounded-lg shadow-xl p-6 hidden">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i class="fas fa-exclamation-triangle text-red-600 text-3xl"></i>
-                                    </div>
-                                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Attendance Log Failed</h3>
-                                    <p class="text-gray-600 mb-4" id="errorText"></p>
-                                    <button id="retryBtn" class="bg-primary-500 hover:bg-primary-600 text-white py-2 px-6 rounded-lg transition-colors">
-                                        Try Again
-                                    </button>
-                                </div>
-                            </div>
+                            <div class="showUserInfo grid gap-2 mb-3"></div>
                         </div>
                     </div>
 
-                    <div class="mt-2 text-center mb-12 grid lg:grid-cols-2 gap-4">
+                    <div class="mt-3 text-center mb-12 grid lg:grid-cols-2 gap-4">
                         <div>
                             <a id="goBack" href="<?= $goBackUrl ?>" class="bg-blue-400 hover:bg-blue-600 text-white px-4 py-4 rounded-lg flex items-center space-x-2 text-center transition-colors">
                                 <i class="fas fa-arrow-left"></i>
@@ -328,6 +259,35 @@ if($logBusAttendance) {
                         let html5QrcodeScanner = null;
                         let isScanning = false;
                         let recentScans = [];
+
+                        function successMessage(message) {
+                        return `<div id="successMessage" class="bg-white mt-4 rounded-lg shadow-xl p-6">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-check-circle text-green-600 text-3xl"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-2" id="successMessageText">${message}</h3>
+                                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                        <div class="flex items-center space-x-2 text-green-700">
+                                            <i class="fas fa-clock"></i>
+                                            <span id="verificationTime">${new Date().toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+                        }
+
+                        function errorMessage(message) {
+                            return `<div id="errorMessage" class="bg-white mt-4 mb-4 rounded-lg shadow-xl p-6 hidden">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-exclamation-triangle text-red-600 text-3xl"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-2">${message}</h3>
+                                </div>
+                            </div>`;
+                        
+                        }
 
                         // Initialize scanner
                         function initializeScanner() {
@@ -350,7 +310,7 @@ if($logBusAttendance) {
                             html5QrcodeScanner.render(onScanSuccess, onScanError);
                             isScanning = true;
                             
-                            document.getElementById('successMessage').classList.add('hidden');
+                            $(`div[class~="showUserInfo"]`).html("");
                             document.getElementById('startBtn').classList.add('hidden');
                             document.getElementById('stopBtn').classList.remove('hidden');
                         }
@@ -369,11 +329,12 @@ if($logBusAttendance) {
                         // Handle successful scan
                         function onScanSuccess(decodedText) {
                             stopScanner();
-                            console.log(decodedText);
+                            let userType = null;
                             if(decodedText) {
-                                const match = decodedText.match(/(employeeId|studentId):\[(\d+)\]/);
+                                const match = decodedText.match(/(employeeId|studentId|parentId|delegateId):\[([A-Za-z0-9]+)\]/);
                                 if (match) {
                                     decodedText = `employeeId:${match[2]}`;
+                                    userType = match[1].replace("Id", "");
                                 }
                             }
                                             
@@ -384,20 +345,22 @@ if($logBusAttendance) {
                             document.getElementById('loadingState').classList.remove('hidden');
                             
                             // Fetch user data
-                            fetchUserData(decodedText);
+                            fetchUserData(decodedText, userType);
                         }
 
                         // Handle scan error
                         function onScanError(error) {}
 
                         // Fetch user data from API
-                        async function fetchUserData(userId) {
+                        async function fetchUserData(userId, userType) {
                             try {
                                 // Simulate API call - replace with actual endpoint
-                                $.get(`${baseUrl}api/qr/lookup?user_id=${encodeURIComponent(userId)}&client_id=${clientId}`, function(response) {
+                                $.get(`${baseUrl}api/qr/lookup?user_id=${encodeURIComponent(userId)}&client_id=${clientId}&type=${userType}`, function(response) {
                                     if (response.code == 200) {
                                         const user = response.data.result;
-                                        displayUserInfo(user);
+                                        $.each(user, function(index, value) {
+                                            displayUserInfo(value);
+                                        });
                                     } else {
                                         showError('User not found in the system.');
                                     }
@@ -414,12 +377,40 @@ if($logBusAttendance) {
 
                         // Display user information
                         function displayUserInfo(user) {
-                            document.getElementById('userInfo').classList.remove('hidden');
-                            document.getElementById('userName').textContent = user.name || 'N/A';
-                            document.getElementById('userType').textContent = user.user_type || user.user_type || 'N/A';
-                            document.getElementById('userId').textContent = user.unique_id || user.user_id || 'N/A';
-                            document.getElementById('userClass').textContent = user.class_name || 'N/A';
-                            // document.getElementById('userGender').textContent = user.gender || 'N/A';
+                            $(`div[class~="showUserInfo"]`).append(
+                                `<div data-user_id="${user.id}" data-user_type="${user.user_type}" class="bg-white rounded-lg shadow-xl p-3 mb-2">
+                                    <div class="text-center mb-6">
+                                        <h3 class="text-xl font-semibold text-gray-900" id="userName">${user.name || 'N/A'}</h3>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                            <i class="fas fa-id-card text-gray-500 w-5"></i>
+                                            <div>
+                                                <div class="text-sm text-gray-500">${user.user_type == "student" ? "Student" : "Staff"} ID</div>
+                                                <div class="font-medium" id="userId">${user.unique_id || user.id}</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                            <i class="fas fa-graduation-cap text-gray-500 w-5"></i>
+                                            <div>
+                                                <div class="text-sm text-gray-500">Class/Department</div>
+                                                <div class="font-medium" id="userClass">${user.class_name || 'N/A'}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-6 grid grid-cols-2 gap-4">
+                                        <button onclick="return saveAttendance('checkin', ${user.id})" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
+                                            <i class="fas fa-user-clock"></i>
+                                            <span>Check In</span>
+                                        </button>
+                                        <button onclick="return saveAttendance('checkout', ${user.id})" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
+                                            <i class="fas fa-sign-out-alt"></i>
+                                            <span>Check Out</span>
+                                        </button>
+                                    </div>
+                                </div>`
+                            );
                         }
 
                         // Show error message
@@ -429,31 +420,26 @@ if($logBusAttendance) {
                         }
 
                         // Show success message
-                        function showSuccess(message) {
-                            document.getElementById('userInfo').classList.add('hidden');
-                            document.getElementById('successMessage').classList.remove('hidden');
-                            document.getElementById('successMessageText').innerHTML = message;
-                            document.getElementById('verificationTime').textContent = new Date().toLocaleString();
+                        function showSuccess(message, userId) {
+                            $(`div[id="successMessage"]`).removeClass("hidden");
+                            $(`div[data-user_id="${userId}"]`).removeClass("bg-white mb-2 p-3 rounded-lg shadow-xl");
+                            $(`div[class~="showUserInfo"] div[data-user_id="${userId}"]`).html(successMessage(message));
                         }
 
                         // Reset scanner for new scan
                         function resetForNewScan() {
-                            document.getElementById('userInfo').classList.add('hidden');
-                            document.getElementById('successMessage').classList.add('hidden');
-                            document.getElementById('errorMessage').classList.add('hidden');
-                            document.getElementById('loadingState').classList.add('hidden');
-                            
+                            $(`div[class~="showUserInfo"]`).html("");
                             startScanner();
                         }
 
-                        async function saveAttendance(action) {
+                        async function saveAttendance(action, userId, userType) {
                             try {
                                 // Simulate confirmation API call
-                                const userId = document.getElementById('scannedId').textContent;
                                 const response = await $.post(`${baseUrl}api/qr/save`, {
                                     user_id: userId,
                                     request: logType,
                                     action: action,
+                                    user_type: userType,
                                     longitude: QrManager.longitude,
                                     latitude: QrManager.latitude,
                                     bus_id: busId,
@@ -461,7 +447,7 @@ if($logBusAttendance) {
                                 });
                                 
                                 if (response.code == 200) {
-                                    showSuccess(response.data.result);
+                                    showSuccess(response.data.result, userId);
                                 } else {
                                     showError('Verification failed. Please try again.');
                                 }
@@ -474,17 +460,6 @@ if($logBusAttendance) {
                         // Event listeners
                         document.getElementById('startBtn').addEventListener('click', startScanner);
                         document.getElementById('stopBtn').addEventListener('click', stopScanner);
-                        
-                        document.getElementById('checkInBtn').addEventListener('click', async () => {
-                            saveAttendance('checkin');
-                        });
-
-                        document.getElementById('checkoutOutBtn').addEventListener('click', async () => {
-                            saveAttendance('checkout');
-                        });
-                        
-                        document.getElementById('newScanBtn').addEventListener('click', resetForNewScan);
-                        document.getElementById('retryBtn').addEventListener('click', resetForNewScan);
 
                         // Initialize on page load
                         document.addEventListener('DOMContentLoaded', () => {

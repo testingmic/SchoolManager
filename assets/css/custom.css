@@ -344,10 +344,6 @@ body .btn {
     margin: auto auto;
 }
 
-.navbar-bg {
-    /* background: #0071f3; */
-}
-
 .bg-blue {
     background: #0071f3 !important;
 }
@@ -500,7 +496,7 @@ table.dataTable.table-sm>thead>tr>th {
 }
 
 .minified-settingSidebar {
-    width: 380px !important;
+    width: 380px;
 }
 
 @media only screen and (max-width: 700px) {
@@ -511,6 +507,9 @@ table.dataTable.table-sm>thead>tr>th {
         width: 500px;
         right: -500px;
     }
+    .minified-settingSidebar {
+        width: 380px !important;
+    }
     .main-footer {
         display: none!important;
     }
@@ -520,6 +519,9 @@ table.dataTable.table-sm>thead>tr>th {
     .settingSidebar {
         width: 380px;
         right: -380px;
+    }
+    .minified-settingSidebar {
+        width: 380px !important;
     }
     .attendance-icon {
         display: none !important;
@@ -545,6 +547,9 @@ table.dataTable.table-sm>thead>tr>th {
     .settingSidebar {
         width: 345px;
         right: -345px;
+    }
+    .minified-settingSidebar {
+        width: 345px !important;
     }
 }
 

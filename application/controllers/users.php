@@ -531,13 +531,13 @@ class Users extends Myschoolgh {
 			// prepare and execute the statement
 			$sql = $this->db->prepare("SELECT 
 				".((isset($params->columns) ? $params->columns : "
-					a.*, a.id AS user_row_id, a.item_id AS user_id,
+					a.*, a.item_id AS user_id,
 					ut.description AS user_type_description, c.country_name,
 					(SELECT COUNT(*) FROM users b WHERE (b.created_by = a.item_id) AND a.deleted='0') AS clients_count,
 					(SELECT name FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_name,
 					dept.name AS department_name, se.name AS section_name, a.blood_group AS blood_group_name,
 					(SELECT phone_number FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_phone
-				")).", a.class_ids, a.changed_password, (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions, 
+				")).", a.id AS user_row_id, a.class_ids, a.changed_password, (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions, 
 					a.course_ids, cl.name AS class_name, cl.item_id AS class_guid,
 					(
 						SELECT SUM(p.balance) FROM fees_payments p 

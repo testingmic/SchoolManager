@@ -11,7 +11,7 @@
         // create a new account object
         $accountObj = load_class("account", "controllers", (object) ["client_data" => $defaultUser->client]);
 
-        $userQrCode = $myClass->qr_code_renderer($defaultUser->user_type, $defaultUser->user_id, $defaultUser->client_id, $defaultUser->name, true);
+        $userQrCode = $myClass->qr_code_renderer($defaultUser->user_type, $defaultUser->user_row_id, $defaultUser->client_id, $defaultUser->name, true);
         ?>
         <?php if($isAdminAccountant) { ?>
         <footer class="main-footer">
@@ -105,6 +105,18 @@
                                     Show QR-Code to School staff for scanning.
                                 </div>
                                 <div class="text-center">
+                                    <div class="grid grid-cols-2">
+                                        <div class="col-12">
+                                            <button onclick="return option_selected('bus')" id="bus_option" class="btn btn-outline-primary btn-block font-16">
+                                                <i class="fa fa-bus"></i> Bus
+                                            </button>
+                                        </div>
+                                        <div class="col-12">
+                                            <button onclick="return option_selected('school')" id="school_option" class="btn btn-outline-primary btn-block font-16">
+                                                <i class="fa fa-school"></i> School
+                                            </button>
+                                        </div>
+                                    </div>
                                     <img src="<?= $baseUrl ?><?= $userQrCode["qrcode"] ?>" alt="User QR Code" class="w-100 h-100">
                                     <div id="processing_qr_code" class="text-primary mb-2 hidden">
                                         <i class="fa fa-spin fa-spinner"></i> Confirming QR-Code...

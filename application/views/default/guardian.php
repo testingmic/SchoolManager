@@ -202,7 +202,7 @@ if(!empty($user_id)) {
                                     <span class="float-right text-muted">'.$data->country_name.'</span>
                                 </p>' : null
                             ).'
-                            '.$myClass->qr_code_renderer("guardian", $data->user_id, $clientId, $data->name).'
+                            '.$myClass->qr_code_renderer("guardian", $data->user_row_id, $clientId, $data->name).'
                         </div>
                     </div>
                 </div>

@@ -87,6 +87,17 @@ var open_attendance_modal = () => {
 
 var cancel_qr_code_request = () => {
     open_attendance_modal();
+    $(`div[class~="settingSidebar"]`).removeClass("minified-settingSidebar");
+}
+
+var option_selected = (option) => {
+    if(option == "bus") {
+        $(`button[id="bus_option"]`).addClass("btn-primary").removeClass("btn-outline-primary");
+        $(`button[id="school_option"]`).removeClass("btn-primary").addClass("btn-outline-primary");
+    } else if(option == "school") {
+        $(`button[id="bus_option"]`).removeClass("btn-primary").addClass("btn-outline-primary");
+        $(`button[id="school_option"]`).addClass("btn-primary").removeClass("btn-outline-primary");
+    }
 }
 
 var confirm_qr_code_request = () => {

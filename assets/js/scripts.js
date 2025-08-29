@@ -524,6 +524,7 @@ $(function() {
     // setting sidebar 
     $("div[class~='bg-blur'").on("click", function() {
         $("div[class~='bg-blur'").addClass("hidden");
+        $(`div[class~="settingSidebar"]`).removeClass("minified-settingSidebar");
     });
 
     // close right sidebar when click outside
