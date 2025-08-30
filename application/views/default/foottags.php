@@ -117,13 +117,13 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <img src="<?= $baseUrl ?><?= $userQrCode["qrcode"] ?>" alt="User QR Code" class="w-100 h-100">
+                                    <img id="qr_code_image" src="<?= $baseUrl ?><?= $userQrCode["qrcode"] ?>" alt="User QR Code" class="w-100 h-100">
                                     <div id="processing_qr_code" class="text-primary mb-2 hidden">
                                         <i class="fa fa-spin fa-spinner"></i> Confirming QR-Code...
                                     </div>
                                 </div>
                                 <div class="text-center">
-                                    <button onclick="return confirm_qr_code_request()" class="btn btn-primary btn-block py-3" id="qr_code_scanned">
+                                    <button disabled onclick="return confirm_qr_code_request()" class="btn btn-primary btn-block py-3" id="qr_code_scanned">
                                         <i class="fa fa-qrcode"></i> Yes, my QR-Code has been scanned.
                                     </button>
                                     <div class="text-center mt-2">

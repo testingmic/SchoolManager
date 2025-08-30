@@ -62,6 +62,15 @@ var mark_all_notification_as_read = () => {
     });
 }
 
+var revert_all_changes = () => {
+    $(`button[id="bus_option"]`).removeClass("btn-primary").addClass("btn-outline-primary");
+    $(`button[id="school_option"]`).removeClass("btn-primary").addClass("btn-outline-primary");
+    let isOpened = $(`div[class~="settingSidebar"]`).hasClass("showSettingPanel");
+    if(isOpened) {
+        $(`button[id="qr_code_scanned"]`).attr("disabled", "disabled");
+    }
+}
+
 var open_dictionary_modal = () => {
     $(".settingSidebar").toggleClass("showSettingPanel");
     $("div[class~='bg-blur'").toggleClass("hidden");
@@ -73,6 +82,7 @@ var open_dictionary_modal = () => {
     $(`div[class~="search_dictionary"]`).removeClass("hidden");
     $(`div[id="processing_qr_code"]`).addClass("hidden");
     $(`div[class~="setting-panel-header"] h6`).html("Onboard Dictionary");
+    revert_all_changes();
 }
 
 var open_attendance_modal = () => {
@@ -80,13 +90,12 @@ var open_attendance_modal = () => {
     $(".settingSidebar").addClass("minified-settingSidebar");
     $(`div[class~="search_dictionary"]`).addClass("hidden");
     $(`div[class~="attendance_modal"]`).removeClass("hidden");
-    $(`button[id="qr_code_scanned"]`).removeAttr("disabled");
     $(`div[class="setting-panel-header"] h6`).html("Check In/Out of School");
-    let isOpened = $(`div[class~="settingSidebar"]`).hasClass("showSettingPanel");
 }
 
 var cancel_qr_code_request = () => {
     open_attendance_modal();
+    revert_all_changes();
     $(`div[class~="settingSidebar"]`).removeClass("minified-settingSidebar");
 }
 
@@ -98,9 +107,24 @@ var option_selected = (option) => {
         $(`button[id="bus_option"]`).removeClass("btn-primary").addClass("btn-outline-primary");
         $(`button[id="school_option"]`).addClass("btn-primary").removeClass("btn-outline-primary");
     }
+    $(`button[id="qr_code_scanned"]`).removeAttr("disabled");
+    $.post(`${baseUrl}api/qr/initialize`, {option, user: myUName}).then((response) => {
+        if(response.code == 200) {
+            $(`div[id="processing_qr_code"]`).addClass("hidden");
+            if(typeof response.data?.additional?.qr_code !== "undefined") {
+                $(`img[id="qr_code_image"]`).attr("src", `${baseUrl}${response?.data?.additional?.qr_code?.qrcode}`);
+            }
+        }
+    });
 }
 
 var confirm_qr_code_request = () => {
     $(`button[id="qr_code_scanned"]`).attr("disabled", "disabled");
     $(`div[id="processing_qr_code"]`).removeClass("hidden");
+    let option = $(`button[id="bus_option"]`).hasClass("btn-primary") ? "bus" : "school";
+    $.post(`${baseUrl}api/qr/confirm`, {option, user: myUName}).then((response) => {
+        if(response.code == 200) {
+            $(`div[id="processing_qr_code"]`).addClass("hidden");
+        }
+    });
 }

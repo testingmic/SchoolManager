@@ -104,14 +104,25 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("TRUNCATE delegates;");
+		$fix[] = ("CREATE TABLE IF NOT EXISTS buses_qr_request (
+			unique_id VARCHAR(255) NOT NULL,
+			option VARCHAR(255) NOT NULL,
+			user VARCHAR(255) NOT NULL,
+			status VARCHAR(255) NOT NULL,
+			created_at DATETIME NOT NULL
+		)");
+		$fix[] = ("ALTER TABLE buses_qr_request ADD PRIMARY KEY (unique_id)");
+		$fix[] = ("ALTER TABLE buses_qr_request ADD INDEX IF NOT EXISTS idx_user (user)");
+		$fix[] = ("ALTER TABLE buses_qr_request ADD INDEX IF NOT EXISTS idx_option (option)");
+		$fix[] = ("ALTER TABLE buses_qr_request ADD INDEX IF NOT EXISTS idx_status (status)");
+		$fix[] = ("ALTER TABLE buses_qr_request ADD INDEX IF NOT EXISTS idx_created_at (created_at)");
 
 		foreach($fix as $stmt) {
 			try {
 				// $query = $this->db->prepare($stmt);
 				// $query->execute();
 			} catch(PDOException $e) {
-				// print $e->getMessage();
+				print $e->getMessage();
 			}
 		}
 	}
@@ -317,9 +328,9 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return String
 	 */
-	final function qr_code_renderer($item, $record_id, $clientId, $name = 'QR Code', $return_data = false) {
+	final function qr_code_renderer($item, $record_id, $clientId, $name = 'QR Code', $return_data = false, $other = null) {
 		// generate the qr code
-        $qr_code = load_class("qr", "controllers")->makepath($item, $record_id, $clientId);
+        $qr_code = load_class("qr", "controllers")->makepath($item, $record_id, $clientId, $other);
         
 		// remove the root directory from the qr code
 		$qr_code['qrcode'] = ltrim($qr_code['qrcode'], "/");
