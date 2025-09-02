@@ -14,37 +14,51 @@ class Account extends Myschoolgh {
 
         // set the columns for the import of csv files
         $this->accepted_column["student"] = [
-            "unique_id" => "Student ID", "firstname" => "Firstname", "lastname" => "Lastname", 
-            "othername" => "Othernames", "email" => "Email", "phone_number" => "Contact Number",
-            "blood_group" => "Blood Group", "city" => "City", "residence" => "Residence", 
+            "unique_id" => "Student ID", 
+            "firstname" => "Firstname", 
+            "lastname" => "Lastname", 
+            "othername" => "Othernames", 
+            "email" => "Email", 
+            "phone_number" => "Contact Number",
+            "residence" => "Residence", 
             "date_of_birth" => "Date of Birth", 
-            "enrollment_date" => "Admission Date", "gender" => "Gender", "section" => "Section", 
-            "department" => "Department", "class_id" => "Class ID", "description" => "Description",
-            "religion" => "Religion",  "previous_school" => "Previous School", 
-            "previous_school_qualification" => "Previous School Qualification",
-            "previous_school_remarks" => "Previous School Remarks"
+            "enrollment_date" => "Admission Date", 
+            "gender" => "Gender", 
+            "department" => "Department", 
+            "class_id" => "Class ID", 
+            "description" => "Description"
         ];
 
         $this->accepted_column["staff"] = [
-            "unique_id" => "Employee ID", "firstname" => "Firstname", "lastname" => "Lastname", 
-            "othername" => "Othernames", "email" => "Email", "phone_number" => "Contact Number",
-            "blood_group" => "Blood Group", "city" => "City", "residence" => "Residence", 
+            "unique_id" => "Employee ID", 
+            "firstname" => "Firstname", 
+            "lastname" => "Lastname", 
+            "othername" => "Othernames",
+            "email" => "Email",
+            "phone_number" => "Contact Number",
+            "city" => "City", 
+            "residence" => "Residence", 
             "date_of_birth" => "Date of Birth", 
-            "enrollment_date" => "Date of Employment", "gender" => "Gender", "section" => "Section", 
-            "department" => "Department", "description" => "Description",
-            "religion" => "Religion", "course_ids" => "Courses Taught", "user_type" => "User Type", 
-            "employer" => "Employer", "occupation" => "Occupation", "position" => "Position"
+            "enrollment_date" => "Date of Employment", 
+            "gender" => "Gender",
+            "occupation" => "Occupation", 
+            "position" => "Position"
         ];
     
         $this->accepted_column["parent"] = [
-            "unique_id" => "Guardian ID", "firstname" => "Firstname", "lastname" => "Lastname", 
-            "othername" => "Othernames", "email" => "Email", "phone_number" => "Primary Contact",
-            "phone_number_2" => "Secondary Contact", "blood_group" => "Blood Group", 
-            "city" => "City", "residence" => "Residence",
-            "date_of_birth" => "Date of Birth", 
-            "gender" => "Gender", "description" => "Description",
-            "religion" => "Religion", "employer" => "Employer",
-            "occupation" => "Occupation", "position" => "Position"
+            "unique_id" => "Guardian ID", 
+            "firstname" => "Firstname", 
+            "lastname" => "Lastname", 
+            "othername" => "Othernames", 
+            "email" => "Email", 
+            "phone_number" => "Primary Contact",
+            "phone_number_2" => "Secondary Contact", 
+            "city" => "City",
+            "residence" => "Residence",
+            "date_of_birth" => "Date of Birth",
+            "employer" => "Employer",
+            "occupation" => "Occupation",
+            "position" => "Position"
         ];
 
 	}
