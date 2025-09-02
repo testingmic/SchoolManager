@@ -1482,6 +1482,11 @@ class Users extends Myschoolgh {
             }
         }
 
+		// if the date of birth is today then set it to null
+		if(!empty($params->date_of_birth) && strtotime($params->date_of_birth) == strtotime(date("Y-m-d"))) {
+			$params->date_of_birth = null;
+		}
+
 		// generate a new unique user id
 		$theClientData = !empty($this->iclient) ? $this->iclient : $this->client_data($params->clientId);
 
@@ -2042,6 +2047,11 @@ class Users extends Myschoolgh {
 			// convert to arrary if the class id is an array variable
 			if(is_array($params->class_id)) {
 				$params->class_id = json_encode($params->class_id);
+			}
+
+			// if the date of birth is today then set it to null
+			if(!empty($params->date_of_birth) && strtotime($params->date_of_birth) == strtotime(date("Y-m-d"))) {
+				$params->date_of_birth = null;
 			}
 
 			// insert the user information
