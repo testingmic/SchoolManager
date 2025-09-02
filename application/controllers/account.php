@@ -16,8 +16,8 @@ class Account extends Myschoolgh {
         $this->accepted_column["student"] = [
             "unique_id" => "Student ID", 
             "firstname" => "Firstname", 
-            "lastname" => "Lastname", 
             "othername" => "Othernames", 
+            "lastname" => "Lastname", 
             "email" => "Email", 
             "phone_number" => "Contact Number",
             "residence" => "Residence", 
@@ -25,15 +25,14 @@ class Account extends Myschoolgh {
             "enrollment_date" => "Admission Date", 
             "gender" => "Gender", 
             "department" => "Department", 
-            "class_id" => "Class ID", 
-            "description" => "Description"
+            "class_id" => "Class ID"
         ];
 
         $this->accepted_column["staff"] = [
             "unique_id" => "Employee ID", 
             "firstname" => "Firstname", 
-            "lastname" => "Lastname", 
             "othername" => "Othernames",
+            "lastname" => "Lastname", 
             "email" => "Email",
             "phone_number" => "Contact Number",
             "city" => "City", 
@@ -42,14 +41,15 @@ class Account extends Myschoolgh {
             "enrollment_date" => "Date of Employment", 
             "gender" => "Gender",
             "occupation" => "Occupation", 
+            "department" => "Department", 
             "position" => "Position"
         ];
     
         $this->accepted_column["parent"] = [
             "unique_id" => "Guardian ID", 
             "firstname" => "Firstname", 
-            "lastname" => "Lastname", 
             "othername" => "Othernames", 
+            "lastname" => "Lastname", 
             "email" => "Email", 
             "phone_number" => "Primary Contact",
             "phone_number_2" => "Secondary Contact", 
@@ -1087,6 +1087,14 @@ class Account extends Myschoolgh {
             return ["code" => 400, "data" => "Sorry! An invalid column value was parsed"];
         }
 
+        if(empty($params->csv_file['tmp_name'])) {
+            return  [
+                "data" => [
+                    'column' => [], 'sample_csv_data' => [], 'data_count' => 0
+                ]
+            ];
+        }
+
         // reading tmp_file name
         $csv_file = fopen($params->csv_file['tmp_name'], 'r');
 
@@ -1108,7 +1116,7 @@ class Account extends Myschoolgh {
         // loop through the data received from the 
         foreach($complete_csv_data as $each) {
             // clean the array set
-            $clean_set = array_slice($each, 0, $c_count-1);
+            $clean_set = array_slice($each, 0, $c_count);
             $data[] = $clean_set;
             // push the data parsed by the user to the page
             if($i < 20)  {
@@ -1125,7 +1133,7 @@ class Account extends Myschoolgh {
         $csv_data = array_filter($data, $clean);
 
         // slice the header
-        $headers = array_slice($headers, 0, $c_count-1);
+        $headers = array_slice($headers, 0, $c_count);
 
         // set the content in a session
         $this->session->set("{$params->column}_csv_file", $csv_data);
@@ -1152,6 +1160,10 @@ class Account extends Myschoolgh {
 
         global $clientPrefs;
 
+        if(empty($params->column)) {
+            return ["code" => 400, "data" => "Invalid request parsed."];
+        }
+
         // columns to use for the query
         $accepted_column = $this->accepted_column[$params->column] ?? [];
 
@@ -1163,6 +1175,10 @@ class Account extends Myschoolgh {
             if(!in_array($thisKey, array_values($accepted_column))) {
                 $notFound++;
             }
+        }
+
+        if(empty($accepted_column)) {
+            return ["code" => 400, "data" => "Invalid request parsed to save the data."];
         }
 
         // keys count
@@ -1244,7 +1260,7 @@ class Account extends Myschoolgh {
             if($isUser) {
                 $items_last_row["student"] = $this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='student' LIMIT {$this->global_limit}");
                 $items_last_row["guardian"] = $this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='parent' LIMIT {$this->global_limit}");
-                $items_last_row["staff"] = $this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='student' LIMIT {$this->global_limit}");
+                $items_last_row["staff"] = $this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type NOT IN ('student', 'parent') LIMIT {$this->global_limit}");
             }
 
             $not_yet_set = true;
@@ -1281,6 +1297,11 @@ class Account extends Myschoolgh {
 
                     // perform these checks for the arrayed list
                     if($isUser) {
+                        
+                        // trim the values
+                        $eachValue = trim($eachValue);
+                        $params->csv_keys[$eachKey] = trim($params->csv_keys[$eachKey]);
+
                         // if email then validate it
                         if(($params->csv_keys[$eachKey] === "Email") && !empty($eachValue) && !filter_var($eachValue, FILTER_VALIDATE_EMAIL)) {
                             $bugs["email"] = "Please ensure the email section contains only valid email addresses.";
@@ -1301,7 +1322,7 @@ class Account extends Myschoolgh {
                             $eachValue = strtoupper($eachValue);
                             $unique_id[$eachValue] = isset($unique_id[$eachValue]) ? ($unique_id[$eachValue]+1) : 1;
                         }
-                        if(($params->csv_keys[$eachKey] === "Contact Number")) {
+                        if(($params->csv_keys[$eachKey] === "Contact Number") && !empty($eachValue)) {
                             $eachValue = str_ireplace(" ", "", $eachValue);
                             if(!preg_match("/^[0-9 +]+$/", $eachValue)) {
                                 $bugs["phone_number"] = "Please ensure the contact number contains only numeric integers: eg. 0244444444 | +23324444444.";
@@ -1331,7 +1352,7 @@ class Account extends Myschoolgh {
                                 $bugs["admission_date"] = "Please ensure a valid Admission Date was supplied: eg. YYYY-MM-DD";
                             }
                         }
-                        if(in_array($params->csv_keys[$eachKey], ["Department", "Section", "Class"])) {
+                        if(in_array($params->csv_keys[$eachKey], ["Department", "Section", "Class ID"])) {
                             $eachValue = $this->get_equivalent($params->csv_keys[$eachKey], $eachValue, $params->clientId);
                         }
                         if(in_array($params->csv_keys[$eachKey], ["Country Code"])) {
@@ -1463,25 +1484,35 @@ class Account extends Myschoolgh {
      */
     public function get_equivalent($column, $value, $clientId) {
         $tables = [
-            "Department" => "departments",
-            "Section" => "sections",
-            "Class" => "classes",
-            "Course" => "courses"
+            "Department" => ["departments", "department"],
+            "Section" => ["sections", "section"],
+            "Class" => ["classes", "class"],
+            "Class ID" => ["classes", "class"],
+            "Course" => ["courses", "course"]
         ];
+        $column = trim($column);
+
+        // if the column is set
         if(isset($tables[$column])) {
             $n_value = create_slug($value);
             
+            // get the code value
             $t_code = strtoupper($value);
-            $item_code = strtolower($column)."_code";
+            $item_code = strtolower($tables[$column][1])."_code";
 
             try {
-                $fetch = $this->db->prepare("SELECT item_id FROM {$tables[$column]} WHERE (slug='{$n_value}' OR {$item_code}='{$t_code}') AND client_id='{$clientId}' AND status='1' ORDER BY id DESC LIMIT 1");
+
+                $field = in_array($column, ["Class", "Class ID", "Department"]) ? "id" : "item_id";
+
+                $fetch = $this->db->prepare("SELECT {$field} FROM {$tables[$column][0]} WHERE (slug='{$n_value}' OR {$item_code}='{$t_code}') AND client_id='{$clientId}' AND status='1' ORDER BY id DESC LIMIT 1");
                 $fetch->execute();
                 $result = $fetch->fetch(PDO::FETCH_OBJ);
 
-                return $result->item_id ?? null;
+                return $result->item_id ?? (
+                    $result->id ?? null
+                );
 
-            } catch(PDOException $e) {} 
+            } catch(PDOException $e) { } 
         }
     }
 
@@ -1501,7 +1532,7 @@ class Account extends Myschoolgh {
             $fetch->execute();
             $result = $fetch->fetch(PDO::FETCH_OBJ);
             return $result->id ?? null;
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) { } 
     }
 
     /**

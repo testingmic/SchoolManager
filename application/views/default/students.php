@@ -87,6 +87,7 @@ foreach($student_list["data"] as $key => $each) {
     $count++;
     $students .= "<tr data-row_id=\"{$each->user_id}\">";
     $students .= "
+    <td class='text-center'>{$count}</td>
     <td>
         <div class='flex items-center space-x-4'>
             {$imageToUse}
@@ -96,7 +97,7 @@ foreach($student_list["data"] as $key => $each) {
             </div>
         </div>
     </td>";
-    $students .= "<td>".(!empty($each->class_name) ? ucwords(strtolower($each->class_name)) : 'N/A')."</td>";
+    $students .= "<td><a class='user_name' href='{$baseUrl}class/{$each->class_id}'>".(!empty($each->class_name) ? ucwords(strtolower($each->class_name)) : 'N/A')."</a></td>";
     $students .= "<td>".(!empty($each->gender) ? ucwords(strtolower($each->gender)) : 'N/A')."</td>";
     $students .= "<td>".(!empty($each->department_name) ? ucwords(strtolower($each->department_name)) : 'N/A')."</td>";
 
@@ -195,6 +196,7 @@ $response->html = '
                             <table class="table table-sm table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
+                                        <th width="5%" class="text-center">#</th>
                                         <th>Student Name</th>
                                         <th>Class</th>
                                         <th>Gender</th>

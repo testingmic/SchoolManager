@@ -104,18 +104,7 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("CREATE TABLE IF NOT EXISTS buses_qr_request (
-			unique_id VARCHAR(255) NOT NULL,
-			option VARCHAR(255) NOT NULL,
-			user VARCHAR(255) NOT NULL,
-			status VARCHAR(255) NOT NULL,
-			created_at DATETIME NOT NULL
-		)");
-		$fix[] = ("ALTER TABLE buses_qr_request ADD PRIMARY KEY (unique_id)");
-		$fix[] = ("ALTER TABLE buses_qr_request ADD INDEX IF NOT EXISTS idx_user (user)");
-		$fix[] = ("ALTER TABLE buses_qr_request ADD INDEX IF NOT EXISTS idx_option (option)");
-		$fix[] = ("ALTER TABLE buses_qr_request ADD INDEX IF NOT EXISTS idx_status (status)");
-		$fix[] = ("ALTER TABLE buses_qr_request ADD INDEX IF NOT EXISTS idx_created_at (created_at)");
+		$fix[] = ("DELETE FROM users WHERE DATE(date_created) = '2025-09-02'");
 
 		foreach($fix as $stmt) {
 			try {
