@@ -40,9 +40,17 @@ function random_names($real_name = null) {
 		"Matthew Murphy", "Scarlett Cox", "David Simmons", "Victoria Rogers", "Mason Cook",
 		"Isla Bell", "Julian Morgan", "Levi Cooper", "Layla Bailey", "Eleanor Diaz",
 		"Owen Richardson", "Gabriel Watson", "Camila Wood", "Isaac Brooks", "Sofia Bennett"
-	];	
+	];
+
+	$reorderNames = [];
+	foreach($names as $name) {
+		$split = explode(" ", $name);
+		foreach($split as $each) {
+			$reorderNames[] = trim($each);
+		}
+	}
 
 	// pick and return a random name
-	return $names[array_rand($names)];
+	return $reorderNames[array_rand($reorderNames)] . " " . $reorderNames[array_rand($reorderNames)];
 }
 ?>

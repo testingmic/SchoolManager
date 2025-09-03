@@ -32,7 +32,7 @@ $hasAdd = $accessObject->hasAccess("add", "section");
 $sections = "";
 foreach($department_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to view section record' href='#' onclick='return load(\"section/{$each->id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to view section record' href='#' onclick='return load(\"section/{$each->id}/students\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate) {
         $action .= "&nbsp;<a title='Update the section record' href='#' onclick='return load(\"section/{$each->id}/update\");' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-edit'></i></a>";

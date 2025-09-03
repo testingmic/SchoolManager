@@ -60,6 +60,12 @@ class Records extends Myschoolgh {
                 "where" => "id='{$record_id}'",
                 "query" => "SELECT id FROM departments WHERE id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
+            "section" => [
+                "table" => "sections",
+                "update" => "status='0'",
+                "where" => "id='{$record_id}'",
+                "query" => "SELECT id FROM sections WHERE id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
+            ],
             "course" => [
                 "table" => "courses",
                 "update" => "status='0'",
