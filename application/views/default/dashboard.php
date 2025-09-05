@@ -832,7 +832,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body trix-slim-scroll quick_loader pt-2 pb-0" id="class_count_list" style="max-height:517px;height:517px;overflow-y:auto;">
+                        <div class="card-body trix-slim-scroll quick_loader pt-2 pb-0" id="class_count_list" style="max-height:525px;height:525px;overflow-y:auto;">
                             <div class="form-content-loader" style="display: flex; position: absolute">
                                 <div class="offline-content text-center">
                                     <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>

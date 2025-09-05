@@ -13,7 +13,7 @@
 
         $userQrCode = $myClass->qr_code_renderer($defaultUser->user_type, $defaultUser->user_row_id, $defaultUser->client_id, $defaultUser->name, true);
         ?>
-        <?php if($isAdminAccountant) { ?>
+        <?php if($isAdminAccountant || $isSupport) { ?>
         <footer class="main-footer">
             <div class="footer-left">
                 Copyright &copy; <?= 2023 ?> <div class="bullet"></div> <a href="<?= $myClass->baseUrl; ?>" target="_blank"><?= $appName ?></a>. All rights reserved
