@@ -104,7 +104,7 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("DELETE FROM users WHERE DATE(date_created) = '2025-09-02'");
+		$fix[] = ("DELETE FROM users WHERE DATE(date_created) = '2025-09-05'");
 
 		foreach($fix as $stmt) {
 			try {

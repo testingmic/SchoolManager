@@ -51,6 +51,7 @@ foreach($item_list["data"] as $key => $each) {
     }
 
     $classes .= "<tr data-row_id=\"{$each->id}\">";
+    $classes .= "<td class='text-center'>".($key+1)."</td>";
     $classes .= "<td>
     <div class='flex items-center space-x-4'>
         <div class='h-12 w-12 bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg'>
@@ -105,6 +106,7 @@ $response->html = '
                             <table data-empty="" class="table table-sm table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
+                                        <th width="5%">No.</th>
                                         <th width="22%">Class Name</th>
                                         <th>Department</th>
                                         <th>Class Size</th>
