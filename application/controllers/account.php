@@ -1319,8 +1319,8 @@ class Account extends Myschoolgh {
                                 $eachValue = $user_unique_id;
                             }
                             // set the new user id
-                            $eachValue = strtoupper($eachValue);
-                            $unique_id[$eachValue] = isset($unique_id[$eachValue]) ? ($unique_id[$eachValue]+1) : 1;
+                            $eachValue = str_ireplace(" ", "", $eachValue);
+                            $unique_id[$eachValue] = isset($unique_id[$eachValue]) ? ($unique_id[$eachValue] + 1) : 1;
                         }
                         if(($params->csv_keys[$eachKey] === "Contact Number") && !empty($eachValue)) {
                             $eachValue = str_ireplace(" ", "", $eachValue);
