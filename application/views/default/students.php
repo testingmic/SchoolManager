@@ -97,7 +97,10 @@ foreach($student_list["data"] as $key => $each) {
             </div>
         </div>
     </td>";
-    $students .= "<td><a class='user_name' href='{$baseUrl}class/{$each->class_id}'>".(!empty($each->class_name) ? ucwords(strtolower($each->class_name)) : 'N/A')."</a></td>";
+
+    $classUrl = !empty($each->class_id) ? "<a class='user_name' href='{$baseUrl}class/{$each->class_id}'>".(!empty($each->class_name) ? ucwords(strtolower($each->class_name)) : 'N/A')."</a>" : "N/A";
+
+    $students .= "<td>{$classUrl}</td>";
     $students .= "<td>".(!empty($each->gender) ? ucwords(strtolower($each->gender)) : 'N/A')."</td>";
     $students .= "<td>".(!empty($each->department_name) ? ucwords(strtolower($each->department_name)) : 'N/A')."</td>";
 

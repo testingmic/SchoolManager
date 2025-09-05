@@ -511,7 +511,7 @@ class Account extends Myschoolgh {
         $data_to_import = isset($params->data_to_import) ? $this->stringToArray($params->data_to_import) : [];
 
         // set the current timestamp
-        $current_timestamp = date("Y-m-d H:i:s", strtotime("+2 minutes"));
+        $current_timestamp = date("Y-m-d H:i:s");
 
         // insert a new cron job scheduler for this activity
         $stmt = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = '{$params->clientId}', item_id = ?, user_id = ?, cron_type = ?, subject = ?, active_date = '{$current_timestamp}', query = ?");
@@ -1324,8 +1324,10 @@ class Account extends Myschoolgh {
                         }
                         if(($params->csv_keys[$eachKey] === "Contact Number") && !empty($eachValue)) {
                             $eachValue = str_ireplace(" ", "", $eachValue);
+                            $eachValue = explode("/", $eachValue)[1] ?? $eachValue;
+                            $eachValue = explode("-", $eachValue)[1] ?? $eachValue;
                             if(!preg_match("/^[0-9 +]+$/", $eachValue)) {
-                                $bugs["phone_number"] = "Please ensure the contact number contains only numeric integers: eg. 0244444444 | +23324444444.";
+                                $eachValue = "";
                             }
                         }
                         if(($params->csv_keys[$eachKey] === "Date of Birth")) {
@@ -1403,7 +1405,7 @@ class Account extends Myschoolgh {
                 foreach($unique_id as $key => $value) {
                     if($value > 1) {
                         $repeat += $value;
-                        $bugs["unique_id"] = "{$repeat} number of {$params->column} ids were repeated.";
+                        $bugs["unique_id"] = "{$repeat} number of {$params->column} ids (".$key.") were repeated.";
                     }
                 }
             }

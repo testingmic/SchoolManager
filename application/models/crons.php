@@ -313,8 +313,33 @@ class Crons {
 				// if the processed is true
 				$processed = false;
 
+				// if a user information have been uploaded
+				if($result->cron_type == "users_upload") {
+					$this->users_upload_modification($result->item_id, $result->client_id);
+					$processed = true;
+				}
+
+				// if the type is to manage the terminal report functionality
+				elseif($result->cron_type == "terminal_report") {
+					$this->terminal_report_handler($result->item_id);
+					$processed = true;
+				}
+
+				// if the activity is to assign fees to a particular class
+				elseif($result->cron_type == "assign_student_fees") {
+					$this->assign_student_fees($result);
+					$processed = true;
+				}
+
+				// if the query is to update the student parent information
+				elseif($result->cron_type == "bulk_student_update") {
+					$this->update_student_information($result->query);
+					$this->update_class_ids($result->client_id);
+					$processed = true;
+				}
+
 				// if the request is notification
-				if($result->cron_type == "notification") {
+				elseif($result->cron_type == "notification") {
 					// get the query to process
 					$query = $result->query;
 					// prepare and execute the statement
@@ -361,31 +386,6 @@ class Crons {
 
 					$processed = true;
 					
-				}
-
-				// if a user information have been uploaded
-				elseif($result->cron_type == "users_upload") {
-					$this->users_upload_modification($result->item_id, $result->client_id);
-					$processed = true;
-				}
-
-				// if the type is to manage the terminal report functionality
-				elseif($result->cron_type == "terminal_report") {
-					$this->terminal_report_handler($result->item_id);
-					$processed = true;
-				}
-
-				// if the activity is to assign fees to a particular class
-				elseif($result->cron_type == "assign_student_fees") {
-					$this->assign_student_fees($result);
-					$processed = true;
-				}
-
-				// if the query is to update the student parent information
-				elseif($result->cron_type == "bulk_student_update") {
-					$this->update_student_information($result->query);
-					$this->update_class_ids($result->client_id);
-					$processed = true;
 				}
 
 				// if the processed state is true
@@ -818,8 +818,8 @@ class Crons {
 
 // create new object
 $jobs = new Crons;
+$jobs->scheduler();
 $jobs->send_student_bill();
 $jobs->load_emails();
-$jobs->scheduler();
 $jobs->send_smsemail();
 ?>

@@ -77,13 +77,13 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                         <a class="nav-link '.($url_link == "_remarks" ? "active" : null).'" id="_remarks-tab2" data-toggle="tab" href="#_remarks" role="tab" aria-selected="true">Remarks</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="import_students-tab2" data-toggle="tab" href="#import_students" role="tab" aria-selected="true">Import Student</a>
+                                        <a class="nav-link '.($url_link == "_student" ? "active" : null).'" id="import_students-tab2" data-toggle="tab" href="#import_students" role="tab" aria-selected="true">Import Student</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="staff-tab2" data-toggle="tab" href="#staff" role="tab" aria-selected="true">Import Staff</a>
+                                        <a class="nav-link '.($url_link == "_staff" ? "active" : null).'" id="staff-tab2" data-toggle="tab" href="#staff" role="tab" aria-selected="true">Import Staff</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="parent-tab2" data-toggle="tab" href="#parent" role="tab" aria-selected="true">Import Parent</a>
+                                        <a class="nav-link '.($url_link == "_parent" ? "active" : null).'" id="parent-tab2" data-toggle="tab" href="#parent" role="tab" aria-selected="true">Import Parent</a>
                                     </li>
                                 </ul>
                                 <div class="tab-content tab-bordered" id="myTab3Content">
@@ -102,15 +102,15 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                     <div class="tab-pane fade '.($url_link == "_remarks" ? "show active" : null).'" id="_remarks" role="tabpanel" aria-labelledby="_remarks-tab2">
                                         '.($the_form["_remarks"]["results_remarks"] ?? null).'
                                     </div>
-                                    <div class="tab-pane fade" id="import_students" role="tabpanel" aria-labelledby="import_students-tab2">
+                                    <div class="tab-pane fade '.($url_link == "_student" ? "show active" : null).'" id="import_students" role="tabpanel" aria-labelledby="import_students-tab2">
                                         '.($the_form["student"] ?? null).'
                                     </div>
-                                    <div class="tab-pane fade" id="staff" role="tabpanel" aria-labelledby="staff-tab2">
+                                    <div class="tab-pane fade '.($url_link == "_staff" ? "show active" : null).'" id="staff" role="tabpanel" aria-labelledby="staff-tab2">
                                         <div class="col-lg-12">
                                             '.($the_form["staff"] ?? null).'
                                         </div>
                                     </div>
-                                    <div class="tab-pane fade" id="parent" role="tabpanel" aria-labelledby="parenttab2">
+                                    <div class="tab-pane fade '.($url_link == "_parent" ? "show active" : null).'" id="parent" role="tabpanel" aria-labelledby="parenttab2">
                                         <div class="col-lg-12">
                                             '.($the_form["parent"] ?? null).'
                                         </div>

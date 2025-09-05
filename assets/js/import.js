@@ -191,7 +191,7 @@ var clear_csv_upload = (column) => {
     $(`div[data-csv_import_column="${column}"] div[class~="file-checker"]`).html(``);
     $(`div[data-csv_import_column="${column}"] div[class~="csv-rows-content"]`).html(``);
     file_checker_text_handler(column);
-    loadPage(`${baseUrl}settings`);
+    loadPage(`${baseUrl}settings/_${column}`);
 }
 
 var cancel_csv_upload = (column) => {

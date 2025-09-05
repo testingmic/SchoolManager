@@ -17,6 +17,14 @@ body .btn {
     height: 100%;
 }
 
+.h-98 {
+    height: 98%!important;
+}
+
+.h-95 {
+    height: 95%!important;
+}
+
 .mb-0 {
     margin-bottom: 0!important;
 }

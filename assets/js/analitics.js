@@ -169,7 +169,14 @@ var summaryReporting = (t_summary, date_range) => {
     $(`[data-filter="current_period"]`).html(date_range.current.title);
     $(`span[data-filter="period"]`).html(date_range.previous.title);
 
-    if(typeof summary.students_class_fees_payment !== 'undefined') {
+    let paymentsFound = typeof summary.students_class_fees_payment !== 'undefined';
+
+    if($(`tbody[class="class_fees_payment_chart_table"]`).length && !paymentsFound) {
+        $(`div[data-chart="class_fees_payment_chart_table"]`).html(
+            no_content_wrapper("No Class Found", "No class found has been created yet; hence the fees payment chart cannot be displayed.", "fa-graduation-cap")
+        ).addClass('pt-2');
+    }
+    if(paymentsFound) {
 
         let class_payments = summary.students_class_fees_payment,
             _class_keys = new Array(),
@@ -367,6 +374,7 @@ var summaryReporting = (t_summary, date_range) => {
                 `;
             }
         });
+        class_count_list = classes.total_classes_count == 0 ? no_content_wrapper("No Class Found", "No class has been created yet.", "fa-graduation-cap") : class_count_list;
         $(`div[id="class_count_list"]`).html(class_count_list);
     }
 

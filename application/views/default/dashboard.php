@@ -827,7 +827,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="card rounded-2xl rounded-b-none">
                         <div class="card-header pr-2">
                             <div class="row width-per-100">
-                                <div class="col-md-9 flex align-items-lg-center">
+                                <div class="col-md-12 flex align-items-lg-center">
                                     <h4 class="text-uppercase font-13 mb-0">Students Per Class Count</h4>
                                 </div>
                             </div>
@@ -984,12 +984,12 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13 mb-0">Upcoming Events</h4>
                             </div>
-                            <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:350px;height:350px;'.(!empty($upcoming_events_list) ? "overflow-y:auto;" : null).'">
+                            <div class="card-body p-2 trix-slim-scroll" style="max-height:350px;height:350px;'.(!empty($upcoming_events_list) ? "overflow-y:auto;" : null).'">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
                                     '.(
                                         !empty($upcoming_events_list) ? 
                                             $upcoming_events_list : 
-                                            no_record_found("No Events Found", "No events have been created yet.", null, "Event")
+                                            no_record_found("No Events Found", "No events have been created yet.", null, "Event", false, "fas fa-calendar-check", true)
                                     ).'
                                 </ul>
                             </div>
@@ -1000,9 +1000,12 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13 mb-0">Upcoming Birthdays</h4>
                             </div>
-                            <div class="pl-1 pr-2 trix-slim-scroll" style="max-height:350px;height:350px;overflow-y:auto;">
+                            <div class="card-body p-2 trix-slim-scroll" style="max-height:350px;height:350px;'.(!empty($upcoming_birthday_list) ? "overflow-y:auto;" : null).'">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
-                                    '.$upcoming_birthday_list.'
+                                    '.(
+                                        !empty($upcoming_birthday_list) ? $upcoming_birthday_list : 
+                                            no_record_found("No Birthdays Found", "No birthdays have been created yet.", null, "Birthday", false, "fas fa-birthday-cake", true)
+                                    ).'
                                 </ul>
                             </div>
                         </div>
