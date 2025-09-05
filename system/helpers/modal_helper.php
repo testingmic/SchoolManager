@@ -686,6 +686,19 @@ function leave_comments_builder($resource, $recordId, $upload = true, $comment =
 }
 
 /**
+ * Leave comments builder view
+ * 
+ * @param string $resource
+ * @param string $item_id
+ * 
+ * @return string
+ */
+function leave_comments_builder_view($item_id) {
+    return '<div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto;"></div>
+        <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-outline-secondary">Loading comments</button></div>';
+}
+
+/**
  * Quick Add Student Modal
  * 
  * @return string

@@ -155,7 +155,7 @@ class Forms extends Myschoolgh {
                 }
 
                 /** Set the course id */
-                $resources = ["assets/js/upload.js"];
+                $resources = ["assets/js/upload.js", "assets/js/comments.js"];
                 $item_id = explode("_", $params->module["item_id"]);
 
                 /** If a second item was parsed then load the lesson unit information */
@@ -1539,7 +1539,7 @@ class Forms extends Myschoolgh {
             // show the details
             $html_content = "
                 <div class='row'>
-                    <div class='col-md-12 mb-2'>Title: <h5 class=\"text-uppercase\">{$title}</h5></div>
+                    <div class='col-md-12 mb-2'><strong>Title:</strong> <h5 class=\"text-uppercase\">{$title}</h5></div>
                     <div class='col-md-6 mb-2'><strong>Start Date:</strong> {$params->data->start_date}</div>
                     <div class='col-md-6 mb-2'><strong>End Date:</strong> {$params->data->end_date}</div>
                     <div class='col-md-12 mb-2 border-top pt-3'>{$message}</div>
@@ -1549,6 +1549,10 @@ class Forms extends Myschoolgh {
                     )."
                     <div class='col-md-12 mt-4 ".(!empty($message) ? "border-top" : "")." pt-4 mb-3 text-center'><span class='btn btn-outline-secondary' data-dismiss='modal'>Close Modal</span></div>
                 </div>";
+
+            // Add the comments functionality to the form
+            $html_content .= leave_comments_builder("course_lesson", $item_id, false);
+            $html_content .= leave_comments_builder_view($item_id);
 
         }
 

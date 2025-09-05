@@ -1076,14 +1076,14 @@ class Courses extends Myschoolgh {
         $html .= "
             <tr>
                 <td width=\"30%\" style=\"border:solid 1px #ccc\">
-                    <span style=\"font-size:13px\">Academic Year: ".strtoupper($content->academic_year)."</span><br>
-                    <span style=\"font-size:13px\">Academic Term: ".strtoupper($content->academic_term)."</span><br>
+                    <span style=\"font-size:15px\">Academic Year: ".strtoupper($content->academic_year)."</span><br>
+                    <span style=\"font-size:15px\">Academic Term: ".strtoupper($content->academic_term)."</span><br>
                 </td>
                 <td width=\"70%\" style=\"border:solid 1px #ccc\">
-                    <span style=\"font-size:24px\">".strtoupper($content->name)."</span><br>
-                    <span style=\"font-size:13px;padding-right:40px;\"><strong>CODE:</strong> {$content->course_code}</span><br>
-                    <span style=\"font-size:13px\"><strong>WEEKLY MEETINGS:</strong> {$content->weekly_meeting}</span><br>
-                    <span style=\"font-size:13px\"><strong>CREDIT HOURS:</strong> {$content->credit_hours}</span>
+                    <span style=\"font-size:20px\">".strtoupper($content->name)."</span><br>
+                    <span style=\"font-size:15px;padding-right:40px;\"><strong>CODE:</strong> {$content->course_code}</span><br>
+                    <span style=\"font-size:15px\"><strong>WEEKLY MEETINGS:</strong> {$content->weekly_meeting}</span><br>
+                    <span style=\"font-size:15px\"><strong>CREDIT HOURS:</strong> {$content->credit_hours}</span>
                 </td>
             </tr>
             </table>
@@ -1092,8 +1092,8 @@ class Courses extends Myschoolgh {
             $html .= "<tr><td colspan=\"2\"><span style=\"font-size:24px\">LESSON PLAN</span></td></tr>";
         foreach($content->lesson_plan as $key => $plan) {
             $html .= "<tr>";
-            $html .= "<td width=\"70%\" style=\"border:solid 1px #ccc; font-size:16px; color:#fff; background-color:#2196f3;\">Unit ".($key+1).". {$plan->name}</td>";
-            $html .= "<td width=\"30%\" style=\"border:solid 1px #ccc; color:#fff; background-color:#2196f3;\"><strong>{$plan->start_date}</strong> to <strong>{$plan->end_date}</strong></td>";
+            $html .= "<td width=\"60%\" style=\"border:solid 1px #ccc; font-size:16px; color:#fff; background-color:#2196f3;font-size:17px;\">Unit ".($key+1).". {$plan->name}</td>";
+            $html .= "<td width=\"40%\" style=\"border:solid 1px #ccc; color:#fff; background-color:#2196f3;font-size:17px;\">From: <strong>{$plan->start_date}</strong> to <strong>{$plan->end_date}</strong></td>";
             $html .= "</tr>";
             $html .= "<tr>";
             $html .= "<td colspan=\"2\">{$plan->description}</td>";
@@ -1103,8 +1103,8 @@ class Courses extends Myschoolgh {
             foreach($plan->lessons_list as $lkey => $lesson) {
                 $html .= "<table width=\"100%\" style=\"padding:0px;margin:0px;\">";
                 $html .= "<tr>";
-                $html .= "<td width=\"70%\" style=\"background-color:#ff9800;color:#fff;line-height:30px;height:30px;\">&nbsp;&nbsp;Lesson ".($lkey+1).". <strong>{$lesson->name}</strong></td>";
-                $html .= "<td width=\"30%\" style=\"line-height:30px;height:30px;border:solid 1px #ccc; color:#fff; background-color:#ff9800;\">&nbsp;&nbsp;<strong>{$lesson->start_date}</strong> to <strong>{$lesson->end_date}</strong></td>";
+                $html .= "<td width=\"60%\" style=\"background-color:#ff9800;color:#fff;line-height:30px;height:30px;font-size:17px;\">&nbsp;&nbsp;Lesson ".($lkey+1).". <strong>{$lesson->name}</strong></td>";
+                $html .= "<td width=\"40%\" style=\"line-height:30px;height:30px;border:solid 1px #ccc; color:#fff; background-color:#ff9800;font-size:17px;\">&nbsp;&nbsp;From: <strong>{$lesson->start_date}</strong> to <strong>{$lesson->end_date}</strong></td>";
                 $html .= "</tr>";
                 $html .= "<tr>";
                 $html .= "<td colspan=\"2\">".(empty($lesson->description) ? "No content under this lesson": strip_tags($lesson->description, "<br><strong>"))."</td>";
@@ -1142,18 +1142,18 @@ class Courses extends Myschoolgh {
             <table width=\"100%\">
                 <tr>
                     <td>
-                        <span style=\"font-size:13px\"><strong>Fullname:</strong></span><br>
-                        <span style=\"font-size:13px\"><strong>Employee ID:</strong></span><br>
-                        <span style=\"font-size:13px\"><strong>Phone Number:</strong></span><br>
-                        <span style=\"font-size:13px\"><strong>Email Address:</strong></span><br>
+                        <span style=\"font-size:15px\"><strong>Fullname:</strong></span><br>
+                        <span style=\"font-size:15px\"><strong>Employee ID:</strong></span><br>
+                        <span style=\"font-size:15px\"><strong>Phone Number:</strong></span><br>
+                        <span style=\"font-size:15px\"><strong>Email Address:</strong></span><br>
                     </td>";
             foreach($content->course_tutors as $key => $value) {
                 $html .= "
                 <td>
-                    <span style=\"font-size:13px\">".$value->name."</span><br>
-                    <span style=\"font-size:13px\">".$value->unique_id."</span><br>
-                    <span style=\"font-size:13px\">".$value->phone_number."</span><br>
-                    <span style=\"font-size:13px\">".$value->email."</span><br>
+                    <span style=\"font-size:15px\">".$value->name."</span><br>
+                    <span style=\"font-size:15px\">".$value->unique_id."</span><br>
+                    <span style=\"font-size:15px\">".$value->phone_number."</span><br>
+                    <span style=\"font-size:15px\">".$value->email."</span><br>
                 </td>";
             }
             $html .= "</tr>";

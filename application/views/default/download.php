@@ -172,14 +172,7 @@ if(!$isSupport) {
         // end query if no result found
         if(!isset($_GET["dw"])) {
             print $content["data"];
-            print "<script>
-                function print_payslip() {
-                    window.print();
-                    window.onfocus = (evt) => {window.close();}
-                    window.onafterprint = (evt) => { window.close(); }
-                }
-                print_payslip();
-                </script>";
+            print print_page_content();
             return;
         }
         $pages_content .= $content["data"];
@@ -253,7 +246,11 @@ if(!$isSupport) {
                 $file_name = "Course_Material.".strtoupper($course_info->name).".pdf";
 
                 if(!isset($_GET["dw"])) {
-                    print $content;
+                    print "<div style='padding: 15px;'>";
+                    print $pages_content;
+                    print "</div>";
+                    print print_page_content();
+                    exit;
                 }
             }
         }

@@ -2497,15 +2497,7 @@ class Fees extends Myschoolgh {
 
         // append this section if download element was not parsed
         if(!isset($params->download)) {
-            $receipt .= "
-            <script>
-            function print_receipt() {
-                window.print();
-                window.onfocus = (evt) => {window.close();}
-                window.onafterprint = (evt) => { window.close(); }
-            }
-            print_receipt();
-            </script>";
+            $receipt .= print_page_content();
         }
 
         return $receipt;
@@ -2985,15 +2977,7 @@ class Fees extends Myschoolgh {
 
             // append this section if download element was not parsed
             if(isset($params->print)) {
-                $student_bill .= "
-                <script>
-                function print_bill() {
-                    window.print();
-                    window.onfocus = (evt) => {window.close();}
-                    window.onafterprint = (evt) => { window.close(); }
-                }
-                print_bill();
-                </script>";
+                $student_bill .= print_page_content();
             }
 
 

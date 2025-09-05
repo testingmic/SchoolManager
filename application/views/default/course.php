@@ -163,7 +163,7 @@ if(!empty($item_id)) {
         $lessonPlanner = confirm_url_id(2, "lesson") ? true : false;
 
         // lesson planner display
-        $lessons_list = "";
+        $lessons_list = null;
         $attachments_list = "";
 
         // set the user_id id in the console
@@ -256,52 +256,6 @@ if(!empty($item_id)) {
                     </div>
                 </div>
             </details>";
-
-            $lessons_lists = "
-                <div id=\"accordion\" class='mt-2' data-row_id=\"{$plan->item_id}\">
-                    <div class=\"accordion\">
-                    <div class=\"accordion-header ".($plan->id == $session->thisLast_UnitId ? null : "collapsed")."\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\" ".($plan->id == $session->thisLast_UnitId ? "aria-expanded=\"true\"" : null)."\">
-                        <div class=\"d-flex justify-content-between\">
-                            <div><h4>{$key}. {$plan->name}</h4></div>
-                            <div class='text-right'><i class=\"fa fa-calendar-check\"></i> {$plan->date_created}</div>
-                        </div>
-                    </div>
-                    <div class=\"accordion-body ".($plan->id == $session->thisLast_UnitId ? "collapse show" : "collapse")." p-0 pt-3\" id=\"panel-body-{$key}\" data-parent=\"#accordion\">
-                        <div class='d-flex justify-content-between'>
-                            <div>
-                                <span class=\"mr-3\"><strong>Start Date: </strong> {$plan->start_date}</span><br>
-                                <span><strong>End Date: </strong> {$plan->end_date}</span>
-                            </div>
-                            ".($hasPlanner ? "
-                            <div class='text-right'>
-                                <button onclick='return load_quick_form(\"course_unit_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-success btn-sm mb-2' type='button'>
-                                    <i class='fa fa-edit'></i> Edit
-                                </button>
-                                <button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-primary btn-sm mb-2' type='button'>
-                                    <i class='fa fa-plus'></i> Add ".(!empty($labels->lesson_label) ? $labels->lesson_label : 'Lesson')."
-                                </button>
-                                <a href='#' onclick='return delete_record(\"{$plan->item_id}\", \"course_unit\");' class='btn btn-sm btn-outline-danger mb-2'><i class='fa fa-trash'></i> Delete</a>
-                            </div>
-                            " : null)."
-                        </div>
-                        <div class='mt-2 mb-3'>{$plan->description}</div>
-
-                        <div class='border-bottom mb-3'><h6>".strtoupper($labels->unit_label ?? 'Unit')." LESSONS</h6></div>
-                        <div class='table-responsive trix-slim-scroll'>
-                            <table data-order_item='asc' class='table table-bordered raw_datatable'>
-                                <thead>
-                                    <th>#</th>
-                                    <th>Lesson Title</th>
-                                    <th>Start Date</th>
-                                    <th>End Date</th>
-                                    <th class='text-center'>Action</th>
-                                </thead>
-                                <tbody>{$unit_lessons}</tbody>
-                            </table>
-                        </div>
-                    </div>
-                    </div>
-                </div>";
         }
 
         // confirm that the unit lessons has been set
@@ -430,7 +384,7 @@ if(!empty($item_id)) {
                             <div class="d-flex justify-content-between mb-2">
                                 <div><h5>LESSON PLANNER</h5></div>
                                 <div class="text-right">
-                                    '.(!$unit_lessons ? '<a target="_blank" class="btn btn-sm btn-outline-success mb-1" href="'.$baseUrl.'download/coursematerial?cs_mat='.base64_encode($data->id."_".$data->item_id."_".$data->client_id).'&dw=true"><i class="fa fa-download"></i> Download</a>' : '').'
+                                    '.($lessons_list ? '<a target="_blank" class="btn btn-sm btn-outline-success mb-1" href="'.$baseUrl.'download/coursematerial?cs_mat='.base64_encode($data->id."_".$data->item_id."_".$data->client_id).'&ddw=true"><i class="fa fa-download"></i> Download</a>' : '').'
                                     '.($hasPlanner ? '
                                         <button  onclick="return load_quick_form(\'course_unit_form\',\''.$data->id.'\');" class="btn mb-1 btn-sm btn-outline-primary" type="button">
                                             <i class="fa fa-plus"></i> Create New '.(!empty($labels->unit_label) ? $labels->unit_label : 'Unit').'

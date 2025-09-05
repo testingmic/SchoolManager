@@ -26,4 +26,20 @@ function filterWeekendDates(array $dates): array {
         return true;
     }));
 }
+
+/**
+ * Print the page content
+ * 
+ * @return string
+ */
+function print_page_content() {
+    return"<script>
+    function print_page_content() {
+        window.print();
+        window.onfocus = (evt) => { window.close(); }
+        window.onafterprint = (evt) => { window.close(); }
+    }
+    print_page_content();
+    </script>";
+}
 ?>

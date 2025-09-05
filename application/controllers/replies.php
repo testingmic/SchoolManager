@@ -3,7 +3,9 @@
 class Replies extends Myschoolgh {
 
     public $accepted_resources = [
-        "assignments", "events", "ebook", "books_request", "document", "bus", "application", "daily_report", "leave", "frontoffice", "exeats"
+        "assignments", "events", "ebook", "books_request", 
+        "document", "bus", "application", "daily_report", 
+        "leave", "frontoffice", "exeats", "course_lesson"
     ];
 
     public function __construct()

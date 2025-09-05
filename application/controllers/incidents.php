@@ -765,15 +765,7 @@ class Incidents extends Myschoolgh {
 
         }
         $html_content .= "</div>";
-        $html_content .= "
-        <script>
-        function print_receipt() {
-            window.print();
-            window.onfocus = (evt) => {window.close();}
-            window.onafterprint = (evt) => { window.close(); }
-        }
-        print_receipt();
-        </script>";
+        $html_content .= print_page_content();
 
         return $html_content;
     }
