@@ -399,7 +399,7 @@ if(empty($user_id)) {
                             <div class="py-2">
                                 <p class="clearfix">
                                     <span class="float-left">Date of Employment</span>
-                                    <span class="float-right text-muted">'.$data->enrollment_date.'</span>
+                                    <span class="float-right text-muted">'.format_date_to_show($data->enrollment_date).'</span>
                                 </p>
                                 <p class="clearfix">
                                     <span class="float-left">Gender</span>
@@ -410,11 +410,10 @@ if(empty($user_id)) {
                                     <span class="float-left">Section</span>
                                     <span class="float-right text-muted">'.$data->section_name.'</span>
                                 </p>' : '').'
-                                '.(!empty($data->date_of_birth) ? 
-                                '<p class="clearfix">
+                                <p class="clearfix">
                                     <span class="float-left">Date of Birth</span>
-                                    <span class="float-right text-muted">'.$data->date_of_birth.'</span>
-                                </p>' : '').'
+                                    <span class="float-right text-muted">'.format_date_to_show($data->date_of_birth).'</span>
+                                </p>
                                 <p class="clearfix">
                                     <span class="float-left">Primary Contact</span>
                                     <span class="float-right text-muted">'.$data->phone_number.'</span>

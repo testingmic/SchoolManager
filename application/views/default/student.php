@@ -468,7 +468,7 @@ if(!empty($user_id)) {
                         <div class="py-2">
                             <p class="clearfix">
                                 <span class="float-left">Enrollment Date</span>
-                                <span class="float-right text-muted">'.$data->enrollment_date.'</span>
+                                <span class="float-right text-muted">'.format_date_to_show($data->enrollment_date).'</span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Boarding Status</span>
@@ -490,7 +490,7 @@ if(!empty($user_id)) {
                             ).'
                             <p class="clearfix">
                                 <span class="float-left">Birthday</span>
-                                <span class="float-right text-muted">'.$data->date_of_birth.'</span>
+                                <span class="float-right text-muted">'.format_date_to_show($data->date_of_birth).'</span>
                             </p>
                             '.(!empty($data->phone_number) ?
                                 '<p class="clearfix">

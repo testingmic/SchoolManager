@@ -42,4 +42,22 @@ function print_page_content() {
     print_page_content();
     </script>";
 }
+
+/**
+ * Format the date to show
+ * 
+ * @param string $date
+ * 
+ * @return string
+ */
+function format_date_to_show($date, $is_null = false) {
+    if(empty($data)) {
+        return !$is_null ? "N/A" : null;
+    }
+    $date = date('Y-m-d', strtotime($date));
+    if(in_array($date, ["1970-01-01", "01/01/1970"])) {
+        return !$is_null ? "N/A" : null;
+    }
+    return $date;
+}
 ?>

@@ -49,6 +49,7 @@ $response->scripts = ["assets/js/bulk_update.js"];
 // get the users list
 foreach($other_users_list as $user) {
     $user->class_id = (int) $user->class_id;
+    $user->date_of_birth = format_date_to_show($user->date_of_birth, true);
     $users_array_list[] = $user;
 }
 
@@ -97,7 +98,7 @@ $response->html = '
                 <div class="card stick_to_top">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-3" id="class_select">
+                            <div class="col-md-4" id="class_select">
                                 <div class="form-group mb-1">
                                     <label>Class <span class="required">*</span></label>
                                     <select name="class_id" class="form-control selectpicker" data-width="100%">
