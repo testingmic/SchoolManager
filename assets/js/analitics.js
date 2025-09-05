@@ -488,7 +488,6 @@ var summaryReporting = (t_summary, date_range) => {
         }
 
         $.each(summary.fees_record_count.summation, function(i, e) {
-            // let amount = e !== null ? format_currency(e) : "0.00";
             $(`[data-summary="${i}"]`).html(`${formatMoney(e)}`).addClass('font-20');
         });
 
@@ -582,7 +581,7 @@ var attendanceReport = (_attendance) => {
                     width: 2,
                     colors: ['transparent']
                 },
-                series: attendance.chart_grouping,
+                series: attendance.chart_grouping ?? [],
                 xaxis: {
                     categories: chart_label,
                 },
@@ -662,7 +661,7 @@ var attendanceReport = (_attendance) => {
         let _class_summary = _attendance.class_summary,
             _chart_label = new Array(),
             color = 'text-black';
-        let rate = _class_summary.summaries.attendanceRate;
+        let rate = _class_summary?.summaries?.attendanceRate ?? 0;
         if(rate < 40) {
             color = 'text-danger';
         } else if(rate > 90) {
@@ -916,17 +915,17 @@ var loadDashboardAnalitics = (period) => {
             if (response.data.result.summary_report !== undefined) {
                 summaryReporting(response.data.result, range);
             }
-            if (response.data.result.transaction_revenue_flow !== undefined) {
-                transactionReport(response.data.result.transaction_revenue_flow, range);
-            }
-            if (response.data.result.fees_revenue_flow !== undefined) {
-                revenueReporting(response.data.result.fees_revenue_flow, range);
-            }
             if (response.data.result.attendance_report !== undefined) {
                 attendanceReport(response.data.result.attendance_report);
             }
             if (response.data.result.salary_report !== undefined) {
                 salaryReport(response.data.result.salary_report);
+            }
+            if (response.data.result.transaction_revenue_flow !== undefined) {
+                transactionReport(response.data.result.transaction_revenue_flow, range);
+            }
+            if (response.data.result.fees_revenue_flow !== undefined) {
+                revenueReporting(response.data.result.fees_revenue_flow, range);
             }
         }
         setTimeout(() => {
@@ -934,8 +933,9 @@ var loadDashboardAnalitics = (period) => {
             $(`div[class~="form-content-loader"]`).css({ "display": "none" });
         }, 800);
         $(`div[class~="toggle-calculator"]`).addClass("hidden");
-    }).catch(() => {
+    }).catch((error) => {
         $.pageoverlay.hide();
+        console.log({error: error});
         $(`div[class~="form-content-loader"]`).css({ "display": "none" });
     });
 }

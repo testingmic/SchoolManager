@@ -1077,8 +1077,8 @@ var appendToUrl = (url) => {
 function formatMoney(amount, locale = "en-GH") {
     return new Intl.NumberFormat(locale, {
       style: "currency",
-      currency: myPrefs.labels.currency
-    }).format(amount);
+      currency: myPrefs?.labels?.currency ?? "GHS"
+    }).format(amount || 0);
 }
 
 var setActiveNavLink = () => {
