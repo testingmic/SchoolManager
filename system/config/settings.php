@@ -16,7 +16,7 @@ define('APPPATH', $application_folder.DIRECTORY_SEPARATOR);
 define('VIEWPATH', $application_folder.DIRECTORY_SEPARATOR);
 
 function version() {
-    return "1.3.0";
+    return "1.3.1";
 }
 
 function loggedIn() {
