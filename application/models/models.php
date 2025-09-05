@@ -375,9 +375,9 @@ class Models {
 
         // quick student search form
         $this->quick_student_search_form = '
-        <div class="mb-3" id="student_search_input">
-            <label>Filter by Student Name or Reg. ID</label>
-            <input type="search" autocomplete="Off" placeholder="Search by fullname" name="student_fullname" class="form-control">
+        <div class="bg-white mb-3 p-2 font-bold stick_to_top border-3px text-black" id="student_search_input">
+            <label for="student_fullname">Filter by Student Name or Reg. ID</label>
+            <input type="search" autocomplete="Off" id="student_fullname" placeholder="Search by fullname" name="student_fullname" class="form-control">
             <input type="hidden" value="true" name="auto_search">
         </div>';
 
