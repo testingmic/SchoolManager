@@ -403,9 +403,9 @@ class Api {
                 // if in preview mode but the user is not a super admin user
                 if($this->session->previewMode && empty($this->session->superAdminUser)) {
                     if(in_array($method, ['update'])) {
-                        return $this->output(400, [
-                            "result" => "Sorry! You will not be able to perform the delete action since you are in preview mode."
-                        ]);
+                        // return $this->output(400, [
+                        //     "result" => "Sorry! You will not be able to perform the {$method} action since you are in preview mode."
+                        // ]);
                     }
                 }
                 
