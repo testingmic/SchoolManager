@@ -4270,13 +4270,13 @@ class Forms extends Myschoolgh {
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="next_term_starts">Next Academic Term Start</label>
-                    <input type="text" value="'.($prefs->academics->next_term_starts ?? null).'" name="general[academics][next_term_starts]" data-maxdate="'.$last_date.'" id="next_term_starts" class="form-control datepicker">
+                    <input type="text" value="'.($prefs->academics->next_term_starts ?? null).'" name="general[academics][next_term_starts]" data-mindate="'.$min_date.'" data-maxdate="'.$last_date.'" id="next_term_starts" class="form-control datepicker">
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="next_term_ends">Next Academic Term Ends</label>
-                    <input type="text" value="'.($prefs->academics->next_term_ends ?? null).'" name="general[academics][next_term_ends]" data-maxdate="'.$last_date.'" id="next_term_ends" class="form-control datepicker">
+                    <input type="text" value="'.($prefs->academics->next_term_ends ?? null).'" name="general[academics][next_term_ends]" data-mindate="'.$min_date.'" data-maxdate="'.$last_date.'" id="next_term_ends" class="form-control datepicker">
                 </div>
             </div>
             <div class="col-md-12 text-right">
