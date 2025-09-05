@@ -153,3 +153,20 @@ $(`select[name="user_type"]`).on("change", function() {
 });
 
 sms_characters_counter("student_fees_reminder");
+
+function closeAllDetails() {
+    const allDetails = document.querySelectorAll("details");
+    allDetails.forEach((detail) => {
+        detail.addEventListener("toggle", () => {
+            if (detail.open) {
+            // Close all other <details>
+            allDetails.forEach((otherDetail) => {
+                if (otherDetail !== detail) {
+                otherDetail.removeAttribute("open");
+                }
+            });
+            }
+        });
+    });
+}
+closeAllDetails();

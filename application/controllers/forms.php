@@ -1460,13 +1460,13 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class='col-md-6'>
                     <div class='form-group'>
-                        <label>Week Start Date</label>
+                        <label>Start Date</label>
                         <input value='".($params->data->start_date ?? null)."' type='text' name='start_date' id='start_date' data-maxdate='".date("Y-m-d", strtotime("+6 months"))."' class='form-control datepicker'>
                     </div>
                 </div>
                 <div class='col-md-6'>
                     <div class='form-group'>
-                        <label>Week End Date</label>
+                        <label>End Date</label>
                         <input value='".($params->data->end_date ?? null)."' type='text' name='end_date' id='end_date' data-maxdate='".date("Y-m-d", strtotime("+6 months"))."' class='form-control datepicker'>
                     </div>
                 </div>

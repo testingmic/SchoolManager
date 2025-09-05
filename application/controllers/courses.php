@@ -601,7 +601,7 @@ class Courses extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Unit successfully created.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}course/{$params->course_id}/lessons"];
+			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}course/{$params->course_id}/lessons?unit_id={$unit_id}"];
 
 			// return the output
             return $return;
@@ -673,7 +673,7 @@ class Courses extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Unit successfully updated.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["href" => "{$this->baseUrl}course/{$params->course_id}/lesson"];
+			$return["additional"] = ["href" => "{$this->baseUrl}course/{$params->course_id}/lessons?unit_id={$params->unit_id}"];
 
 			// return the output
             return $return;
@@ -744,7 +744,7 @@ class Courses extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Lesson successfully created.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}course/{$params->course_id}/lesson"];
+			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}course/{$params->course_id}/lessons?unit_id={$params->unit_id}"];
 
 			// return the output
             return $return;
@@ -850,7 +850,7 @@ class Courses extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Lesson successfully updated.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["href" => "{$this->baseUrl}course/{$params->course_id}/lesson"];
+			$return["additional"] = ["href" => "{$this->baseUrl}course/{$params->course_id}/lessons?unit_id={$params->unit_id}"];
 
 			// return the output
             return $return;
