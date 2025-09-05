@@ -94,6 +94,10 @@ foreach($student_list["data"] as $key => $each) {
             <div>
                 <span title='View Details' class='user_name' onclick='load(\"student/{$each->user_id}\");'>{$each->name}</span><br>
                 {$each->unique_id}{$t_status}{$scholarship_status}
+                <div class='mt-0'>
+                    ".($each->student_type == "Weekend" ? "<span class='badge p-1 badge-".($each->student_type == "Weekend" ? "danger" : "success")."'>{$each->student_type}</span> " : null)."
+                    ".($each->boarding_status == "Boarder" ? "<span class='badge p-1 badge-".($each->boarding_status == "Day" ? "primary" : "success")."'>{$each->boarding_status}</span>" : null)."
+                </div>
             </div>
         </div>
     </td>";

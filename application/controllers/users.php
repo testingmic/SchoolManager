@@ -201,7 +201,7 @@ class Users extends Myschoolgh {
 			$minorDataset = !empty($params->quick_list);
 			
 			// prepare and execute the statement
-			$sql = $this->db->prepare("SELECT {$params->columns} 
+			$sql = $this->db->prepare("SELECT {$params->columns}, a.student_type, a.boarding_status
 				FROM users a
 				LEFT JOIN classes cl ON cl.id = a.class_id
 				{$appendJoin}
@@ -1650,6 +1650,9 @@ class Users extends Myschoolgh {
 				".(isset($params->status) ? ", status='{$params->status}'" : null)."
 				".(isset($encrypt_password) ? ", password='{$encrypt_password}'" : ", password='{$defaultPass}'")."
 
+				".(!empty($params->boarding_status) ? ", boarding_status='{$params->boarding_status}'" : null)."
+				".(!empty($params->student_type) ? ", student_type='{$params->student_type}'" : null)."
+
 				".(!empty($course_ids) ? ", course_ids='".json_encode($course_ids)."'" : "")."
 
 				".(!empty($fileName) ? ", image='{$fileName}'" : null)."
@@ -2070,6 +2073,9 @@ class Users extends Myschoolgh {
 				".(isset($params->is_bus_user) ? ", is_bus_user='{$params->is_bus_user}'" : null)."
 				".(isset($params->alergy) ? ", alergy='{$params->alergy}'" : null)."
 				".(isset($params->hometown) ? ", hometown='{$params->hometown}'" : null)."
+
+				".(!empty($params->boarding_status) ? ", boarding_status='{$params->boarding_status}'" : null)."
+				".(!empty($params->student_type) ? ", student_type='{$params->student_type}'" : null)."
 				
 				".(isset($params->previous_school) ? ", previous_school='{$params->previous_school}'" : null)."
 				".(isset($params->previous_school_remarks) ? ", previous_school_remarks='{$params->previous_school_remarks}'" : null)."

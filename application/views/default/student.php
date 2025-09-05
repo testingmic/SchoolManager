@@ -471,6 +471,14 @@ if(!empty($user_id)) {
                                 <span class="float-right text-muted">'.$data->enrollment_date.'</span>
                             </p>
                             <p class="clearfix">
+                                <span class="float-left">Boarding Status</span>
+                                <span class="float-right badge badge-'.($data->boarding_status == "Day" ? "primary" : "success").'">'.$data->boarding_status.'</span>
+                            </p>
+                            <p class="clearfix">
+                                <span class="float-left">Student Type</span>
+                                <span class="float-right badge badge-'.($data->student_type == "Weekend" ? "danger" : "success").'">'.$data->student_type.'</span>
+                            </p>
+                            <p class="clearfix">
                                 <span class="float-left">Gender</span>
                                 <span class="float-right text-muted">'.$data->gender.'</span>
                             </p>

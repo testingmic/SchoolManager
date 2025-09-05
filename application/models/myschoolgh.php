@@ -104,14 +104,15 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("DELETE FROM users WHERE DATE(date_created) = '2025-09-05'");
+		$fix[] = ("ALTER TABLE users ADD COLUMN boarding_status VARCHAR(16) DEFAULT 'Day'");
+		$fix[] = ("ALTER TABLE users ADD COLUMN student_type VARCHAR(16) DEFAULT 'Weekday'");
 
 		foreach($fix as $stmt) {
 			try {
 				// $query = $this->db->prepare($stmt);
 				// $query->execute();
 			} catch(PDOException $e) {
-				print $e->getMessage();
+				// print $e->getMessage();
 			}
 		}
 	}

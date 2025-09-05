@@ -104,11 +104,11 @@ if(!empty($item_id)) {
                                         </span>
                                     </span>
                                 </p>
-                                <p class="clearfix">
+                                <p class="clearfix w-100">
                                     <span class="float-left">Code</span>
                                     <span class="float-right text-muted">'.$class->class_code.'</span>
                                 </p>
-                                <p class="clearfix">
+                                <p class="clearfix w-100">
                                     <span class="float-left">Students Count</span>
                                     <span class="float-right text-muted">'.$class->students_count.'</span>
                                 </p>
@@ -132,7 +132,7 @@ if(!empty($item_id)) {
                 <div id=\"accordion\" data-row_id=\"{$link->item_id}\">
                     <div class=\"accordion\">
                         <div class=\"accordion-header collapsed\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$link->item_id}\">
-                            <div class=\"d-flex justify-content-between\">
+                            <div class=\"d-flex justify-content-between w-100\">
                                 <div><h4>{$key}. {$link->link_name}</h4></div>
                                 <div class='text-right'><i class=\"fa fa-calendar-check\"></i> {$link->date_created}</div>
                             </div>
@@ -217,11 +217,11 @@ if(!empty($item_id)) {
             $lessons_list .= "
             <details class='mb-2' ".(($uniId == $plan->id) ? "open" : null)." data-row_id=\"{$plan->item_id}\">
                 <summary class='cursor cursor-pointer bg-primary font-16 text-white p-2 mb-2'>
-                        {$key}. {$plan->name}
-                        <span class='float-right'><i class=\"fa fa-calendar-check\"></i> {$plan->date_created}</span>
+                    {$key}. {$plan->name}
+                    <span class='float-right'><i class=\"fa fa-calendar-check\"></i> ".date("d M Y", strtotime($plan->date_created))."</span>
                 </summary>
                 <div>
-                    <div class='d-flex justify-content-between'>
+                    <div class='d-flex justify-content-between w-100'>
                         <div>
                             <span class=\"mr-3\"><strong>Start Date: </strong> {$plan->start_date}</span><br>
                             <span><strong>End Date: </strong> {$plan->end_date}</span>
@@ -239,7 +239,7 @@ if(!empty($item_id)) {
                         " : null)."
                     </div>
                     <div class='mt-2 mb-3'>{$plan->description}</div>
-                    <div class='border-bottom mb-3 font-bold'>
+                    <div class='border-bottom mb-3 bg-light-blue p-2 font-bold'>
                         <h6 class='pb-0 mb-0'>".strtoupper($labels->unit_label ?? 'Unit')." LESSONS</h6>
                     </div>
                     <div class='table-responsive trix-slim-scroll'>

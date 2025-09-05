@@ -2263,7 +2263,28 @@ class Forms extends Myschoolgh {
                         <input data-student_image="upload" data-student_id="'.($userData->user_id ?? null).'" accept=".jpg,.jpeg,.png,.gif" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">CONTACT INFORMATION</h5></div> 
+                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">BOARDING STATUS & STUDENT TYPE</h5></div> 
+                <div class="col-lg-4 col-md-4">
+                    <div class="form-group">
+                        <label for="boarding_status">Boarding Status</label>
+                        <select data-width="100%" name="boarding_status" id="boarding_status" class="form-control selectpicker">
+                            <option value="">Please Select</option>
+                            <option '.($isData && ($userData->boarding_status == "Day") ? "selected" : null).' value="Day">Day Student</option>
+                            <option '.($isData && ($userData->boarding_status == "Boarder") ? "selected" : null).' value="Boarder">Boarder</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4">
+                    <div class="form-group">
+                        <label for="student_type">Student Type</label>
+                        <select data-width="100%" name="student_type" id="student_type" class="form-control selectpicker">
+                            <option value="">Please Select</option>
+                            <option '.($isData && ($userData->student_type == "Weekday") ? "selected" : null).' value="Weekday">Weekday Student</option>
+                            <option '.($isData && ($userData->student_type == "Weekend") ? "selected" : null).' value="Weekend">Weekend Student</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-12 mt-2"><h5 class="text-primary border-bottom pb-2 mb-3">CONTACT INFORMATION</h5></div> 
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="email">Email Address</label>
