@@ -32,7 +32,7 @@ $class_list = $myClass->pushQuery("name, id", "classes", "client_id='{$clientId}
 
 // get the students list
 $students_array_list = $myClass->pushQuery("id, name, unique_id, gender, residence, item_id, class_id, image", "users", 
-    "client_id='{$clientId}' AND user_type='student' AND class_id IS NULL LIMIT 500");
+    "client_id='{$clientId}' AND user_type='student' AND LENGTH(class_id) = 0 LIMIT 500");
 
 $students_list = "";
 
