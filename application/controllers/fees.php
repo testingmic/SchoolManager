@@ -1161,7 +1161,7 @@ class Fees extends Myschoolgh {
 
                 // log the user activity
                 $this->userLogs("fees_allocation", $params->class_id, null, 
-                    "{$params->userData->name} added the fee allocation for <strong>{$class_check[0]->category_name}</strong> of: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
+                    "{$defaultUser->name} added the fee allocation for <strong>{$class_check[0]->category_name}</strong> of: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
             }
 
             // remove some unimportant keys

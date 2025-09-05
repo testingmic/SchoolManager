@@ -177,7 +177,7 @@ class Classes extends Myschoolgh {
         try {
 
             // get a default client data
-            global $defaultClientData, $accessObject;
+            global $defaultClientData, $accessObject, $defaultUser;
 
             // check permission
             if(!$accessObject->hasAccess("update", "class")) {
@@ -226,7 +226,7 @@ class Classes extends Myschoolgh {
             $stmt->execute([$params->clientId, $params->userId, json_encode($room_ids), $item_id]);
             
             // log the user activity
-            $this->userLogs("classes", $item_id, null, "{$params->userData->name} created a new Class: {$params->name}", $params->userId);
+            $this->userLogs("classes", $item_id, null, "{$defaultUser->name} created a new Class: {$params->name}", $params->userId);
 
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Class successfully created.", "refresh" => 2000];
