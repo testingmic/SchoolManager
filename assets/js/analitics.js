@@ -353,6 +353,12 @@ var summaryReporting = (t_summary, date_range) => {
         $(`span[data-count="library_books_count"]`).html(library.library_books_count);
     }
 
+    if(typeof t_summary.students_class_record_count == 'undefined') {
+        let no_class_found = no_content_wrapper("No Students Record Found", "No student has been created yet.", "fa-graduation-cap");
+        $(`div[id="class_count_list"]`).html(no_class_found);
+    }
+
+
     if (typeof summary.students_class_record_count !== 'undefined') {
         let classes = summary.students_class_record_count,
             class_count_list = "",
