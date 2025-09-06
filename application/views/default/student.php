@@ -807,7 +807,7 @@ if(!empty($user_id)) {
                             </div>
                         </div>
                         <div class="tab-pane fade '.($url_link === "incidents" ? "show active" : null).'" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
-                            <div class="d-flex justify-content-between">
+                            <div class="d-flex justify-content-between mb-2 w-100">
                                 <div class="mb-2"><h5></h5></div>
                                 '.($addIncident ? '
                                     <div>
