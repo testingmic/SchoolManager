@@ -53,13 +53,12 @@ class Backup {
 
     	// get the list of all tables
         $query_list = $this->db->query("SHOW TABLES");
+        print_r($query_list);
 
         // loop through the tables list
         while($table = $query_list->fetch_row()) {
         	foreach($table as $key => $value) {
-        		// dont add tables that starts with wn
         		if( (strpos($value, "wn_") === false) && (!in_array($value, $this->global_tables))) {
-		            // append to the tables list
 		            $tables_array[] = $value;
 		        }
             }
