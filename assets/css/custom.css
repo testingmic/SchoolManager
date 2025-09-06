@@ -17,6 +17,16 @@ body .btn {
     height: 100%;
 }
 
+.navbar {
+    height: 75px;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0rem 0rem;
+    }
+}
+
 .form-heading {
     text-transform: uppercase;
     color: #0171f3 !important;

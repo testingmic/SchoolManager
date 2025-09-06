@@ -112,8 +112,8 @@ class Myschoolgh extends Models {
 
 		foreach($fix as $stmt) {
 			try {
-				$query = $this->db->prepare($stmt);
-				$query->execute();
+				// $query = $this->db->prepare($stmt);
+				// $query->execute();
 			} catch(PDOException $e) {
 				// print $e->getMessage();
 			}

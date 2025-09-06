@@ -107,7 +107,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                         <input type="hidden" disabled value="'.($timetable_id ?? null).'" name="timetable_id">
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-lg-12 text-center">
+                                <div class="col-lg-12 text-center border-3px mb-3">
                                     <div class="form-group">
                                         <select style="max-width:400px" class="form-control selectpicker" data-url="timetable-allocate" id="current_TimetableId" name="current_TimetableId">';
                                         if(empty($timetable_id)) {
@@ -125,6 +125,9 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                                     $response->html .= "<input name='{$input}' type='hidden' value='disabled'>";
                                 }
                                 $response->html .= '
+                                </div>
+                                <div class="col-lg-12" id="new_custom_timetable">
+                                    
                                 </div>
                                 <div class="col-lg-12" id="allocate_dynamic_timetable">
                                     <div class="row">

@@ -99,7 +99,7 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
                                                 <div class='card-header'>
                                                     <h5 class='card-title font-weight-normal mb-0'>{$value->name}</h5>
                                                 </div>
-                                                <div class='card-body'>
+                                                <div class='card-body pt-1 pb-1'>
                                                     <div data-row_id=\"{$value->item_id}\">
                                                         ".($value->class_name ? 
                                                             "<p class='clearfix pb-0 mb-0'>
