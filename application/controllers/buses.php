@@ -355,7 +355,7 @@ class Buses extends Myschoolgh {
         }
 
 		// if the user type is parent, then get the children of the parent
-		if($users[0]->user_type == "parent") {
+		if(in_array($users[0]->user_type, ["parent", "guardian"])) {
 			$users = $this->pushQuery(
 				"u.id, u.item_id, u.name, u.gender, u.class_id, u.day_boarder, u.unique_id, u.date_of_birth, u.user_type, u.enrollment_date, c.name AS class_name", 
 				"users u LEFT JOIN classes c ON u.class_id=c.id", 
