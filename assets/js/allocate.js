@@ -18,8 +18,11 @@ function processAllocations(item) {
     let data = calculateAllocations();
     $.post(`${baseUrl}api/timetable/validate_allocation`, { data, item }).then((response) => {
         if(response.code !== 200) {
-            $(`div[class="notices_div"]`).html(`<div class="text-center text-danger">${response.data.result}</div>`);
-            return;
+            let errors = "";
+            $.each(response.data.result, function(i, v) {
+                errors += `<div class="text-center text-danger mb-1">${i+1}. ${v}<hr></div>`;
+            });
+            $(`div[class="notices_div"]`).html(errors);
         }
     });
 }
@@ -67,7 +70,11 @@ $("input", "#courseAlloc").each(function() {
 });
 colorCourses();
 
-const calculateAllocations = () => {
+if($(`div[class="notices_div"]`).length > 0) {
+    processAllocations();
+}
+
+function calculateAllocations() {
     let finalAllocations = {};
     let stream_data = $.array_stream['timetable_allocations'];
     $.each($('td[data-slot_key] div.course_holder'), function(i, v) {

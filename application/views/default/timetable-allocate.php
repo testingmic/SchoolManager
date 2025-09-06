@@ -141,8 +141,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                                                     <div class="col-lg-12 table-responsive timetable">';
                                                         
                                                         // Add new custom timetable section
-                                                        $response->html .= '<div id="new_custom_timetable" class="mt-4" '.(!$timetable_id ? 'style="display:none;"' : '').'>
-                                                            <h5 class="mb-3">Custom Timetable Layout</h5>';
+                                                        $response->html .= '<div id="new_custom_timetable" class="mt-4" '.(!$timetable_id ? 'style="display:none;"' : '').'>';
                                                         
                                                         if(!empty($data)) {
                                                             // Prepare data array for the function

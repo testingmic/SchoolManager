@@ -108,7 +108,7 @@ function draw_timetable_table($timetable_data, $start_time = '08:00', $download 
     }
 
     $total_items = round(100 / (count($time_slots) + 1));
-    $height = $download ? 50 : 80;
+    $height = $download ? 50 : 100;
     
     // Generate HTML table
     $html = '<div id="allocate_dynamic_timetable">';
@@ -164,7 +164,7 @@ function draw_timetable_table($timetable_data, $start_time = '08:00', $download 
         foreach ($time_slots as $slot) {
             $slot_key = $key . "_" . $slot['slot_number'];
             if ($slot['is_break']) {
-                $html .= '<td class="break-column break-cell blocked" style="background-color: #ffeaa7; color: #000; padding: 10px; text-align: center; vertical-align: middle; min-width: '.$height.'px; height: '.$height.'px; font-style: italic;">';
+                $html .= '<td class="break-column break-cell blocked" style="background-color: #ffeaa7; color: #000; padding: 10px; text-align: center; vertical-align: middle; min-width: '.$total_items.'%; height: '.$height.'px; font-style: italic;">';
                 $html .= $slot['break_name'];
             } else {
                 $slot_id = strtolower($day) . '_' . $slot['slot_number'];
@@ -186,4 +186,66 @@ function draw_timetable_table($timetable_data, $start_time = '08:00', $download 
 
     
     return $html;
+}
+
+
+/**
+ * Detect Clashes
+ * 
+ * @param array $incoming
+ * @param array $courseMap
+ * @param array $existing
+ * @return array
+ */
+function detectClashes($incoming, $courseMap, $existing, $tutors_names = []) {
+    $clashes = [];
+
+    // Build a lookup of existing allocations with tutors per slot
+    $existingTutorMap = [];
+    foreach ($existing as $alloc) {
+        $slot = $alloc['day_slot']; 
+        $courseId = $alloc['course_id'];
+
+        if (isset($courseMap[$courseId])) {
+            foreach ($courseMap[$courseId]['tutors'] as $tutorId) {
+                $existingTutorMap[$slot][$tutorId] = $courseId;
+            }
+        }
+    }
+
+    // Process incoming data
+    foreach ($incoming as $item) {
+        $slot = $item['slot'];
+        $courseId = explode(":", $item['value'])[0];
+
+        if (!isset($courseMap[$courseId])) {
+            continue; // skip unmapped courses
+        }
+
+        foreach ($courseMap[$courseId]['tutors'] as $tutorId) {
+            // Clash check: same tutor already teaching in this slot
+            if (isset($existingTutorMap[$slot][$tutorId])) {
+                $name = $tutors_names[$tutorId] ?? $tutorId;
+                $course = $courseMap[$courseId]['course_name'] ?? $courseId;
+                $class = $courseMap[$courseId]['class_name'] ?? $courseId;
+                $clashes[] = [
+                    "slot" => $slot,
+                    "tutor" => $tutorId,
+                    "course" => $courseId,
+                    "message" => "{$name} already has a {$course} lesson in {$class} at slot {$slot}."
+                ];
+            }
+        }
+
+        // Add this new allocation into map (so clashes among incoming data are also caught)
+        foreach ($courseMap[$courseId]['tutors'] as $tutorId) {
+            if (isset($existingTutorMap[$slot][$tutorId])) {
+                // Already logged clash above
+            } else {
+                $existingTutorMap[$slot][$tutorId] = $courseId;
+            }
+        }
+    }
+
+    return $clashes;
 }

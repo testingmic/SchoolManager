@@ -94,10 +94,10 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
                                         $expected_days = json_decode($value->expected_days, true);
 
                                         $response->html .= "
-                                        <div data-row_id=\"{$value->item_id}\" class='col-lg-3 col-md-4 col-sm-6 col-12 rounded-2xl transition-all duration-300 hover:-translate-y-1'>
+                                        <div data-row_id=\"{$value->item_id}\" class='col-lg-4 col-md-4 col-sm-6 col-12 rounded-2xl transition-all duration-300 hover:-translate-y-1'>
                                             <div class='card'>
                                                 <div class='card-header'>
-                                                    <h5 class='card-title font-weight-normal mb-0'>{$value->name}</h5>
+                                                    <h5 class='card-title font-weight-normal mb-0 font-17'>{$value->name}</h5>
                                                 </div>
                                                 <div class='card-body pt-1 pb-1'>
                                                     <div data-row_id=\"{$value->item_id}\">

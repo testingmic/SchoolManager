@@ -430,25 +430,88 @@ class Timetable extends Myschoolgh {
         $daySubjects = [];
         $dailySubjects = [];
 
-        foreach($params->data["allocations"] as $item) {
-            
-            $slot = $item['slot'];
-            $weekday = $item['weekday'];
-            $course = explode(":", $item['value'])[0];
+        $slotsList = [];
+        $distinctCourses = [];
 
-            $dailySubjects[$weekday][$course][] = $item['course'];
+        if(isset($params->data["allocations"]) && is_array($params->data["allocations"])) {
+            foreach($params->data["allocations"] as $item) {
+                $slotsList[] = $item['slot'];
+                $weekday = $item['weekday'];
+                $course = explode(":", $item['value'])[0];
+                $distinctCourses[] = $course;
 
-            $daySubjects[$weekday][] = $course;
+                $dailySubjects[$weekday][$course][] = $item['course'];
+
+                $daySubjects[$weekday][] = $course;
+            }
         }
 
         // get the days with the same subject more than once
         foreach($dailySubjects as $weekday => $subjects) {
-            foreach($subjects as $course => $subject) {
-                if(count($subject) > 1) {
-                    return ["code" => 400, "data" => "Sorry! The subject {$subject[0]} is allocated more than once on {$weekday} same day."];
+            if(is_array($subjects)) {
+                foreach($subjects as $course => $subject) {
+                    if(count($subject) > 1) {
+                        $errors[] = "The subject <strong>{$subject[0]}</strong> is allocated <strong>".count($subject)." times</strong> on <strong>".ucfirst($weekday)."</strong>.";
+                    }
                 }
             }
         }
+
+        // get the distinct courses that are allocated more than once
+        $distinctCourses = array_unique(array_values($distinctCourses));
+
+        // get the course list
+        $course_list = !empty($distinctCourses) ? $this->pushQuery("a.id, a.course_tutor, a.class_id, a.item_id, a.name, c.name as class_name", 
+            "courses a INNER JOIN classes c ON c.item_id = a.class_id", 
+            "a.item_id IN {$this->inList($distinctCourses)} AND a.academic_year = '{$params->academic_year}' 
+            AND a.academic_term = '{$params->academic_term}' AND a.client_id='{$params->clientId}' 
+            AND LENGTH(a.course_tutor) > 10
+            LIMIT ".count($distinctCourses)
+        ) : [];
+
+        $course_tutors = [];
+        $tutors_list = [];
+        foreach($course_list as $course) {
+            $tutors = array_unique(array_filter(json_decode($course->course_tutor, true)));
+            if(empty($tutors)) continue;
+            $tutors_list = array_merge($tutors_list, $tutors);
+            $course_tutors[$course->item_id] = [
+                'tutors' => $tutors,
+                'course_id' => $course->id,
+                'course_name' => $course->name,
+                'class_name' => $course->class_name,
+            ];
+        }
+
+        // get all the timetables that have the same courses
+        $timetable_list = !empty($distinctCourses) ? $this->pushQuery("a.day_slot, a.class_id, a.course_id", 
+            "timetables_slots_allocation a INNER JOIN timetables t ON t.item_id = a.timetable_id", 
+            "a.client_id='{$params->clientId}' AND a.course_id IN {$this->inList($distinctCourses)} 
+                AND a.day_slot IN {$this->inList($slotsList)} AND a.status = '1'
+                AND academic_year = '{$params->academic_year}' AND academic_term = '{$params->academic_term}'
+                AND t.status = '1'", false, "FETCH"
+        ) : [];
+
+        // get the course list
+        $tutors_name_list = !empty($tutors_list) ? $this->pushQuery("a.name, a.item_id", 
+            "users a", 
+            "a.item_id IN {$this->inList($tutors_list)}"
+        ) : [];
+
+        foreach($tutors_name_list as $tutor) {
+            $tutors_names[$tutor->item_id] = $tutor->name;
+        }
+
+        $detectClashes = detectClashes($params->data["allocations"], $course_tutors, $timetable_list, $tutors_names ?? []);
+        // echo json_encode($detectClashes);exit;
+
+        return [
+            "code" => !empty($errors) ? 400 : 200,
+            "data" => $errors ?? "The timetable was successfully save!",
+            "additional" => [
+                "detectClashes" => $detectClashes
+            ]
+        ];
         
     }
 
