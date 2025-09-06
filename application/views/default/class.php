@@ -379,7 +379,7 @@ if(!empty($item_id)) {
                                                         <span class="float-left bold">Name</span>
                                                         <span class="float-right text-muted">
                                                             <span class="user_name" '.(!$isWardParent && ($isTutor && in_array($course->id, $defaultUser->course_ids)) ? 'onclick="load(\'course/'.$course->item_id.'\');"' : null).'>
-                                                                '.($isAdmin ? "<a href='{$myClass->baseUrl}course/{$course->id}/lesson'>" : null).'
+                                                                '.($isAdmin ? "<a href='{$myClass->baseUrl}course/{$course->id}/lessons'>" : null).'
                                                                     '.$course->name.'
                                                                 '.($isAdmin ? "</a>" : null).'
                                                             </span>
