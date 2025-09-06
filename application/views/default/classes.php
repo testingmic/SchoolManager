@@ -109,7 +109,7 @@ $response->html = '
                                         <th width="5%">No.</th>
                                         <th width="22%">Class Name</th>
                                         <th>Department</th>
-                                        <th width="15%">Students Count</th>
+                                        <th class="text-center" width="15%">Students Count</th>
                                         <th>Class Teacher</th>
                                         <th class="text-center">Graduation Level</th>
                                         <th align="center" width="18%"></th>

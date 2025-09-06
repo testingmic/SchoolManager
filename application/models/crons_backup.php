@@ -68,37 +68,29 @@ class Backup {
     	// initialize the client data content
     	$clients_db = [];
 
-        // loop through the tables client tables
-        $clients_list = $this->db->query("SELECT * FROM clients_accounts WHERE client_state = 'Active'");
-
         // loop through the clients list
         try {
-
-            while($client = $clients_list->fetch_array(MYSQLI_ASSOC)) {
-
-                // loop through the tables list
-                foreach($tables_array as $table) {
-                    try {
-                        // select from all tables where the client_id matches the existing one
-                        $stmt = $this->db->query("SELECT * FROM {$table} WHERE client_id='{$client["client_id"]}' LIMIT 25000");
-
-                        while($result = $stmt->fetch_array(MYSQLI_ASSOC)) {
-                            $key = isset($result["id"]) ? $result["id"] : $result["item_id"];
-                            $clients_db[$client["client_id"]][$table][$key] = $result;
-                        }
-                    } catch(\Exception $e) {}
-                }
-
+            // loop through the tables list
+            foreach($tables_array as $table) {
+                try {
+                    // select from all tables where the client_id matches the existing one
+                    $stmt = $this->db->query("SELECT * FROM {$table}");
+                    while($result = $stmt->fetch_array(MYSQLI_ASSOC)) {
+                        $key = isset($result["id"]) ? $result["id"] : (
+                            isset($result["item_id"]) ? $result["item_id"] : (
+                                $result["unique_id"] ?? null
+                            )
+                        );
+                        $clients_db[$table][$key] = $result;
+                    }
+                } catch(\Exception $e) {}
             }
-            
         } catch(\Exception $e) {}
 
         // loop through each client data
-        foreach($clients_db as $client => $data) {
-            $today_file = "{$this->systemRoot}backups/myschool/{$client}_".date("Y-m-d").".json";
-            $ft = fopen($today_file, "w");
-            fwrite($ft, json_encode($data));
-        }
+        $today_file = "{$this->systemRoot}backups/myschool/myschoolgh_".date("Y-m-d_H_i").".json";
+        $ft = fopen($today_file, "w");
+        fwrite($ft, json_encode($clients_db));
 
     }
 
