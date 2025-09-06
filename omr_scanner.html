@@ -391,10 +391,10 @@
             
             let totalQuestions = 0;
             
-            // Process two columns of questions
+            // Process four columns of questions
             for (let col = 0; col < numColumns; col++) {
-                // Adjust column spacing to match the actual sheet layout
-                const colStartX = Math.floor(imgWidth * (0.2 + col * 0.4)); // More space between columns
+                // Calculate column positions to match the actual sheet layout
+                const colStartX = Math.floor(imgWidth * (0.15 + col * 0.2)); // Evenly space 4 columns
                 
                 for (let q = 0; q < questionsPerColumn; q++) {
                     const questionNum = col * questionsPerColumn + q + 1;
@@ -464,18 +464,18 @@
             // Draw detected bubble regions
             const imgHeight = processedImg.rows;
             const imgWidth = processedImg.cols;
-            const questionsPerColumn = 30;
-            const numColumns = 2;
-            const startY = Math.floor(imgHeight * 0.45); // Start after index number section
+            const questionsPerColumn = 15;  // 15 questions per column
+            const numColumns = 4;  // 4 columns for 60 questions
+            const startY = Math.floor(imgHeight * 0.55); // Start at answer section
             const endY = Math.floor(imgHeight * 0.95);
             const questionHeight = (endY - startY) / questionsPerColumn;
-            const bubbleWidth = Math.floor(imgWidth * 0.025);
-            const bubbleHeight = Math.floor(questionHeight * 0.6);
-            const bubbleSpacing = Math.floor(bubbleWidth * 1.8);
+            const bubbleWidth = Math.floor(imgWidth * 0.02);
+            const bubbleHeight = Math.floor(questionHeight * 0.5);
+            const bubbleSpacing = Math.floor(bubbleWidth * 1.5);
             
             // Draw grid and detected answers
             for (let col = 0; col < numColumns; col++) {
-                const colStartX = Math.floor(imgWidth * (0.2 + col * 0.4)); // Match the detection spacing
+                const colStartX = Math.floor(imgWidth * (0.15 + col * 0.2)); // Match the detection spacing
                 
                 for (let q = 0; q < questionsPerColumn; q++) {
                     const questionNum = col * questionsPerColumn + q + 1;
