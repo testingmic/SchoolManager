@@ -68,12 +68,9 @@ class Backup {
     	// initialize the client data content
     	$clients_db = [];
 
-        // loop through the clients list
         try {
-            // loop through the tables list
             foreach($tables_array as $table) {
                 try {
-                    // select from all tables where the client_id matches the existing one
                     $stmt = $this->db->query("SELECT * FROM {$table}");
                     while($result = $stmt->fetch_array(MYSQLI_ASSOC)) {
                         $key = isset($result["id"]) ? $result["id"] : (
@@ -83,7 +80,9 @@ class Backup {
                         );
                         $clients_db[$table][$key] = $result;
                     }
-                } catch(\Exception $e) {}
+                } catch(\Exception $e) {
+                    print $e->getMessage()."\n";
+                }
             }
         } catch(\Exception $e) {
             print $e->getMessage()."\n";
