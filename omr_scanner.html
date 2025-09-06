@@ -306,63 +306,142 @@
         function extractStudentInfo(src) {
             log("Extracting student information...");
             
-            // Extract name region (top portion of the sheet)
-            const nameRegion = src.roi(new cv.Rect(0, 0, src.cols, Math.floor(src.rows * 0.15)));
+            // Define regions for name and subject based on the actual form layout
+            const headerHeight = Math.floor(src.rows * 0.12); // Top section height
             
-            // Convert to canvas for OCR
-            const canvas = document.createElement('canvas');
-            cv.imshow(canvas, nameRegion);
+            // Name is in the left box
+            const nameRegion = src.roi(new cv.Rect(
+                Math.floor(src.cols * 0.1),  // Start from 10% from left
+                Math.floor(src.rows * 0.02), // Start from top with small margin
+                Math.floor(src.cols * 0.35), // Width of name box
+                headerHeight
+            ));
             
-            // Use Tesseract.js for OCR
-            Tesseract.recognize(canvas, 'eng', {
-                logger: m => {
-                    if (m.status === 'recognizing text') {
-                        log(`OCR Progress: ${Math.round(m.progress * 100)}%`);
+            // Subject is in the right box
+            const subjectRegion = src.roi(new cv.Rect(
+                Math.floor(src.cols * 0.55), // Start after middle
+                Math.floor(src.rows * 0.02), // Same top margin
+                Math.floor(src.cols * 0.35), // Width of subject box
+                headerHeight
+            ));
+            
+            // Preprocess the regions for better OCR
+            const processedName = preprocessForOCR(nameRegion);
+            const processedSubject = preprocessForOCR(subjectRegion);
+            
+            // Create canvases for OCR
+            const nameCanvas = document.createElement('canvas');
+            const subjectCanvas = document.createElement('canvas');
+            
+            cv.imshow(nameCanvas, processedName);
+            cv.imshow(subjectCanvas, processedSubject);
+            
+            // Perform OCR on both regions
+            Promise.all([
+                Tesseract.recognize(nameCanvas, 'eng', {
+                    logger: m => {
+                        if (m.status === 'recognizing text') {
+                            log(`Name OCR Progress: ${Math.round(m.progress * 100)}%`);
+                        }
                     }
-                }
-            }).then(({ data: { text } }) => {
-                log(`OCR Result: ${text}`);
-                parseStudentInfo(text);
+                }),
+                Tesseract.recognize(subjectCanvas, 'eng', {
+                    logger: m => {
+                        if (m.status === 'recognizing text') {
+                            log(`Subject OCR Progress: ${Math.round(m.progress * 100)}%`);
+                        }
+                    }
+                })
+            ]).then(([nameResult, subjectResult]) => {
+                log(`OCR Results - Name: ${nameResult.data.text}, Subject: ${subjectResult.data.text}`);
+                parseStudentInfo(nameResult.data.text, subjectResult.data.text);
+                
+                // Cleanup
                 nameRegion.delete();
+                subjectRegion.delete();
+                processedName.delete();
+                processedSubject.delete();
             }).catch(error => {
                 log(`OCR Error: ${error.message}`);
                 document.getElementById('studentName').textContent = 'Could not detect';
                 document.getElementById('subject').textContent = 'Could not detect';
+                
+                // Cleanup on error
                 nameRegion.delete();
+                subjectRegion.delete();
+                processedName.delete();
+                processedSubject.delete();
             });
         }
+        
+        function preprocessForOCR(mat) {
+            // Create a copy for processing
+            const processed = mat.clone();
+            
+            // Convert to grayscale if not already
+            if (processed.channels() > 1) {
+                cv.cvtColor(processed, processed, cv.COLOR_RGBA2GRAY);
+            }
+            
+            // Apply adaptive threshold
+            cv.adaptiveThreshold(processed, processed, 255,
+                cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2);
+                
+            // Denoise
+            const kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(2, 2));
+            cv.morphologyEx(processed, processed, cv.MORPH_OPEN, kernel);
+            kernel.delete();
+            
+            return processed;
+        }
 
-        function parseStudentInfo(text) {
-            // Parse the OCR text to extract name and subject
-            const lines = text.split('\n').filter(line => line.trim());
+        function parseStudentInfo(nameText, subjectText) {
+            log("Parsing extracted text...");
             let name = 'Could not detect';
             let subject = 'Could not detect';
             
-            // Look for name patterns
-            for (let line of lines) {
-                if (line.toLowerCase().includes('name') || line.length > 10) {
-                    // Extract text after "name" or longest line
-                    name = line.replace(/name[:\s]*/i, '').trim();
-                    if (name.length > 3) break;
+            // Process name text
+            const nameLines = nameText.split('\n').filter(line => line.trim());
+            for (let line of nameLines) {
+                // Remove common OCR artifacts and clean up the text
+                let cleanLine = line.replace(/[^a-zA-Z\s]/g, ' ').trim();
+                if (cleanLine.toLowerCase().includes('candidate')) continue;
+                if (cleanLine.length > 3) {
+                    name = cleanLine;
+                    break;
                 }
             }
             
-            // Look for subject
-            const subjects = ['MATH', 'SCIENCE', 'ENGLISH', 'HISTORY', 'PHYSICS', 'CHEMISTRY', 'BIOLOGY'];
-            for (let line of lines) {
-                const upperLine = line.toUpperCase();
-                for (let subj of subjects) {
-                    if (upperLine.includes(subj)) {
-                        subject = subj;
-                        break;
-                    }
+            // Process subject text
+            const subjectLines = subjectText.split('\n').filter(line => line.trim());
+            for (let line of subjectLines) {
+                // Clean up the subject text
+                let cleanLine = line.replace(/[^a-zA-Z\s]/g, ' ')
+                                  .replace(/SUBJECT|NAME/gi, '')
+                                  .trim()
+                                  .toUpperCase();
+                                  
+                if (cleanLine.length > 2) {
+                    subject = cleanLine;
+                    break;
                 }
-                if (subject !== 'Could not detect') break;
             }
             
+            // Update the display
             document.getElementById('studentName').textContent = name;
             document.getElementById('subject').textContent = subject;
             log(`Parsed - Name: ${name}, Subject: ${subject}`);
+            
+            // Add visual feedback
+            const studentInfo = document.getElementById('studentInfo');
+            studentInfo.style.backgroundColor = '#e3f2fd';
+            studentInfo.style.padding = '20px';
+            studentInfo.style.borderRadius = '8px';
+            studentInfo.style.marginTop = '20px';
+            
+            // Log the extracted information for debugging
+            log(`Raw name text: ${nameText}`);
+            log(`Raw subject text: ${subjectText}`);
         }
 
         function detectBubbles(processedImg) {
@@ -385,16 +464,16 @@
             console.log({imgHeight, imgWidth, questionsPerColumn, numColumns, startY, endY, questionHeight});
             
             // Bubble dimensions based on actual sheet measurements
-            const bubbleWidth = Math.floor(imgWidth * 0.02);  // Smaller bubbles to match sheet
+            const bubbleWidth = Math.floor(imgWidth * 0.025);  // Slightly larger bubbles
             const bubbleHeight = Math.floor(questionHeight * 0.5); // Adjust height to match actual bubbles
-            const bubbleSpacing = Math.floor(bubbleWidth * 1.5);  // Closer spacing between options
+            const bubbleSpacing = Math.floor(bubbleWidth * 2.2);  // Increase spacing between options
             
             let totalQuestions = 0;
             
             // Process four columns of questions
             for (let col = 0; col < numColumns; col++) {
                 // Calculate column positions to match the actual sheet layout
-                const colStartX = Math.floor(imgWidth * (0.15 + col * 0.2)); // Evenly space 4 columns
+                const colStartX = Math.floor(imgWidth * (0.25 + col * 0.18)); // Adjust left margin and spacing between columns
                 
                 for (let q = 0; q < questionsPerColumn; q++) {
                     const questionNum = col * questionsPerColumn + q + 1;
