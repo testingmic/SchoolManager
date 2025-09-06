@@ -102,7 +102,7 @@ $response->html = '
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="text-right mb-2">
                     <a class="btn btn-outline-danger" href="'.$baseUrl.'timetable"><i class="fa fa-arrow-left"></i> Back to Timetable List</a>
-                    '.($timetable_found ? '<a class="btn btn-outline-primary" href="'.$baseUrl.'timetable-manage/'.$timetable_id.'"><i class="fa fa-edit"></i> Edit Timetable</a>' : null).'
+                    '.($timetable_found ? '<a class="btn btn-outline-primary" href="'.$baseUrl.'timetable-allocate/'.$timetable_id.'"><i class="fa fa-edit"></i> Allocate Timetable</a>' : null).'
                 </div>';
                 if($timetable_id && !$timetable_found) {
                     $response->html .= no_record_found("Record Not Found", "The timetable record you are looking for does not exist.", $baseUrl."timetable-manage", "Timetable");

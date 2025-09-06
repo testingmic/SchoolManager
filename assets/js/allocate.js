@@ -9,14 +9,11 @@ $(`div[id="courseScroll"] div[class~="course"]`).draggable({
     opacity: 0.7,
     appendTo: "#rightpane",
     tolerance: "fit",
-    start: function(e, ui) {
-        var blocked = $("." + this.id, ".blocked");
-    },
+    start: function(e, ui) { },
     stop: function() { }
 });
 
 var active = $(".celler", "#allocate_dynamic_timetable").not(".disabled,.blank,.day,.time");
-console.log(active);
 active.droppable({
     drop: function(e, ui) {
         var inner = $('<div class="course_holder"></div>');
@@ -25,11 +22,14 @@ active.droppable({
         inner.html(ui.draggable.html());
         $(this).addClass('hover-background');
         $("input[name=" + this.id + "]", "#courseAlloc").remove();
-        $("#courseAlloc").append('<input type="hidden" name="' + this.id + '" value="' + ui.draggable[0].id + ":" + $(`select[name='t_room_id']`).val() + '">')
+        $("#courseAlloc").append('<input type="hidden" name="' + this.id + '" value="' + ui.draggable[0].id + ":" + $(`select[name='t_room_id']`).val() + '">');
+        $.array_stream['timetable_allocations'][this.id] = [{
+            course_id: ui.draggable[0].id,
+            room_id: $(`select[name='t_room_id']`).val()
+        }];
         $(this).click();
     },
     over: function(e, ui) {
-        console.log(this);
         $(this).addClass('hover-background').addClass('border-3px');
     },
     out: function() {
@@ -57,23 +57,31 @@ $("input", "#courseAlloc").each(function() {
 colorCourses();
 
 var save_TimetableAllocation = () => {
-    let allocations = {},
-        save_button = $(`button[id="save_TimetableAllocation"]`);
-    $.each($(`form[id="courseAlloc"] input`), function(i, e) {
-        let value = $(this).attr("value"),
-            slot = $(this).attr("name");
-        allocations[i] = {
-            slot,
-            value
-        }
+
+    let finalAllocations = {};
+
+    let save_button = $(`button[id="save_TimetableAllocation"]`);
+
+    let stream_data = $.array_stream['timetable_allocations'];
+    $.each($('td[data-slot_key] div.course_holder'), function(i, v) {
+        let td = $(this).closest('td');
+        let slot_key = td.data('slot_key');
+        let room = stream_data?.[slot_key]?.[0]['room_id'] || null;
+        let course = stream_data?.[slot_key]?.[0]['course_id'] || null;
+        finalAllocations[i] = {
+            slot: slot_key,
+            weekday: td.data('day'),
+            value: `${course}:${room}`
+        };
     });
 
     let data = {
-        allocations,
         query: "allocation",
+        allocations: finalAllocations,
         timetable_id: $(`input[name="timetable_id"]`).val(),
         class_id: $(`input[name="t_class_id"]`).val()
     };
+
     swal({
         title: "Save Timetable",
         text: "Do you want to proceed to save changes made to this timetable?",

@@ -137,8 +137,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                                         <div class="col-lg-9">
                                             <div class="col-lg-12">
                                                 <div class="row">
-                                                    <div class="col-lg-12 table-responsive timetable">
-                                                        <div id="dynamic_timetable"></div>';
+                                                    <div class="col-lg-12 table-responsive timetable">';
                                                         
                                                         // Add new custom timetable section
                                                         $response->html .= '<div id="new_custom_timetable" class="mt-4" '.(!$timetable_id ? 'style="display:none;"' : '').'>

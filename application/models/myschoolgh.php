@@ -109,6 +109,7 @@ class Myschoolgh extends Models {
 		$fix[] = ("ALTER TABLE timetables ADD COLUMN first_break_ends VARCHAR(255) DEFAULT NULL");
 		$fix[] = ("ALTER TABLE timetables ADD COLUMN second_break_starts VARCHAR(255) DEFAULT NULL");
 		$fix[] = ("ALTER TABLE timetables ADD COLUMN second_break_ends VARCHAR(255) DEFAULT NULL");
+		$fix[] = ("ALTER TABLE timetables_slots_allocation ADD COLUMN weekday VARCHAR(255) DEFAULT NULL");
 
 		foreach($fix as $stmt) {
 			try {

@@ -375,7 +375,7 @@ class Timetable extends Myschoolgh {
 
                 // prepare the insert query here
                 $allot_slot = $this->db->prepare('INSERT INTO timetables_slots_allocation SET 
-                    client_id = ?, timetable_id = ?, `day` = ?, slot = ?, day_slot = ?, room_id = ?, class_id = ?, course_id = ?, `status` = ?
+                    client_id = ?, timetable_id = ?, day = ?, slot = ?, weekday = ?, day_slot = ?, room_id = ?, class_id = ?, course_id = ?, status = ?
                 ');
 
                 // continue processing
@@ -388,7 +388,7 @@ class Timetable extends Myschoolgh {
                     $room = $course_room[1] ?? null;
 
                     // insert the value into the database
-                    $allot_slot->execute([$params->clientId, $item_id, $slot[0], $slot[1], $slots["slot"], $room, $class_id, $course, 1]);
+                    $allot_slot->execute([$params->clientId, $item_id, $slot[0], $slot[1], $slots["weekday"], $slots["slot"], $room, $class_id, $course, 1]);
                 }
 
                 // update the timetable information

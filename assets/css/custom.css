@@ -30,6 +30,7 @@ body .btn {
     min-width: 60px;
     max-width: 100px;
     color: #000;
+    font-weight: bold;
     box-shadow: rgb(205, 205, 205) 0px 0px 25px inset;
     vertical-align: middle;
     text-align: center;

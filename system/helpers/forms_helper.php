@@ -108,7 +108,7 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
     }
     
     // Generate HTML table
-    $html = '<div id="allocate_dynamic_timetable" class="hidden">';
+    $html = '<div id="allocate_dynamic_timetable">';
     $html .= '<table class="table table-bordered timetable-table">';
     
     // Table header
@@ -148,7 +148,7 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
                 $html .= 'id="' . $slot_id . '" data-day="' . strtolower($day) . '" data-slot="' . $slot['slot_number'] . '" data-slot_key="' . $slot_key . '">';
                 $html .= "<div class='d-flex align-items-center justify-content-center' style='font-size: 13px;' class='w-100 font-bold h-100' id='{$slot_key}' data-slot_item='column'>";
                 foreach(($allocations[$slot_key] ?? []) as $allocation) {
-                    $html .= $allocation->course_name . " (" . $allocation->course_code . ")<br>";
+                    $html .= "<div class='course_holder'>".$allocation->course_name . " (" . $allocation->course_code . ")<br></div>";
                 }
                 $html .= "</div>";
             }
