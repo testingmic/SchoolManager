@@ -67,6 +67,7 @@ class Backup {
     	$clients_db = [];
 
         try {
+            print "About to loop through the tables and extract the data.\n";
             foreach($tables_array as $table) {
                 try {
                     $stmt = $this->db->query("SELECT * FROM {$table}");
@@ -82,13 +83,18 @@ class Backup {
                     print $e->getMessage()."\n";
                 }
             }
+            print "Looping and extracting the data from the tables completed successfully.\n";
         } catch(\Exception $e) {
             print $e->getMessage()."\n";
         }
 
+        print "About to write the backup to the file.\n";
+        
         // loop through each client data
         $today_file = "{$this->systemRoot}backups/myschool/myschoolgh_".date("Y-m-d_H").".json";
         file_put_contents($today_file, json_encode($clients_db ?? []));
+        
+        print "Backup completed successfully.\n";
     }
 
 }
