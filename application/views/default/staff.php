@@ -113,7 +113,7 @@ if(empty($user_id)) {
                     $action = "<a href='#' onclick='return load(\"course/{$each->id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
                     if($courseDelete) {
-                        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+                        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"teacher_course\", \"delete\", \"{$user_id}\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
                     }
 
                     $course_listing .= "<tr data-row_id=\"{$each->id}\">";

@@ -273,7 +273,7 @@ var share_Comment = (resource, item_id) => {
     });
 }
 
-var delete_record = (record_id, resource, action = "delete") => {
+var delete_record = (record_id, resource, action = "delete", extra_id = "") => {
     let title = (action == "delete") ? "Delete Record" : "Restore Record";
     swal({
         title: title,
@@ -291,7 +291,7 @@ var delete_record = (record_id, resource, action = "delete") => {
             
             let deleteBtn = `&nbsp;<button title="Delete User Record" onclick="return delete_record('${record_id}', '${resource}');" class="btn btn-sm mb-1 btn-outline-danger"><i class="fa fa-trash"></i></button>`;
 
-            $.post(`${baseUrl}api/records/remove`, { resource, record_id, action }).then((response) => {
+            $.post(`${baseUrl}api/records/remove`, { resource, record_id, action, extra_id }).then((response) => {
                 let s_icon = "error";
                 if (response.code == 200) {
                    s_icon = "success";

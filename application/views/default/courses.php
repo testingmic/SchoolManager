@@ -71,7 +71,7 @@ foreach($item_list["data"] as $key => $each) {
         </div>
     </div>
     </td>";
-    $courses .= "<td>{$each->credit_hours}</td>";
+    $courses .= $isAdmin ? "<td>{$each->credit_hours}</td>" : null;
     
     if(!$isWardParent) {
         $courses .= "<td>";
@@ -162,7 +162,7 @@ $response->html = '
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
                                         <th>Subject Title</th>
-                                        <th>Credit Hours</th>
+                                        '.($isAdmin ? '<th>Credit Hours</th>' : null).'
                                         '.(!$isWardParent ? '<th width="12%">Class Name</th>' : null).'
                                         <th>Subject Tutor</th>
                                         <th align="center" width="14%"></th>

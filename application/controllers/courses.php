@@ -492,7 +492,7 @@ class Courses extends Myschoolgh {
                 UPDATE courses SET date_updated = '{$this->current_timestamp}'
                 ".(!empty($class_ids) ? ", class_id = '{$class_ids}'" : null)."
                 ".(!empty($params->name) ? ", name = '{$params->name}'" : null)."
-                ".(!empty($tutor_ids) ? ", course_tutor = '".json_encode($tutor_ids)."'" : null)."
+                ".(isset($tutor_ids) ? ", course_tutor = '".json_encode($tutor_ids)."'" : null)."
                 ".(!empty($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
                 ".(!empty($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(!empty($params->course_code) ? ", course_code = '{$params->course_code}'" : null)."
