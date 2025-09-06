@@ -63,9 +63,6 @@ class Backup {
             }
         }
 
-        print_r($tables_array);
-        die();
-
     	// initialize the client data content
     	$clients_db = [];
 
@@ -81,6 +78,8 @@ class Backup {
                         );
                         $clients_db[$table][$key] = $result;
                     }
+                    print_r($clients_db);
+                    die();
                 } catch(\Exception $e) {
                     print $e->getMessage()."\n";
                 }
