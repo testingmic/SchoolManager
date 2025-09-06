@@ -15,7 +15,7 @@ body .btn {
     height: 100%;
 }
 
-.new_custom_timetable .cell.day {
+#new_custom_timetable .celler.day {
     background: rgba(235, 249, 163, 0.9) padding-box !important;
     box-shadow: 0 0 25px rgba(207, 229, 84, 0.9) inset !important;
     border: 1px solid rgba(169, 201, 0, 0.9) !important;
@@ -23,12 +23,13 @@ body .btn {
     width: 100px;
 }
 
-.new_custom_timetable .cell {
+#new_custom_timetable .celler {
     display: table-cell;
     position: relative;
     height: 65px;
-    width: 120px;
-    color: rgb(120, 120, 120);
+    min-width: 60px;
+    max-width: 100px;
+    color: #000;
     box-shadow: rgb(205, 205, 205) 0px 0px 25px inset;
     vertical-align: middle;
     text-align: center;

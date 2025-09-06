@@ -75,6 +75,9 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
             $params->full_detail = true;
             $params->timetable_id = $timetable_id;
             $timetable_allocations = $timetableClass->list($params)["data"][$timetable_id]->allocations;
+
+            // set the allocations to the array stream
+            $response->array_stream['timetable_allocations'] = !empty($timetable_allocations) ? $timetable_allocations : [];
         } else {
             // once again set the $timetable_id == null even if a session has been set 
             $timetable_id = null;
@@ -151,6 +154,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                                                                 'duration' => $data->duration,
                                                                 'class_id' => $data->class_id,
                                                                 'expected_days' => $data->expected_days,
+                                                                'timetable_allocations' => $timetable_allocations,
                                                                 'first_break_starts' => $data->first_break_starts ?? '10:00',
                                                                 'first_break_ends' => $data->first_break_ends ?? '10:30',
                                                                 'second_break_starts' => $data->second_break_starts ?? '12:30',

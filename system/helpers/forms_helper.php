@@ -28,6 +28,8 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
     $days = json_decode($timetable_data['expected_days'], true);
     $slots = (int)$timetable_data['slots'];
     $duration = (int)$timetable_data['duration']; // in minutes
+
+    $allocations = $timetable_data['timetable_allocations'] ?? [];
     
     // Break times
     $first_break_start = $timetable_data['first_break_starts'];
@@ -110,15 +112,15 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
     
     // Table header
     $html .= '<thead><tr>';
-    $html .= '<th style="background-color: #f8f9fa; padding: 10px; text-align: center;"></th>';
+    $html .= '<th style="background-color: #f8f9fa; padding: 0px; text-align: center;"></th>';
     
     foreach ($time_slots as $slot) {
         if ($slot['is_break']) {
-            $html .= '<th class="break-column" style="background-color: #ffeaa7; padding: 8px; text-align: center; font-size: 12px; min-width: 120px; color: #2d3436;">';
+            $html .= '<th class="break-column" style="background-color: #ffeaa7; padding: 5px; text-align: center; font-size: 13px; min-width: 60px; color: #2d3436;">';
             $html .= $slot['break_name'] . '<br>';
             $html .= '<small>(' . $slot['start'] . ' - ' . $slot['end'] . ')</small>';
         } else {
-            $html .= '<th class="cell">';
+            $html .= '<th class="celler" style="padding: 5px; font-weight: normal; color: #000000; font-size: 13px;">';
             $html .= $slot['start'] . '<br>' . $slot['end'];
         }
         $html .= '</th>';
@@ -127,20 +129,27 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
     
     // Table body
     $html .= '<tbody>';
-    foreach ($days as $day) {
+    foreach ($days as $key => $day) {
+        $key = $key + 1;
         $html .= '<tr>';
-        $html .= '<td class="cell day" style="background-color: #e8f5e8; padding: 15px; text-align: center; width: 80px;">';
+        $html .= '<td class="celler day" style="background-color: #e8f5e8; padding: 15px; text-align: center; width: 80px;">';
         $html .= substr($day, 0, 3); // Show first 3 letters of day
         $html .= '</td>';
         
         foreach ($time_slots as $slot) {
+            $slot_key = $key . "_" . $slot['slot_number'];
             if ($slot['is_break']) {
-                $html .= '<td class="break-column break-cell" style="background-color: #ffeaa7; padding: 20px; text-align: center; vertical-align: middle; min-height: 60px; color: #636e72; font-style: italic;">';
+                $html .= '<td class="break-column break-cell" style="background-color: #ffeaa7; padding: 10px; text-align: center; vertical-align: middle; min-width: 60px; min-height: 60px; color: #636e72; font-style: italic;">';
                 $html .= $slot['break_name'];
             } else {
                 $slot_id = strtolower($day) . '_' . $slot['slot_number'];
-                $html .= '<td style="padding: 20px; text-align: center; vertical-align: middle; min-height: 60px;" ';
-                $html .= 'id="' . $slot_id . '" data-day="' . strtolower($day) . '" data-slot="' . $slot['slot_number'] . '">';
+                $html .= '<td valign="middle" class="celler" id="'.$slot_key.'" style="text-align: center; padding: 5px; vertical-align: middle; min-height: 60px;" ';
+                $html .= 'id="' . $slot_id . '" data-day="' . strtolower($day) . '" data-slot="' . $slot['slot_number'] . '" data-slot_key="' . $slot_key . '">';
+                $html .= "<div class='d-flex align-items-center justify-content-center' style='font-size: 13px;' class='w-100 font-bold h-100' id='{$slot_key}' data-slot_item='column'>";
+                foreach(($allocations[$slot_key] ?? []) as $allocation) {
+                    $html .= $allocation->course_name . " (" . $allocation->course_code . ")<br>";
+                }
+                $html .= "</div>";
             }
             $html .= '</td>';
         }
