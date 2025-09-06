@@ -331,7 +331,7 @@ if($logBusAttendance) {
                             stopScanner();
                             let userType = null;
                             if(decodedText) {
-                                const match = decodedText.match(/(employeeId|studentId|parentId|delegateId):\[([A-Za-z0-9]+)\]/);
+                                const match = decodedText.match(/(employeeId|studentId|parentId|delegateId|guardianId):\[([A-Za-z0-9]+)\]/);
                                 if (match) {
                                     decodedText = `employeeId:${match[2]}`;
                                     userType = match[1].replace("Id", "");
