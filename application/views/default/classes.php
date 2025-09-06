@@ -74,7 +74,7 @@ foreach($item_list["data"] as $key => $each) {
     </td>";
     $classes .= "<td>{$each->department_name}</td>";
     // $classes .= "<td>{$each->class_size}</td>";
-    $classes .= "<td>{$each->students_count}</td>";
+    $classes .= "<td class='text-center'>{$each->students_count}</td>";
     $classes .= "<td><span class='user_name'>".($each->class_teacher_info->name ?? null)."</span></td>";
     $classes .= "<td class='text-center'><span class='user_name' title='".($each->is_graduation_level == "Yes" ? "Yes" : "No")."'>".($each->is_graduation_level == "Yes" ? "<i class='fa fa-check-circle text-success'></i>" : "<i class='fa fa-times-circle text-danger'></i>")."</span></td>";
     $classes .= "<td class='text-center'>{$action}</td>";
