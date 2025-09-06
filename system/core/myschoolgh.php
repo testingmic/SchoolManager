@@ -36,6 +36,7 @@ load_helpers([
 	'url_helper',
 	'file_helper',
 	'time_helper',
+	'forms_helper',
 	'render_helper',
 	'utilities_helper',
 	'upload_helper',

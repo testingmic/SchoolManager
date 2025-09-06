@@ -104,8 +104,11 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("ALTER TABLE users ADD COLUMN boarding_status VARCHAR(16) DEFAULT 'Day'");
-		$fix[] = ("ALTER TABLE users ADD COLUMN student_type VARCHAR(16) DEFAULT 'Weekday'");
+		$fix[] = ("ALTER TABLE timetables ADD COLUMN expected_days VARCHAR(255) DEFAULT 'Monday,Tuesday,Wednesday,Thursday,Friday'");
+		$fix[] = ("ALTER TABLE timetables ADD COLUMN first_break_starts VARCHAR(255) DEFAULT NULL");
+		$fix[] = ("ALTER TABLE timetables ADD COLUMN first_break_ends VARCHAR(255) DEFAULT NULL");
+		$fix[] = ("ALTER TABLE timetables ADD COLUMN second_break_starts VARCHAR(255) DEFAULT NULL");
+		$fix[] = ("ALTER TABLE timetables ADD COLUMN second_break_ends VARCHAR(255) DEFAULT NULL");
 
 		foreach($fix as $stmt) {
 			try {

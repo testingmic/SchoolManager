@@ -233,13 +233,13 @@ function no_record_found($title = null, $caption = null, $url_link = null, $reco
                 " : (!empty($url_link) ? "
                     <a href='{$url_link}'>
                         <button
-                        class='inline-flex items-center justify-center font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 hover:scale-105 transition-all duration-300 bg-primary-600 hover:bg-primary-700 focus:ring-primary-500 px-4 py-2 text-sm bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white shadow-lg'><svg
+                        class='inline-flex items-center justify-center font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 hover:scale-105 transition-all duration-300 bg-primary-600 hover:bg-primary-700 focus:ring-primary-500 px-4 py-3 text-sm bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white shadow-lg'><svg
                             xmlns='http://www.w3.org/2000/svg' width='24' height='24'
                             viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'
                             stroke-linecap='round' stroke-linejoin='round' class='w-5 h-5 mr-2'>
                             <path d='M5 12h14'></path>
                             <path d='M12 5v14'></path>
-                        </svg>Add {$record}</button>
+                        </svg>Create {$record}</button>
                     </a>" : null)
                 )."
             </div>

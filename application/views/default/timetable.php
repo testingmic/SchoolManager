@@ -113,7 +113,7 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
                                 <div class="col-lg-12">';
 
                                 if(empty($timetable_list)) {
-                                    $response->html .= no_record_found("No Timetable Found", "No timetable has been created yet. Get started by creating your first timetable.", $baseUrl."timetable-manage", "Timetable");
+                                    $response->html .= no_record_found("No Timetable Found", "No timetable has been created yet. Get started by creating your first timetable.", $baseUrl."timetable-manage", "New Timetable");
                                 } else {
                                     $response->html .= '<div class="row">';
                                     foreach($timetable_list as $key => $value) {

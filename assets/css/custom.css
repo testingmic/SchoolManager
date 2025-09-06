@@ -17,6 +17,15 @@ body .btn {
     height: 100%;
 }
 
+.form-heading {
+    text-transform: uppercase;
+    color: #0171f3 !important;
+}
+
+.input-group-text {
+    color: #000000;
+}
+
 .btn-outline-secondary {
     color: #000000;
     border-color: #000000;

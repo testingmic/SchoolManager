@@ -82,8 +82,8 @@ if(!empty($item_id)) {
             // if the user has the permission to view fees allocation
             if($viewAllocation) {
                 // add up the values
-                $amount_due += $student->debt + $student->amount_paid;
-                $amount_paid += $student->amount_paid;
+                $amount_due += ($student->debt ?? 0) + ($student->amount_paid ?? 0);
+                $amount_paid += $student->amount_paid ?? 0;
                 $arrears += $student->arrears ?? 0;
                 $balance += $student->debt ?? 0;
             }

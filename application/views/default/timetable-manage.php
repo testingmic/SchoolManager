@@ -48,6 +48,9 @@ if(!empty($timetable_id)) {
     $timetable_list = load_class("timetable", "controllers", $params)->list($params);
 }
 
+// expected days to be present in school
+$expected_days = $myClass->default_opening_days;
+
 // run this section if $timetable_id is not empty
 if(!empty($timetable_id)) {
 
@@ -74,10 +77,16 @@ if(!empty($timetable_id)) {
             $disabled_inputs = $data->disabled_inputs;
             $class_id = $data->class_id;
 
+            // expected days to be present in school
+            $expected_days = $myClass->stringToArray($data->expected_days);
+
+            // set the page title
             $pageTitle = "Modify Timetable";
         }
     }
 }
+
+$daysOfWeek = $myClass->days_of_week;
 
 $response->html = '
     <section class="section">
@@ -102,6 +111,7 @@ $response->html = '
                     <div class="card">
                         <div class="card-body" id="timetable_form">
                             <div class="row">
+                                <div class="col-lg-12"><h5 class="form-heading border-bottom pb-2 mb-3">Class & Name</h5></div> 
                                 <div class="col-xl-4 col-md-4 col-12 form-group">
                                     <div class="mb-1">
                                         <select class="form-control selectpicker" data-width="100%" name="class_id">
@@ -121,6 +131,7 @@ $response->html = '
                                         <input autocomplete="Off" type="text" value="'.($d_name ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="name" id="name">
                                     </div>
                                 </div>
+                                <div class="col-lg-12"><h5 class="form-heading border-bottom pb-2 mb-3">Time & Duration</h5></div> 
                                 <div class="col-md-3">
                                     <div class="input-group mb-3" title="Start time for lesson each day.">
                                         <div class="input-group-prepend">
@@ -132,17 +143,9 @@ $response->html = '
                                 <div class="col-md-3">
                                     <div class="input-group mb-3" title="Number of Slots / Lessons per day">
                                         <div class="input-group-prepend">
-                                            <span class="input-group-text">Slots<span class="required">*</span></span>
+                                            <span class="input-group-text">Slots per day <span class="required">*</span></span>
                                         </div>
                                         <input type="number" pattern="[0-9]{1,2}" value="'.($d_slots ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="slots" id="slots">
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="input-group mb-3" title="Number of Days in the Week for Class">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Days<span class="required">*</span></span>
-                                        </div>
-                                        <input type="number" pattern="[0-7]{1,2}" value="'.($d_days ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="days" id="days">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -153,6 +156,29 @@ $response->html = '
                                         <input type="number" pattern="[0-9]{2,}" value="'.($d_duration ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="duration" id="duration">
                                     </div>
                                     <input type="hidden" hidden name="timetable_id" id="timetable_id" value="'.$timetable_id.'">
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="font-14 text-uppercase mt-0 mb-2 font-weight-bold mb-0">EXPECTED DAYS</div>
+                                    '.implode(" ", array_map(function($day) use ($expected_days, $timetable_id) {
+                                    return "
+                                        <div style='padding-left: 2.5rem;' class='custom-control cursor col-lg-12 custom-switch switch-primary'>
+                                            <input onchange='return update_expected_days(\"{$timetable_id}\", \"timetable\");' type='checkbox' name='expected_days[]' value='".ucfirst($day)."' class='custom-control-input cursor' id='".$day."' ".(in_array($day, $expected_days) ? "checked='checked'" : null).".>
+                                            <label class='custom-control-label cursor text-black' for='".$day."'>".$day."</label>
+                                        </div>";
+                                    }, $daysOfWeek)).'
+                                </div>
+                                <div class="col-lg-12 mt-2"><h5 class="form-heading border-bottom pb-2 mb-3">Break Times</h5></div> 
+                                <div class="col-md-3">
+                                    '.time_slots_builder("first_break_starts", ($data->first_break_starts ?? null)).'
+                                </div>
+                                <div class="col-md-3">
+                                    '.time_slots_builder("first_break_ends", ($data->first_break_ends ?? null)).'
+                                </div>
+                                <div class="col-md-3">
+                                    '.time_slots_builder("second_break_starts", ($data->second_break_starts ?? null)).'
+                                </div>
+                                <div class="col-md-3">
+                                    '.time_slots_builder("second_break_ends", ($data->second_break_ends ?? null)).'
                                 </div>
                                 <div class="col-lg-12 text-right">
                                     <button onclick="return save_Timetable_Record()" class="btn btn-outline-success">Save Timetable</button>

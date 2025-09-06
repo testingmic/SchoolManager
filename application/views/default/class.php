@@ -92,7 +92,7 @@ if(!empty($item_id)) {
                 $debt = $student->debt ?? 0;
 
                 // add up the values
-                $amount_due += $debt + $student->amount_paid;
+                $amount_due += $debt + ($student->amount_paid ?? 0);
                 $amount_paid += $student->amount_paid ?? 0;
                 $arrears += $student->arrears ?? 0;
                 $balance += $debt;

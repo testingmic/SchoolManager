@@ -143,7 +143,7 @@ class Timetable extends Myschoolgh {
         try {
 
             // confirm that the timetable_id is parsed
-            if(isset($params->timetable_id)) {
+            if(!empty($params->timetable_id)) {
                 // assign
                 $item_id = $params->timetable_id;
                 // check if a record exist
@@ -168,6 +168,12 @@ class Timetable extends Myschoolgh {
             // convert to array
             $disabled_inputs =  isset($params->disabled_inputs) ? $this->stringToArray($params->disabled_inputs) : [];
 
+            // expected days
+            $expected_days = !empty($params->expected_days) ? $params->expected_days : $this->default_opening_days;
+
+            // set the days
+            $params->days = count($expected_days);
+
             // clean input
             if( !is_numeric($params->days) || !is_numeric($params->slots) || !is_numeric($params->duration)) {
                 return ["code" => 400, "data" => "Sorry! The days, slots and duration must be a valid numeric integers."];
@@ -181,13 +187,20 @@ class Timetable extends Myschoolgh {
                 return ["code" => 400, "data" => "Sorry! The maximum number of Allocations must be 180  ie 9 rows & 20 columns."];
             }
 
+            $expected_days = !empty($params->expected_days) ? json_encode($params->expected_days) : 0;
+
             // update the record if found
             if($isFound) {
                 $stmt = $this->db->prepare("
                     UPDATE timetables SET 
                         days = ?, slots = ?, duration = ?, start_time = ?, disabled_inputs = ?
-                        ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
-                        ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
+                        ".(!empty($params->name) ? ", name = '{$params->name}'" : null)."
+                        ".(!empty($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
+                        ".(!empty($expected_days) ? ", expected_days = '{$expected_days}'" : null)."
+                        ".(!empty($params->first_break_starts) ? ", first_break_starts = '{$params->first_break_starts}'" : null)."
+                        ".(!empty($params->first_break_ends) ? ", first_break_ends = '{$params->first_break_ends}'" : null)."
+                        ".(!empty($params->second_break_starts) ? ", second_break_starts = '{$params->second_break_starts}'" : null)."
+                        ".(!empty($params->second_break_ends) ? ", second_break_ends = '{$params->second_break_ends}'" : null)."
                     WHERE item_id = ? AND client_id = ? LIMIT 1
                 ");
                 $stmt->execute([$params->days, $params->slots, $params->duration, 
@@ -200,10 +213,15 @@ class Timetable extends Myschoolgh {
                     INSERT INTO timetables SET 
                         days = ?, slots = ?, duration = ?, start_time = ?, 
                         disabled_inputs = ?, item_id = ?, client_id = ?
-                        ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
-                        ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
-                        ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
-                        ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
+                        ".(!empty($params->name) ? ", name = '{$params->name}'" : null)."
+                        ".(!empty($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
+                        ".(!empty($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                        ".(!empty($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
+                        ".(!empty($expected_days) ? ", expected_days = '{$expected_days}'" : null)."
+                        ".(!empty($params->first_break_starts) ? ", first_break_starts = '{$params->first_break_starts}'" : null)."
+                        ".(!empty($params->first_break_ends) ? ", first_break_ends = '{$params->first_break_ends}'" : null)."
+                        ".(!empty($params->second_break_starts) ? ", second_break_starts = '{$params->second_break_starts}'" : null)."
+                        ".(!empty($params->second_break_ends) ? ", second_break_ends = '{$params->second_break_ends}'" : null)."
                 ");
                 $stmt->execute([$params->days, $params->slots, $params->duration, $params->start_time, 
                     json_encode($disabled_inputs), $item_id, $params->clientId]);
