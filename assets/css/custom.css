@@ -23,25 +23,6 @@ body .btn {
     width: 100px;
 }
 
-#new_custom_timetable .celler {
-    display: table-cell;
-    position: relative;
-    height: 65px;
-    min-width: 60px;
-    max-width: 100px;
-    color: #000;
-    font-weight: bold;
-    box-shadow: rgb(205, 205, 205) 0px 0px 25px inset;
-    vertical-align: middle;
-    text-align: center;
-    cursor: pointer;
-    background: padding-box padding-box rgb(250, 250, 250);
-    border-width: 1px !important;
-    border-style: solid !important;
-    border-color: rgb(167, 167, 167) !important;
-    border-image: initial !important;
-}
-
 .navbar {
     height: 75px;
 }

@@ -23,7 +23,7 @@ function time_slots_builder($name, $value = '') {
  * @param string $start_time - Start time (default: 08:00)
  * @return string - HTML table
  */
-function draw_timetable_table($timetable_data, $start_time = '08:00') {
+function draw_timetable_table($timetable_data, $start_time = '08:00', $download = false) {
     // Parse expected days
     $days = json_decode($timetable_data['expected_days'], true);
     $slots = (int)$timetable_data['slots'];
@@ -106,10 +106,35 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
         $current_time = strtotime("+{$duration} minutes", strtotime($slot_start));
         $column_index++;
     }
+
+    $total_items = round(100 / (count($time_slots) + 1));
+    $height = $download ? 50 : 80;
     
     // Generate HTML table
     $html = '<div id="allocate_dynamic_timetable">';
+    $html .= '<style>
+    .celler {
+        display: table-cell;
+        position: relative;
+        min-height: '.$height.'px !important;
+        min-width: 60px;
+        max-width: '.$total_items.'%;
+        color: #000;
+        font-weight: bold;
+        box-shadow: rgb(205, 205, 205) 0px 0px 25px inset;
+        vertical-align: middle;
+        text-align: center;
+        cursor: pointer;
+        background: padding-box padding-box rgb(250, 250, 250);
+        border-width: 1px !important;
+        border-style: solid !important;
+        border-color: rgb(167, 167, 167) !important;
+        border-image: initial !important;
+    }
+    </style>';
     $html .= '<table class="table table-bordered timetable-table">';
+
+    
     
     // Table header
     $html .= '<thead><tr>';
@@ -134,17 +159,17 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
         $key = $key + 1;
         $html .= '<tr>';
         $html .= '<td class="celler day" style="background-color: #e8f5e8; padding: 15px; text-align: center; width: 80px;">';
-        $html .= substr($day, 0, 3); // Show first 3 letters of day
+        $html .= substr($day, 0, 12); // Show first 3 letters of day
         $html .= '</td>';
         
         foreach ($time_slots as $slot) {
             $slot_key = $key . "_" . $slot['slot_number'];
             if ($slot['is_break']) {
-                $html .= '<td class="break-column break-cell blocked" style="background-color: #ffeaa7; padding: 10px; text-align: center; vertical-align: middle; min-width: 60px; min-height: 60px; color: #636e72; font-style: italic;">';
+                $html .= '<td class="break-column break-cell blocked" style="background-color: #ffeaa7; padding: 10px; text-align: center; vertical-align: middle; min-width: '.$height.'px; height: '.$height.'px; color: #636e72; font-style: italic;">';
                 $html .= $slot['break_name'];
             } else {
                 $slot_id = strtolower($day) . '_' . $slot['slot_number'];
-                $html .= '<td valign="middle" class="celler" id="'.$slot_key.'" style="text-align: center; padding: 5px; vertical-align: middle; min-height: 60px;" ';
+                $html .= '<td valign="middle" class="celler" id="'.$slot_key.'" style="text-align: center; padding: 5px; vertical-align: middle; " ';
                 $html .= 'id="' . $slot_id . '" data-day="' . strtolower($day) . '" data-slot="' . $slot['slot_number'] . '" data-slot_key="' . $slot_key . '">';
                 $html .= "<div class='d-flex align-items-center justify-content-center' style='font-size: 13px;' class='w-100 font-bold h-100' id='{$slot_key}' data-slot_item='column'>";
                 foreach(($allocations[$slot_key] ?? []) as $allocation) {

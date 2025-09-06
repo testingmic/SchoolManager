@@ -1448,116 +1448,37 @@ class Timetable extends Myschoolgh {
             } else {
                 $html_table = "<style>#t_table tr td, #t_table tr td {border:1px dashed #ccc;}</style>\n";
             }
-            $html_table .= $summary.'<table class="'.$table_class.'" id="t_table" width="100%" cellpadding="0px" style="margin: auto auto;" cellspacing="0px">'."\n";
-            $html_table .= "<tr ".(isset($params->height) && $params->height ? "style='height:{$params->height}px'" : "").">\n\t<td width=\"{$width}%\"></td>\n";
-            $start_time = $data->start_time;
-            
-            // generate the header
-            for($i = 0; $i < $slots; $i++) {
-                // set the start time
-                $start_time = date("h:i A", strtotime($start_time));
-                $end_time = $this->add_time($start_time, $data->duration);
 
-                // show the time
-                $html_table .= "\t<td width=\"{$width}%\" style=\"background-color:#607d8b;font-size:12px;color:#fff\">
-                    <div align=\"center\"><strong>{$start_time}</strong><br>-<br><strong>{$end_time}</strong></div>
-                </td>\n";
-                $start_time = $end_time;
-            }
-            $html_table .= "</tr>\n";
-
-            // days of the week
-            $d_style = "style=\"background-color:#795548;font-weight:bold;font-size:12px;text-align:center;color:#fff;".(isset($params->height) && $params->height ? "height:{$params->height}px;" : "")."\"";
-
-            // set the array of days
-            $days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
-            // some more features
-            $filters = [
-                "yesterday" => date("l", strtotime("-1 day")),
-                "today" => date("l"),
-                "tomorrow" => date("l", strtotime("+1 day"))
+            // Prepare data array for the function
+            $timetable_array = [
+                'id' => $data->item_id,
+                'name' => $data->name,
+                'days' => $data->days,
+                'slots' => $data->slots,
+                'duration' => $data->duration,
+                'class_id' => $data->class_id,
+                'expected_days' => $data->expected_days,
+                'timetable_allocations' => $data->allocations,
+                'first_break_starts' => $data->first_break_starts ?? '10:00',
+                'first_break_ends' => $data->first_break_ends ?? '10:30',
+                'second_break_starts' => $data->second_break_starts ?? '12:30',
+                'second_break_ends' => $data->second_break_ends ?? '13:30'
             ];
+            
+            // Get start time from data or default to 08:00
+            $start_time = isset($data->start_time) ? date("H:i", strtotime($data->start_time)) : '08:00';
 
-            // init
-            $t_course_ids = [];        
-            // loop through all the allocations
-            if(isset($data->allocations)) {
-                foreach($data->allocations as $allot) {
-                    foreach($allot as $all) {
-                        $t_course_ids[] = $all->course_id;
-                    }
-                }
-            }
-            $course_ids = array_unique($t_course_ids);
+            $html_table .= $summary.'<table class="'.$table_class.'" id="t_table" width="100%" cellpadding="0px" style="margin: auto auto;" cellspacing="0px">'."\n";
+            $html_table .= "<tr ".(isset($params->height) && $params->height ? "style='height:{$params->height}px'" : "").">\n";
+            // $start_time = $data->start_time;
+            $html_table .= "<td>";
 
-            // set
-            $color_set = [];
+            // Call the timetable drawing function
+            $html_table .= draw_timetable_table($timetable_array, $start_time, true);
 
-            // color coding
-            foreach($course_ids as $key => $each) {
-                $color_set[$each] = $this->color_set[$key] ?? null;
-            }
-
-            // if the allocations is not empty
-            if(!empty($data->allocations)) {
-                
-                // loop through each day
-                for ($d = 0; $d < $data->days; $d++) {
-
-                    // if not today only 
-                    if(!$todayOnly || ($todayOnly && $days[$d] == $filters[$todayOnly])) {
-
-                        // set the begining of the table
-                        $row = "<tr>\n";
-
-                        // set the day name of the week
-                        $row .= "\t<td {$d_style}>".($days[$d] ?? null)."</td>\n";
-
-                        // loop through the slots
-                        for ($i = 0; $i < $slots; $i++) {
-                            
-                            // set the key
-                            $course = "";
-                            $bg_color = "style=\"padding:10px\"";
-                            $key = ($d + 1)."_".($i + 1);
-
-                            // get the data
-                            $allocation = isset($data->allocations[$key]) ? $data->allocations[$key] : [];
-                            
-                            // loop through each allocation for the day
-                            foreach($allocation as $akey => $cleaned) {
-                                
-                                // set the information to display
-                                if(!empty($cleaned)) {
-                                    $bg_color = "style=\"padding:5px;font-size:13px;background-color:".($color_set[$cleaned->course_id] ?? "#000").";color:#fff\"";
-                                    $info = !$codeOnly ? $cleaned->course_name. " (" : null; 
-                                    $info .= "<strong>{$cleaned->course_code}</strong>";
-                                    $info .= !$codeOnly ? " )" : null; 
-                                    // $info .= ($akey !== (count($allocation) - 1)) ? "<hr>" : null;
-                                    $course .=  "<div {$bg_color}>{$info}</div>";
-                                }
-                                if(in_array($key, $data->disabled_inputs)) {
-                                    $bg_color = "style=\"padding:5px;background-color:#cccccc;color:#888888;\"";
-                                    $course .=  "<div {$bg_color}>DISABLED</div>";
-                                }
-                                
-                            }
-
-                            // append the information
-                            $row .= "\t<td {$bg_color} align=\"center\">{$course}</td>\n";
-
-                        }
-
-                        $row .= "</tr>\n";
-                        $html_table .= $row;
-                    
-                    }
-                }
-            } else {
-                $slots = $slots+1;
-                $html_table .= "<tr><td align=\"center\" colspan=\"{$slots}\">No timetable record for today was found in the database.</td></tr>";
-            }
+            $html_table .= "</td>\n";
+            $html_table .= "</tr>\n";
+            $html_table .= "</table>";
 
             $html_table .= "</table>";
         }
