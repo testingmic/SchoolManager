@@ -7,14 +7,37 @@ body .btn {
 }
 
 .main-background {
-    /* background-color: #fafafa; */
     background-image: url(../img/pattern.png);
     background-position: 0;
-    /* background-repeat: no-repeat; */
     background-size: 45% 100%;
     color: #333;
     display: flex;
     height: 100%;
+}
+
+.new_custom_timetable .cell.day {
+    background: rgba(235, 249, 163, 0.9) padding-box !important;
+    box-shadow: 0 0 25px rgba(207, 229, 84, 0.9) inset !important;
+    border: 1px solid rgba(169, 201, 0, 0.9) !important;
+    color: #567D41;
+    width: 100px;
+}
+
+.new_custom_timetable .cell {
+    display: table-cell;
+    position: relative;
+    height: 65px;
+    width: 120px;
+    color: rgb(120, 120, 120);
+    box-shadow: rgb(205, 205, 205) 0px 0px 25px inset;
+    vertical-align: middle;
+    text-align: center;
+    cursor: pointer;
+    background: padding-box padding-box rgb(250, 250, 250);
+    border-width: 1px !important;
+    border-style: solid !important;
+    border-color: rgb(167, 167, 167) !important;
+    border-image: initial !important;
 }
 
 .navbar {

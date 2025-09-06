@@ -37,36 +37,72 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
     
     // Calculate time slots with breaks
     $time_slots = [];
+    $break_columns = [];
     $current_time = strtotime($start_time);
+    $column_index = 0;
     
     for ($i = 0; $i < $slots; $i++) {
         $slot_start = date('H:i', $current_time);
         $slot_end = date('H:i', strtotime("+{$duration} minutes", $current_time));
+        $is_break_before = false;
         
-        // Check if this slot conflicts with breaks
+        // Check if we need to add first break column
         if (($slot_start >= $first_break_start && $slot_start < $first_break_end) ||
             ($slot_end > $first_break_start && $slot_end <= $first_break_end)) {
+            
+            // Add break column if not already added
+            if (!in_array('first_break', $break_columns)) {
+                $time_slots[] = [
+                    'start' => date('h:i A', strtotime($first_break_start)),
+                    'end' => date('h:i A', strtotime($first_break_end)),
+                    'slot_number' => 'break_1',
+                    'is_break' => true,
+                    'break_name' => 'Break'
+                ];
+                $break_columns[] = 'first_break';
+                $column_index++;
+            }
+            
             // Skip to end of first break
             $current_time = strtotime($first_break_end);
             $slot_start = date('H:i', $current_time);
             $slot_end = date('H:i', strtotime("+{$duration} minutes", $current_time));
+            $is_break_before = true;
         }
         
+        // Check if we need to add second break column
         if (($slot_start >= $second_break_start && $slot_start < $second_break_end) ||
             ($slot_end > $second_break_start && $slot_end <= $second_break_end)) {
+            
+            // Add break column if not already added
+            if (!in_array('second_break', $break_columns)) {
+                $time_slots[] = [
+                    'start' => date('h:i A', strtotime($second_break_start)),
+                    'end' => date('h:i A', strtotime($second_break_end)),
+                    'slot_number' => 'break_2',
+                    'is_break' => true,
+                    'break_name' => 'Lunch Break'
+                ];
+                $break_columns[] = 'second_break';
+                $column_index++;
+            }
+            
             // Skip to end of second break
             $current_time = strtotime($second_break_end);
             $slot_start = date('H:i', $current_time);
             $slot_end = date('H:i', strtotime("+{$duration} minutes", $current_time));
+            $is_break_before = true;
         }
         
         $time_slots[] = [
             'start' => date('h:i A', strtotime($slot_start)),
             'end' => date('h:i A', strtotime($slot_end)),
-            'slot_number' => $i + 1
+            'slot_number' => $i + 1,
+            'is_break' => false
         ];
         
         $current_time = strtotime("+{$duration} minutes", strtotime($slot_start));
+        $column_index++;
     }
     
     // Generate HTML table
@@ -74,11 +110,17 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
     
     // Table header
     $html .= '<thead><tr>';
-    $html .= '<th style="background-color: #f8f9fa; padding: 10px; text-align: center; font-weight: bold;"></th>';
+    $html .= '<th style="background-color: #f8f9fa; padding: 10px; text-align: center;"></th>';
     
     foreach ($time_slots as $slot) {
-        $html .= '<th style="background-color: #f8f9fa; padding: 8px; text-align: center; font-size: 12px; min-width: 120px;">';
-        $html .= $slot['start'] . '<br>' . $slot['end'];
+        if ($slot['is_break']) {
+            $html .= '<th class="break-column" style="background-color: #ffeaa7; padding: 8px; text-align: center; font-size: 12px; min-width: 120px; color: #2d3436;">';
+            $html .= $slot['break_name'] . '<br>';
+            $html .= '<small>(' . $slot['start'] . ' - ' . $slot['end'] . ')</small>';
+        } else {
+            $html .= '<th class="cell">';
+            $html .= $slot['start'] . '<br>' . $slot['end'];
+        }
         $html .= '</th>';
     }
     $html .= '</tr></thead>';
@@ -87,14 +129,19 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
     $html .= '<tbody>';
     foreach ($days as $day) {
         $html .= '<tr>';
-        $html .= '<td style="background-color: #e8f5e8; padding: 15px; text-align: center; font-weight: bold; width: 80px;">';
+        $html .= '<td class="cell day" style="background-color: #e8f5e8; padding: 15px; text-align: center; width: 80px;">';
         $html .= substr($day, 0, 3); // Show first 3 letters of day
         $html .= '</td>';
         
         foreach ($time_slots as $slot) {
-            $slot_id = strtolower($day) . '_' . $slot['slot_number'];
-            $html .= '<td style="padding: 20px; text-align: center; vertical-align: middle; min-height: 60px;" ';
-            $html .= 'id="' . $slot_id . '" data-day="' . strtolower($day) . '" data-slot="' . $slot['slot_number'] . '">';
+            if ($slot['is_break']) {
+                $html .= '<td class="break-column break-cell" style="background-color: #ffeaa7; padding: 20px; text-align: center; vertical-align: middle; min-height: 60px; color: #636e72; font-style: italic;">';
+                $html .= $slot['break_name'];
+            } else {
+                $slot_id = strtolower($day) . '_' . $slot['slot_number'];
+                $html .= '<td style="padding: 20px; text-align: center; vertical-align: middle; min-height: 60px;" ';
+                $html .= 'id="' . $slot_id . '" data-day="' . strtolower($day) . '" data-slot="' . $slot['slot_number'] . '">';
+            }
             $html .= '</td>';
         }
         $html .= '</tr>';
