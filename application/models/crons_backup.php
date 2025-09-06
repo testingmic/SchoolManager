@@ -93,9 +93,6 @@ class Backup {
         // loop through each client data
         $today_file = "{$this->systemRoot}backups/myschool/myschoolgh_".date("Y-m-d_H").".json";
 
-        var_dump($today_file);
-        var_dump(is_writable(dirname($today_file)));
-
         $json = json_encode($clients_db, JSON_PRETTY_PRINT | JSON_PARTIAL_OUTPUT_ON_ERROR);
         if ($json === false) {
             die("JSON encode failed: " . json_last_error_msg());
