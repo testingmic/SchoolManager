@@ -56,13 +56,15 @@ class Backup {
 
         // loop through the tables list
         while($table = $query_list->fetch_row()) {
-            print_r($table);
         	foreach($table as $key => $value) {
         		if( (strpos($value, "wn_") === false) && (!in_array($value, $this->global_tables))) {
 		            $tables_array[] = $value;
 		        }
             }
         }
+
+        print_r($tables_array);
+        die();
 
     	// initialize the client data content
     	$clients_db = [];
