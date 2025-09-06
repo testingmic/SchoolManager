@@ -78,12 +78,12 @@ class Backup {
                         );
                         $clients_db[$table][$key] = $result;
                     }
-                    print_r($clients_db);
-                    die();
                 } catch(\Exception $e) {
                     print $e->getMessage()."\n";
                 }
             }
+            print_r($clients_db);
+            die();
         } catch(\Exception $e) {
             print $e->getMessage()."\n";
         }
