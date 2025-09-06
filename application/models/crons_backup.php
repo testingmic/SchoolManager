@@ -92,7 +92,7 @@ class Backup {
         
         // loop through each client data
         $today_file = "{$this->systemRoot}backups/myschool/myschoolgh_".date("Y-m-d_H").".json";
-        file_put_contents($today_file, json_encode($clients_db ?? []));
+        file_put_contents($today_file, json_encode($clients_db ?? ['backup' => []]));
         
         print "Backup completed successfully.\n";
     }
