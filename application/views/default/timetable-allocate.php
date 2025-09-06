@@ -132,7 +132,36 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                                             <div class="col-lg-12">
                                                 <div class="row">
                                                     <div class="col-lg-12 table-responsive timetable">
-                                                        <div id="dynamic_timetable"></div>
+                                                        <div id="dynamic_timetable"></div>';
+                                                        
+                                                        // Add new custom timetable section
+                                                        $response->html .= '<div id="new_custom_timetable" class="mt-4" '.(!$timetable_id ? 'style="display:none;"' : '').'>
+                                                            <h5 class="mb-3">Custom Timetable Layout</h5>';
+                                                        
+                                                        if(!empty($data)) {
+                                                            // Prepare data array for the function
+                                                            $timetable_array = [
+                                                                'id' => $data->item_id,
+                                                                'name' => $data->name,
+                                                                'days' => $data->days,
+                                                                'slots' => $data->slots,
+                                                                'duration' => $data->duration,
+                                                                'class_id' => $data->class_id,
+                                                                'expected_days' => $data->expected_days,
+                                                                'first_break_starts' => $data->first_break_starts ?? '10:00',
+                                                                'first_break_ends' => $data->first_break_ends ?? '10:30',
+                                                                'second_break_starts' => $data->second_break_starts ?? '12:30',
+                                                                'second_break_ends' => $data->second_break_ends ?? '13:30'
+                                                            ];
+                                                            
+                                                            // Get start time from data or default to 08:00
+                                                            $start_time = isset($data->start_time) ? date("H:i", strtotime($data->start_time)) : '08:00';
+                                                            
+                                                            // Call the timetable drawing function
+                                                            $response->html .= draw_timetable_table($timetable_array, $start_time);
+                                                        }
+                                                        
+                                                        $response->html .= '</div>
                                                     </div>
                                                     <div class="col-lg-12 '.(!$timetable_id ? "hidden" : "").' text-center mt-2">
                                                         <button id="save_TimetableAllocation" onclick="return save_TimetableAllocation()" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Timetable</button>
