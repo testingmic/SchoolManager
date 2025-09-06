@@ -56,9 +56,18 @@ var save_Timetable_Record = () => {
                 days = parseInt($(`div[id="timetable_form"] input[name="days"]`).val()),
                 duration = parseInt($(`div[id="timetable_form"] input[name="duration"]`).val()),
                 start_time = $(`div[id="timetable_form"] input[name="start_time"]`).val(),
-                timetable_id = $(`div[id="timetable_form"] input[name="timetable_id"]`).val();
+                timetable_id = $(`div[id="timetable_form"] input[name="timetable_id"]`).val(),
+                expected_days = $(`input[name="expected_days[]"]:checked`).map((index, element) => $(element).val()).get(),
+                first_break_starts = $(`div[id="timetable_form"] input[name="first_break_starts"]`).val(),
+                first_break_ends = $(`div[id="timetable_form"] input[name="first_break_ends"]`).val(),
+                second_break_starts = $(`div[id="timetable_form"] input[name="second_break_starts"]`).val(),
+                second_break_ends = $(`div[id="timetable_form"] input[name="second_break_ends"]`).val();
 
-            let data = { slots, name, class_id, days, duration, start_time, disabled_inputs, timetable_id };
+            let data = { 
+                slots, name, class_id, days, duration, start_time, disabled_inputs, 
+                timetable_id, expected_days, first_break_starts, first_break_ends, 
+                second_break_starts, second_break_ends 
+            };
 
             $.post(`${baseUrl}api/timetable/save`, data).then((response) => {
                 swal({

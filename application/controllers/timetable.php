@@ -142,6 +142,10 @@ class Timetable extends Myschoolgh {
 
         try {
 
+            if(empty($params->name)) {
+                return ["code" => 400, "data" => "Sorry! The name is required"];
+            }
+
             // confirm that the timetable_id is parsed
             if(!empty($params->timetable_id)) {
                 // assign

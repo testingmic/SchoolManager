@@ -57,37 +57,9 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
     }
     $timetable_list = load_class("timetable", "controllers", $params)->list($params);
 
-    // run this section if $timetable_id is not empty
-    if(!empty($timetable_id)) {
-
-        // if the table is not empty
-        if(!empty($timetable_list["data"])) {
-            
-            // get the first item
-            $data = $timetable_list["data"][$timetable_id] ?? null;
-            
-            // if the data is not empty
-            if(!empty($data)) {
-                // set the timetable id in session
-                $session->set("last_TimetableId", $timetable_id);
-
-                // set the found variable to true
-                $timetable_found = true;
-                
-                // reassign variables
-                $d_name = $data->name;
-                $d_time = $data->start_time;
-                $d_slots = $data->slots;
-                $d_days = $data->days;
-                $d_duration = $data->duration;
-                $disabled_inputs = $data->disabled_inputs;
-                $class_id = $data->class_id;
-            }
-        }
-    } else {
-        // set the timetable key
-        $timetable_list = $timetable_list["data"];
-    }
+    // set the timetable key
+    $timetable_list = $timetable_list["data"];
+    $columns_to_show = ['slots', 'days', 'start_time', 'duration', 'first_break_starts', 'first_break_ends', 'second_break_starts', 'second_break_ends'];
 
     $n_string = $disabled_inputs;
 
@@ -117,36 +89,36 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
                                 } else {
                                     $response->html .= '<div class="row">';
                                     foreach($timetable_list as $key => $value) {
+
+                                        // expected days
+                                        $expected_days = json_decode($value->expected_days, true);
+
                                         $response->html .= "
                                         <div data-row_id=\"{$value->item_id}\" class='col-lg-3 col-md-4 col-sm-6 col-12 rounded-2xl transition-all duration-300 hover:-translate-y-1'>
                                             <div class='card'>
+                                                <div class='card-header'>
+                                                    <h5 class='card-title font-weight-normal mb-0'>{$value->name}</h5>
+                                                </div>
                                                 <div class='card-body'>
                                                     <div data-row_id=\"{$value->item_id}\">
-                                                        <p class='clearfix pb-0 mb-0'>
-                                                            <span class='float-left font-weight-bolder'>Name</span>
-                                                            <span class='float-right'>{$value->name}</span>
-                                                        </p>
                                                         ".($value->class_name ? 
                                                             "<p class='clearfix pb-0 mb-0'>
                                                                 <span class='float-left font-weight-bolder'>Class</span>
                                                                 <span class='float-right'>{$value->class_name}</span>
                                                             </p>" : ""
-                                                        )."
+                                                        );
+                                                        foreach($columns_to_show as $key) {
+                                                            $key_name = ucfirst(str_ireplace("_", " ", $key));
+                                                            $response->html .= "
+                                                            <p class='clearfix pb-0 mb-0'>
+                                                                <span class='float-left font-weight-bolder'>{$key_name}</span>
+                                                                <span class='float-right'>{$value->{$key}}</span>
+                                                            </p>";
+                                                        }
+                                                        $response->html .= "
                                                         <p class='clearfix pb-0 mb-0'>
-                                                            <span class='float-left font-weight-bolder'>Slots</span>
-                                                            <span class='float-right'>{$value->slots}</span>
-                                                        </p>
-                                                        <p class='clearfix pb-0 mb-0'>
-                                                            <span class='float-left font-weight-bolder'>Days</span>
-                                                            <span class='float-right'>{$value->days}</span>
-                                                        </p>
-                                                        <p class='clearfix pb-0 mb-0'>
-                                                            <span class='float-left font-weight-bolder'>Start Time</span>
-                                                            <span class='float-right'>{$value->start_time}</span>
-                                                        </p>
-                                                        <p class='clearfix pb-0 mb-0'>
-                                                            <span class='float-left font-weight-bolder'>Duration</span>
-                                                            <span class='float-right'>{$value->duration} minutes</span>
+                                                            <span class='float-left font-weight-bolder'>Expected Days</span>
+                                                            <span class='float-right'>".( !empty($expected_days) ? implode("<br> ", $expected_days) : "N/A")."</span>
                                                         </p>
                                                         <p class='clearfix pb-0 mb-2 mt-2 text-right'>
                                                             <a href='#' onclick='return delete_record(\"{$value->item_id}\", \"timetable\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a>
@@ -162,44 +134,6 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
                                 }
                                 $response->html .= '
                                 </div>';
-                            }
-                            if($timetable_found) {
-                                $response->html .= '
-                                <div class="col-lg-12">
-                                    <div class="row">
-                                        <div class="col-lg-12 table-responsive timetable">
-                                            <div id="dynamic_timetable"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-12 mt-3" id="legend">
-                                    <div class="row">
-                                        <div class="col-lg-2 mt-3">
-                                            <div title="Click on a slot to disable or enable" class="card mb-3">
-                                                <div class="card-body bg-blue text-center">
-                                                    <strong>Active</strong>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-2 mt-3">
-                                            <div class="card">
-                                                <div title="Click on a slot to disable or enable" class="card-body bg-grey text-center">
-                                                    <strong>Disabled</strong>
-                                                    <input type="hidden" hidden name="timetable_id" id="timetable_id" value="'.$timetable_id.'">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="text-center col-lg-8 mt-3">
-                                            <div class="d-flex justify-content-around">
-                                                '.($isPermitted ? '<div><a href="'.$baseUrl.'timetable-allocate/'.$timetable_id.'" class="btn btn-outline-warning pt-3 pb-3"><i class="fa fa-copy"></i> Allocate Timetable</a></div>' : null).'
-                                                <div><button onclick="return save_Timetable_Record()" class="btn btn-outline-success pt-3 pb-3"><i class="fa fa-save"></i> Update Timetable</button></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div id="disabledSlots" data-disabled_inputs=\''.json_encode($n_string).'\'>';
-                                    foreach($disabled_inputs as $input) {
-                                        $response->html .= "<input name='{$input}' type='hidden' value='disabled'>";
-                                    }
                             }
                             $response->html .= '
                                 </div>

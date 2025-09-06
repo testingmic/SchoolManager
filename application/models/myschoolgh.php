@@ -104,7 +104,7 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("ALTER TABLE timetables ADD COLUMN expected_days VARCHAR(255) DEFAULT 'Monday,Tuesday,Wednesday,Thursday,Friday'");
+		$fix[] = ("ALTER TABLE timetables ADD COLUMN expected_days VARCHAR(255) DEFAULT '".json_encode($this->default_opening_days)."'");
 		$fix[] = ("ALTER TABLE timetables ADD COLUMN first_break_starts VARCHAR(255) DEFAULT NULL");
 		$fix[] = ("ALTER TABLE timetables ADD COLUMN first_break_ends VARCHAR(255) DEFAULT NULL");
 		$fix[] = ("ALTER TABLE timetables ADD COLUMN second_break_starts VARCHAR(255) DEFAULT NULL");
@@ -112,8 +112,8 @@ class Myschoolgh extends Models {
 
 		foreach($fix as $stmt) {
 			try {
-				// $query = $this->db->prepare($stmt);
-				// $query->execute();
+				$query = $this->db->prepare($stmt);
+				$query->execute();
 			} catch(PDOException $e) {
 				// print $e->getMessage();
 			}

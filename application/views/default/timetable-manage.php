@@ -78,7 +78,7 @@ if(!empty($timetable_id)) {
             $class_id = $data->class_id;
 
             // expected days to be present in school
-            $expected_days = $myClass->stringToArray($data->expected_days);
+            $expected_days = json_decode($data->expected_days, true);
 
             // set the page title
             $pageTitle = "Modify Timetable";
@@ -107,6 +107,9 @@ $response->html = '
                 if($timetable_id && !$timetable_found) {
                     $response->html .= no_record_found("Record Not Found", "The timetable record you are looking for does not exist.", $baseUrl."timetable-manage", "Timetable");
                 } else {
+                    $response->html .= ($timetable_id ? '<div class="col-md-12 mb-2 alert alert-success">
+                        Modify the details of the created timetable with title "'.$d_name.'".
+                    </div>' : null);
                     $response->html .= '
                     <div class="card">
                         <div class="card-body" id="timetable_form">
@@ -151,7 +154,7 @@ $response->html = '
                                 <div class="col-md-3">
                                     <div class="input-group mb-3" title="Duration for each lesson in minutes">
                                         <div class="input-group-prepend">
-                                            <span class="input-group-text">Duration<span class="required">*</span></span>
+                                            <span class="input-group-text">Duration in minutes <span class="required">*</span></span>
                                         </div>
                                         <input type="number" pattern="[0-9]{2,}" value="'.($d_duration ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="duration" id="duration">
                                     </div>
