@@ -373,22 +373,28 @@
             const imgWidth = processedImg.cols;
             
             // Constants based on the actual answer sheet layout
-            const questionsPerColumn = 15;
-            const numColumns = 4;  // 4 columns of 15 questions each
-            const startY = Math.floor(imgHeight * 0.25); // Start after header area
+            const questionsPerColumn = 15;  // 15 questions per column
+            const numColumns = 4;  // 4 columns to get 60 questions total
+            
+            // Calculate the answer section boundaries (approximately 60% of the page height)
+            const startY = Math.floor(imgHeight * 0.55); // Start where the answer section begins
             const endY = Math.floor(imgHeight * 0.95);
             const questionHeight = (endY - startY) / questionsPerColumn;
             
-            // Bubble dimensions based on actual sheet
-            const bubbleWidth = Math.floor(imgWidth * 0.02);
-            const bubbleHeight = Math.floor(questionHeight * 0.4);
-            const bubbleSpacing = Math.floor(bubbleWidth * 1.5);
+            // Log dimensions for debugging
+            console.log({imgHeight, imgWidth, questionsPerColumn, numColumns, startY, endY, questionHeight});
+            
+            // Bubble dimensions based on actual sheet measurements
+            const bubbleWidth = Math.floor(imgWidth * 0.02);  // Smaller bubbles to match sheet
+            const bubbleHeight = Math.floor(questionHeight * 0.5); // Adjust height to match actual bubbles
+            const bubbleSpacing = Math.floor(bubbleWidth * 1.5);  // Closer spacing between options
             
             let totalQuestions = 0;
             
-            // Process four columns of questions
+            // Process two columns of questions
             for (let col = 0; col < numColumns; col++) {
-                const colStartX = Math.floor(imgWidth * (0.15 + col * 0.22)); // Adjust column spacing
+                // Adjust column spacing to match the actual sheet layout
+                const colStartX = Math.floor(imgWidth * (0.2 + col * 0.4)); // More space between columns
                 
                 for (let q = 0; q < questionsPerColumn; q++) {
                     const questionNum = col * questionsPerColumn + q + 1;
@@ -429,7 +435,7 @@
                                 roi.delete();
                                 
                                 // Adjusted threshold for better detection
-                                if (fillRatio > 0.25 && fillRatio > maxFilled) {
+                                if (fillRatio > 0.2 && fillRatio > maxFilled) {  // Lower threshold for better detection
                                     bestAnswer = option;
                                     maxFilled = fillRatio;
                                 }
@@ -440,7 +446,7 @@
                     }
                     
                     detectedAnswers[questionNum] = bestAnswer || '-';
-                    log(`Q${questionNum} - Fill ratios: ${debugInfo.join(', ')} -> Selected: ${bestAnswer || '-'}`);
+                    // log(`Q${questionNum} - Fill ratios: ${debugInfo.join(', ')} -> Selected: ${bestAnswer || '-'}`);
                 }
             }
             
@@ -458,18 +464,18 @@
             // Draw detected bubble regions
             const imgHeight = processedImg.rows;
             const imgWidth = processedImg.cols;
-            const questionsPerColumn = 15;
-            const numColumns = 4;
-            const startY = Math.floor(imgHeight * 0.25);
+            const questionsPerColumn = 30;
+            const numColumns = 2;
+            const startY = Math.floor(imgHeight * 0.45); // Start after index number section
             const endY = Math.floor(imgHeight * 0.95);
             const questionHeight = (endY - startY) / questionsPerColumn;
-            const bubbleWidth = Math.floor(imgWidth * 0.02);
-            const bubbleHeight = Math.floor(questionHeight * 0.4);
-            const bubbleSpacing = Math.floor(bubbleWidth * 1.5);
+            const bubbleWidth = Math.floor(imgWidth * 0.025);
+            const bubbleHeight = Math.floor(questionHeight * 0.6);
+            const bubbleSpacing = Math.floor(bubbleWidth * 1.8);
             
             // Draw grid and detected answers
             for (let col = 0; col < numColumns; col++) {
-                const colStartX = Math.floor(imgWidth * (0.15 + col * 0.22));
+                const colStartX = Math.floor(imgWidth * (0.2 + col * 0.4)); // Match the detection spacing
                 
                 for (let q = 0; q < questionsPerColumn; q++) {
                     const questionNum = col * questionsPerColumn + q + 1;
