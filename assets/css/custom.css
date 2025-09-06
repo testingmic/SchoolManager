@@ -405,6 +405,10 @@ body .btn {
     margin: auto auto;
 }
 
+.hover-background {
+    background-color: #417ff22e !important;
+}
+
 .bg-blue {
     background: #0071f3 !important;
 }

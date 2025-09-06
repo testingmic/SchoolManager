@@ -108,7 +108,8 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
     }
     
     // Generate HTML table
-    $html = '<table class="table table-bordered timetable-table">';
+    $html = '<div id="allocate_dynamic_timetable">';
+    $html .= '<table class="table table-bordered timetable-table">';
     
     // Table header
     $html .= '<thead><tr>';
@@ -139,7 +140,7 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
         foreach ($time_slots as $slot) {
             $slot_key = $key . "_" . $slot['slot_number'];
             if ($slot['is_break']) {
-                $html .= '<td class="break-column break-cell" style="background-color: #ffeaa7; padding: 10px; text-align: center; vertical-align: middle; min-width: 60px; min-height: 60px; color: #636e72; font-style: italic;">';
+                $html .= '<td class="break-column break-cell blocked" style="background-color: #ffeaa7; padding: 10px; text-align: center; vertical-align: middle; min-width: 60px; min-height: 60px; color: #636e72; font-style: italic;">';
                 $html .= $slot['break_name'];
             } else {
                 $slot_id = strtolower($day) . '_' . $slot['slot_number'];
@@ -156,8 +157,9 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
         $html .= '</tr>';
     }
     $html .= '</tbody>';
-    
     $html .= '</table>';
+    $html .= '</div>';
+
     
     return $html;
 }

@@ -132,7 +132,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                                 <div class="col-lg-12" id="new_custom_timetable">
                                     
                                 </div>
-                                <div class="col-lg-12" id="allocate_dynamic_timetable">
+                                <div class="col-lg-12">
                                     <div class="row">
                                         <div class="col-lg-9">
                                             <div class="col-lg-12">
