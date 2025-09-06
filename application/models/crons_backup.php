@@ -85,10 +85,12 @@ class Backup {
                     }
                 } catch(\Exception $e) {}
             }
-        } catch(\Exception $e) {}
+        } catch(\Exception $e) {
+            print $e->getMessage()."\n";
+        }
 
         // loop through each client data
-        $today_file = "{$this->systemRoot}backups/myschool/myschoolgh_".date("Y-m-d_H_i").".json";
+        $today_file = "{$this->systemRoot}backups/myschool/myschoolgh_".date("Y-m-d_H").".json";
         $ft = fopen($today_file, "w");
         fwrite($ft, json_encode($clients_db));
 
