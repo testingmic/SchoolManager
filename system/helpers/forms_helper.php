@@ -108,7 +108,7 @@ function draw_timetable_table($timetable_data, $start_time = '08:00') {
     }
     
     // Generate HTML table
-    $html = '<div id="allocate_dynamic_timetable">';
+    $html = '<div id="allocate_dynamic_timetable" class="hidden">';
     $html .= '<table class="table table-bordered timetable-table">';
     
     // Table header
