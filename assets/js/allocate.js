@@ -13,6 +13,17 @@ $(`div[id="courseScroll"] div[class~="course"]`).draggable({
     stop: function() { }
 });
 
+function processAllocations(item) {
+    $(`div[class="notices_div"]`).html(`<div class="text-warning">The are no nofications to display currently.</div>`);
+    let data = calculateAllocations();
+    $.post(`${baseUrl}api/timetable/validate_allocation`, { data, item }).then((response) => {
+        if(response.code !== 200) {
+            $(`div[class="notices_div"]`).html(`<div class="text-center text-danger">${response.data.result}</div>`);
+            return;
+        }
+    });
+}
+
 var active = $(".celler", "#allocate_dynamic_timetable").not(".disabled,.blank,.day,.time");
 active.droppable({
     drop: function(e, ui) {
@@ -20,14 +31,15 @@ active.droppable({
         $(this).html(inner);
         $.data(this, "content", inner);
         inner.html(ui.draggable.html());
-        $(this).addClass('hover-background');
+        $(this).removeClass('hover-background');
         $("input[name=" + this.id + "]", "#courseAlloc").remove();
         $("#courseAlloc").append('<input type="hidden" name="' + this.id + '" value="' + ui.draggable[0].id + ":" + $(`select[name='t_room_id']`).val() + '">');
-        $.array_stream['timetable_allocations'][this.id] = [{
+        let data = {
             course_id: ui.draggable[0].id,
             room_id: $(`select[name='t_room_id']`).val()
-        }];
-        $(this).click();
+        };
+        $.array_stream['timetable_allocations'][this.id] = [data];
+        processAllocations(data);
     },
     over: function(e, ui) {
         $(this).addClass('hover-background').addClass('border-3px');
@@ -42,6 +54,7 @@ active.dblclick(function() {
     $(this).html('');
     $(this).removeClass('hover-background').removeClass('border-3px');
     $("input[name=" + this.id + "]", "#courseAlloc").remove();
+    processAllocations({});
 });
 
 $("input", "#courseAlloc").each(function() {
@@ -51,37 +64,35 @@ $("input", "#courseAlloc").each(function() {
         i = course.index() % colors.length;
     slot.html(inner);
     inner.html(course.html());
-    slot.css('background-color', colors[i][0]);
-    slot.css('box-shadow', '0 0 25px ' + colors[i][1] + ' inset');
 });
 colorCourses();
 
-var save_TimetableAllocation = () => {
-
+const calculateAllocations = () => {
     let finalAllocations = {};
-
-    let save_button = $(`button[id="save_TimetableAllocation"]`);
-
     let stream_data = $.array_stream['timetable_allocations'];
     $.each($('td[data-slot_key] div.course_holder'), function(i, v) {
         let td = $(this).closest('td');
         let slot_key = td.data('slot_key');
         let room = stream_data?.[slot_key]?.[0]['room_id'] || null;
         let course = stream_data?.[slot_key]?.[0]['course_id'] || null;
+        let course_name = stream_data?.[slot_key]?.[0]['course_name'] || null;
         finalAllocations[i] = {
             slot: slot_key,
+            course: course_name,
             weekday: td.data('day'),
             value: `${course}:${room}`
         };
     });
 
-    let data = {
+    return {
         query: "allocation",
         allocations: finalAllocations,
         timetable_id: $(`input[name="timetable_id"]`).val(),
         class_id: $(`input[name="t_class_id"]`).val()
     };
+}
 
+var save_TimetableAllocation = () => {
     swal({
         title: "Save Timetable",
         text: "Do you want to proceed to save changes made to this timetable?",
@@ -90,6 +101,8 @@ var save_TimetableAllocation = () => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            let data = calculateAllocations();
+            let save_button = $(`button[id="save_TimetableAllocation"]`);
             $(`div[class="notices_div"]`).html(`Processing request... <i class="fa fa-spin fa-spinner"></i>`);
             save_button.prop({ "disabled": true });
             save_button.html(`Saving.. <i class="fa fa-spin fa-spinner"></i>`);

@@ -789,7 +789,7 @@ if(!empty($user_id)) {
                             </div>
                         </div>
                         <div class="tab-pane '.($url_link === "documents" ? "show active" : null).' fade" id="documents" role="tabpanel" aria-labelledby="documents-tab2">
-                            <div>
+                            <div class="mb-2 w-100">
                                 <div class="d-flex justify-content-between">
                                     <div><h5>STUDENT DOCUMENTS</h5></div>
                                     '.($isAdminAccountant ? 
@@ -798,7 +798,7 @@ if(!empty($user_id)) {
                                 </div>
                             </div>
                             <div data-ebook_resource_list="'.$user_id.'">
-                                '.($attachment_html ? $attachment_html : "No documents uploaded yet.").'
+                                '.($attachment_html ? $attachment_html : no_record_found("No Documents Uploaded", "No documents uploaded yet.", null, "Documents", false, "fa fa-file-alt")).'
                             </div>
                         </div>
                         <div class="tab-pane fade '.($url_link === "timetable" ? "show active" : null).'" id="timetable" role="tabpanel" aria-labelledby="timetable-tab2">
@@ -807,7 +807,7 @@ if(!empty($user_id)) {
                             </div>
                         </div>
                         <div class="tab-pane fade '.($url_link === "incidents" ? "show active" : null).'" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
-                            <div class="d-flex justify-content-between mb-2 w-100">
+                            <div class="d-flex justify-content-between mb-3 w-100">
                                 <div class="mb-2"><h5></h5></div>
                                 '.($addIncident ? '
                                     <div>

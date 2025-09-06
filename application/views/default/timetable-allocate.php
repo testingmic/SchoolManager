@@ -78,6 +78,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
 
             // set the allocations to the array stream
             $response->array_stream['timetable_allocations'] = !empty($timetable_allocations) ? $timetable_allocations : [];
+            $response->array_stream['courses_list'] = $courses_list;
         } else {
             // once again set the $timetable_id == null even if a session has been set 
             $timetable_id = null;

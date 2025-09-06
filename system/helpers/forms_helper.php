@@ -121,7 +121,6 @@ function draw_timetable_table($timetable_data, $start_time = '08:00', $download 
         max-width: '.$total_items.'%;
         color: #000;
         font-weight: bold;
-        box-shadow: rgb(205, 205, 205) 0px 0px 25px inset;
         vertical-align: middle;
         text-align: center;
         cursor: pointer;
@@ -142,11 +141,11 @@ function draw_timetable_table($timetable_data, $start_time = '08:00', $download 
     
     foreach ($time_slots as $slot) {
         if ($slot['is_break']) {
-            $html .= '<th class="break-column" style="background-color: #ffeaa7; padding: 5px; text-align: center; font-size: 13px; min-width: 60px; color: #2d3436;">';
+            $html .= '<th class="break-column" style="background-color: #ffeaa7; padding: 5px; text-align: center; font-size: 13px; min-width: 60px; color: #000;">';
             $html .= $slot['break_name'] . '<br>';
             $html .= '<small>(' . $slot['start'] . ' - ' . $slot['end'] . ')</small>';
         } else {
-            $html .= '<th class="celler" style="padding: 5px; font-weight: normal; color: #000000; font-size: 13px;">';
+            $html .= '<th class="celler" style="padding: 5px; font-weight: normal; color: #fff; background: #03A9F4; font-size: 13px;">';
             $html .= $slot['start'] . '<br>' . $slot['end'];
         }
         $html .= '</th>';
@@ -165,7 +164,7 @@ function draw_timetable_table($timetable_data, $start_time = '08:00', $download 
         foreach ($time_slots as $slot) {
             $slot_key = $key . "_" . $slot['slot_number'];
             if ($slot['is_break']) {
-                $html .= '<td class="break-column break-cell blocked" style="background-color: #ffeaa7; padding: 10px; text-align: center; vertical-align: middle; min-width: '.$height.'px; height: '.$height.'px; color: #636e72; font-style: italic;">';
+                $html .= '<td class="break-column break-cell blocked" style="background-color: #ffeaa7; color: #000; padding: 10px; text-align: center; vertical-align: middle; min-width: '.$height.'px; height: '.$height.'px; font-style: italic;">';
                 $html .= $slot['break_name'];
             } else {
                 $slot_id = strtolower($day) . '_' . $slot['slot_number'];

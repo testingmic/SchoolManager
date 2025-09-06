@@ -415,6 +415,44 @@ class Timetable extends Myschoolgh {
     }
 
     /**
+     * Validate Allocation
+     * 
+     * Validate the allocation of a slot
+     * 
+     * @param String        $params->data["timetable_id"]
+     * @param String        $params->data["allocations"]
+     * @param String        $params->data["slot"]
+     * 
+     * @return Array
+     */
+    public function validate_allocation(stdClass $params) {
+        
+        $daySubjects = [];
+        $dailySubjects = [];
+
+        foreach($params->data["allocations"] as $item) {
+            
+            $slot = $item['slot'];
+            $weekday = $item['weekday'];
+            $course = explode(":", $item['value'])[0];
+
+            $dailySubjects[$weekday][$course][] = $item['course'];
+
+            $daySubjects[$weekday][] = $course;
+        }
+
+        // get the days with the same subject more than once
+        foreach($dailySubjects as $weekday => $subjects) {
+            foreach($subjects as $course => $subject) {
+                if(count($subject) > 1) {
+                    return ["code" => 400, "data" => "Sorry! The subject {$subject[0]} is allocated more than once on {$weekday} same day."];
+                }
+            }
+        }
+        
+    }
+
+    /**
      * Load Class Timetable Record
      * 
      * @param String      $classId
