@@ -341,13 +341,18 @@ class Buses extends Myschoolgh {
             return ["code" => 400, "data" => "User ID is required"];
         }
 
+		global $isSupport;
+
         $explodedUserId = explode(":", $params->user_id);
+
+		// set the where clause
+		$whereClause = $isSupport ? "" : "u.client_id='{$params->clientId}' AND ";
 
         // search for the user
         $users = $this->pushQuery(
             "u.id, u.item_id, u.name, u.gender, u.class_id, u.day_boarder, u.unique_id, u.date_of_birth, u.user_type, u.enrollment_date, c.name AS class_name", 
             "users u LEFT JOIN classes c ON u.class_id=c.id", 
-            "u.client_id='{$params->clientId}' AND u.id='{$explodedUserId[1]}' AND u.user_status='active'"
+            "{$whereClause} u.id='{$explodedUserId[1]}' AND (u.user_status='active' OR u.user_status='Active')"
         );
 
         if(empty($users)) {
@@ -359,7 +364,7 @@ class Buses extends Myschoolgh {
 			$users = $this->pushQuery(
 				"u.id, u.item_id, u.name, u.gender, u.class_id, u.day_boarder, u.unique_id, u.date_of_birth, u.user_type, u.enrollment_date, c.name AS class_name", 
 				"users u LEFT JOIN classes c ON u.class_id=c.id", 
-				"u.client_id='{$params->clientId}' AND u.guardian_id LIKE '%{$users[0]->item_id}%' AND u.user_status='active' AND u.user_type='student'"
+				"{$whereClause} u.guardian_id LIKE '%{$users[0]->item_id}%' AND u.user_status='active' AND u.user_type='student'"
 			);
 		}
 
