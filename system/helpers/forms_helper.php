@@ -215,6 +215,7 @@ function detectClashes($incoming, $courseMap, $existing, $tutors_names = []) {
 
     // Process incoming data
     foreach ($incoming as $item) {
+        if(empty($item['slot'])) continue;
         $slot = $item['slot'];
         $courseId = $item['course_code'];
 

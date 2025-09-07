@@ -4244,7 +4244,7 @@ class Forms extends Myschoolgh {
                 <div class="form-group text-center mb-1">
                     <div class="row">'.$this->form_attachment_placeholder($form_params).'</div>
                 </div>
-            </div>  
+            </div>
             <div class="col-md-12 text-center mb-2">'.$preloaded_attachments.'</div>
 
             <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">NEXT ACADEMIC TERM</h5></div>

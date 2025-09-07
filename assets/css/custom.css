@@ -256,8 +256,15 @@ body .btn {
     transform: scale(1.1);
 }
 
+.footerBanner {
+    display: none;
+}
+
 /* Responsive Enhancements */
 @media (max-width: 768px) {
+    .footerBanner {
+        display: block;
+    }
     .setup-tab-nav .nav-link {
         padding: 8px 16px;
         font-size: 0.875rem;

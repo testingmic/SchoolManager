@@ -34,7 +34,7 @@ $response->scripts = ["assets/js/filters.js", "assets/js/lessons.js"];
 // if the class_id is not empty
 if($isWardParent) {
     $filter->class_id = empty($filter->class_id) ? $session->student_class_id : $filter->class_id;
-    $filter->class_id = array_unique(array_column($defaultUser->wards_list, "class_guid"));
+    $filter->class_id = !empty($defaultUser->wards_list) ? array_unique(array_column($defaultUser->wards_list, "class_guid")) : [];
 }
 
 // the query parameter to load the user information

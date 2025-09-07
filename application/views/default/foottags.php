@@ -24,7 +24,7 @@
             </div>
         </footer>
         <?php } else { ?>
-        <nav id="footerBanner" class="mt-4 bg-white dark:bg-gray-800 shadow-2xl border-t border-gray-200 dark:border-gray-700 fixed bottom-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/95 dark:bg-gray-800/95">
+        <nav id="footerBanner" class="footerBanner mt-4 bg-white dark:bg-gray-800 shadow-2xl border-t border-gray-200 dark:border-gray-700 fixed bottom-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/95 dark:bg-gray-800/95">
             <div class="max-w-7xl mx-auto">
             <div class="flex justify-around">
                 <!-- Home Navigation -->

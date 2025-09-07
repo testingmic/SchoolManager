@@ -510,7 +510,7 @@ class Timetable extends Myschoolgh {
             $tutors_names[$tutor->item_id] = $tutor->name;
         }
 
-        $detectClashes = detectClashes($params->data["allocations"], $course_tutors, $timetable_list, $tutors_names ?? []);
+        $detectClashes = detectClashes(($params->data["allocations"] ?? []), $course_tutors, $timetable_list, $tutors_names ?? []);
 
         return [
             "code" => !empty($errors) ? 400 : 200,

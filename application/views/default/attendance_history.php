@@ -74,8 +74,8 @@ $statistics = [
 
 $users_ids = [$defaultUser->user_row_id];
 if($isWardParent) {
-    $params->user_ids = array_column($defaultUser->wards_list, "id");
-    $users_ids = array_column($defaultUser->wards_list, "id");
+    $params->user_ids = !empty($defaultUser->wards_list) ? array_column($defaultUser->wards_list, "id") : [];
+    $users_ids = !empty($defaultUser->wards_list) ? array_column($defaultUser->wards_list, "id") : [];
     $users_ids[] = $defaultUser->user_row_id;
 }
 
