@@ -909,12 +909,13 @@ class Files extends Myschoolgh {
             $query .= !empty($params->record_id) ? " AND a.record_id = '{$params->record_id}'" : "";
             $query .= !empty($params->created_by) ? " AND a.created_by = '{$params->created_by}'" : "";
             $query .= !empty($params->resource) ? " AND a.resource = '{$params->resource}'" : "";
+            $query .= !empty($params->client_id) ? " AND a.client_id = '{$params->client_id}'" : "";
 
             // specific file type
             $specific_type = isset($params->attachment_type) ? $this->stringToArray($params->attachment_type) : false;
 
             // query the database and return the results
-            $stmt = $this->db->prepare("SELECT description FROM files_attachment a WHERE {$query} ORDER BY a.id DESC LIMIT {$params->limit}");
+            $stmt = $this->db->prepare("SELECT resource, client_id, description FROM files_attachment a WHERE {$query} ORDER BY a.id DESC LIMIT {$params->limit}");
             $stmt->execute([]);
 
             // append to the files list

@@ -170,21 +170,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <span onclick='return view_Event_Details(\"{$event["event_group"]}\", \"{$event["item_id"]}\")' class='badge cursor badge-primary'>Detail</span>
                         </div>
                     </div>
-                </div>
-                <li class='media hidden'>
-                    <div class='media-body' style='flex: 2;'>
-                        <div class='media-title'>
-                            {$event["title"]} ".($event["event_group"] === "holidays_list" ? "<span class='badge p-1 badge-success'>Holiday</span>" : "")."
-                        </div>
-                        <div class='text-job text-muted'>{$event["event_type"]}</div>
-                    </div>
-                    <div class='media-progressbar'>
-                        <div class='progress-text'>".date("jS M Y", strtotime($event["start"]))."</div>
-                    </div>
-                    <div>
-                        <span onclick='return view_Event_Details(\"{$event["event_group"]}\", \"{$event["item_id"]}\")' class='badge cursor badge-primary'>Detail</span>
-                    </div>
-                </li>";
+                </div>";
         }
 
         // if the birthday array is not empty
@@ -287,8 +273,23 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
         "item_id" => $defaultUser->client->client_id
     ];
 
+    /** Set parameters for the data to attach */
+    $files_param = (object) [
+        "userData" => $defaultClientData,
+        "label" => "list",
+        "module" => "settings_calendar",
+        "record_id" => $clientId,
+        "client_id" => $clientId,
+        "limit" => 1,
+        "accept" => implode(",", [".pdf"]),
+        "preview_file" => true
+    ];
+
     // create a new object
     $academi_calendar = load_class("files", "controllers")->list_attachments($files_param);
+
+    // $docs = load_class("files", "controllers")->resource_attachments_list("settings_calendar", $clientId);
+    // print_r($docs);exit;
 
     // set the academic calendar
     $response->array_stream['academic_calendar'] = $academi_calendar;
@@ -328,6 +329,54 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
         $total_amount_due = empty($defaultUser->wards_list_ids) ? 0 : array_sum(array_column($feesAllocation, "amount_due"));
         $total_fees_payments = empty($defaultUser->wards_list_ids) ? 0 : array_sum(array_column($feesAllocation, "amount_paid"));
         $total_outstanding = $total_amount_due - $total_fees_payments;
+
+        // load the calendar
+        $load_calendar = '';
+        foreach(($academi_calendar ?? []) as $each) {
+
+            if($each->is_deleted) continue;
+            // get the download link
+            $file_to_download = base64_encode($each->path."{$myClass->underscores}{$each->record_id}");
+
+            // get the download path
+            $download_path = "{$myClass->baseUrl}download?file={$file_to_download}&preview=1";
+            $view_path = "{$myClass->baseUrl}calendar?file={$file_to_download}";
+
+            $load_calendar .= "
+            <div class='col-lg-12 col-md-12 mb-1'>
+                <div class='flex items-center space-x-3 p-3 mb-2 border rounded-xl'>
+                    <i class='fas fa-check-circle text-blue-500'></i>
+                    <div class='flex items-center justify-between w-100'>
+                        <div class='flex-1'>
+                            <p class='text-sm font-medium text-gray-900'>{$each->name}</p>
+                            <p class='text-xs text-gray-600'>".date("jS M Y", strtotime($each->datetime))."</p>
+                        </div>
+                        <div>
+                            <a class='btn btn-sm btn-outline-primary' target='_blank' title='Click to download {$each->name}' href='{$download_path}'>
+                                <i class='fa fa-download'></i> View
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>";
+        }
+
+        // assign the assignments list
+        $calendar_data = '
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header text-uppercase">
+                    <h4>Academic Calendar</h4>
+                </div>
+                <div class="card-body p-3 pb-0 trix-slim-scroll">
+                    <div class="row">
+                        '.(!empty($load_calendar) ? $load_calendar : 
+                            '<div class="col-lg-12 col-md-12 col-12 col-sm-12 mb-3">'.no_record_found("No Calendar Found", "No calendar has been added to your account yet.", null, "Calendar", false, "fas fa-calendar-check").'</div>'
+                        ).'
+                    </div>
+                </div>
+            </div>
+        </div>';
 
         // load the wards list
         if($isParent) {
@@ -461,8 +510,10 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     $fees_history .= "</tr>";
                 }
 
+                $expenses_list = $calendar_data;
+
                 // assign the assignments list
-                $expenses_list = '<div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                $expenses_list .= '<div class="col-lg-12 col-md-12 col-12 col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4 class="mb-0">Fees Payments History</h4>
@@ -496,54 +547,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 $timetable = $timetableClass->teacher_timetable($defaultUser->user_id, $clientId, "today");
             }
 
-            // load the calendar
-            $load_calendar = '';
-            foreach($academi_calendar as $each) {
-
-                if($each->is_deleted) continue;
-                // get the download link
-                $file_to_download = base64_encode($each->path."{$myClass->underscores}{$each->record_id}");
-
-                // get the download path
-                $download_path = "{$myClass->baseUrl}download?file={$file_to_download}&preview=1";
-                $view_path = "{$myClass->baseUrl}calendar?file={$file_to_download}";
-
-                // load the calendar
-                $load_calendar .= "<div class='col-lg-4 col-md-6 mb-4'>";
-                $load_calendar .= "<div class='border border-blue border-2px p-2 rounded'>";
-                $load_calendar .= "<div class='font-bold uppercase'>{$each->name}</div>";
-                $load_calendar .= "<div class='d-flex justify-content-between'>
-                    <div>
-                        <a class='btn btn-sm btn-outline-primary' title='Click to view {$each->name}' href='{$view_path}'>
-                            <i class='fa fa-eye'></i> View Calendar
-                        </a>
-                    </div>
-                    <div>
-                        <a class='btn btn-sm btn-outline-danger' target='_blank' title='Click to download {$each->name}' href='{$download_path}'>
-                            <i class='fa fa-download'></i> Download
-                        </a>
-                    </div>
-                </div>";
-                $load_calendar .= "<div class='relative'>".date("jS F, Y", strtotime($each->datetime))."</div>";
-                $load_calendar .= "</div>";
-                $load_calendar .= "</div>";
-            }
-
-            // assign the assignments list
-            $assignment_list = !empty($load_calendar) ? '
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header text-uppercase">
-                        <h4>Academic Calendar</h4>
-                    </div>
-                    <div class="card-body pb-0 trix-slim-scroll">
-                        <div class="row">
-                            '.$load_calendar.'
-                        </div>
-                    </div>
-                </div>
-            </div>' : null;
-
+            $assignment_list .= $calendar_data;
             $assignment_list .= '
             <div class="col-lg-12 col-md-12 col-12 col-sm-12">
                 <div class="card">
