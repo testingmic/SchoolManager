@@ -29,16 +29,31 @@ class Buses extends Myschoolgh {
 			$filters .= !empty($params->reg_number) ? " AND a.reg_number = '{$params->reg_number}'" : null;
 			$filters .= !empty($params->clientId) ? " AND a.client_id = '{$params->clientId}'" : null;
 			$filters .= !empty($params->q) ? " AND (a.brand LIKE '%{$params->q}%') " : null;
+		
+			$selectSummary = "";
 			
+			if(!empty($params->account_summary)) {
+				$selectSummary = ",
+				(
+					SELECT SUM(ac.amount) FROM accounts_transaction ac 
+					WHERE ac.item_type = 'Deposit' AND ac.status = '1' AND ac.attach_to_object = 'bus'  AND a.item_id = ac.record_object 
+				) AS income,
+				(
+					SELECT SUM(ac.amount) FROM accounts_transaction ac 
+					WHERE ac.item_type = 'Expense' AND ac.status = '1' AND ac.attach_to_object = 'bus'  AND a.item_id = ac.record_object 
+				) AS expense";
+			}
+
 			// perform the query
 			$stmt = $this->db->prepare("SELECT a.*, u.name AS fullname, u.email, u.username,
 					(
                         SELECT b.description FROM files_attachment b 
                         WHERE b.resource='buses' AND b.record_id = a.item_id 
                         ORDER BY b.id DESC LIMIT 1
-                    ) AS attachment,
-					(SELECT b.name FROM users b WHERE b.item_id = a.driver_id LIMIT 1) AS driver_name
-				FROM buses a LEFT JOIN users u ON u.item_id = a.created_by
+                    ) AS attachment, ud.name AS driver_name {$selectSummary}
+				FROM buses a 
+				LEFT JOIN users u ON u.item_id = a.created_by
+				LEFT JOIN users ud ON ud.item_id = a.driver_id
 				WHERE {$filters} AND a.status = ? ORDER BY a.id DESC LIMIT {$limit}"
 			);
 			$stmt->execute([1]);

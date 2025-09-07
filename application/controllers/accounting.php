@@ -348,12 +348,12 @@ class Accounting extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
-        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->q) && !empty($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
-        $params->query .= (isset($params->item_type) && !empty($params->item_type)) ? " AND a.item_type='{$params->item_type}'" : null;
-        $params->query .= (isset($params->account_id) && !empty($params->account_id)) ? " AND a.account_id='{$params->account_id}'" : null;
-        $params->query .= (isset($params->account_type) && !empty($params->account_type)) ? " AND a.account_type='{$params->account_type}'" : null;
-        $params->query .= (isset($params->transaction_id) && !empty($params->transaction_id)) ? " AND a.item_id='{$params->transaction_id}'" : null;
+        $params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= !empty($params->q) && !empty($params->q) ? " AND a.name LIKE '%{$params->q}%'" : null;
+        $params->query .= !empty($params->item_type) && !empty($params->item_type) ? " AND a.item_type='{$params->item_type}'" : null;
+        $params->query .= !empty($params->account_id) && !empty($params->account_id) ? " AND a.account_id='{$params->account_id}'" : null;
+        $params->query .= !empty($params->account_type) && !empty($params->account_type) ? " AND a.account_type='{$params->account_type}'" : null;
+        $params->query .= !empty($params->transaction_id) && !empty($params->transaction_id) ? " AND a.item_id='{$params->transaction_id}'" : null;
         $params->query .= isset($params->date) && !empty($params->date) ? " AND DATE(a.record_date) ='{$params->date}'" : "";
         $params->query .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", $column) : null;
 
@@ -363,9 +363,6 @@ class Accounting extends Myschoolgh {
         }
 
         // append the academic year and term
-        // $params->query .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
-        // $params->query .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
-
         $params->query .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : null;
         $params->query .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : null;
 

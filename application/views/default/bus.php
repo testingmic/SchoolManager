@@ -36,6 +36,7 @@ $bus_id = confirm_url_id(1) ? $SITEURL[1] : null;
 $param = (object)[
     "bus_id" => $bus_id ?? null,
     "clientId" => $clientId,
+    "account_summary" => true,
 ];
 
 // confirm that the attendance feature is enabled
@@ -141,6 +142,9 @@ if(empty($bus_id)) {
     // uploads script
     $response->scripts = ["assets/js/comments.js", "assets/js/buses.js", "assets/js/upload.js"];
 
+    $buses[0]->income = !empty($buses[0]->income) ? $buses[0]->income : 0;
+    $buses[0]->expense = !empty($buses[0]->expense) ? $buses[0]->expense : 0;
+
     // document information
     $response->html = '
         <section class="section">
@@ -170,6 +174,10 @@ if(empty($bus_id)) {
                         '.($attendancePage ? render_summary_card($statistics["total"], "Total Records", "fa fa-bus", "orange", "col-lg-4") : "").'
                         '.($attendancePage ? render_summary_card($statistics["checkin"], "Total Checkins", "fa fa-check", "green", "col-lg-4") : "").'
                         '.($attendancePage ? render_summary_card($statistics["checkout"], "Total Checkouts", "fa fa-check", "red", "col-lg-4") : "").'
+
+                        '.(!$attendancePage ? render_summary_card(number_format($buses[0]->income, 2), "Total Income", "fa fa-money-bill", "green", "col-lg-4") : "").'
+                        '.(!$attendancePage ? render_summary_card(number_format($buses[0]->expense, 2), "Total Expenses", "fa fa-money-check-alt", "red", "col-lg-4") : "").'
+                        '.(!$attendancePage ? render_summary_card(number_format(($buses[0]->income - $buses[0]->expense), 2), "Total Balance", "fa fa-balance-scale", "cyan", "col-lg-4") : "").'
                     </div>
                     <div class="card">
                         '.($attendancePage ? '
