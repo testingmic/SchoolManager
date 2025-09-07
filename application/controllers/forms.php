@@ -2880,7 +2880,7 @@ class Forms extends Myschoolgh {
         $response = '
         <form autocomplete="Off" class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/classes/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
-                <div class="col-lg-12 border-bottom border-primary text-primary mb-3"><h5>CLASS INFORMATION</h5></div>
+                '.forms_header("CLASS INFORMATION").'
                 <div class="col-lg-6 col-md-6">
                     <div class="form-group">
                         <label for="name">Class Name<span class="required">*</span></label>
@@ -2953,7 +2953,7 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-12 border-bottom border-primary text-primary mb-3"><h5>CLASS STATUS</h5></div>
+                '.forms_header("CLASS STATUS").'
                 <div class="col-lg-4 col-md-4">
                     <div class="form-group">
                         <label class="text-black" for="graduation_level">Graduation Level</label>
@@ -2963,7 +2963,7 @@ class Forms extends Myschoolgh {
                         </select>
                     </div>
                 </div>
-                <div class="col-lg-12 border-bottom border-primary text-primary mb-3"><h5>DESCRIPTION</h5></div>
+                '.forms_header("DESCRIPTION").'
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
                         <input type="hidden" readonly name="class_id" id="class_id" value="'.($itemData->id ?? null).'">
@@ -4015,7 +4015,7 @@ class Forms extends Myschoolgh {
         $general = '
         <form autocomplete="Off" class="ajax-data-form" action="'.$this->baseUrl.'api/account/update" method="POST" id="'.$form_id.'">
         <div class="row">
-            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">GENERAL SETTINGS</h5></div>
+            '.forms_header("GENERAL SETTINGS").'
             '.($logoUploaded ? 
             '<div class="col-lg-2 col-md-4">
                 <div class="form-group">
@@ -4069,8 +4069,7 @@ class Forms extends Myschoolgh {
                     <label for="location">School Location</label>
                     <input type="text" name="general[location]" value="'.($client_data->client_location ?? null).'" class="form-control">
                 </div>
-            </div>
-            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 pt-3">LABELS</h5></div>';
+            </div>' . forms_header("LABELS");
             foreach($labels as $label) {
                 $ilabel = "{$label["key"]}_label";
             $general .= '
@@ -4081,8 +4080,8 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>';
             }
-        $general .= '
-            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">SUBJECT LABELS</h5></div>';
+        $general .= forms_header("SUBJECT LABELS");
+
             foreach($unit_labels as $label) {
                 $ilabel = "{$label["key"]}_label";
             $general .= '
@@ -4094,7 +4093,7 @@ class Forms extends Myschoolgh {
                 </div>';
             }
             $general .= '
-            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">FEES & BILLING NOTES</h5></div>
+            '.forms_header("BANK ACCOUNT INFORMATION").'
             <div class="col-lg-4 col-md-4">
                 <div class="form-group">
                     <label for="name">Bank Account Information</label>
@@ -4113,7 +4112,7 @@ class Forms extends Myschoolgh {
                     <textarea placeholder="Enter the billing additional information" name="general[billing][additional_info]" class="form-control">'.(!empty($prefs?->billing?->additional_info) ? strip_tags($prefs?->billing?->additional_info) : null).'</textarea>
                 </div>
             </div>
-            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">FINANCE & ADDITIONAL SETTINGS</h5></div>
+            '.forms_header("FINANCE & ADDITIONAL SETTINGS").'
             <div class="col-lg-4 settings-form">
                 <div class="form-group">
                     <label for="opening_days">School Opening Days</label>';
@@ -5636,9 +5635,6 @@ class Forms extends Myschoolgh {
             ]
         ];
 
-        /** init content */
-        $preloaded_attachments = "";
-
         /** Set parameters for the data to attach */
         $form_params = (object) [
             "module" => "accounts_transaction_{$params->route}",
@@ -5680,7 +5676,7 @@ class Forms extends Myschoolgh {
         $html = "
         <div class='row'>
             <div id=\"accounts_form\" class=\"col-md-2\"></div>
-            <div id=\"accounts_form\" class=\"col-12 col-md-7 col-lg-7\">
+            <div id=\"accounts_form\" class=\"col-12 col-md-8 col-lg-8\">
                 <div class=\"card\">
                     <div class=\"form-content-loader\" style=\"display: none; position: absolute\">
                         <div class=\"offline-content text-center\">
@@ -5711,10 +5707,25 @@ class Forms extends Myschoolgh {
                                 }
                             $html .= "</select>
                         </div>
+                        ".forms_header("Attach {$params->route} to object", "mt-2")."
                         <div class=\"form-group\">
-                            <label>Reference <span class=\"required\">*</span></label>
-                            <input type=\"text\" name=\"reference\" value=\"".($data->reference ?? null)."\" class=\"form-control\">
+                            <div class='row'>
+                                <div class='col-md-6'>
+                                    <label>Attach to Object</label>
+                                    <select data-width=\"100%\" name=\"attach_to_object\" id=\"attach_to_object\" class=\"form-control selectpicker\">
+                                        <option value=\"\">Select Attach to Object</option>
+                                        <option value=\"bus\">Bus</option>
+                                    </select>
+                                </div>
+                                <div class='col-md-6'>
+                                    <label>Select Object</label>
+                                    <select data-width=\"100%\" name=\"record_object\" id=\"record_object\" class=\"form-control selectpicker\">
+                                        <option value=\"\">Select Object</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
+                        ".forms_header("Set amount and date", "mt-2")."
                         <div class=\"form-group\">
                             <label>Amount <span class=\"required\">*</span></label>
                             <input type=\"number\" name=\"amount\" value=\"".($data->amount ?? null)."\" class=\"form-control\">
@@ -5739,7 +5750,9 @@ class Forms extends Myschoolgh {
                         </div>";
                         $html .= "
                         <div class='col-lg-12'>
-                            <div class='form-group text-center mb-1'><div class='row'>{$this->form_attachment_placeholder($form_params)}</div></div>
+                            <div class='form-group text-center mb-1'>
+                                <div class='row'>{$this->form_attachment_placeholder($form_params)}</div>
+                            </div>
                         </div>
                         <div class=\"row\">
                             <div class=\"col-md-6\" align=\"left\">

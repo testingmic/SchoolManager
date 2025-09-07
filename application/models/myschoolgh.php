@@ -104,12 +104,9 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("ALTER TABLE timetables ADD COLUMN expected_days VARCHAR(255) DEFAULT '".json_encode($this->default_opening_days)."'");
-		$fix[] = ("ALTER TABLE timetables ADD COLUMN first_break_starts VARCHAR(255) DEFAULT NULL");
-		$fix[] = ("ALTER TABLE timetables ADD COLUMN first_break_ends VARCHAR(255) DEFAULT NULL");
-		$fix[] = ("ALTER TABLE timetables ADD COLUMN second_break_starts VARCHAR(255) DEFAULT NULL");
-		$fix[] = ("ALTER TABLE timetables ADD COLUMN second_break_ends VARCHAR(255) DEFAULT NULL");
-		$fix[] = ("ALTER TABLE timetables_slots_allocation ADD COLUMN weekday VARCHAR(255) DEFAULT NULL");
+		$fix[] = ("ALTER TABLE accounts_transaction ADD COLUMN attach_to_object VARCHAR(255) DEFAULT NULL;");
+		$fix[] = ("ALTER TABLE accounts_transaction ADD COLUMN record_object VARCHAR(255) DEFAULT NULL;");
+		$fix[] = ("ALTER TABLE accounts_transaction ADD COLUMN user_id VARCHAR(32) DEFAULT NULL;");
 
 		foreach($fix as $stmt) {
 			try {
@@ -399,9 +396,9 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Array
 	 */
-	final function bus_list($clientId) {
+	final function bus_list($clientId, $columns = "*") {
 		try {
-			$stmt = $this->db->prepare("SELECT * FROM buses WHERE client_id = ? AND status = '1'");
+			$stmt = $this->db->prepare("SELECT {$columns} FROM buses WHERE client_id = ? AND status = '1'");
 			$stmt->execute([$clientId]);
 			return $stmt->fetchAll(PDO::FETCH_OBJ);
 		} catch(PDOException $e) {

@@ -38,7 +38,7 @@ $hasValidate = $accessObject->hasAccess("validate", "accounting");
 $hasModify = $accessObject->hasAccess("modify", "accounting");
 
 // add the scripts to load
-$response->scripts = ["assets/js/accounting.js", "assets/js/upload.js"];
+$response->scripts = ["assets/js/accounting.js", "assets/js/upload.js", "assets/js/object_selector.js"];
 
 // date range filter
 $date_range = $filter->date_range ?? date("Y-m-d", strtotime("monday this week")).":".date("Y-m-d", strtotime("sunday this week"));
@@ -88,7 +88,7 @@ foreach($transactions_list as $key => $transaction) {
     $list_transactions .= "<td>{$count}</td>";
     $list_transactions .= "<td>{$transaction->account_name}</td>";
     $list_transactions .= "<td>{$transaction->account_type_name}</td>";
-    $list_transactions .= "<td>{$transaction->reference}</td>";
+    $list_transactions .= "<td>".(!empty($transaction->attach_to_object) ? ucwords($transaction->attach_to_object) : "N/A")."</td>";
     $list_transactions .= "<td>".number_format($transaction->amount, 2)."</td>";
     $list_transactions .= "<td>".date("jS M Y", strtotime($transaction->record_date))."</td>";
     $list_transactions .= "<td>{$transaction->state_label}</td>";
@@ -179,7 +179,7 @@ $response->html = '
                                                     <th></th>
                                                     <th width="16%">Account Name</th>
                                                     <th width="19%">Account Type Head</th>
-                                                    <th>Ref No.</th>
+                                                    <th>Reference</th>
                                                     <th>Amount</th>
                                                     <th width="12%">Date</th>
                                                     <th>Status</th>

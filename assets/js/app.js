@@ -449,7 +449,6 @@ var trigger_form_submit = () => {
                                         $(`[data-record="${ie}"]`).html(iv);
                                     });
                                 }
-                                console.log(response.data.additional);
                                 if (typeof response.data.additional.href !== 'undefined') {
                                     setTimeout(() => {
                                         $(`div[class~="modal-backdrop"]`).remove();

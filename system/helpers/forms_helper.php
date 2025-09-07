@@ -17,6 +17,16 @@ function time_slots_builder($name, $value = '') {
 }
 
 /**
+ * Forms Header
+ * 
+ * @param string $title
+ * @return string
+ */
+function forms_header($title, $class = "col-lg-12") {
+    return '<div class="'.$class.' border-bottom border-primary text-primary mb-3"><h5>'.$title.'</h5></div>';
+}
+
+/**
  * Draw Timetable Table
  * 
  * @param object $timetable_data - Timetable configuration data

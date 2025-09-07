@@ -614,6 +614,10 @@ class Accounting extends Myschoolgh {
 
         try {
 
+            if(empty($params->account_type)) {
+                return ["code" => 400, "data" => "Sorry! An invalid account type was supplied."];
+            }
+
             // create an item_id
             $item_id = random_string("alnum", RANDOM_STRING);
 
@@ -628,13 +632,15 @@ class Accounting extends Myschoolgh {
             $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
                 item_id = ?, client_id = ?, account_id = ?, account_type = ?, 
                 item_type = ?, reference = ?, amount = ?, created_by = ?, record_date = ?,
-                payment_medium = ?, description = ?, academic_year = ?, academic_term = ?, balance = ?
+                payment_medium = ?, description = ?, academic_year = ?, academic_term = ?, balance = ?,
+                attach_to_object = ?, record_object = ?
             ");
             $stmt->execute([
                 $item_id, $params->clientId, $params->account_id, $params->account_type, 
                 'Deposit', $params->reference ?? null, $params->amount, $params->userId, 
                 $params->date, $params->payment_medium, $params->description ?? null,
-                $params->academic_year, $params->academic_term, ($accountData[0]->balance + $params->amount)
+                $params->academic_year, $params->academic_term, ($accountData[0]->balance + $params->amount),
+                $params->attach_to_object ?? null, $params->record_object ?? null
             ]);
 
             // add up to the credit line
@@ -685,6 +691,10 @@ class Accounting extends Myschoolgh {
 
         try {
 
+            if(empty($params->account_type)) {
+                return ["code" => 400, "data" => "Sorry! An invalid account type was supplied."];
+            }
+
             // old record
             $prevData = $this->pushQuery("*", "accounts_transaction", "item_id='{$params->type_id}' AND client_id='{$params->clientId}' AND item_type='Deposit' AND status='1' LIMIT 1");
             if(empty($prevData)) { return ["code" => 400, "data" => "Sorry! An invalid id was supplied."]; }
@@ -697,9 +707,12 @@ class Accounting extends Myschoolgh {
             $params->payment_medium = isset($params->payment_medium) ? $params->payment_medium : "cash";
 
             // insert the record
-            $stmt = $this->db->prepare("UPDATE accounts_transaction SET 
-                account_id = ?, account_type = ?, reference = ?, amount = ?, created_by = ?, record_date = ?, 
-                payment_medium = ?, description = ?, balance = ? WHERE item_id = ? AND client_id = ? LIMIT 1
+            $stmt = $this->db->prepare("UPDATE accounts_transaction 
+                SET account_id = ?, account_type = ?, reference = ?, amount = ?, created_by = ?, record_date = ?, 
+                payment_medium = ?, description = ?, balance = ? 
+                ".(!empty($params->attach_to_object) ? ", attach_to_object = '{$params->attach_to_object}'" : "")."
+                ".(!empty($params->record_object) ? ", record_object = '{$params->record_object}'" : "")."
+                WHERE item_id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([
                 $params->account_id, $params->account_type, 
@@ -742,6 +755,10 @@ class Accounting extends Myschoolgh {
 
         try {
 
+            if(empty($params->account_type)) {
+                return ["code" => 400, "data" => "Sorry! An invalid account type was supplied."];
+            }
+
             // create an item_id
             $item_id = random_string("alnum", RANDOM_STRING);
 
@@ -756,13 +773,15 @@ class Accounting extends Myschoolgh {
             $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
                 item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
                 reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
-                description = ?, academic_year = ?, academic_term = ?, balance = ?
+                description = ?, academic_year = ?, academic_term = ?, balance = ?,
+                attach_to_object = ?, record_object = ?
             ");
             $stmt->execute([
                 $item_id, $params->clientId, $params->account_id, $params->account_type, 
                 'Expense', $params->reference ?? null, $params->amount, $params->userId, 
                 $params->date, $params->payment_medium, $params->description ?? null,
-                $params->academic_year, $params->academic_term, ($accountData[0]->balance - $params->amount)
+                $params->academic_year, $params->academic_term, ($accountData[0]->balance - $params->amount),
+                $params->attach_to_object ?? null, $params->record_object ?? null
             ]);
 
             // add up to the expense
@@ -813,6 +832,10 @@ class Accounting extends Myschoolgh {
 
         try {
 
+            if(empty($params->account_type)) {
+                return ["code" => 400, "data" => "Sorry! An invalid account type was supplied."];
+            }
+
             // old record
             $prevData = $this->pushQuery("*", "accounts_transaction", "item_id='{$params->type_id}' AND client_id='{$params->clientId}' AND item_type='Expense' AND status='1' LIMIT 1");
             if(empty($prevData)) { return ["code" => 400, "data" => "Sorry! An invalid id was supplied."]; }
@@ -827,7 +850,10 @@ class Accounting extends Myschoolgh {
             // insert the record
             $stmt = $this->db->prepare("UPDATE accounts_transaction SET 
                 account_id = ?, account_type = ?, reference = ?, amount = ?, created_by = ?, record_date = ?, 
-                payment_medium = ?, description = ?, balance = ? WHERE item_id = ? AND client_id = ? LIMIT 1
+                payment_medium = ?, description = ?, balance = ? 
+                ".(!empty($params->attach_to_object) ? ", attach_to_object = '{$params->attach_to_object}'" : "")."
+                ".(!empty($params->record_object) ? ", record_object = '{$params->record_object}'" : "")."
+                WHERE item_id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([
                 $params->account_id, $params->account_type, 
