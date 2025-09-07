@@ -41,6 +41,11 @@ active.droppable({
             course_id: ui.draggable[0].id,
             room_id: $(`select[name='t_room_id']`).val()
         };
+        // get the course code from $.array_stream['courses_list'] where the course_id is equal to ui.draggable[0].id
+        let course = $.array_stream['courses_list'].find(course => course.item_id === data.course_id);
+        data.course_code = course?.course_code;
+        data.course_name = course?.name;
+        console.log(data);
         $.array_stream['timetable_allocations'][this.id] = [data];
         processAllocations(data);
     },
@@ -83,10 +88,12 @@ function calculateAllocations() {
         let room = stream_data?.[slot_key]?.[0]['room_id'] || null;
         let course = stream_data?.[slot_key]?.[0]['course_id'] || null;
         let course_name = stream_data?.[slot_key]?.[0]['course_name'] || null;
+        let course_code = stream_data?.[slot_key]?.[0]['course_code'] || null;
         finalAllocations[i] = {
             slot: slot_key,
             course: course_name,
             weekday: td.data('day'),
+            course_code: course_code,
             value: `${course}:${room}`
         };
     });

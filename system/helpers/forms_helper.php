@@ -198,13 +198,13 @@ function draw_timetable_table($timetable_data, $start_time = '08:00', $download 
  * @return array
  */
 function detectClashes($incoming, $courseMap, $existing, $tutors_names = []) {
-    $clashes = [];
+    $clashes = []; 
 
     // Build a lookup of existing allocations with tutors per slot
     $existingTutorMap = [];
     foreach ($existing as $alloc) {
         $slot = $alloc['day_slot']; 
-        $courseId = $alloc['course_id'];
+        $courseId = $alloc['course_code'];
 
         if (isset($courseMap[$courseId])) {
             foreach ($courseMap[$courseId]['tutors'] as $tutorId) {
@@ -216,7 +216,7 @@ function detectClashes($incoming, $courseMap, $existing, $tutors_names = []) {
     // Process incoming data
     foreach ($incoming as $item) {
         $slot = $item['slot'];
-        $courseId = explode(":", $item['value'])[0];
+        $courseId = $item['course_code'];
 
         if (!isset($courseMap[$courseId])) {
             continue; // skip unmapped courses

@@ -71,7 +71,7 @@ $response->html = '
                         <div class="d-flex justify-content-between">
                             <div></div>
                             <div>
-                                <span class="btn font-20 mb-2 btn-danger" id="sms_balance">'.($settings->sms_balance ?? 0).' SMS Units</span>
+                                <span class="btn font-20 mb-2 btn-danger badge badge-warning p-2" id="sms_balance">'.($settings->sms_balance ?? 0).' SMS Units</span>
                                 <button onclick="return topup_sms()" class="btn mb-2 btn-success"><i class="fa fa-database"></i> Top Up</button>
                             </div>
                         </div>

@@ -432,6 +432,7 @@ class Timetable extends Myschoolgh {
 
         $slotsList = [];
         $distinctCourses = [];
+        $courseCodes = [];
 
         if(isset($params->data["allocations"]) && is_array($params->data["allocations"])) {
             foreach($params->data["allocations"] as $item) {
@@ -439,6 +440,7 @@ class Timetable extends Myschoolgh {
                 $weekday = $item['weekday'];
                 $course = explode(":", $item['value'])[0];
                 $distinctCourses[] = $course;
+                $courseCodes[] = $item['course_code'];
 
                 $dailySubjects[$weekday][$course][] = $item['course'];
 
@@ -461,34 +463,40 @@ class Timetable extends Myschoolgh {
         $distinctCourses = array_unique(array_values($distinctCourses));
 
         // get the course list
-        $course_list = !empty($distinctCourses) ? $this->pushQuery("a.id, a.course_tutor, a.class_id, a.item_id, a.name, c.name as class_name", 
+        $course_list = !empty($distinctCourses) ? $this->pushQuery("a.id, a.course_tutor, a.course_code, a.item_id, a.name, c.name as class_name", 
             "courses a INNER JOIN classes c ON c.item_id = a.class_id", 
-            "a.item_id IN {$this->inList($distinctCourses)} AND a.academic_year = '{$params->academic_year}' 
+            "a.course_code IN {$this->inList($courseCodes)} AND a.academic_year = '{$params->academic_year}' 
             AND a.academic_term = '{$params->academic_term}' AND a.client_id='{$params->clientId}' 
             AND LENGTH(a.course_tutor) > 10
             LIMIT ".count($distinctCourses)
         ) : [];
 
         $course_tutors = [];
+        $course_codes = [];
         $tutors_list = [];
         foreach($course_list as $course) {
             $tutors = array_unique(array_filter(json_decode($course->course_tutor, true)));
             if(empty($tutors)) continue;
             $tutors_list = array_merge($tutors_list, $tutors);
-            $course_tutors[$course->item_id] = [
+            $course_codes[] = $course->course_code;
+            $course_tutors[$course->course_code] = [
                 'tutors' => $tutors,
                 'course_id' => $course->id,
+                'item_id' => $course->item_id,
                 'course_name' => $course->name,
                 'class_name' => $course->class_name,
+                'course_code' => $course->course_code,
             ];
         }
 
         // get all the timetables that have the same courses
-        $timetable_list = !empty($distinctCourses) ? $this->pushQuery("a.day_slot, a.class_id, a.course_id", 
-            "timetables_slots_allocation a INNER JOIN timetables t ON t.item_id = a.timetable_id", 
-            "a.client_id='{$params->clientId}' AND a.course_id IN {$this->inList($distinctCourses)} 
+        $timetable_list = !empty($distinctCourses) ? $this->pushQuery("a.day_slot, a.class_id, a.course_id, c.course_code", 
+            "timetables_slots_allocation a 
+            INNER JOIN timetables t ON t.item_id = a.timetable_id
+            INNER JOIN courses c ON c.item_id = a.course_id", 
+            "a.client_id='{$params->clientId}' AND c.course_code IN {$this->inList($course_codes)} 
                 AND a.day_slot IN {$this->inList($slotsList)} AND a.status = '1'
-                AND academic_year = '{$params->academic_year}' AND academic_term = '{$params->academic_term}'
+                AND t.academic_year = '{$params->academic_year}' AND t.academic_term = '{$params->academic_term}'
                 AND t.status = '1'", false, "FETCH"
         ) : [];
 
@@ -503,7 +511,6 @@ class Timetable extends Myschoolgh {
         }
 
         $detectClashes = detectClashes($params->data["allocations"], $course_tutors, $timetable_list, $tutors_names ?? []);
-        // echo json_encode($detectClashes);exit;
 
         return [
             "code" => !empty($errors) ? 400 : 200,

@@ -517,6 +517,7 @@ $(`div[class="trix-dialogs"] input[type="url"][name="href"], button[data-trix-at
 
 $(`div[class~="send_smsemail"] input[id="select_all"]`).on("click", function () {
     $(`table[class~="table_list"]`).find(`input[class="user_contact"]:checkbox`).prop('checked', this.checked);
+    $(`div[id="message_form"] button`).attr("disabled", false);
 });
 
 sms_characters_counter("message_textarea");

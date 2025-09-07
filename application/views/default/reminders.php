@@ -90,7 +90,7 @@ $response->html = '
         <div class="d-flex justify-content-between">
             <div></div>
             <div>
-                <span class="p-1 mb-2 font-20 bg-amber" id="sms_balance">'.($settings->sms_balance ?? 0).' SMS Units</span>
+                <span class="p-1 mb-2 font-20 bg-amber badge badge-warning p-2" id="sms_balance">'.($settings->sms_balance ?? 0).' SMS Units</span>
                 <button onclick="return topup_sms()" class="btn mb-2 btn-success"><i class="fa fa-database"></i> Top Up</button>
             </div>
         </div>
@@ -104,7 +104,7 @@ $response->html = '
                             <div class="row">
                                 <div class="col-3">
                                     <label>Reminder Type:</label>
-                                    <select data-route="'.$route.'" disabled type="text" id="recipient_type" class="form-control">
+                                    <select data-route="'.$route.'" type="text" id="recipient_type" data-width="100%" class="form-control selectpicker">
                                         <option selected value="fees">Fees</option>
                                     </select>
                                 </div>
@@ -169,7 +169,7 @@ $response->html = '
                             </div>
                             <div class="form-group">
                                 <label>Mode of Message <span class="required">*</span></label>
-                                <select data-route="'.$route.'" multiple name="send_mode[]" class="form-control selectpicker">
+                                <select data-width="100%" data-route="'.$route.'" multiple name="send_mode[]" class="form-control selectpicker">
                                     <option selected value="sms">SMS</option>
                                     <option selected value="email">Email</option>
                                 </select>
