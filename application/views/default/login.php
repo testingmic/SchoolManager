@@ -69,6 +69,7 @@ if (loggedIn()) {
     }
   </style>
   <?= $myClass->google_analytics_code ?>
+  <?= $myClass->trackingSnippet() ?>
 </head>
 
 <body class="bg">

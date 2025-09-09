@@ -1619,6 +1619,28 @@ class Myschoolgh extends Models {
 	}
 
 	/**
+	 * Heatmap Tracking Snippet
+	 * 
+	 * @return String
+	 */
+	public function trackingSnippet() {
+		return "<script>
+		/* >> Heatmap.com :: Snippet << */
+		(function (h,e,a,t,m,ap) {
+			(h._heatmap_paq = []).push([ 'setTrackerUrl', (h.heatUrl = e) + a]); 
+			h.hErrorLogs=h.hErrorLogs || []; ap=t.createElement('script');  
+			ap.src=h.heatUrl+'preprocessor.min.js?sid='+m;  ap.defer=true; 
+			t.head.appendChild(ap); 
+			['error', 'unhandledrejection'].forEach(function (ty) {     
+					h.addEventListener(ty, function (et) { h.hErrorLogs.push({ type: ty, event: et 
+				}); 
+			}); 
+			});
+		})(window,'https://dashboard.heatmap.com/','heatmap.php',document,4485);
+		</script>";
+	}
+
+	/**
 	 * Convert Amount To Words
 	 * 
 	 * @param $amount

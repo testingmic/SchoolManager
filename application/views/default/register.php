@@ -40,6 +40,7 @@ if(loggedIn()) {
       gtag('js', new Date());
       gtag('config', 'G-6YKXX6Z3QZ');
   </script>
+  <?= $myClass->trackingSnippet() ?>
   <style>
     .bg {
       background-image: url('<?= $baseUrl; ?>assets/img/background_2.jpg');

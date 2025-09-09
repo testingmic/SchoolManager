@@ -56,7 +56,7 @@ if($logBusAttendance) {
         <script src="<?= $baseUrl; ?>assets/bundles/select2/select2.js"></script>
     <?php } ?>
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/qr.css?v=<?= version() ?>">
-
+    <?= $myClass->trackingSnippet() ?>
     <script>
         tailwind.config = {
             theme: {

@@ -40,6 +40,7 @@ $schools = $myClass->clients_list();
   }
   </style>
   <?= $myClass->google_analytics_code ?>
+  <?= $myClass->trackingSnippet() ?>
 </head>
 <body class="bg">
   <div class="loader"></div>

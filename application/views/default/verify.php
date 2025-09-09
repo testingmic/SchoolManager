@@ -77,6 +77,7 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 10) ? xss_clean($_GE
   }
   </style>
   <?= $myClass->google_analytics_code ?>
+  <?= $myClass->trackingSnippet() ?>
 </head>
 <body class="bg">
   <div class="loader"></div>
