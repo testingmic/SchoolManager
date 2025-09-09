@@ -24,7 +24,7 @@ class Departments extends Myschoolgh {
         $params->query .= !empty($params->department_head) ? " AND a.department_head='{$params->department_head}'" : null;
         $params->query .= !empty($params->created_by) ? " AND a.created_by='{$params->created_by}'" : null;
         $params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= !empty($params->department_id) ? " AND a.id='{$params->department_id}'" : null;
+        $params->query .= !empty($params->department_id) ? " AND (a.id = '{$params->department_id}' OR a.item_id = '{$params->department_id}')" : null;
 
         $isMinified = (bool) isset($params->quick_analitics_load);
 

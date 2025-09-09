@@ -54,6 +54,7 @@ if(empty($bus_id)) {
 
     // confirm if the user is on the attendance page
     $attendancePage = (bool) isset($SITEURL[2]) && ($SITEURL[2] == "attendance");
+    $financePage = (bool) isset($SITEURL[2]) && ($SITEURL[2] == "finance");
 
     // set the user permissions
     $permissions = [
