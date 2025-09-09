@@ -350,8 +350,8 @@ elseif(!empty($user_id)) {
                                                             <th class="mb-3 font-weight-bold">CATEGORY</th>
                                                             <th width="18%" class="mb-3 font-weight-bold">DUE</th>
                                                             <th width="18%" class="mb-3 font-weight-bold">PAID</th>
-                                                            <th width="20%" class="mb-3 font-weight-bold">'.$headers["balance"].'</th>
-                                                            <th class="mb-3 font-weight-bold"></th>                    
+                                                            <th width="17%" class="mb-3 font-weight-bold">'.$headers["balance"].'</th>
+                                                            <th width="15%" class="mb-3 font-weight-bold"></th>                    
                                                         </tr>
                                                     </thead>
                                                     <tbody>
