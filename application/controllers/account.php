@@ -1506,7 +1506,7 @@ class Account extends Myschoolgh {
 
                 $field = in_array($column, ["Class", "Class ID", "Department"]) ? "id" : "item_id";
 
-                $fetch = $this->db->prepare("SELECT {$field} FROM {$tables[$column][0]} WHERE (slug='{$n_value}' OR {$item_code}='{$t_code}') AND client_id='{$clientId}' AND status='1' ORDER BY id DESC LIMIT 1");
+                $fetch = $this->db->prepare("SELECT {$field} FROM {$tables[$column][0]} WHERE (slug='{$n_value}' OR {$item_code}='{$t_code}' OR id='{$t_code}') AND client_id='{$clientId}' AND status='1' ORDER BY id DESC LIMIT 1");
                 $fetch->execute();
                 $result = $fetch->fetch(PDO::FETCH_OBJ);
 
