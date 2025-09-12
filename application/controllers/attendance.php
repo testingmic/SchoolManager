@@ -139,7 +139,7 @@ class Attendance extends Myschoolgh {
 
                 // append the attendance status to the query
                 $data[0]->state = $value;
-                $data[0]->comments = $eachInfo["comments"];
+                $data[0]->comments = $eachInfo["comments"] ?? null;
 
                 // append to the array list
                 $user_data[$key] = $data[0];
@@ -260,30 +260,28 @@ class Attendance extends Myschoolgh {
      * 
      * @return String
      */
-    public function attendance_radios($userId = null, $user_state = null, $final = false) {
+    public function attendance_radios($userId = null, $user_state = null, $final = false, $mobile = false) {
         
         $html = "";
-        $labels = ["success" => "Present", "danger" => "Absent", "primary" => "Holiday", "warning" => "Late"];
+        if($mobile) {
+            $tag = "div";
+            $class = "class='mb-1'";
+            $labels = ["success" => "Present", "danger" => "Absent", "warning" => "Late"];
+        } else {
+            $tag = "span";
+            $class = "class='mr-2'";
+            $labels = ["success" => "Present", "danger" => "Absent", "primary" => "Holiday", "warning" => "Late"];
+        }
         $disabled = $final ? "disabled" : "data-user_id='{$userId}' name='attendance_status[{$userId}][]'";
-
-        // foreach($labels as $color => $label) {
-        //     $the_key = strtolower($label);
-        //     $html .= "
-        //     <div data_item-container='attendance_{$the_key}' class='flex align-center'>
-        //         <input {$disabled} type='radio' ".($user_state == $the_key ? "checked" : "")." class='cursor mr-1' value='{$the_key}' id='{$userId}_{$the_key}'>
-        //         <label style='display: table-cell;' class='cursor mb-0' title='Click to Select {$label}' for='{$userId}_{$the_key}'>".($user_state == $the_key ? "<strong class='text-{$color}'>{$label}</strong>" : "{$label}")."</label>
-        //     </div>
-        //     ";
-        // }
 
         foreach($labels as $color => $label) {
             $the_key = strtolower($label);
             $html .= "
-            <span class='mr-2'>
+            <{$tag} {$class}>
                 <input {$disabled} type='radio' ".($user_state == $the_key ? "checked" : "")." class='cursor' value='{$the_key}' id='{$userId}_{$the_key}'>
-                <label style='display: table-cell;' class='cursor' title='Click to Select {$label}' for='{$userId}_{$the_key}'>".($user_state == $the_key ? "<strong class='text-{$color}'>{$label}</strong>" : "{$label}")."</label>
-            </span>
-            ";
+                <label style='".($mobile ? "" : "display: table-cell")."' class='cursor' title='Click to Select {$label}' for='{$userId}_{$the_key}'>
+                ".($user_state == $the_key ? "<strong class='text-{$color}'>{$label}</strong>" : "{$label}")."</label>
+            </{$tag}>";
         }
 
         return $html;
@@ -666,6 +664,7 @@ class Attendance extends Myschoolgh {
         // append some few query
         $attendance = [];
         $bottom_data = "";
+        $mobile_bottom = "";
         
         $user_type = isset($params->user_type) ? $params->user_type : null;
 
@@ -791,8 +790,8 @@ class Attendance extends Myschoolgh {
             $final = !empty($check) ? $check[0]->finalize : null;
 
             // set the table content
-            $table_content = (!$final && !empty($attendance["attendance"][0]["record"]["users_list"]) ? "
-            <div class='row'>
+            $top_section = (!$final && !empty($attendance["attendance"][0]["record"]["users_list"]) ? "
+            <div class='row mt-1'>
                 <div class='col-lg-9 col-md-8' id='attendance_search_input'>
                     <label>Filter by Name or Registration ID</label>
                     <input type='search' autocomplete='Off' placeholder='Search by fullname' name='attendance_fullname' class='form-control'>
@@ -809,8 +808,14 @@ class Attendance extends Myschoolgh {
                         </select>
                     </div>
                 </div>
-            </div>" : "")."
-            <div class='table-responsive'>
+            </div>" : "");
+
+            $mobile_version = $top_section;
+            $mobile_version .= "<div id='attendance_logger'>";
+            $mobile_version .= "<div class='grid gap-2 grid-cols-2 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 w-100 flex items-center'>";
+
+            $table_content = $top_section;
+            $table_content .= "<div class='table-responsive'>
             <table border='1' class='table table-bordered mt-0' style='width:100%'>
             <thead>
                 <th width='5%'>&#8470;</th>
@@ -863,6 +868,21 @@ class Attendance extends Myschoolgh {
                         $user_state = $_each_data["state"];
                         $user_comments = $_each_data["comments"];
 
+                        $mobile_version .= "
+                        <div class='w-100'>
+                            <div class='border p-3 rounded-lg overflow-y-auto'>
+                                <div ".($final ? "class='user_name' onclick='load(\"".($user->user_type== "student" ? "student" : "staff")."/{$user->user_id}/attendance\")'" : " class='text-primary mb-2 text-uppercase'").">
+                                    {$user->name}
+                                </div>
+                                <div>
+                                    ".$this->attendance_radios($user->user_id, $user_state, $final, true)."
+                                </div>
+                                <div class='hidden'>
+                                    <input ".($final ? "readonly title='{$user_comments}'" : "data-user_id='{$user->user_id}' id='comments' autocomplete='Off'")." placeholder='Add remarks (optional)' value='{$user_comments}' class='form-control' type='text'>
+                                </div>
+                            </div>
+                        </div>";
+
                         // append to the list
                         $table_content .= "
                         <tr data-row_search='name' data-attandance_fullname='{$user->name}' data-attendance_unique_id='{$user->unique_id}'>
@@ -906,17 +926,28 @@ class Attendance extends Myschoolgh {
                         <div class='font-italic'>Sorry! No user was found under the selected category.</div>
                     </td>
                 </tr>";
+
+                $mobile_version .= "
+                <div class='col-lg-12 alert alert-warning text-center'>
+                    <div class='font-italic'>Sorry! No user was found under the selected category.</div>
+                </div>";
             }
 
             $table_content .= "</tbody>";
             $table_content .= "</table>";
             $table_content .= "</div>";
 
+            $mobile_version .= "</div>";
+            $mobile_version .= "</div>";
+
             // append to this list if students were found for this class
             if(!empty($attendance["attendance"][0]["record"]["users_list"])) {
                 $bottom_data .= "<div class='table-responsive'>";
                 $bottom_data .= "<table border='1' width='100%' class='table table-bordered mt-2'>";
                 $bottom_data .= "<tbody>";
+
+                $mobile_bottom .= "<div class='table-responsive'>";
+
                 // show this section if the finalize is empty
                 if(!$final) {
                     // append the buttons to the table
@@ -939,16 +970,50 @@ class Attendance extends Myschoolgh {
                             )."
                         </td>
                     </tr>";
+
+                    $mobile_bottom .= "
+                    <div class='mt-2 border-top pt-3'>
+                        <div class='grid gap-2 grid-cols-2 lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-1 w-100 flex items-center'>
+                            <div>
+                                ".(!empty($check) ? 
+                                    "
+                                        <p class='mb-0 pb-0'><strong>{$check[0]->created_by_name}</strong></p>
+                                        <p class='mb-0 pb-0'><strong>{$check[0]->created_by_email}</strong></p>
+                                        <p class='mb-0 pb-0'><strong>{$check[0]->date_created}</strong></p>
+                                    " : 
+                                "")."
+                            </div>
+                            <div class='text-right'>
+                                <button onclick='return save_AttendanceLog(\"{$list_days[0]}\",\"{$user_type}\",\"{$class_id}\")' class='btn btn-sm mb-1 btn-outline-success'>
+                                    <i class='fa fa-save'></i> Save
+                                </button>
+                                ".(!empty($attendance_log) && $canFinalize && !$check[0]->finalize ? 
+                                    "<button onclick='return finalize_AttendanceLog(\"{$list_days[0]}\",\"{$user_type}\",\"{$class_id}\", \"{$check[0]->id}\")' class='btn mb-1 btn-sm btn-outline-primary'>
+                                        <i class='fa fa-check'></i> Finalize
+                                    </button>" : 
+                                    ""
+                                )."
+                            </div>
+                        </div>
+                    </div>";
                 } else {
-                    $bottom_data .= "
+                    $finals = "<div class='text-right'>
+                                <p class='mb-0 pb-0'>Finalized By: <strong>{$check[0]->finalized_by_name}</strong></p>
+                                <p class='mb-0 pb-0'>Email Address: <strong>{$check[0]->finalized_by_email}</strong></p>
+                            </div>
+                            <div class='pt-2 text-right border-top mt-2'>
+                                <span class='p-0 m-0'><label class='p-0 m-0 font-weight-bold'>Date Finalized:</label></span>
+                                <p class='p-0 m-0'><i class='fa fa-calendar-check'></i> {$check[0]->date_finalized}</p>
+                            </div>";
+                    $new_bottom_data = "
                     <tr>
                         <td colspan='2'>
                             <div class='text-left'>
                                 <p class='p-0 pt-2 m-0'><label class='p-0 m-0 font-weight-bold'><i class='fa fa-chart-bar'></i> Summary:</label></p>";
                                 foreach($summary as $key => $value) {
-                                    $bottom_data .= "<div class='p-0 m-0'><strong class='mr-3'>".ucwords($key).":</strong> {$value}</div>";
+                                    $new_bottom_data .= "<div class='p-0 m-0'><strong class='mr-3'>".ucwords($key).":</strong> {$value}</div>";
                                 }
-                            $bottom_data .= "
+                            $new_bottom_data .= "
                             </div>
                             ".(!empty($check) ? "
                                 <div class='pt-2 border-top mt-2'>
@@ -960,25 +1025,27 @@ class Attendance extends Myschoolgh {
                             "")."
                         </td>
                         <td colspan='2' valign='top'>
-                            <div class='text-right'>
-                                <p class='mb-0 pb-0'>Finalized By: <strong>{$check[0]->finalized_by_name}</strong></p>
-                                <p class='mb-0 pb-0'>Email Address: <strong>{$check[0]->finalized_by_email}</strong></p>
-                            </div>
-                            <div class='pt-2 text-right border-top mt-2'>
-                                <span class='p-0 m-0'><label class='p-0 m-0 font-weight-bold'>Date Finalized:</label></span>
-                                <p class='p-0 m-0'><i class='fa fa-calendar-check'></i> {$check[0]->date_finalized}</p>
-                            </div>
+                            {$finals}
                         </td>
-                    </tr>";    
+                    </tr>";
+
+                    $bottom_data .= $new_bottom_data;
+                    $mobile_bottom .= "<div class='mt-2'>";
+                    $mobile_bottom .= $finals;
+                    $mobile_bottom .= "</div>";
                 }
                 $bottom_data .= "</tbody>";
                 $bottom_data .= "</table>";
-                $bottom_data .= "</div>";                
+                $bottom_data .= "</div>";    
+                
+                $mobile_bottom .= "</div>";
             }
             
             // append the users list to the results to display
-            $attendance["bottom_data"] = $bottom_data;
-            $attendance["table_content"] = $table_content;
+            // $attendance["bottom_data"] = $bottom_data;
+            // $attendance["table_content"] = $table_content;
+            $attendance["bottom_data"] = $mobile_bottom;
+            $attendance["table_content"] = $mobile_version;
             
         }
 

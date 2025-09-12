@@ -2,9 +2,9 @@ var checkAllState = () => {
     $(`select[id='select_for_all']`).on("change", function() {
         let value = $(this).val();
         if (value !== "null") {
-            $(`table[id="attendance_logger"] input[type='radio'][value='${value}']`).prop("checked", true);
+            $(`[id="attendance_logger"] input[type='radio'][value='${value}']`).prop("checked", true);
         } else {
-            $(`table[id="attendance_logger"] input[type='radio']`).prop("checked", false);
+            $(`[id="attendance_logger"] input[type='radio']`).prop("checked", false);
         }
     });
 }
@@ -51,7 +51,7 @@ var save_AttendanceLog = (date, user_type = "", class_id = "") => {
     }).then((proceed) => {
         if (proceed) {
             let attendance = {};
-            $.each($(`table[id="attendance_logger"] input[type='radio']`), function(i, e) {
+            $.each($(`[id="attendance_logger"] input[type='radio']`), function(i, e) {
                 let user_id = $(this).attr("data-user_id");
                 attendance[user_id] = {
                     status: $(`input[type='radio'][data-user_id='${user_id}']:checked`).val(),
@@ -84,7 +84,7 @@ var save_AttendanceLog = (date, user_type = "", class_id = "") => {
 
 var finalize_AttendanceLog = (date, user_type = "", class_id = "", finalize) => {
     let attendance = {};
-    $.each($(`table[id="attendance_logger"] input[type='radio']`), function(i, e) {
+    $.each($(`[id="attendance_logger"] input[type='radio']`), function(i, e) {
         let user_id = $(this).attr("data-user_id");
         attendance[user_id] = {
             status: $(`input[type='radio'][data-user_id='${user_id}']:checked`).val(),
@@ -104,7 +104,7 @@ var finalize_AttendanceLog = (date, user_type = "", class_id = "", finalize) => 
                 let m_icon = "error"
                 if (response.code == 200) {
                     m_icon = "success";
-                    $(`table[id="attendance_logger"] input[type='radio']`).prop("disabled", true);
+                    $(`[id="attendance_logger"] input[type='radio']`).prop("disabled", true);
                     $(`select[id="attendance_class"]`).trigger("change");
                 }
                 swal({

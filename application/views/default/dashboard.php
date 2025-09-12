@@ -185,20 +185,24 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 // format the upcoming birthday list
                 $upcoming_birthday_list .= "
                     <li class='media'>
-                        <img title='Click to view student details' class='rounded-2xl cursor author-box-picture' width='40px' src=\"{$baseUrl}{$event["description"]->image}\">
-                        <div class='media-body ml-2' style='flex: 2;'>
-                            <div class='media-title'>
-                                <span class='user_name cursor' onclick='return load(\"{$event["link"]}/{$event["description"]->item_id}\");'>
-                                ".ucwords($event["description"]->name)."</span><br>
-                                ".(
-                                    !empty($event["description"]->class_name) ? 
-                                        "<small>".ucwords($event["description"]->class_name)."</small><br>" : null
-                                )."
-                                <span class='badge badge-{$myClass->user_colors[$event["description"]->user_type]} p-1'>".ucwords($event["description"]->user_type)."</span>
-                            </div>                    
-                        </div>
-                        <div class='media-progressbar'>
-                            <div class='progress-text md-right text-uppercase'>".date("D, jS M", strtotime($clean_date))."</div>
+                        <div class='flex w-100 items-center p-2 mb-2 border rounded-xl align-left'>
+                            <div>
+                                <img title='Click to view student details' class='rounded-2xl cursor author-box-picture' width='40px' src=\"{$baseUrl}{$event["description"]->image}\">
+                            </div>
+                            <div class='media-body ml-2' style='flex: 2;'>
+                                <div class='media-title'>
+                                    <span class='user_name cursor' onclick='return load(\"{$event["link"]}/{$event["description"]->item_id}\");'>
+                                    ".ucwords($event["description"]->name)."</span><br>
+                                    ".(
+                                        !empty($event["description"]->class_name) ? 
+                                            "<small>".ucwords($event["description"]->class_name)."</small><br>" : null
+                                    )."
+                                    <span class='badge badge-{$myClass->user_colors[$event["description"]->user_type]} p-1'>".ucwords($event["description"]->user_type)."</span>
+                                </div>                    
+                            </div>
+                            <div class='media-progressbar'>
+                                <div class='progress-text md-right text-uppercase'>".date("D, jS M", strtotime($clean_date))."</div>
+                            </div>
                         </div>
                     </li>";
             }

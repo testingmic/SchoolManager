@@ -105,9 +105,9 @@ if($defaultUser->appPrefs->termEnded) {
             <div class="row">
                 <div class="col-12 col-sm-12 col-lg-12">
                     <div class="text-right mb-2">
-                        <a class="btn btn-outline-success" href="'.$baseUrl.'attendance_history"><i class="fa fa-calendar"></i> Daily Attendance History</a>
+                        <a class="btn btn-outline-success mb-1" href="'.$baseUrl.'attendance_history"><i class="fa fa-calendar"></i> Daily Attendance History</a>
                         '.($attandenceEnabled ? '
-                            <a class="btn btn-outline-success anchor" target="_blank" href="'.$baseUrl.'qr_code?request=daily&client='.$session->clientId.'">
+                            <a class="btn btn-outline-success mb-1 anchor" target="_blank" href="'.$baseUrl.'qr_code?request=daily&client='.$session->clientId.'">
                                 <i class="fa fa-qrcode"></i> Take Attendance with QR Scanner
                             </a>' : ''
                         ).'
