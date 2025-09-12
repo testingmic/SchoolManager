@@ -191,8 +191,9 @@ $response->html = '
                 ).'
                 '.(!$isWardParent ? '
                 <div class="text-right mb-2">
+                    <a class="btn btn-outline-success mb-1" href="'.$baseUrl.'attendance_log"><i class="fa fa-calendar"></i> Attendance Log</a>
                     <a class="btn btn-outline-success anchor" target="_blank" href="'.$baseUrl.'qr_code?request=daily&client='.$session->clientId.'">
-                        <i class="fa fa-qrcode"></i> Take Attendance - QR Code
+                        <i class="fa fa-qrcode"></i> Log With QR Scanner
                     </a>
                 </div>
                 ' : null).'
