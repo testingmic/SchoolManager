@@ -370,7 +370,7 @@ if(empty($user_id)) {
                         <div class="card-body text-center bg-gradient-to-br from-green-200 to-green-100 rounded-2xl shadow-lg text-white card-type-3">
                             <div class="font-18 text-dark font-weight-bold">DEPARTMENT</div>
                             <div class="font-18 text-uppercase text-black">
-                                '.($data->section_name ? $data->section_name : '-' ).'
+                                '.($data->department_name ? $data->department_name : '-' ).'
                             </div>
                         </div>
                     </div>

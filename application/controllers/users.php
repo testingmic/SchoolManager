@@ -152,7 +152,7 @@ class Users extends Myschoolgh {
 				a.user_type, a.phone_number, a.class_id, a.email, a.image, a.gender, a.user_status, a.can_change_status, 
 				cl.payment_module, cl.name class_name, dp.id AS department_id,
 				dp.name AS department_name, sc.id AS section_id, sc.name AS section_name, 
-				a.enrollment_date, a.position, a.date_of_birth";
+				a.enrollment_date, a.position, a.date_of_birth, a.expected_days";
 			
 			if(!isset($params->minified) || (isset($params->minified) && $params->minified === "no_status_filters")) {
 				$params->columns .= ", (

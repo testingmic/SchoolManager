@@ -51,7 +51,7 @@ var form_error = (message) => {
 function no_content_wrapper(title = null, caption = null, icon = "fa-search") {
     return `<div id="no_record_found_container" class="backdrop-blur-xl  h-98 backdrop-saturate-150 rounded-2xl border border-solid-gray dark:bg-opacity-20 transition-all duration-300 p-6 bg-white dark:bg-gray-900/50 border-white/10 dark:border-gray-700/50">
             <div class="dark:text-gray-300 flex items-center justify-center h-98">
-                <div class="text-center">
+                <div class="text-center py-12">
                     <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fa ${icon} text-3xl text-gray-500 dark:text-gray-400"></i>
                     </div>

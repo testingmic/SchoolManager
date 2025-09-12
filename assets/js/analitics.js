@@ -724,12 +724,13 @@ var attendanceReport = (_attendance) => {
             }
         }
 
-        let present = ["Present", "present"];
+        let present = ["Present", "present", "Not_expected", "not_expected"];
         let absent = ["Absent", "absent"];
         let holiday = ["Holiday", "holiday"];
 
         $.each(_attendance.attendance.days_list, function(day, status) {
             comments = _attendance.attendance.days_comments[day].length ? _attendance.attendance.days_comments[day] : "<em class='font-12'>No comments</em>";
+            let the_status = status.toLowerCase();
             attendance_chart_list += `
             <div class='${single_data ? "col-lg-4 col-md-6" : "col-lg-4 col-md-6"}'>
                 <div class='card mb-3'>
@@ -743,7 +744,7 @@ var attendanceReport = (_attendance) => {
                         ))}">${status.toUpperCase()}</strong>
                     </div>
                     <div class='border-top p-2 card-footer'>
-                        ${comments}
+                        ${the_status == 'not_expected' ? '<span class="text-italic">Not expected to report to school.</span>' : comments}
                     </div>
                 </div>
             </div>`;

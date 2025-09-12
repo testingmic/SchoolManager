@@ -260,9 +260,10 @@ class Attendance extends Myschoolgh {
      * 
      * @return String
      */
-    public function attendance_radios($userId = null, $user_state = null, $final = false, $mobile = false) {
+    public function attendance_radios($userId = null, $user_state = null, $final = false, $mobile = false, $notExpectedToday = false) {
         
         $html = "";
+        $alreadyChecked = false;
         if($mobile) {
             $tag = "div";
             $class = "class='mb-1'";
@@ -272,13 +273,20 @@ class Attendance extends Myschoolgh {
             $class = "class='mr-2'";
             $labels = ["success" => "Present", "danger" => "Absent", "primary" => "Holiday", "warning" => "Late"];
         }
+
+        if($notExpectedToday) {
+            $alreadyChecked = true;
+            $class = "class='hidden'";
+            $labels = ["success" => "Not_Expected"];
+        }
+
         $disabled = $final ? "disabled" : "data-user_id='{$userId}' name='attendance_status[{$userId}][]'";
 
         foreach($labels as $color => $label) {
             $the_key = strtolower($label);
             $html .= "
             <{$tag} {$class}>
-                <input {$disabled} type='radio' ".($user_state == $the_key ? "checked" : "")." class='cursor' value='{$the_key}' id='{$userId}_{$the_key}'>
+                <input {$disabled} type='radio' ".($alreadyChecked ? "checked readonly" : "")." ".($user_state == $the_key ? "checked" : "")." class='cursor' value='{$the_key}' id='{$userId}_{$the_key}'>
                 <label style='".($mobile ? "" : "display: table-cell")."' class='cursor' title='Click to Select {$label}' for='{$userId}_{$the_key}'>
                 ".($user_state == $the_key ? "<strong class='text-{$color}'>{$label}</strong>" : "{$label}")."</label>
             </{$tag}>";
@@ -616,6 +624,8 @@ class Attendance extends Myschoolgh {
      */
     public function display_attendance(stdClass $params) {
         
+        global $isAdmin, $isTutor;
+
         // get the information
         $params->minified = "load_minimal_info";
         $params->append_waspresent = true;
@@ -685,7 +695,8 @@ class Attendance extends Myschoolgh {
             // get the attendance log for the day
             $check = $this->pushQuery(
                 "a.users_list, a.users_data, a.user_type, a.class_id", 
-                "users_attendance_log a", "a.log_date='{$each_day}' {$query} LIMIT 1"
+                "users_attendance_log a", 
+                "a.log_date='{$each_day}' {$query} LIMIT 1"
             );
             
             // append the user type is there is a record but the user_type was not initially appended
@@ -868,6 +879,14 @@ class Attendance extends Myschoolgh {
                         $user_state = $_each_data["state"];
                         $user_comments = $_each_data["comments"];
 
+                        $todayName = date("l");
+                        $notExpectedToday = !empty($user_state) && (strtolower($user_state) == 'not_expected') || !in_array($todayName, stringToArray($user->expected_days));
+
+                        $not_expected =  "<div class='alert p-1 text-center alert-success'>{$user->name} is not expected to report to school on {$todayName}s</div>";
+
+                        // comment input
+                        $comment_input = $notExpectedToday ? null : "<input ".($final ? "readonly title='{$user_comments}'" : "data-user_id='{$user->user_id}' id='comments' autocomplete='Off'")." placeholder='Add remarks (optional)' value='{$user_comments}' class='form-control' type='text'>";
+
                         $mobile_version .= "
                         <div class='w-100'>
                             <div class='border p-3 rounded-lg overflow-y-auto'>
@@ -875,10 +894,11 @@ class Attendance extends Myschoolgh {
                                     {$user->name}
                                 </div>
                                 <div>
-                                    ".$this->attendance_radios($user->user_id, $user_state, $final, true)."
+                                    ".($notExpectedToday ? $not_expected : null)."
+                                    ".$this->attendance_radios($user->user_id, $user_state, $final, true, $notExpectedToday)."
                                 </div>
                                 <div>
-                                    <input ".($final ? "readonly title='{$user_comments}'" : "data-user_id='{$user->user_id}' id='comments' autocomplete='Off'")." placeholder='Add remarks (optional)' value='{$user_comments}' class='form-control' type='text'>
+                                    {$comment_input}
                                 </div>
                             </div>
                         </div>";
@@ -905,8 +925,11 @@ class Attendance extends Myschoolgh {
                                     )."
                                 </div>
                             </td>
-                            <td width='30%'>".$this->attendance_radios($user->user_id, $user_state, $final, "")."</td>
-                            <td><input ".($final ? "readonly title='{$user_comments}'" : "data-user_id='{$user->user_id}' id='comments' autocomplete='Off'")." placeholder='Add remarks (optional)' value='{$user_comments}' class='form-control' type='text'></td>
+                            <td width='30%' valign='center' ".($notExpectedToday ? "colspan='2'" : "").">
+                                ".($notExpectedToday ? $not_expected : null)."
+                                ".$this->attendance_radios($user->user_id, $user_state, $final, false, $notExpectedToday)."
+                            </td>
+                            ".($notExpectedToday ? "" : "<td>{$comment_input}</td>")."
                         </tr>";
                     }
                 }
@@ -965,7 +988,9 @@ class Attendance extends Myschoolgh {
                         <td align='right' colspan='2'>
                             <button onclick='return save_AttendanceLog(\"{$list_days[0]}\",\"{$user_type}\",\"{$class_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-save'></i> Save Attendance</button>
                             ".(!empty($attendance_log) && $canFinalize && !$check[0]->finalize ? 
-                                "<button onclick='return finalize_AttendanceLog(\"{$list_days[0]}\",\"{$user_type}\",\"{$class_id}\", \"{$check[0]->id}\")' class='btn btn-sm btn-outline-primary'><i class='fa'></i> Finalize</button>" : 
+                                "<button onclick='return finalize_AttendanceLog(\"{$list_days[0]}\",\"{$user_type}\",\"{$class_id}\", \"{$check[0]->id}\")' class='btn btn-sm btn-outline-primary'>
+                                    <i class='fa fa-check'></i>  Finalize
+                                </button>" : 
                                 ""
                             )."
                         </td>
@@ -1042,10 +1067,8 @@ class Attendance extends Myschoolgh {
             }
             
             // append the users list to the results to display
-            // $attendance["bottom_data"] = $bottom_data;
-            // $attendance["table_content"] = $table_content;
-            $attendance["bottom_data"] = $mobile_bottom;
-            $attendance["table_content"] = $mobile_version;
+            $attendance["bottom_data"] = $isTutor ? $mobile_bottom : $bottom_data;
+            $attendance["table_content"] = $isTutor ? $mobile_version : $table_content;
             
         }
 
