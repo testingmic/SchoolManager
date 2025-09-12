@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser, $isReadOnly, $isTutorAdmin;
+global $myClass, $SITEURL, $defaultUser, $isReadOnly, $isTutorAdmin, $isTutor;
 
 // initial variables
 $appName = $myClass->appName;
@@ -106,7 +106,7 @@ if($defaultUser->appPrefs->termEnded) {
                 <div class="col-12 col-sm-12 col-lg-12">
                     <div class="text-right mb-2">
                         <a class="btn btn-outline-success mb-1" href="'.$baseUrl.'attendance_history"><i class="fa fa-calendar"></i> Daily Attendance History</a>
-                        '.($attandenceEnabled ? '
+                        '.($attandenceEnabled && !$isTutor ? '
                             <a class="btn btn-outline-success mb-1 anchor" target="_blank" href="'.$baseUrl.'qr_code?request=daily&client='.$session->clientId.'">
                                 <i class="fa fa-qrcode"></i> Take Attendance with QR Scanner
                             </a>' : ''
