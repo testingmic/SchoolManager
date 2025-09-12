@@ -542,8 +542,99 @@ async function fetchAnswerKey(examId) {
     }
 }
 
-// ... (Include the rest of the OMR processing JavaScript from the HTML file)
-// This would be the same functions from the standalone HTML file but adapted for PHP integration
+// ==================== OMR PROCESSING CORE FUNCTIONS ====================
+
+// Updated positioning constants for 3-column, 20-questions-per-column layout
+const useStartY = 0.28; // Start of answer section
+const useEndY = 0.95; // End of answer section
+const leftMargin = 0.08; // Left margin for first column
+const columnSpacing = 0.305; // Space between columns
+const useBubbleWidth = 0.018; // Bubble width ratio
+const useBubbleHeight = 0.6; // Bubble height ratio
+const bubbleOptionSpacing = 0.045; // Spacing between A,B,C,D options
+
+function processOMRSheet(img) {
+    log("Starting OMR processing...");
+    const startTime = Date.now();
+    
+    try {
+        // Step 1: Load image into OpenCV
+        const src = cv.imread(img);
+        log(`Image loaded into OpenCV: ${src.cols}x${src.rows}`);
+
+        // Step 2: Preprocess image
+        const processed = preprocessImage(src);
+        
+        // Step 3: Extract student information
+        extractStudentInfo(src);
+        
+        // Step 4: Detect and analyze bubbles
+        const detectedAnswers = detectBubbles(processed);
+        
+        // Step 5: Display results
+        displayResults(src, processed, detectedAnswers);
+        
+        const processingTime = ((Date.now() - startTime) / 1000).toFixed(2);
+        document.getElementById('processingTime').textContent = processingTime;
+        document.getElementById('processingStatus').textContent = 'Completed';
+        
+        // Store results for saving
+        currentResults = {
+            detectedAnswers: detectedAnswers,
+            score: Object.values(detectedAnswers).filter(a => a !== '-').length,
+            totalQuestions: Object.keys(detectedAnswers).length
+        };
+        
+        // Cleanup
+        src.delete();
+        processed.delete();
+        
+        resetProcessButton();
+        document.getElementById('saveBtn').disabled = false;
+        
+    } catch (error) {
+        log(`Error processing image: ${error.message}`);
+        showStatus('Error processing image. Please try again.', 'error');
+        resetProcessButton();
+    }
+}
+
+function preprocessImage(src) {
+    log("Preprocessing image...");
+    
+    // Convert to grayscale
+    const gray = new cv.Mat();
+    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+    
+    // Apply bilateral filter to reduce noise while preserving edges
+    const bilateral = new cv.Mat();
+    cv.bilateralFilter(gray, bilateral, 9, 75, 75);
+    
+    // Enhance contrast using CLAHE
+    const clahe = new cv.Mat();
+    const claheAlgo = new cv.CLAHE(3.0, new cv.Size(8, 8));
+    claheAlgo.apply(bilateral, clahe);
+    
+    // Apply Otsu's thresholding
+    const thresh = new cv.Mat();
+    cv.threshold(clahe, thresh, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
+    
+    // Morphological operations to clean up the image
+    const kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(3, 3));
+    const morphed = new cv.Mat();
+    cv.morphologyEx(thresh, morphed, cv.MORPH_OPEN, kernel);
+    
+    log("Enhanced image preprocessing completed");
+    
+    // Cleanup intermediate mats
+    gray.delete();
+    bilateral.delete();
+    clahe.delete();
+    thresh.delete();
+    kernel.delete();
+    
+    return morphed;
+}
 
 function showStatus(message, type = 'info') {
     const statusEl = document.getElementById('processingStatus');

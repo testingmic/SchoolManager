@@ -3,660 +3,930 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced OMR Answer Sheet Scanner</title>
+    <title>Custom A5 OMR Answer Sheet Scanner</title>
     <script src="https://docs.opencv.org/4.x/opencv.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            background-color: #f5f5f5;
         }
+
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
         }
+
         h1 {
-            color: #333;
             text-align: center;
-            margin-bottom: 30px;
+            color: #2d3748;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .upload-section {
-            border: 2px dashed #ddd;
-            padding: 30px;
+
+        .subtitle {
             text-align: center;
-            border-radius: 10px;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .upload-zone {
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            border: 3px dashed #cbd5e0;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
             margin-bottom: 30px;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .upload-section:hover {
-            border-color: #007bff;
-            background-color: #f8f9fa;
+
+        .upload-zone:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
         }
+
         .file-input {
-            margin: 10px 0;
-            padding: 10px;
-        }
-        .processing-status {
             margin: 20px 0;
-            padding: 15px;
-            border-radius: 5px;
-            display: none;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
         }
-        .status-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-        .status-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .status-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .file-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .status-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid;
+            display: none;
+            backdrop-filter: blur(5px);
+        }
+
+        .status-info { 
+            border-left-color: #3182ce; 
+            background: linear-gradient(90deg, rgba(49, 130, 206, 0.1), transparent);
+        }
+        .status-success { 
+            border-left-color: #38a169; 
+            background: linear-gradient(90deg, rgba(56, 161, 105, 0.1), transparent);
+        }
+        .status-error { 
+            border-left-color: #e53e3e; 
+            background: linear-gradient(90deg, rgba(229, 62, 62, 0.1), transparent);
+        }
+
         .results-section {
             display: none;
             margin-top: 30px;
         }
-        .canvas-container {
-            text-align: center;
+
+        .canvas-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
             margin: 20px 0;
         }
-        canvas {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin: 10px;
-            max-width: 100%;
-        }
-        .student-info {
-            background: #e3f2fd;
+
+        .canvas-item {
+            background: white;
             padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .canvas-item h4 {
+            margin-bottom: 15px;
+            color: #2d3748;
+            font-size: 1.1rem;
+        }
+
+        canvas {
+            max-width: 100%;
             border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
             margin: 20px 0;
         }
+
+        .info-card {
+            background: linear-gradient(135deg, #e6fffa, #f0fff4);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(56, 178, 172, 0.2);
+        }
+
+        .info-card h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, #fed7d7, #fbb6ce);
+            border: 1px solid rgba(236, 72, 153, 0.2);
+        }
+
+        .answers-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
         .answers-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 15px;
-            margin: 20px 0;
         }
-        .answer-block {
-            background: #f8f9fa;
+
+        .answer-item {
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
             padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #007bff;
+            border-radius: 10px;
+            border-left: 4px solid #cbd5e0;
+            transition: all 0.3s ease;
         }
-        .answer-correct { border-left-color: #28a745; background: #d4edda; }
-        .answer-incorrect { border-left-color: #dc3545; background: #f8d7da; }
-        .score-summary {
-            background: #fff3cd;
+
+        .answer-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .answer-correct {
+            border-left-color: #38a169;
+            background: linear-gradient(135deg, #f0fff4, #e6fffa);
+        }
+
+        .answer-incorrect {
+            border-left-color: #e53e3e;
+            background: linear-gradient(135deg, #fed7d7, #fbb6ce);
+        }
+
+        .answer-blank {
+            border-left-color: #ed8936;
+            background: linear-gradient(135deg, #fffaf0, #fef5e7);
+        }
+
+        .debug-section {
+            background: #2d3748;
+            color: #e2e8f0;
             padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #ffeeba;
-            margin: 20px 0;
-        }
-        .btn {
-            background: #007bff;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 5px;
-        }
-        .btn:hover { background: #0056b3; }
-        .debug-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
+            border-radius: 12px;
             margin: 20px 0;
             font-family: monospace;
             font-size: 12px;
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
+        }
+
+        .debug-section h4 {
+            color: #90cdf4;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        @media (max-width: 768px) {
+            .canvas-grid,
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎯 Advanced OMR Answer Sheet Scanner</h1>
+        <h1>A5 OMR Scanner</h1>
+        <p class="subtitle">Specialized for MySchoolGH Answer Sheets</p>
         
-        <div class="upload-section">
-            <h3>📄 Upload OMR Answer Sheet</h3>
-            <p>Upload a clear photo of your OMR answer sheet. The system will automatically detect and process it.</p>
-            <input type="file" id="fileInput" accept="image/*" class="file-input">
-            <br>
-            <button onclick="processUploadedImage()" class="btn">🔍 Scan Answer Sheet</button>
+        <div class="upload-zone">
+            <div class="upload-content">
+                <h3>Upload Your A5 Answer Sheet</h3>
+                <p>Select your OMR answer sheet image for processing</p>
+                <input type="file" id="fileInput" accept="image/*" class="file-input">
+                <button onclick="processSheet()" class="btn">Process Answer Sheet</button>
+            </div>
         </div>
 
-        <div id="processingStatus" class="processing-status">
-            <span id="statusText">Processing...</span>
+        <div id="statusCard" class="status-card">
+            <div id="progressBar" class="progress-bar" style="display: none;">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <div id="statusText">Ready to process...</div>
         </div>
 
         <div id="resultsSection" class="results-section">
-            <div class="canvas-container">
-                <h3>📸 Processed Images</h3>
-                <div>
-                    <label>Original Image:</label><br>
+            <div class="canvas-grid">
+                <div class="canvas-item">
+                    <h4>Original Image</h4>
                     <canvas id="originalCanvas"></canvas>
                 </div>
-                <div>
-                    <label>Processed Image:</label><br>
+                <div class="canvas-item">
+                    <h4>Processed Image</h4>
                     <canvas id="processedCanvas"></canvas>
                 </div>
             </div>
 
-            <div id="studentInfo" class="student-info">
-                <h3>👤 Student Information</h3>
-                <p><strong>Name:</strong> <span id="studentName">Detecting...</span></p>
-                <p><strong>Subject:</strong> <span id="subject">Detecting...</span></p>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Student Information</h3>
+                    <div class="info-item">
+                        <span>Name:</span>
+                        <strong id="studentName">Detecting...</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Subject:</span>
+                        <strong id="studentSubject">Detecting...</strong>
+                    </div>
+                </div>
+
+                <div class="info-card score-card">
+                    <h3>Results Summary</h3>
+                    <div class="info-item">
+                        <span>Score:</span>
+                        <strong id="scoreDisplay">0/60</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Percentage:</span>
+                        <strong id="percentageDisplay">0%</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Processed:</span>
+                        <strong id="processedCount">0 questions</strong>
+                    </div>
+                </div>
             </div>
 
-            <div class="score-summary">
-                <h3>📊 Scan Results</h3>
-                <p><strong>Score:</strong> <span id="totalScore">0/0</span></p>
-                <p><strong>Percentage:</strong> <span id="percentage">0%</span></p>
-                <p><strong>Questions Processed:</strong> <span id="questionsProcessed">0</span></p>
+            <div class="answers-container">
+                <h3>Answer Analysis</h3>
+                <div id="answersGrid" class="answers-grid">
+                    <!-- Answers will be populated here -->
+                </div>
             </div>
 
-            <div id="answersGrid" class="answers-grid">
-                <!-- Answers will be populated here -->
-            </div>
-
-            <div id="debugInfo" class="debug-info">
-                <h4>🔧 Debug Information</h4>
-                <div id="debugContent"></div>
+            <div class="debug-section">
+                <h4>Processing Log</h4>
+                <div id="debugLog"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Global variables
-        let uploadedImage = null;
-        let answerKey = {};
-        let debugLog = [];
+        var uploadedImage = null;
+        var answerKey = {};
+        var debugMessages = [];
         
-        // Initialize answer key (you can modify this based on your needs)
         function initializeAnswerKey() {
-            // Sample answer key - you can load this from a file or API
-            const sampleAnswers = ["A", "B", "C", "D"];
-            for (let i = 1; i <= 60; i++) {
-                answerKey[i] = sampleAnswers[Math.floor(Math.random() * sampleAnswers.length)];
+            var answers = ['A', 'B', 'C', 'D'];
+            for (var i = 1; i <= 60; i++) {
+                answerKey[i] = answers[Math.floor(Math.random() * answers.length)];
             }
             log("Answer key initialized for 60 questions");
         }
 
-        // Logging function
         function log(message) {
             console.log(message);
-            debugLog.push(`${new Date().toLocaleTimeString()}: ${message}`);
-            updateDebugInfo();
+            debugMessages.push(new Date().toLocaleTimeString() + ": " + message);
+            updateDebugDisplay();
         }
 
-        function updateDebugInfo() {
-            document.getElementById('debugContent').innerHTML = debugLog.slice(-10).join('<br>');
+        function updateDebugDisplay() {
+            var debugLog = document.getElementById('debugLog');
+            debugLog.innerHTML = debugMessages.slice(-15).join('<br>');
+            debugLog.scrollTop = debugLog.scrollHeight;
         }
 
-        function showStatus(message, type = 'info') {
-            const statusEl = document.getElementById('processingStatus');
-            const statusText = document.getElementById('statusText');
+        function showStatus(message, type, showProgress) {
+            var statusCard = document.getElementById('statusCard');
+            var statusText = document.getElementById('statusText');
+            var progressBar = document.getElementById('progressBar');
             
-            statusEl.style.display = 'block';
+            statusCard.style.display = 'block';
+            statusCard.className = 'status-card status-' + (type || 'info');
             statusText.textContent = message;
             
-            statusEl.className = `processing-status status-${type}`;
+            progressBar.style.display = showProgress ? 'block' : 'none';
             
             if (type === 'success' || type === 'error') {
-                setTimeout(() => {
-                    statusEl.style.display = 'none';
+                setTimeout(function() {
+                    if (!showProgress) statusCard.style.display = 'none';
                 }, 3000);
             }
         }
 
-        // File input handling
+        function updateProgress(percentage) {
+            var progressFill = document.getElementById('progressFill');
+            progressFill.style.width = percentage + '%';
+        }
+
         document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
+            var file = e.target.files[0];
             if (!file) return;
 
-            const img = new Image();
+            if (!file.type.startsWith('image/')) {
+                showStatus('Please select a valid image file!', 'error');
+                return;
+            }
+
+            var img = new Image();
             img.onload = function() {
                 uploadedImage = img;
-                showStatus('Image loaded successfully!', 'success');
-                log(`Image loaded: ${file.name} (${img.width}x${img.height})`);
+                showStatus('Image loaded: ' + file.name + ' (' + img.width + 'x' + img.height + ')', 'success');
+                log('Image loaded successfully: ' + file.name);
+            };
+            img.onerror = function() {
+                showStatus('Failed to load image. Please try another file.', 'error');
             };
             img.src = URL.createObjectURL(file);
         });
 
-        function processUploadedImage() {
+        function processSheet() {
             if (!uploadedImage) {
                 showStatus('Please upload an image first!', 'error');
                 return;
             }
 
-            showStatus('Processing OMR sheet...', 'info');
+            showStatus('Processing A5 answer sheet...', 'info', true);
+            updateProgress(0);
+            
             initializeAnswerKey();
             
-            try {
-                processOMRSheet(uploadedImage);
-            } catch (error) {
-                log(`Error processing image: ${error.message}`);
-                showStatus('Error processing image. Please try again.', 'error');
-            }
+            setTimeout(function() {
+                try {
+                    processA5OMR(uploadedImage);
+                } catch (error) {
+                    log('Error: ' + error.message);
+                    showStatus('Processing failed. Please try again.', 'error');
+                }
+            }, 100);
         }
 
-        function processOMRSheet(img) {
-            log("Starting OMR processing...");
+        function processA5OMR(img) {
+            log("Starting A5 OMR processing...");
+            updateProgress(10);
             
-            // Step 1: Load image into OpenCV
-            const src = cv.imread(img);
-            log(`Image loaded into OpenCV: ${src.cols}x${src.rows}`);
-
-            // Step 2: Preprocess image
-            const processed = preprocessImage(src);
+            var src = cv.imread(img);
+            log('Image dimensions: ' + src.cols + 'x' + src.rows);
+            updateProgress(20);
             
-            // Step 3: Extract student information
-            extractStudentInfo(src);
+            var processed = preprocessA5Image(src);
+            updateProgress(40);
             
-            // Step 4: Detect and analyze bubbles
-            const detectedAnswers = detectBubbles(processed);
+            extractA5StudentInfo(src);
+            updateProgress(60);
             
-            // Step 5: Display results
-            displayResults(src, processed, detectedAnswers);
+            var answers = detectA5Answers(processed);
+            updateProgress(80);
             
-            // Cleanup
+            displayA5Results(src, processed, answers);
+            updateProgress(100);
+            
             src.delete();
             processed.delete();
+            
+            showStatus('Processing completed successfully!', 'success');
         }
 
-        function preprocessImage(src) {
-            log("Preprocessing image...");
+        function preprocessA5Image(src) {
+            log("Preprocessing A5 image...");
             
-            // Convert to grayscale
-            const gray = new cv.Mat();
+            var gray = new cv.Mat();
             cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
             
-            // Apply bilateral filter to reduce noise while preserving edges
-            const bilateral = new cv.Mat();
-            cv.bilateralFilter(gray, bilateral, 9, 75, 75);
+            var denoised = new cv.Mat();
+            cv.medianBlur(gray, denoised, 3);
             
-            // Enhance contrast using CLAHE
-            const clahe = new cv.Mat();
-            const claheAlgo = new cv.CLAHE(3.0, new cv.Size(8, 8));
-            claheAlgo.apply(bilateral, clahe);
+            var enhanced = new cv.Mat();
+            try {
+                cv.equalizeHist(denoised, enhanced);
+            } catch (e) {
+                log("Histogram equalization failed, using original");
+                enhanced = denoised.clone();
+            }
             
-            // Apply Otsu's thresholding
-            const thresh = new cv.Mat();
-            cv.threshold(clahe, thresh, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
+            var thresh = new cv.Mat();
+            cv.threshold(enhanced, thresh, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
             
-            // Morphological operations to clean up the image
-            const kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(3, 3));
-            const morphed = new cv.Mat();
-            cv.morphologyEx(thresh, morphed, cv.MORPH_OPEN, kernel);
+            var kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(2, 2));
+            var final = new cv.Mat();
+            cv.morphologyEx(thresh, final, cv.MORPH_CLOSE, kernel);
             
-            log("Enhanced image preprocessing completed");
-            
-            // Cleanup intermediate mats
             gray.delete();
-            bilateral.delete();
-            clahe.delete();
+            denoised.delete();
+            enhanced.delete();
             thresh.delete();
             kernel.delete();
             
-            return morphed;
+            log("Image preprocessing completed");
+            return final;
         }
 
-        function extractStudentInfo(src) {
+        function extractA5StudentInfo(src) {
             log("Extracting student information...");
             
-            // Define regions for name and subject based on the actual form layout
-            const headerHeight = Math.floor(src.rows * 0.12); // Top section height
+            var nameRegionHeight = Math.floor(src.rows * 0.08);
             
-            // Name is in the left box
-            const nameRegion = src.roi(new cv.Rect(
-                Math.floor(src.cols * 0.1),  // Start from 10% from left
-                Math.floor(src.rows * 0.02), // Start from top with small margin
-                Math.floor(src.cols * 0.35), // Width of name box
-                headerHeight
+            var nameRegion = src.roi(new cv.Rect(
+                Math.floor(src.cols * 0.02),
+                Math.floor(src.rows * 0.12),
+                Math.floor(src.cols * 0.45),
+                nameRegionHeight
             ));
             
-            // Subject is in the right box
-            const subjectRegion = src.roi(new cv.Rect(
-                Math.floor(src.cols * 0.55), // Start after middle
-                Math.floor(src.rows * 0.02), // Same top margin
-                Math.floor(src.cols * 0.35), // Width of subject box
-                headerHeight
+            var subjectRegion = src.roi(new cv.Rect(
+                Math.floor(src.cols * 0.52),
+                Math.floor(src.rows * 0.12),
+                Math.floor(src.cols * 0.45),
+                nameRegionHeight
             ));
             
-            // Preprocess the regions for better OCR
-            const processedName = preprocessForOCR(nameRegion);
-            const processedSubject = preprocessForOCR(subjectRegion);
+            var processedName = preprocessTextRegion(nameRegion);
+            var processedSubject = preprocessTextRegion(subjectRegion);
             
-            // Create canvases for OCR
-            const nameCanvas = document.createElement('canvas');
-            const subjectCanvas = document.createElement('canvas');
+            var nameCanvas = document.createElement('canvas');
+            var subjectCanvas = document.createElement('canvas');
             
             cv.imshow(nameCanvas, processedName);
             cv.imshow(subjectCanvas, processedSubject);
             
-            // Perform OCR on both regions
             Promise.all([
-                Tesseract.recognize(nameCanvas, 'eng', {
-                    logger: m => {
-                        if (m.status === 'recognizing text') {
-                            log(`Name OCR Progress: ${Math.round(m.progress * 100)}%`);
-                        }
-                    }
-                }),
-                Tesseract.recognize(subjectCanvas, 'eng', {
-                    logger: m => {
-                        if (m.status === 'recognizing text') {
-                            log(`Subject OCR Progress: ${Math.round(m.progress * 100)}%`);
-                        }
-                    }
-                })
-            ]).then(([nameResult, subjectResult]) => {
-                log(`OCR Results - Name: ${nameResult.data.text}, Subject: ${subjectResult.data.text}`);
-                parseStudentInfo(nameResult.data.text, subjectResult.data.text);
+                Tesseract.recognize(nameCanvas, 'eng'),
+                Tesseract.recognize(subjectCanvas, 'eng')
+            ]).then(function(results) {
+                parseA5StudentInfo(results[0].data.text, results[1].data.text);
                 
-                // Cleanup
                 nameRegion.delete();
                 subjectRegion.delete();
                 processedName.delete();
                 processedSubject.delete();
-            }).catch(error => {
-                log(`OCR Error: ${error.message}`);
+            }).catch(function(error) {
+                log('OCR Error: ' + error.message);
                 document.getElementById('studentName').textContent = 'Could not detect';
-                document.getElementById('subject').textContent = 'Could not detect';
+                document.getElementById('studentSubject').textContent = 'Could not detect';
                 
-                // Cleanup on error
                 nameRegion.delete();
                 subjectRegion.delete();
                 processedName.delete();
                 processedSubject.delete();
             });
         }
-        
-        function preprocessForOCR(mat) {
-            // Create a copy for processing
-            const processed = mat.clone();
+
+        function preprocessTextRegion(region) {
+            var processed = region.clone();
             
-            // Convert to grayscale if not already
             if (processed.channels() > 1) {
                 cv.cvtColor(processed, processed, cv.COLOR_RGBA2GRAY);
             }
             
-            // Apply adaptive threshold
-            cv.adaptiveThreshold(processed, processed, 255,
-                cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2);
-                
-            // Denoise
-            const kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(2, 2));
-            cv.morphologyEx(processed, processed, cv.MORPH_OPEN, kernel);
+            cv.threshold(processed, processed, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU);
+            
+            var kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(2, 1));
+            cv.dilate(processed, processed, kernel);
             kernel.delete();
             
             return processed;
         }
 
-        function parseStudentInfo(nameText, subjectText) {
-            log("Parsing extracted text...");
-            let name = 'Could not detect';
-            let subject = 'Could not detect';
+        function parseA5StudentInfo(nameText, subjectText) {
+            var name = 'Could not detect';
+            var subject = 'Could not detect';
             
-            // Process name text
-            const nameLines = nameText.split('\n').filter(line => line.trim());
-            for (let line of nameLines) {
-                // Remove common OCR artifacts and clean up the text
-                let cleanLine = line.replace(/[^a-zA-Z\s]/g, ' ').trim();
-                if (cleanLine.toLowerCase().includes('candidate')) continue;
-                if (cleanLine.length > 3) {
-                    name = cleanLine;
-                    break;
-                }
+            if (nameText && nameText.trim().length > 2) {
+                name = nameText.replace(/[^a-zA-Z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+                if (name.length < 3) name = 'Could not detect';
             }
             
-            // Process subject text
-            const subjectLines = subjectText.split('\n').filter(line => line.trim());
-            for (let line of subjectLines) {
-                // Clean up the subject text
-                let cleanLine = line.replace(/[^a-zA-Z\s]/g, ' ')
-                                  .replace(/SUBJECT|NAME/gi, '')
-                                  .trim()
-                                  .toUpperCase();
-                                  
-                if (cleanLine.length > 2) {
-                    subject = cleanLine;
-                    break;
-                }
+            if (subjectText && subjectText.trim().length > 1) {
+                subject = subjectText.replace(/[^a-zA-Z\s]/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
+                if (subject.length < 2) subject = 'Could not detect';
             }
             
-            // Update the display
             document.getElementById('studentName').textContent = name;
-            document.getElementById('subject').textContent = subject;
-            log(`Parsed - Name: ${name}, Subject: ${subject}`);
+            document.getElementById('studentSubject').textContent = subject;
             
-            // Add visual feedback
-            const studentInfo = document.getElementById('studentInfo');
-            studentInfo.style.backgroundColor = '#e3f2fd';
-            studentInfo.style.padding = '20px';
-            studentInfo.style.borderRadius = '8px';
-            studentInfo.style.marginTop = '20px';
-            
-            // Log the extracted information for debugging
-            log(`Raw name text: ${nameText}`);
-            log(`Raw subject text: ${subjectText}`);
+            log('Student Info - Name: ' + name + ', Subject: ' + subject);
         }
 
-        const useStartY = 0.289; // good position
-        const useEndY = 1; // good position
-        const leftMargin = 0.05; // good position
-        const leftMarginMultiplier = 0.15;
-        const processedImgColsMultiplier = 1.45;
-
-        const useBubbleWidth = 0.02;
-        const useBubbleHeight = 0.65;
-        const useBubbleSpacing = 2.6;
-
-        function detectBubbles(processedImg) {
-            log("Detecting bubble answers...");
+        function detectA5Answers(processedImg) {
+            log("Detecting answers on A5 sheet...");
             
-            const detectedAnswers = {};
-            const imgHeight = processedImg.rows;
-            const imgWidth = processedImg.cols * processedImgColsMultiplier;
+            var answers = {};
+            var imgHeight = processedImg.rows;
+            var imgWidth = processedImg.cols;
             
-            // Constants based on the actual answer sheet layout
-            const questionsPerColumn = 15;  // 15 questions per column
-            const numColumns = 4;  // 4 columns to get 60 questions total
+            var questionsPerColumn = 20;
+            var totalColumns = 3;
             
-            // Calculate the answer section boundaries (approximately 60% of the page height)
-            const startY = Math.floor(imgHeight * useStartY); // Start where the answer section begins
-            const endY = Math.floor(imgHeight * useEndY);
-            const questionHeight = (endY - startY) / questionsPerColumn;
+            var answerAreaTop = Math.floor(imgHeight * 0.28);
+            var answerAreaBottom = Math.floor(imgHeight * 0.95);
+            var answerAreaHeight = answerAreaBottom - answerAreaTop;
+            var questionSpacing = answerAreaHeight / questionsPerColumn;
             
-            // Log dimensions for debugging
-            console.log({imgHeight, imgWidth, questionsPerColumn, numColumns, startY, endY, questionHeight});
+            var columnPositions = [
+                Math.floor(imgWidth * 0.08),
+                Math.floor(imgWidth * 0.40),
+                Math.floor(imgWidth * 0.72)
+            ];
             
-            // Bubble dimensions based on actual sheet measurements
-            const bubbleWidth = Math.floor(imgWidth * useBubbleWidth);  // Slightly larger bubbles
-            const bubbleHeight = Math.floor(questionHeight * useBubbleHeight); // Adjust height to match actual bubbles
-            const bubbleSpacing = Math.floor(bubbleWidth * useBubbleSpacing);  // Increase spacing between options
+            var bubbleWidth = Math.floor(imgWidth * 0.018);
+            var bubbleHeight = Math.floor(questionSpacing * 0.5);
+            var optionSpacing = Math.floor(imgWidth * 0.04);
             
-            let totalQuestions = 0;
+            log('Detection params - Columns: ' + totalColumns + ', Questions/col: ' + questionsPerColumn);
+            log('Answer area: ' + answerAreaTop + '-' + answerAreaBottom + ', Bubble: ' + bubbleWidth + 'x' + bubbleHeight);
             
-            // Process four columns of questions
-            for (let col = 0; col < numColumns; col++) {
-                // Calculate column positions to match the actual sheet layout
-                const colStartX = Math.floor(imgWidth * (leftMargin + col * leftMarginMultiplier)); // Adjust left margin and spacing between columns
+            var allFillRatios = [];
+            
+            for (var col = 0; col < totalColumns; col++) {
+                var colX = columnPositions[col];
                 
-                for (let q = 0; q < questionsPerColumn; q++) {
-                    const questionNum = col * questionsPerColumn + q + 1;
-                    if (questionNum > 60) break;
+                for (var q = 0; q < questionsPerColumn; q++) {
+                    var questionNum = col * questionsPerColumn + q + 1;
+                    var questionY = answerAreaTop + Math.floor(q * questionSpacing);
                     
-                    totalQuestions++;
-                    const questionY = startY + q * questionHeight;
-                    
-                    let bestAnswer = null;
-                    let maxFilled = 0;
-                    let debugInfo = [];
-                    
-                    // Check each option (A, B, C, D)
-                    const options = ['A', 'B', 'C', 'D'];
-                    for (let i = 0; i < options.length; i++) {
-                        const option = options[i];
-                        const bubbleX = colStartX + i * bubbleSpacing;
+                    for (var opt = 0; opt < 4; opt++) {
+                        var bubbleX = colX + opt * optionSpacing;
                         
                         try {
-                            // Extract and analyze bubble region
-                            const bubbleRect = new cv.Rect(
-                                Math.max(0, bubbleX), 
-                                Math.max(0, questionY),
-                                Math.min(bubbleWidth, imgWidth - bubbleX),
-                                Math.min(bubbleHeight, imgHeight - questionY)
-                            );
+                            var safeX = Math.max(0, Math.min(bubbleX, imgWidth - bubbleWidth));
+                            var safeY = Math.max(0, Math.min(questionY, imgHeight - bubbleHeight));
+                            var safeWidth = Math.min(bubbleWidth, imgWidth - safeX);
+                            var safeHeight = Math.min(bubbleHeight, imgHeight - safeY);
                             
-                            if (bubbleRect.width > 0 && bubbleRect.height > 0) {
-                                const roi = processedImg.roi(bubbleRect);
+                            if (safeWidth > 0 && safeHeight > 0) {
+                                var bubbleRect = new cv.Rect(safeX, safeY, safeWidth, safeHeight);
+                                var roi = processedImg.roi(bubbleRect);
                                 
-                                // Count black pixels (marked areas)
-                                const nonZeroPixels = cv.countNonZero(roi);
-                                const totalPixels = roi.rows * roi.cols;
-                                const fillRatio = nonZeroPixels / totalPixels;
+                                var filledPixels = cv.countNonZero(roi);
+                                var totalPixels = roi.rows * roi.cols;
+                                var fillRatio = filledPixels / totalPixels;
                                 
-                                debugInfo.push(`${option}:${Math.round(fillRatio * 100)}%`);
-                                
+                                allFillRatios.push(fillRatio);
                                 roi.delete();
-                                
-                                // Adjusted threshold for better detection
-                                if (fillRatio > 0.2 && fillRatio > maxFilled) {  // Lower threshold for better detection
-                                    bestAnswer = option;
-                                    maxFilled = fillRatio;
-                                }
                             }
                         } catch (error) {
-                            log(`Error processing Q${questionNum}${option}: ${error.message}`);
+                            // Skip problematic bubbles
+                        }
+                    }
+                }
+            }
+            
+            if (allFillRatios.length === 0) {
+                log("No valid bubbles found for analysis");
+                return {};
+            }
+            
+            allFillRatios.sort(function(a, b) { return a - b; });
+            var q75 = allFillRatios[Math.floor(allFillRatios.length * 0.75)] || 0;
+            var mean = allFillRatios.reduce(function(sum, val) { return sum + val; }, 0) / allFillRatios.length;
+            var variance = allFillRatios.reduce(function(sum, val) { return sum + Math.pow(val - mean, 2); }, 0) / allFillRatios.length;
+            var stdDev = Math.sqrt(variance);
+            
+            var dynamicThreshold = Math.max(
+                mean + 2 * stdDev,
+                q75 * 1.5,
+                0.35
+            );
+            
+            log('Fill ratio analysis - Mean: ' + (mean*100).toFixed(1) + '%, Q75: ' + (q75*100).toFixed(1) + '%');
+            log('Dynamic threshold set to: ' + (dynamicThreshold*100).toFixed(1) + '%');
+            
+            var totalProcessed = 0;
+            var detectedAnswers = 0;
+            
+            for (var col = 0; col < totalColumns; col++) {
+                var colX = columnPositions[col];
+                
+                for (var q = 0; q < questionsPerColumn; q++) {
+                    var questionNum = col * questionsPerColumn + q + 1;
+                    var questionY = answerAreaTop + Math.floor(q * questionSpacing);
+                    
+                    var bestOption = null;
+                    var maxFillRatio = 0;
+                    var fillRatios = {};
+                    var validOptions = [];
+                    
+                    var options = ['A', 'B', 'C', 'D'];
+                    for (var opt = 0; opt < 4; opt++) {
+                        var option = options[opt];
+                        var bubbleX = colX + opt * optionSpacing;
+                        
+                        try {
+                            var safeX = Math.max(0, Math.min(bubbleX, imgWidth - bubbleWidth));
+                            var safeY = Math.max(0, Math.min(questionY, imgHeight - bubbleHeight));
+                            var safeWidth = Math.min(bubbleWidth, imgWidth - safeX);
+                            var safeHeight = Math.min(bubbleHeight, imgHeight - safeY);
+                            
+                            if (safeWidth > 0 && safeHeight > 0) {
+                                var bubbleRect = new cv.Rect(safeX, safeY, safeWidth, safeHeight);
+                                var roi = processedImg.roi(bubbleRect);
+                                
+                                var filledPixels = cv.countNonZero(roi);
+                                var totalPixels = roi.rows * roi.cols;
+                                var fillRatio = filledPixels / totalPixels;
+                                
+                                fillRatios[option] = fillRatio;
+                                
+                                if (fillRatio >= dynamicThreshold) {
+                                    validOptions.push({ option: option, fillRatio: fillRatio });
+                                    if (fillRatio > maxFillRatio) {
+                                        bestOption = option;
+                                        maxFillRatio = fillRatio;
+                                    }
+                                }
+                                
+                                roi.delete();
+                            }
+                        } catch (error) {
+                            log('Error processing Q' + questionNum + option + ': ' + error.message);
                         }
                     }
                     
-                    detectedAnswers[questionNum] = bestAnswer || '-';
-                    // log(`Q${questionNum} - Fill ratios: ${debugInfo.join(', ')} -> Selected: ${bestAnswer || '-'}`);
-                }
-            }
-            
-            log(`Bubble detection completed. Processed ${totalQuestions} questions.`);
-            return detectedAnswers;
-        }
-
-        function displayResults(originalImg, processedImg, detectedAnswers) {
-            log("Displaying results...");
-            
-            // Create a copy for visualization
-            const visualImg = originalImg.clone();
-            const color = new cv.Scalar(0, 255, 0, 255); // Green color for visualization
-            
-            // Draw detected bubble regions
-            const imgHeight = processedImg.rows;
-            const imgWidth = processedImg.cols * processedImgColsMultiplier;
-            const questionsPerColumn = 20;  // 15 questions per column
-            const numColumns = 3;  // 4 columns for 60 questions
-            const startY = Math.floor(imgHeight * useStartY); // Start at answer section
-            const endY = Math.floor(imgHeight * useEndY);
-            const questionHeight = (endY - startY) / questionsPerColumn;
-            const bubbleWidth = Math.floor(imgWidth * useBubbleWidth);
-            const bubbleHeight = Math.floor(questionHeight * useBubbleHeight);
-            const bubbleSpacing = Math.floor(bubbleWidth * useBubbleSpacing);
-            
-            // Draw grid and detected answers
-            for (let col = 0; col < numColumns; col++) {
-                const colStartX = Math.floor(imgWidth * (leftMargin + col * leftMarginMultiplier)); // Match the detection spacing
-                
-                for (let q = 0; q < questionsPerColumn; q++) {
-                    const questionNum = col * questionsPerColumn + q + 1;
-                    if (questionNum > 60) break;
-                    
-                    const questionY = startY + q * questionHeight;
-                    const answer = detectedAnswers[questionNum];
-                    
-                    // Draw all bubble positions
-                    for (let i = 0; i < 4; i++) {
-                        const option = ['A', 'B', 'C', 'D'][i];
-                        const bubbleX = colStartX + i * bubbleSpacing;
+                    if (validOptions.length > 1) {
+                        validOptions.sort(function(a, b) { return b.fillRatio - a.fillRatio; });
+                        var highest = validOptions[0].fillRatio;
+                        var secondHighest = validOptions[1].fillRatio;
                         
-                        // Draw rectangle for each bubble position
-                        const pt1 = new cv.Point(bubbleX, questionY);
-                        const pt2 = new cv.Point(bubbleX + bubbleWidth, questionY + bubbleHeight);
-                        
-                        // Highlight detected answer in green, others in red
-                        const bubbleColor = option === answer ? 
-                            new cv.Scalar(0, 255, 0, 255) : // Green for selected
-                            new cv.Scalar(255, 0, 0, 255);  // Red for others
-                            
-                        cv.rectangle(visualImg, pt1, pt2, bubbleColor, 1);
+                        if (highest - secondHighest < 0.15) {
+                            bestOption = null;
+                            log('Q' + questionNum + ': Multiple unclear markings detected');
+                        }
                     }
                     
-                    // Add question number
-                    const textPt = new cv.Point(colStartX - 20, questionY + bubbleHeight);
-                    cv.putText(visualImg, questionNum.toString(), textPt, cv.FONT_HERSHEY_SIMPLEX, 0.4, color, 1);
+                    answers[questionNum] = bestOption;
+                    totalProcessed++;
+                    
+                    if (bestOption) {
+                        detectedAnswers++;
+                    }
+                    
+                    if (questionNum <= 10 || bestOption) {
+                        var ratioStr = '';
+                        for (var key in fillRatios) {
+                            ratioStr += key + ':' + Math.round(fillRatios[key] * 100) + '% ';
+                        }
+                        log('Q' + questionNum + ': ' + ratioStr + ' -> ' + (bestOption || 'BLANK'));
+                    }
                 }
             }
             
-            // Show images
-            cv.imshow('originalCanvas', visualImg);
+            log('Detection completed: ' + detectedAnswers + '/' + totalProcessed + ' questions marked');
+            return answers;
+        }
+
+        function displayA5Results(originalImg, processedImg, detectedAnswers) {
+            log("Displaying A5 results...");
+            
+            cv.imshow('originalCanvas', originalImg);
             cv.imshow('processedCanvas', processedImg);
             
-            // Cleanup
-            visualImg.delete();
+            var correctCount = 0;
+            var attemptedCount = 0;
+            var incorrectCount = 0;
+            var blankCount = 0;
+            var totalQuestions = 60;
             
-            // Calculate score
-            let correctAnswers = 0;
-            const totalQuestions = Object.keys(detectedAnswers).length;
-            
-            const answersGrid = document.getElementById('answersGrid');
+            var answersGrid = document.getElementById('answersGrid');
             answersGrid.innerHTML = '';
             
-            for (let q in detectedAnswers) {
-                const studentAnswer = detectedAnswers[q];
-                const correctAnswer = answerKey[q];
-                const isCorrect = studentAnswer === correctAnswer;
+            for (var q = 1; q <= totalQuestions; q++) {
+                var studentAnswer = detectedAnswers[q];
+                var correctAnswer = answerKey[q];
                 
-                if (isCorrect && studentAnswer !== '-') {
-                    correctAnswers++;
+                var isCorrect = false;
+                var answerClass = 'answer-blank';
+                var statusIcon = '—';
+                
+                if (studentAnswer) {
+                    attemptedCount++;
+                    if (studentAnswer === correctAnswer) {
+                        correctCount++;
+                        isCorrect = true;
+                        answerClass = 'answer-correct';
+                        statusIcon = '✓';
+                    } else {
+                        incorrectCount++;
+                        answerClass = 'answer-incorrect';
+                        statusIcon = '✗';
+                    }
+                } else {
+                    blankCount++;
+                    statusIcon = '—';
                 }
                 
-                // Create answer display element
-                const answerDiv = document.createElement('div');
-                answerDiv.className = `answer-block ${isCorrect ? 'answer-correct' : 'answer-incorrect'}`;
-                answerDiv.innerHTML = `
-                    <strong>Q${q}:</strong> ${studentAnswer || '-'}<br>
-                    <small>Correct: ${correctAnswer}</small>
-                `;
+                var answerDiv = document.createElement('div');
+                answerDiv.className = 'answer-item ' + answerClass;
+                answerDiv.innerHTML = '<div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: bold; font-size: 1.1em;">Q' + q + '</span><span style="font-size: 1.4em; font-weight: bold;">' + (studentAnswer || '—') + '</span></div><div style="margin-top: 8px; font-size: 0.85em; color: #666; display: flex; justify-content: space-between;"><span>Correct: ' + correctAnswer + '</span><span style="font-size: 1.2em;">' + statusIcon + '</span></div>';
                 answersGrid.appendChild(answerDiv);
             }
             
-            // Update score display
-            const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
-            document.getElementById('totalScore').textContent = `${correctAnswers}/${totalQuestions}`;
-            document.getElementById('percentage').textContent = `${percentage}%`;
-            document.getElementById('questionsProcessed').textContent = totalQuestions;
+            var percentage = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+            var attemptRate = Math.round((attemptedCount / totalQuestions) * 100);
+            var accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
             
-            // Show results section
-            document.getElementById('resultsSection').style.display = 'block';
-            showStatus('OMR processing completed!', 'success');
+            document.getElementById('scoreDisplay').textContent = correctCount + '/' + totalQuestions;
+            document.getElementById('percentageDisplay').textContent = percentage + '% (' + accuracy + '% accuracy)';
+            document.getElementById('processedCount').textContent = attemptedCount + ' attempted, ' + blankCount + ' blank';
             
-            log(`Results displayed - Score: ${correctAnswers}/${totalQuestions} (${percentage}%)`);
+            var resultsSection = document.getElementById('resultsSection');
+            resultsSection.style.display = 'block';
+            resultsSection.style.opacity = '0';
+            resultsSection.style.transform = 'translateY(20px)';
+            
+            setTimeout(function() {
+                resultsSection.style.transition = 'all 0.5s ease';
+                resultsSection.style.opacity = '1';
+                resultsSection.style.transform = 'translateY(0)';
+            }, 100);
+            
+            log('Final Results:');
+            log('   Correct: ' + correctCount + '/' + totalQuestions + ' (' + percentage + '%)');
+            log('   Attempted: ' + attemptedCount + ' (' + attemptRate + '%)');
+            log('   Accuracy: ' + accuracy + '% of attempted questions');
+            log('   Blank: ' + blankCount + ', Incorrect: ' + incorrectCount);
         }
 
-        // Initialize when OpenCV is ready
         function onOpenCvReady() {
-            log("OpenCV.js is ready!");
-            showStatus('System ready - upload an OMR sheet to begin', 'success');
+            log("OpenCV.js loaded successfully!");
+            showStatus('System ready - Upload your A5 answer sheet to begin', 'success');
         }
 
-        // Wait for OpenCV to load
-        if (typeof cv !== 'undefined') {
+        function waitForOpenCV() {
+            if (typeof cv !== 'undefined' && cv.Mat) {
+                onOpenCvReady();
+            } else {
+                setTimeout(waitForOpenCV, 100);
+            }
+        }
+
+        if (typeof cv !== 'undefined' && cv.Mat) {
             onOpenCvReady();
         } else {
-            var script = document.createElement('script');
-            script.onload = onOpenCvReady;
-            script.src = 'https://docs.opencv.org/4.x/opencv.js';
-            document.head.appendChild(script);
+            log("Loading OpenCV.js...");
+            showStatus('Loading computer vision library...', 'info');
+            waitForOpenCV();
         }
+
+        var uploadZone = document.querySelector('.upload-zone');
+        
+        uploadZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#667eea';
+            uploadZone.style.backgroundColor = 'rgba(102, 126, 234, 0.1)';
+        });
+        
+        uploadZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#cbd5e0';
+            uploadZone.style.backgroundColor = '';
+        });
+        
+        uploadZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#cbd5e0';
+            uploadZone.style.backgroundColor = '';
+            
+            var files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('fileInput').files = files;
+                document.getElementById('fileInput').dispatchEvent(new Event('change'));
+            }
+        });
+
+        function loadCustomAnswerKey() {
+            var customAnswers = {
+                1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'A', 6: 'B', 7: 'C', 8: 'D', 9: 'A', 10: 'B',
+                11: 'C', 12: 'D', 13: 'A', 14: 'B', 15: 'C', 16: 'D', 17: 'A', 18: 'B', 19: 'C', 20: 'D',
+                21: 'A', 22: 'B', 23: 'C', 24: 'D', 25: 'A', 26: 'B', 27: 'C', 28: 'D', 29: 'A', 30: 'B',
+                31: 'C', 32: 'D', 33: 'A', 34: 'B', 35: 'C', 36: 'D', 37: 'A', 38: 'B', 39: 'C', 40: 'D',
+                41: 'A', 42: 'B', 43: 'C', 44: 'D', 45: 'A', 46: 'B', 47: 'C', 48: 'D', 49: 'A', 50: 'B',
+                51: 'C', 52: 'D', 53: 'A', 54: 'B', 55: 'C', 56: 'D', 57: 'A', 58: 'B', 59: 'C', 60: 'D'
+            };
+            
+            answerKey = customAnswers;
+            log("Custom answer key loaded");
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'u':
+                        e.preventDefault();
+                        document.getElementById('fileInput').click();
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        if (uploadedImage) processSheet();
+                        break;
+                }
+            }
+        });
+
+        var helpButton = document.createElement('button');
+        helpButton.className = 'btn';
+        helpButton.innerHTML = 'Help';
+        helpButton.style.position = 'fixed';
+        helpButton.style.bottom = '20px';
+        helpButton.style.right = '20px';
+        helpButton.style.zIndex = '1000';
+        
+        helpButton.onclick = function() {
+            alert('A5 OMR Scanner Help:\n\nInstructions:\n1. Upload a clear, well-lit photo of your A5 answer sheet\n2. Ensure the sheet is flat and all bubbles are visible\n3. The scanner will automatically detect student info and answers\n4. Review results and debug information\n\nShortcuts:\n• Ctrl+U: Upload file\n• Ctrl+Enter: Process sheet\n\nSheet Requirements:\n• A5 size format\n• 60 questions (3 columns × 20 rows)\n• Clear bubble markings\n• Good contrast and lighting\n\nTroubleshooting:\n• If detection fails, try better lighting\n• Ensure sheet is not wrinkled or damaged\n• Check that bubbles are properly filled\n• Review debug log for detailed information');
+        };
+        
+        document.body.appendChild(helpButton);
     </script>
 </body>
 </html>
