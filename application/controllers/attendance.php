@@ -812,7 +812,7 @@ class Attendance extends Myschoolgh {
 
             $mobile_version = $top_section;
             $mobile_version .= "<div id='attendance_logger'>";
-            $mobile_version .= "<div class='grid gap-2 grid-cols-2 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 w-100 flex items-center'>";
+            $mobile_version .= "<div class='grid gap-2 grid-cols-1 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 w-100 flex items-center'>";
 
             $table_content = $top_section;
             $table_content .= "<div class='table-responsive'>
@@ -877,7 +877,7 @@ class Attendance extends Myschoolgh {
                                 <div>
                                     ".$this->attendance_radios($user->user_id, $user_state, $final, true)."
                                 </div>
-                                <div class='hidden'>
+                                <div>
                                     <input ".($final ? "readonly title='{$user_comments}'" : "data-user_id='{$user->user_id}' id='comments' autocomplete='Off'")." placeholder='Add remarks (optional)' value='{$user_comments}' class='form-control' type='text'>
                                 </div>
                             </div>
