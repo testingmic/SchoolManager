@@ -485,31 +485,33 @@
             var gray = new cv.Mat();
             cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
             
-            var denoised = new cv.Mat();
-            cv.medianBlur(gray, denoised, 3);
+            // Apply Gaussian blur to smooth the image
+            var blurred = new cv.Mat();
+            cv.GaussianBlur(gray, blurred, new cv.Size(3, 3), 0);
             
-            var enhanced = new cv.Mat();
-            try {
-                cv.equalizeHist(denoised, enhanced);
-            } catch (e) {
-                log("Histogram equalization failed, using original");
-                enhanced = denoised.clone();
-            }
-            
+            // Use adaptive threshold for better handling of varying lighting
             var thresh = new cv.Mat();
-            cv.threshold(enhanced, thresh, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
+            cv.adaptiveThreshold(blurred, thresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 15, 3);
             
-            var kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(2, 2));
+            // Apply minimal morphological operations to clean noise but preserve markings
+            var kernel1 = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(2, 2));
+            var opened = new cv.Mat();
+            cv.morphologyEx(thresh, opened, cv.MORPH_OPEN, kernel1, new cv.Point(-1, -1), 1);
+            
+            // Close small gaps in markings
+            var kernel2 = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(3, 3));
             var final = new cv.Mat();
-            cv.morphologyEx(thresh, final, cv.MORPH_CLOSE, kernel);
+            cv.morphologyEx(opened, final, cv.MORPH_CLOSE, kernel2, new cv.Point(-1, -1), 1);
             
+            // Cleanup
             gray.delete();
-            denoised.delete();
-            enhanced.delete();
+            blurred.delete();
             thresh.delete();
-            kernel.delete();
+            opened.delete();
+            kernel1.delete();
+            kernel2.delete();
             
-            log("Image preprocessing completed");
+            log("Enhanced preprocessing completed for marked bubbles");
             return final;
         }
 
