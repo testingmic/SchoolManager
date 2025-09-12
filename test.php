@@ -676,10 +676,16 @@
             var variance = allFillRatios.reduce(function(sum, val) { return sum + Math.pow(val - mean, 2); }, 0) / allFillRatios.length;
             var stdDev = Math.sqrt(variance);
             
+            // var dynamicThreshold = Math.max(
+            //     mean + 2 * stdDev,
+            //     q75 * 1.5,
+            //     0.35
+            // );
+
             var dynamicThreshold = Math.max(
-                mean + 2 * stdDev,
-                q75 * 1.5,
-                0.35
+                mean + stdDev * 0.5,   // less strict than 2σ
+                q75 * 1.1,             // less strict than 1.5×
+                0.15                   // minimum 15% pixels instead of 35%
             );
             
             log('Fill ratio analysis - Mean: ' + (mean*100).toFixed(1) + '%, Q75: ' + (q75*100).toFixed(1) + '%');
