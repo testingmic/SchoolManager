@@ -624,7 +624,7 @@ class Attendance extends Myschoolgh {
      */
     public function display_attendance(stdClass $params) {
         
-        global $isAdmin, $isTutor;
+        global $isAdmin, $isTutor, $defaultClientData, $clientPrefs, $accessObject, $usersClass;
 
         // get the information
         $params->minified = "load_minimal_info";
@@ -634,20 +634,20 @@ class Attendance extends Myschoolgh {
         // additional parameter
         $appendUsersList = (bool) !isset($params->no_list);
 
-        // global items
-        global $accessObject, $usersClass;
-
         // date range mechanism
         $this_date = isset($params->date_range) ? $params->date_range : date("Y-m-d");
         $explode = explode(":", $this_date);
         $start_date = $explode[0];
         $end_date = $explode[1] ?? date("Y-m-d", strtotime("{$this_date} 0 day"));
 
+        // confirm if the school operates on weekends
+        $params->weekends = (bool)(in_array('Saturday', $clientPrefs->opening_days) || in_array('Sunday', $clientPrefs->opening_days));
+
         // get the list of days 
-        $list_days = $this->listDays($start_date, $end_date, "Y-m-d", !isset($params->weekends));
+        $list_days = $this->listDays($start_date, $end_date, "Y-m-d");
 
         // if no date was parsed
-        if(!isset($list_days[0])) {
+        if(!in_array(date("l", strtotime($list_days[0])), $clientPrefs->opening_days)) {
             return [
                 "data" => [
                     "table_content" => no_record_found("Weekend Excluded", "Sorry! The selected date is a weekend which has been excluded from recording attendance.", null, "Event", false, "fa-clock")
@@ -879,7 +879,7 @@ class Attendance extends Myschoolgh {
                         $user_state = $_each_data["state"];
                         $user_comments = $_each_data["comments"];
 
-                        $todayName = date("l");
+                        $todayName = date("l", strtotime($list_days[0]));
                         $notExpectedToday = !empty($user_state) && (strtolower($user_state) == 'not_expected') || !in_array($todayName, stringToArray($user->expected_days));
 
                         $not_expected =  "<div class='alert p-1 text-center alert-success'>{$user->name} is not expected to report to school on {$todayName}s</div>";

@@ -107,7 +107,7 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("ALTER TABLE users ADD COLUMN leave_days INT(11) DEFAULT 0;");
+		$fix[] = ("UPDATE users SET expected_days='Monday,Tuesday,Wednesday,Thursday,Friday'");
 
 		foreach($fix as $stmt) {
 			try {
