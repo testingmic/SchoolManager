@@ -357,6 +357,7 @@ if(!empty($client_id)) {
                                                                     <option '.($data->client_state == "Activated" ? "selected" : null).' disabled value="Activated">Activated</option>
                                                                     <option '.($data->client_state == "Propagation" ? "selected" : null).' disabled value="Propagation">Propagation</option>
                                                                     <option '.($data->client_state == "Complete" ? "selected" : null).' disabled value="Complete">Complete</option>
+                                                                    <option '.($data->client_state == "Deleted" ? "selected" : null).' value="Deleted">Deleted</option>
                                                                 </select>
                                                             </td>
                                                         </tr>
