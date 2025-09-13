@@ -84,11 +84,17 @@ foreach($transactions_list as $key => $transaction) {
         }
     }
 
+    $reference = !empty($transaction->attach_to_object) ? ucwords($transaction->attach_to_object) : "N/A";
+
+    if(!empty($transaction->record_object)) {
+        $reference = "<a href='{$baseUrl}{$transaction->attach_to_object}/{$transaction->record_object}'>{$reference} Object</a>";
+    }
+
     $list_transactions .= "<tr data-row_id=\"{$transaction->item_id}\">";
     $list_transactions .= "<td>{$count}</td>";
     $list_transactions .= "<td>{$transaction->account_name}</td>";
     $list_transactions .= "<td>{$transaction->account_type_name}</td>";
-    $list_transactions .= "<td>".(!empty($transaction->attach_to_object) ? ucwords($transaction->attach_to_object) : "N/A")."</td>";
+    $list_transactions .= "<td>{$reference}</td>";
     $list_transactions .= "<td>".number_format($transaction->amount, 2)."</td>";
     $list_transactions .= "<td>".date("jS M Y", strtotime($transaction->record_date))."</td>";
     $list_transactions .= "<td>{$transaction->state_label}</td>";
@@ -191,7 +197,7 @@ $response->html = '
                                     </div>
                                 </div>
                                 '.($canLogExpenses ? '
-                                <div class="tab-pane fade" id="upload_reports" role="tabpanel" aria-labelledby="upload_reports-tab2">
+                                <div class="tab-pane fade bg-lighter" id="upload_reports" role="tabpanel" aria-labelledby="upload_reports-tab2">
                                     '.$the_form.'
                                 </div>' : null).'
                             </div>

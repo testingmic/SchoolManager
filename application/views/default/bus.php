@@ -23,8 +23,15 @@ $response->title = $pageTitle;
 $hasView = $accessObject->hasAccess("view", "buses");
 
 // if the user does not have the required permissions
-if(!$hasView || !in_array("bus_manager", $clientFeatures)) {
+if(!in_array("bus_manager", $clientFeatures)) {
     $response->html = page_not_found("feature_disabled", ["bus_manager"]);
+    echo json_encode($response);
+    exit;
+}
+
+// if the user does not have the required permissions
+if(!$hasView) {
+    $response->html = page_not_found("permission_denied");
     echo json_encode($response);
     exit;
 }
@@ -36,7 +43,7 @@ $bus_id = confirm_url_id(1) ? $SITEURL[1] : null;
 $param = (object)[
     "bus_id" => $bus_id ?? null,
     "clientId" => $clientId,
-    "account_summary" => true,
+    "account_summary" => $accessObject->hasAccess("financials", "buses"),
 ];
 
 // confirm that the attendance feature is enabled
@@ -62,6 +69,7 @@ if(empty($bus_id)) {
         "hasModify" => $hasModify,
         "hasCreate" => $hasCreate,
         "attendancePage" => $attendancePage,
+        "busFinancials" => $accessObject->hasAccess("financials", "buses"),
         "markAttendance" => $accessObject->hasAccess("bus_log", "attendance")
     ];
 
@@ -176,9 +184,9 @@ if(empty($bus_id)) {
                         '.($attendancePage ? render_summary_card($statistics["checkin"], "Total Checkins", "fa fa-check", "green", "col-lg-4") : "").'
                         '.($attendancePage ? render_summary_card($statistics["checkout"], "Total Checkouts", "fa fa-check", "red", "col-lg-4") : "").'
 
-                        '.(!$attendancePage ? render_summary_card(number_format($buses[0]->income, 2), "Total Income", "fa fa-money-bill", "green", "col-lg-4") : "").'
-                        '.(!$attendancePage ? render_summary_card(number_format($buses[0]->expense, 2), "Total Expenses", "fa fa-money-check-alt", "red", "col-lg-4") : "").'
-                        '.(!$attendancePage ? render_summary_card(number_format(($buses[0]->income - $buses[0]->expense), 2), "Total Balance", "fa fa-balance-scale", "cyan", "col-lg-4") : "").'
+                        '.(!$attendancePage && $permissions["busFinancials"] ? render_summary_card(number_format($buses[0]->income, 2), "Total Income", "fa fa-money-bill", "green", "col-lg-4") : "").'
+                        '.(!$attendancePage && $permissions["busFinancials"] ? render_summary_card(number_format($buses[0]->expense, 2), "Total Expenses", "fa fa-money-check-alt", "red", "col-lg-4") : "").'
+                        '.(!$attendancePage && $permissions["busFinancials"] ? render_summary_card(number_format(($buses[0]->income - $buses[0]->expense), 2), "Total Balance", "fa fa-balance-scale", "cyan", "col-lg-4") : "").'
                     </div>
                     <div class="card">
                         '.($attendancePage ? '

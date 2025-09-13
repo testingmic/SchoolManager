@@ -187,7 +187,7 @@ $response->html = '
                                     </div>
                                 </div>
                                 '.($canDeposit ? '
-                                    <div class="tab-pane fade" id="upload_reports" role="tabpanel" aria-labelledby="upload_reports-tab2">
+                                    <div class="tab-pane fade bg-lighter" id="upload_reports" role="tabpanel" aria-labelledby="upload_reports-tab2">
                                         '.$the_form.'
                                     </div>': null
                                 ).'

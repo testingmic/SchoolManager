@@ -323,6 +323,9 @@
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-bus-alt"></i><span>Bus Management</span></a>
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>buses">Manage Buses</a></li>
+                <?php if($accessObject->hasAccess("financials", "buses")) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>bus_financials">Bus Financials</a></li>
+                <?php } ?>
                 <?php if($accessObject->hasAccess("bus_log", "attendance") && in_array("qr_code_scanner", $clientFeatures)) { ?>
                     <li><a class="nav-link" href="<?= $baseUrl ?>buses_attendance">Bus Attendance History</a></li>
                 <?php } ?>

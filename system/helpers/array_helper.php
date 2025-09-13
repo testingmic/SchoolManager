@@ -411,7 +411,9 @@ function format_bus_item($value, $no_container = false, $no_buttons = false, $wi
                             ".(!empty($permissions["markAttendance"]) && $permissions["attendancePage"] ? "<button class='btn btn-sm mb-1 btn-outline-primary' title='View {$value->brand}' onclick='return load(\"bus/{$value->item_id}\");'><i class='fa fa-eye'></i> Manage Interactions</button>" : null)."
                             ".(!empty($permissions["markAttendance"]) && !$permissions["attendancePage"] ? "
                                 <button class='btn btn-sm mb-1 btn-outline-primary' title='View Comments Log for {$value->brand}' onclick='return load(\"bus/{$value->item_id}/attendance\");'><i class='fa fa-bus'></i> Attendance</button>
-                                <button class='btn btn-sm mb-1 btn-outline-warning' title='Review the financials for {$value->brand}' onclick='return load(\"bus/{$value->item_id}/finance\");'><i class='fa fa-chart-line'></i> Financials</button>
+                            " : null)."
+                            ".(!empty($permissions["busFinancials"]) && !$permissions["attendancePage"] ? "
+                                <button class='btn btn-sm mb-1 btn-outline-warning' title='Review the financials for {$value->brand}' onclick='return load(\"bus_financials/?bus_id={$value->item_id}\");'><i class='fa fa-chart-line'></i> Financials</button>
                             " : null)."
                         </div>
                     </div>

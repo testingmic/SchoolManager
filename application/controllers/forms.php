@@ -5668,10 +5668,10 @@ class Forms extends Myschoolgh {
         $accounts_head_list = $this->pushQuery("name, item_id", "accounts_type_head", "client_id = '{$params->clientId}' AND status='1' AND type='{$form_route[$params->route]["type"]}'");
 
         $html = "
-        <div class='row'>
+        <div class='row mt-3'>
             <div id=\"accounts_form\" class=\"col-md-2\"></div>
             <div id=\"accounts_form\" class=\"col-12 col-md-8 col-lg-8\">
-                <div class=\"card\">
+                <div class=\"card shadow-lg\">
                     <div class=\"form-content-loader\" style=\"display: none; position: absolute\">
                         <div class=\"offline-content text-center\">
                             <p><i class=\"fa fa-spin fa-spinner fa-3x\"></i></p>
