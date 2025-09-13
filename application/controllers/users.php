@@ -944,6 +944,43 @@ class Users extends Myschoolgh {
 	}
 
 	/**
+	 * Update the expected days
+	 * 
+	 * @param stdClass $params
+	 * 
+	 * @return Array
+	 */
+	public function leave_days(stdClass $params) {
+
+		try {
+
+			if(empty($params->leave_days)) {
+				return ["code" => 400, "data" => "Sorry! Ensure that the leave days was parsed."];
+			}
+
+			if(empty($params->user_id)) {
+				return ["code" => 400, "data" => "Sorry! Ensure that the user id was parsed."];
+			}
+
+			if(!in_array($params->leave_days, $this->leave_days)) {
+				return ["code" => 400, "data" => "Sorry! An invalid leave days was parsed."];
+			}
+			
+			// update the expected days
+			$stmt = $this->db->prepare("UPDATE users SET leave_days = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
+			$stmt->execute([$params->leave_days, $params->user_id, $params->clientId]);
+			
+			// return the success response
+			return [
+				"code" => 200,
+				"data" => "Leave days were successfully updated"
+			];
+		} catch(PDOException $e) {
+			return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];
+		}
+	}
+
+	/**
 	 * Get the list of guardian information
 	 * 
 	 * @param Mixed $guardian_ids

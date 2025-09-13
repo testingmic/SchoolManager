@@ -17,6 +17,16 @@ function time_slots_builder($name, $value = '') {
 }
 
 /**
+ * Div Labels
+ * 
+ * @param string $title
+ * @return string
+ */
+function div_labels($title) {
+    return '<div class="col-lg-12"><h5 class="text-primary border-primary border-bottom pb-2 mt-3 mb-3">'.$title.'</h5></div>';
+}
+
+/**
  * Forms Header
  * 
  * @param string $title

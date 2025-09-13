@@ -1989,9 +1989,7 @@ class Forms extends Myschoolgh {
         $response = '
         <form autocomplete="Off" class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4">
-                <div class="col-lg-12">
-                    <h5 class="text-primary border-bottom pb-2 mb-3">BIO INFORMATION</h5>
-                </div>
+                '.div_labels("BIO INFORMATION").'
                 <div class="col-md-9">
                     <div class="row mb-4">
                         <div class="col-lg-4 col-md-6">
@@ -2076,7 +2074,7 @@ class Forms extends Myschoolgh {
                         <input accept=".jpg,.jpeg,.png,.gif" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">CONTACT INFORMATION</h5></div> 
+                '.div_labels("CONTACT INFORMATION").'
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="email">Email Address</label>
@@ -2159,7 +2157,7 @@ class Forms extends Myschoolgh {
             <div class="row mb-3 pb-4">
                 <div class="col-lg-12">
                     <div class="row mb-4">
-                        <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">ACADEMICS</h5></div>
+                        '.div_labels("ACADEMICS").'
                         <div class="col-lg-4 col-md-6">
                             <div class="form-group">
                                 <label for="department_id">Department</label>
@@ -2333,7 +2331,7 @@ class Forms extends Myschoolgh {
         $response = '
         <form autocomplete="Off" class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
-                <div class="col-lg-12"><h5 class="text-primary">BIO INFORMATION</h5></div>
+                '.div_labels("BIO INFORMATION").'
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Guardian Image</label>
@@ -2376,7 +2374,7 @@ class Forms extends Myschoolgh {
                         <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
                     </div>
                 </div>
-                <div class="col-lg-12"><h5 class="text-primary">CONTACT INFORMATION</h5></div>
+                '.div_labels("CONTACT INFORMATION").'
                 <div class="col-lg-8 col-md-6">
                     <div class="form-group">
                         <label for="email">Email Address</label>
@@ -2440,7 +2438,7 @@ class Forms extends Myschoolgh {
                 $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-12"><h5 class="text-primary">EMPLOYMENT DETAILS</h5></div>
+                '.div_labels("EMPLOYMENT DETAILS").'
                 <div class="col-lg-6 col-md-6">
                     <div class="form-group">
                         <label for="employer">Name of Employer</label>
@@ -2811,9 +2809,7 @@ class Forms extends Myschoolgh {
         $response = '
         <form class="ajax-data-form" autocomplete="Off" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-3">
-                <div class="col-lg-12">
-                    <h5 class="text-primary border-bottom pb-2 mb-3">BIO INFORMATION</h5>
-                </div>
+                '.div_labels("BIO INFORMATION").'
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Staff Image</label>
@@ -2874,7 +2870,7 @@ class Forms extends Myschoolgh {
                         <input type="hidden" hidden value="'.($userData->user_id ?? null).'" name="user_id" id="user_id" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mt-3 mb-3">CONTACT INFORMATION</h5></div>
+                '.div_labels("CONTACT INFORMATION").'
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="email">Email Address</label>
@@ -2929,7 +2925,7 @@ class Forms extends Myschoolgh {
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">ACADEMICS</h5></div>
+                '.div_labels("ACADEMICS").'
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="user_type">Designation <span class="required">*</span></label>
@@ -2987,7 +2983,7 @@ class Forms extends Myschoolgh {
                 </div>
             </div>
             <div class="row mb-4 pb-4 hidden">
-                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">LOGIN INFORMATION</h5></div>
+                '.div_labels("LOGIN INFORMATION").'
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="username">Username</label>
@@ -3460,9 +3456,7 @@ class Forms extends Myschoolgh {
         $response = '
         <form autocomplete="Off" class="ajax-data-form" id="'.$form_id.'" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
-                <div class="col-lg-12">
-                    <h5>BIO INFORMATION</h5>
-                </div>
+                '.div_labels("BIO INFORMATION").'
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Image</label>

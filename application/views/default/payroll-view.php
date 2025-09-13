@@ -58,6 +58,18 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
             // set the first key
             $data = $data["data"][0];
 
+            // leave days
+            $leave_days = $data->leave_days ?? 0;
+
+            // expected days to be present in school
+            $expected_days = $myClass->stringToArray($data->expected_days);
+
+            // set the days of the week
+            $daysOfWeek = $myClass->days_of_week;
+
+            // user id
+            $user_id = $userId;
+
             $response->scripts = ["assets/js/payroll.js"];
 
             // if the request is to view the student information
@@ -145,7 +157,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                     </div>
                     <div class="col-md-3">
                         <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
-                            <div class="card-body text-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
+                            <div class="card-body text-center bg-gradient-to-br pr-2 pl-2 from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="font-18 text-white">POSITION</div>
                                 <div class="font-22 font-weight-bold text-uppercase text-white">'.($data->position ? $data->position : '-' ).'</div>
                             </div>
@@ -215,7 +227,9 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                             <div class="padding-20">
                                 <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                     <li class="nav-item">
-                                        <a class="nav-link active" id="bank_details-tab2" data-toggle="tab" href="#bank_details" role="tab" aria-selected="false">Bank Details</a>
+                                        <a class="nav-link active" id="bank_details-tab2" data-toggle="tab" href="#bank_details" role="tab" aria-selected="false">
+                                            Bank & Employee Information
+                                        </a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" id="allowances-tab2" data-toggle="tab" href="#allowances" role="tab" aria-selected="true">Allowances</a>
@@ -226,7 +240,37 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                 </ul>
                                 <div class="tab-content tab-bordered" id="myTab3Content">
                                     <div class="tab-pane fade show active" id="bank_details" role="tabpanel" aria-labelledby="bank_details-tab2">
+
                                         '.$payroll_form["bank_detail"].'
+                                        
+                                        <div class="row">
+                                        '.div_labels("EMPLOYEE INFORMATION").'
+                                            <div class="col-lg-6">
+                                                <div class="font-14 text-uppercase">
+                                                    <div class="font-14 text-uppercase mt-0 mb-2 font-weight-bold mb-0">EXPECTED DAYS</div>
+                                                '.implode(" ", array_map(function($day) use ($expected_days, $user_id) {
+                                                    return "
+                                                        <div style='padding-left: 2.5rem;' class='custom-control cursor col-lg-12 custom-switch switch-primary'>
+                                                            <input onchange='return update_expected_days(\"{$user_id}\", \"users\");' type='checkbox' name='expected_days[]' value='".ucfirst($day)."' class='custom-control-input cursor' id='".$day."' ".(in_array($day, $expected_days) ? "checked='checked'" : null).".>
+                                                            <label class='custom-control-label cursor text-black' for='".$day."'>".$day."</label>
+                                                        </div>";
+                                                }, $daysOfWeek)).'
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+
+                                                <div class="font-14">
+                                                    <div class="font-14 mt-0 mb-2 font-weight-bold">ANNUAL LEAVE DAYS</div>
+                                                    <select name="leave_days" onchange="return update_leave_days(\''.$user_id.'\', \'users\');" id="leave_days" class="form-control mt-2 selectpicker" data-width="100%">
+                                                        <option value="">Select Leave Days</option>
+                                                        '.implode(" ", array_map(function($day) use ($leave_days, $user_id) {
+                                                            return "<option value='".$day."' ".($day == $leave_days ? "selected='selected'" : null).">".$day." Working Days</option>";
+                                                        }, $myClass->leave_days)).'
+                                                    </select>
+                                                </div>
+                                                
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="tab-pane fade" id="allowances" role="tabpanel" aria-labelledby="allowances-tab2">
                                         '.$payroll_form["allowance_detail"].'

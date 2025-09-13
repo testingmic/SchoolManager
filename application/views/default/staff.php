@@ -283,6 +283,9 @@ if(empty($user_id)) {
         $change_password_url = null;
         $isCurrentUser = (bool) ($defaultUser->user_id == $user_id);
 
+        // leave days
+        $leave_days = $data->leave_days ?? 0;
+
         // if the user has permission
         if($isAdmin || $isCurrentUser) {
             // set up the information
@@ -464,6 +467,15 @@ if(empty($user_id)) {
                                         <label class='custom-control-label cursor text-black' for='".$day."'>".$day."</label>
                                     </div>";
                             }, $daysOfWeek)).'
+                            </div>
+                            <div class="font-14 mb-2 border-top border-primary pt-3">
+                                <div class="font-14 mt-0 mb-2 font-weight-bold mb-0">ANNUAL LEAVE DAYS</div>
+                                <select name="leave_days" onchange="return update_leave_days(\''.$user_id.'\', \'users\');" id="leave_days" class="form-control mt-2 selectpicker" data-width="100%">
+                                    <option value="">Select Leave Days</option>
+                                    '.implode(" ", array_map(function($day) use ($leave_days, $user_id) {
+                                        return "<option value='".$day."' ".($day == $leave_days ? "selected='selected'" : null).">".$day." Working Days</option>";
+                                    }, $myClass->leave_days)).'
+                                </select>
                             </div>
                         </div>
                     </div>

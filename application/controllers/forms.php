@@ -2176,9 +2176,7 @@ class Forms extends Myschoolgh {
         $response = '
         <form autocomplete="Off" class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4">
-                <div class="col-lg-12">
-                    <h5 class="text-primary border-bottom pb-2 mb-3">BIO INFORMATION</h5>
-                </div>
+                '.div_labels("BIO INFORMATION").'
                 <div class="col-md-9">
                     <div class="row mb-4">
                         <div class="col-lg-4 col-md-6">
@@ -2263,7 +2261,7 @@ class Forms extends Myschoolgh {
                         <input data-student_image="upload" data-student_id="'.($userData->user_id ?? null).'" accept=".jpg,.jpeg,.png,.gif" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">BOARDING STATUS & STUDENT TYPE</h5></div> 
+                '.div_labels("BOARDING STATUS & STUDENT TYPE").'
                 <div class="col-lg-4 col-md-4">
                     <div class="form-group">
                         <label for="boarding_status">Boarding Status</label>
@@ -2367,7 +2365,7 @@ class Forms extends Myschoolgh {
             <div class="row mb-3 pb-4">
                 <div class="col-lg-12">
                     <div class="row mb-4">
-                        <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">ACADEMICS</h5></div>
+                        '.div_labels("ACADEMICS").'
                         <div class="col-lg-4 col-md-6">
                             <div class="form-group">
                                 <label for="department_id">Department</label>
@@ -2554,7 +2552,7 @@ class Forms extends Myschoolgh {
         $response = '
         <form autocomplete="Off" class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
-                <div class="col-lg-12"><h5 class="text-primary">BIO INFORMATION</h5></div>
+                '.div_labels("BIO INFORMATION").'
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Guardian Image</label>
@@ -2597,7 +2595,7 @@ class Forms extends Myschoolgh {
                         <input type="text" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
                     </div>
                 </div>
-                <div class="col-lg-12"><h5 class="text-primary">CONTACT INFORMATION</h5></div>
+                '.div_labels("CONTACT INFORMATION").'
                 <div class="col-lg-8 col-md-6">
                     <div class="form-group">
                         <label for="email">Email Address</label>
@@ -2661,7 +2659,7 @@ class Forms extends Myschoolgh {
                 $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-12"><h5 class="text-primary">EMPLOYMENT DETAILS</h5></div>
+                '.div_labels("EMPLOYMENT DETAILS").'
                 <div class="col-lg-6 col-md-6">
                     <div class="form-group">
                         <label for="employer">Name of Employer</label>
@@ -3093,9 +3091,7 @@ class Forms extends Myschoolgh {
         $response = '
         <form class="ajax-data-form" autocomplete="Off" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-3">
-                <div class="col-lg-12">
-                    <h5 class="text-primary border-bottom pb-2 mb-3">BIO INFORMATION</h5>
-                </div>
+                '.div_labels("BIO INFORMATION").'
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Staff Image</label>
@@ -3156,7 +3152,7 @@ class Forms extends Myschoolgh {
                         <input type="hidden" hidden value="'.($userData->user_id ?? null).'" name="user_id" id="user_id" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mt-3 mb-3">CONTACT INFORMATION</h5></div>
+                '.div_labels("CONTACT INFORMATION").'
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="email">Email Address</label>
@@ -3211,7 +3207,7 @@ class Forms extends Myschoolgh {
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">ACADEMICS</h5></div>
+                '.div_labels("ACADEMICS").'
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="user_type">Designation <span class="required">*</span></label>
@@ -3258,7 +3254,7 @@ class Forms extends Myschoolgh {
                 </div>
             </div>
             <div class="row mb-4 pb-4 hidden">
-                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">LOGIN INFORMATION</h5></div>
+                '.div_labels("LOGIN INFORMATION").'
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="username">Username</label>
@@ -4884,9 +4880,7 @@ class Forms extends Myschoolgh {
         $bank = '
         <form autocomplete="Off" class="ajax-data-form" action="'.$this->baseUrl.'api/payroll/paymentdetails" method="POST" id="ajax-data-form-content">
             <div class="row">
-                <div class="col-lg-12">
-                    <h5>BANK DETAILS</h5>
-                </div>
+                '.div_labels("BANK DETAILS").'
                 <div class="col-lg-6 col-md-6">
                     <label for="account_name">Account Holder Name</label>
                     <div class="input-group mb-3">
@@ -5076,7 +5070,7 @@ class Forms extends Myschoolgh {
 
         $allowance = '
             <div class="row">
-                <div class="col-lg-12"><h5>BASIC SALARY</h5></div>
+                '.div_labels("BASIC SALARY").'
                 <div class="col-lg-6">
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
@@ -5085,7 +5079,7 @@ class Forms extends Myschoolgh {
                         <input type="text" value="'.($data->basic_salary ?? null).'" name="basic_salary" id="basic_salary" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-12 mt-3 border-top pt-3"><h5>ALLOWANCES</h5></div>
+                '.div_labels("ALLOWANCES").'
                 <div class="col-lg-10">
                     <div width="100%" class="text-right mb-2">
                         <button type="button" class="btn btn-info add-allowance"><i class="fa fa-plus"></i></button>
@@ -5094,7 +5088,7 @@ class Forms extends Myschoolgh {
                         '.$allowances_list.'
                     </div>
                 </div>
-                <div class="col-lg-12 mt-3 border-top pt-3"><h5>DEDUCTIONS</h5></div>
+                '.div_labels("DEDUCTIONS").'
                 <div class="col-lg-10">
                     <div width="100%" class="text-right mb-2">
                         <button type="button" class="btn btn-info add-deductions"><i class="fa fa-plus"></i></button>

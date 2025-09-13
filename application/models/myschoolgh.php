@@ -61,6 +61,9 @@ class Myschoolgh extends Models {
     public $default_opening_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 	public $days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
+	// default leave days to be awarded to staff members
+	public $leave_days = [7, 14, 21, 30, 45, 60, 90];
+
 	public function __construct() {
 
 		parent::__construct();
@@ -104,9 +107,7 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("ALTER TABLE accounts_transaction ADD COLUMN attach_to_object VARCHAR(255) DEFAULT NULL;");
-		$fix[] = ("ALTER TABLE accounts_transaction ADD COLUMN record_object VARCHAR(255) DEFAULT NULL;");
-		$fix[] = ("ALTER TABLE accounts_transaction ADD COLUMN user_id VARCHAR(32) DEFAULT NULL;");
+		$fix[] = ("ALTER TABLE users ADD COLUMN leave_days INT(11) DEFAULT 0;");
 
 		foreach($fix as $stmt) {
 			try {

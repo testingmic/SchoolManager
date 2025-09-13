@@ -37,8 +37,16 @@ var upload_Employee_Documents = (employee_id) => {
     });
 }
 
-var update_expected_days = (user_id, table) => {
-    // get all the selected days
-    const expected_days = $(`input[name="expected_days[]"]:checked`).map((index, element) => $(element).val()).get();
-    $.post(`${baseUrl}api/${table}/expected_days`, { user_id, table, expected_days }).then((response) => {});
+if(typeof update_expected_days == "undefined") {
+    var update_expected_days = (user_id, table) => {
+        const expected_days = $(`input[name="expected_days[]"]:checked`).map((index, element) => $(element).val()).get();
+        $.post(`${baseUrl}api/${table}/expected_days`, { user_id, table, expected_days }).then((response) => {});
+    }
+}
+
+if(typeof update_leave_days == "undefined") {
+    var update_leave_days = (user_id, table) => {
+        const leave_days = $(`select[name="leave_days"]`).val();
+        $.post(`${baseUrl}api/${table}/leave_days`, { user_id, table, leave_days }).then((response) => {});
+    }
 }
