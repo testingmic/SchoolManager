@@ -1292,7 +1292,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 'Complete' => 0
             ];
             $schools_list = "";
-            $load_schools_list = $myClass->pushQuery("*", "clients_accounts");
+            $load_schools_list = $myClass->pushQuery("*", "clients_accounts", "client_state != 'Deleted'");
 
             // loop through the list of schools
             foreach($load_schools_list as $key => $school) {
