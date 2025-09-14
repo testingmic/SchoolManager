@@ -1,14 +1,16 @@
 <?php
 
 /** Random names function */
-function random_names($real_name = null) {
+function random_names($real_name = null, $raw_name = true) {
 
     // if the environment is production, return the real name
     if(!empty(APP_INI['environment']) && APP_INI['environment'] !== "development") {
         return $real_name;
     }
 
-    // return $real_name;
+	if($raw_name) {
+		return $real_name;
+	}
 
 	$names = [
 		"Emmanuel Obeng", "Ama Serwaa", "Kwame Boateng", "Linda Mensah", "Yaw Antwi",
