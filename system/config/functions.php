@@ -8,7 +8,7 @@ function random_names($real_name = null) {
         return $real_name;
     }
 
-    return $real_name;
+    // return $real_name;
 
 	$names = [
 		"Emmanuel Obeng", "Ama Serwaa", "Kwame Boateng", "Linda Mensah", "Yaw Antwi",
@@ -29,7 +29,8 @@ function random_names($real_name = null) {
 		"Doris Asare", "Gifty Owusu", "Kojo Frimpong", "Harriet Konadu", "Raymond Adjei",
 		"Salomey Agyemang", "Mavis Oti", "Peter Baffour", "Edna Yeboah", "Sampson Kusi",
 		"Vivian Amoah", "Paa Kwesi", "Agnes Mensima", "David Tutu", "Esther Amponsah",
-		// International names
+	];
+	$lastname = [
 		"James Smith", "Maria Garcia", "Liam Johnson", "Olivia Brown", "Noah Davis",
 		"Emma Wilson", "Ava Taylor", "Isabella Anderson", "Lucas Thomas", "Mia Martinez",
 		"Sophia Hernandez", "Charlotte Moore", "Benjamin Jackson", "Amelia White", "Henry Martin",
@@ -42,15 +43,21 @@ function random_names($real_name = null) {
 		"Owen Richardson", "Gabriel Watson", "Camila Wood", "Isaac Brooks", "Sofia Bennett"
 	];
 
-	$reorderNames = [];
 	foreach($names as $name) {
 		$split = explode(" ", $name);
 		foreach($split as $each) {
-			$reorderNames[] = trim($each);
+			$firstNames[] = trim($each);
+		}
+	}
+
+	foreach($lastname as $name) {
+		$split = explode(" ", $name);
+		foreach($split as $each) {
+			$lastNames[] = trim($each);
 		}
 	}
 
 	// pick and return a random name
-	return $reorderNames[array_rand($reorderNames)] . " " . $reorderNames[array_rand($reorderNames)];
+	return $lastNames[array_rand($lastNames)]. " " . $firstNames[array_rand($firstNames)] . " " . $lastNames[array_rand($lastNames)];
 }
 ?>

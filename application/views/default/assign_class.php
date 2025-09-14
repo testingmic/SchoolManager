@@ -54,7 +54,7 @@ if(empty($students_array_list)) {
             <td>".($key + 1)."</td>
             <td>
                 <label class='cursor' title='Click to select {$student->name}' for='student_id_{$student->item_id}'>
-                    ".strtoupper($student->name)."
+                    ".random_names($student->name)."
                 </label>
                 <div>
                     <span class='badge badge-primary'>

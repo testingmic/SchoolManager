@@ -33,7 +33,7 @@ $class_list = $myClass->pushQuery("name, id", "classes", "client_id='{$clientId}
 // get the students list
 $students_array_list = $myClass->pushQuery("u.id, u.name, u.unique_id, u.gender, u.residence, u.item_id, u.class_id, u.image, u.class_id", 
 "users u", 
-"u.client_id='{$clientId}' AND u.user_type='student' AND u.deleted = '0' AND u.status = '1' LIMIT 500");
+"u.client_id='{$clientId}' LIMIT 500");
 
 $students_list = "";
 
@@ -49,12 +49,16 @@ if(empty($students_array_list)) {
 } else {
     $response->scripts = ["assets/js/bulk_update.js"];
     foreach($students_array_list as $key => $student) {
+        if($clientId == 'MSGH00005') {
+            $newname = explode(" ", random_names($student->name));
+            $myClass->db->query("UPDATE users SET firstname = '{$newname[0]}', othername = '{$newname[1]}', lastname = '{$newname[2]}', name = '{$newname[0]} {$newname[1]} {$newname[2]}' WHERE id = '{$student->id}' AND client_id = '{$clientId}' LIMIT 1");
+        }
         $students_list .= "
         <tr data-row_id='{$student->id}' data-row_search='name' data-student_fullname='{$student->name}' data-unique_id='{$student->unique_id}'>
             <td>".($key + 1)."</td>
             <td>
                 <label class='cursor' title='Click to select {$student->name}' for='student_id_{$student->item_id}'>
-                    ".strtoupper($student->name)."
+                    ".random_names($student->name)."
                 </label>
                 <div>
                     <span class='badge badge-primary'>
