@@ -6519,6 +6519,10 @@ class Forms extends Myschoolgh {
                     <label for="">Full Content <span class="required">*</span></label>
                     '.$this->textarea_editor($data->content ?? null, "faketext", "ajax-form-content", "content").'
                 </div>
+                <div class="col-md-12 mt-3 mb-3">
+                    <label for="">Video Link</label>
+                    <input type="text" placeholder="Enter Video Link" value="'.($data->video_link ?? null).'" class="form-control" name="video_link">
+                </div>
                 <div class="col-md-12 p-0">
                     <div class="form-group">
                         '.$this->form_attachment_placeholder($file_params).'

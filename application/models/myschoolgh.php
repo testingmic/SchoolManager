@@ -107,7 +107,7 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("UPDATE users SET expected_days='Monday,Tuesday,Wednesday,Thursday,Friday'");
+		$fix[] = ("ALTER TABLE `knowledge_base` CHANGE `status` `status` ENUM('Pending','Answered','Closed','Waiting','Reopened','Active','Deleted') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Pending';");
 
 		foreach($fix as $stmt) {
 			try {

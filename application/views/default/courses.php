@@ -38,8 +38,20 @@ $item_list = load_class("courses", "controllers")->list($courses_param);
 
 $hasDelete = $accessObject->hasAccess("delete", "course");
 $hasUpdate = $accessObject->hasAccess("update", "course");
+$hasAdd = $accessObject->hasAccess("add", "course");
 
 $hasFiltering = $accessObject->hasAccess("filters", "settings");
+
+$statistics = [
+    'total' => [
+        'count' => 0,
+        'label' => 'TOTAL SUBJECTS'
+    ],
+    'no_tutors' => [
+        'count' => 0,
+        'label' => 'SUBJECTS WITH NO TUTORS'
+    ],
+];
 
 $courses = "";
 foreach($item_list["data"] as $key => $each) {
@@ -53,6 +65,9 @@ foreach($item_list["data"] as $key => $each) {
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Delete this Course' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
+
+
+    $statistics['total']['count']++;
 
     $courses .= "<tr data-row_id=\"{$each->id}\">";
     $courses .= "<td class='text-center'>".($key+1)."</td>";
@@ -88,7 +103,11 @@ foreach($item_list["data"] as $key => $each) {
         foreach($each->course_tutors as $tutor) {
             $courses .= "<p class='mb-0 pb-0'><span class='user_name' onclick='return load(\"staff/{$tutor->item_id}/documents\");'>".$tutor->name."</a></p>";
         }
+    } else {
+        $statistics['no_tutors']['count']++;
     }
+
+    $courses .= "<td class='text-center'>{$each->date_created}</td>";
 
     $courses .= "</td><td class='text-center'>{$action}</td>";
     $courses .= "</tr>";
@@ -102,6 +121,24 @@ $classes_param = (object) [
 // if the class_id is not empty
 $classes_param->department_id = !empty($filter->department_id) ? $filter->department_id : null;
 $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
+
+$statistics_card = '';
+
+foreach($statistics as $key => $each) {
+    $statistics_card .= '
+    <div class="col-md-3">
+        <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-blue">
+            <div class="card-body pt-3 pl-3 pr-3 pb-2 card-type-3">
+                <div class="row">
+                    <div class="col">
+                        <h6 class="font-14 text-uppercase font-bold mb-0">'.$each['label'].'</h6>
+                        <span class="font-bold text-primary font-20 mb-0">'.$each['count'].'</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>';
+}
 
 $response->html = '
     <section class="section">
@@ -154,6 +191,14 @@ $response->html = '
                 <button id="filter_Courses_List" type="submit" class="btn height-40 btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>
             <div class="col-12 col-sm-12 col-lg-12">
+                <div class="row mb-3">
+                    '.$statistics_card.'
+                    <div class="col-md-6 text-right">
+                        '.($hasAdd ? '
+                            <a class="btn btn-outline-success" href="'.$baseUrl.'class_add"><i class="fas fa-graduation-cap"></i> Create New Class</a>' : ''
+                        ).'
+                    </div>
+                </div>
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
@@ -165,6 +210,7 @@ $response->html = '
                                         '.($isAdmin ? '<th>Credit Hours</th>' : null).'
                                         '.(!$isWardParent ? '<th width="12%">Class Name</th>' : null).'
                                         <th>Subject Tutor</th>
+                                        <th class="text-center">Date Created</th>
                                         <th align="center" width="14%"></th>
                                     </tr>
                                 </thead>

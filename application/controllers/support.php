@@ -386,9 +386,9 @@ class Support extends Myschoolgh {
             // insert the article data information
             $stmt = $this->db->prepare("INSERT INTO knowledge_base SET client_id =?, content = ?, 
                 user_id = ?, subject = ?, department = ?, date_created = now(), date_updated = now(), 
-                section = ?, user_type = ?, item_id = ?, status = ?");
+                section = ?, user_type = ?, item_id = ?, status = ?, video_link = ?");
             $stmt->execute([$params->clientId, $params->content, $params->userId, $params->subject, 
-                $params->department ?? null, $params->section ?? null, $user_type, $item_id, "Active"]);
+                $params->department ?? null, $params->section ?? null, $user_type, $item_id, "Active", $params->video_link ?? null]);
 
             // create a new object
             $filesObj = load_class("files", "controllers");
@@ -413,7 +413,7 @@ class Support extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
-            return $this->unexpected_error;
+            return $e->getMessage();
         }
 
     }

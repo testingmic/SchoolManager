@@ -83,6 +83,7 @@ if((count($support_array) > 1) || empty($knowledge_id)) {
                         </div>
                         <div class='card-body mb-1' style='height:250px;overflow:hidden;'>
                             ".($isSupport ? $ticket->content : auto_link($ticket->content, "url"))."
+                            ".(!empty($ticket->video_link) ? "<div class='mt-2'>".iframe_holder($ticket->video_link)."</div>" : null)."
                         </div>
                         <div class='card-footer pt-0 mt-3' align='right'>
                             <a class='btn btn-outline-success' href=\"{$action}\">
