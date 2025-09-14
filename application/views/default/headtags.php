@@ -257,6 +257,9 @@ load_helpers(['menu_helper']);
                         <a title="Support Tickets List" href="<?= $baseUrl ?>support" class="nav-link nav-link-lg"><i class="fa fa-user-cog"></i></a>
                     </li>
                     <?php } ?>
+                    <li class="dropdown dropdown-list-toggle">
+                        <a title="Knowledge Base List" href="<?= $baseUrl ?>knowledgebase" class="nav-link nav-link-lg"><i class="fa fa-book-open"></i></a>
+                    </li>
                 <?php } ?>
                 <li class="dropdown">
                     <a href="#" data-toggle="dropdown"
