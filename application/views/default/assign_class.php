@@ -65,7 +65,7 @@ if(empty($students_array_list)) {
             <td>{$student->unique_id}</td>
             <td>{$student->gender}</td>
             <td class='text-center'>
-                <input class='student_ids' data-student_name='{$student->name}' disabled name='student_ids[]' value='{$student->id}' id='student_id_{$student->id}' style='width:20px;cursor:pointer;height:20px;' type='checkbox'>
+                <input class='student_ids' data-student_name='{$student->name}' name='student_ids[]' value='{$student->id}' id='student_id_{$student->id}' style='width:20px;cursor:pointer;height:20px;' type='checkbox'>
             </td>
         </tr>";
     }
