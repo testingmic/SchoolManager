@@ -343,7 +343,7 @@ class Analitics extends Myschoolgh {
                 "userId" => $params->userId,
                 "user_type" => "student",
                 "class_id" => $value->id,
-                "user_status" => $this->user_status,
+                "user_status" => ['Active'],
                 "reporting" => true,
                 "remove_user_data" => true,
                 "return_where_clause" => true,
@@ -401,7 +401,7 @@ class Analitics extends Myschoolgh {
             $class_name = create_slug($value->name, "_");
             $value_count = "{$class_name}_total_count";
 
-            $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause}");
+            $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause} AND a.status='1' AND a.deleted = '0'");
             $query->execute();
             $_q_result = $query->fetch(PDO::FETCH_OBJ);
 
