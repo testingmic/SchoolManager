@@ -96,6 +96,7 @@
                 <?php } ?>
                 <?php if($accessObject->hasAccess("assign_class", "settings")) { ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>assign_class">Assign Class</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>reassign_class">Re-Assign Class</a></li>
                 <?php } ?>
                 <?php if($accessObject->hasAccess("assign_department", "settings")) { ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>assign_department">Assign Departments</a></li>

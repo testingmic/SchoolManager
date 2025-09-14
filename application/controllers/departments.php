@@ -276,6 +276,12 @@ class Departments extends Myschoolgh {
 
         try {
 
+            global $accessObject;
+
+            if(!$accessObject->hasAccess("assign_department", "settings")) {
+                return ["code" => 400, "data" => $this->permission_denied];
+            }
+
             // confirm that the variable is an array
             if(empty($params->data) && !is_array($params->data)) {
                 return ["code" => 400, "data" => "Sorry! The data array must be a valid array."];

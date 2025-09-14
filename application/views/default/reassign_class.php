@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
-$response->title = "Assign Student Class";
+$response->title = "Re-Assign Student Class";
 
 // end query if the user has no permissions
 if(!$accessObject->hasAccess("assign_class", "settings")) {
@@ -31,8 +31,9 @@ if(!$accessObject->hasAccess("assign_class", "settings")) {
 $class_list = $myClass->pushQuery("name, id", "classes", "client_id='{$clientId}' AND status='1'", false, "ASSOC");
 
 // get the students list
-$students_array_list = $myClass->pushQuery("id, name, unique_id, gender, residence, item_id, class_id, image", "users", 
-    "client_id='{$clientId}' AND user_type='student' AND LENGTH(class_id) = 0 LIMIT 500");
+$students_array_list = $myClass->pushQuery("u.id, u.name, u.unique_id, u.gender, u.residence, u.item_id, u.class_id, u.image, u.class_id", 
+"users u", 
+"u.client_id='{$clientId}' AND u.user_type='student' LIMIT 500");
 
 $students_list = "";
 
@@ -83,7 +84,7 @@ $response->html = '
         <div class="row" id="bulk_assign_class">
             <div class="col-12 col-sm-12 col-md-12 mb-2 text-primary">
                 <h4 class="font-italic">
-                    Use this panel to assign class to students that has not been set yet.
+                    Use this panel to reassign class to students that has already been set.
                     You can only update up to 500 students at a go.
                 </h4>
             </div>

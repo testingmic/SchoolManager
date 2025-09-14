@@ -364,6 +364,12 @@ class Classes extends Myschoolgh {
 
         try {
 
+            global $accessObject;
+
+            if(!$accessObject->hasAccess("assign_class", "settings")) {
+                return ["code" => 400, "data" => $this->permission_denied];
+            }
+
             // confirm that the variable is an array
             if(empty($params->data) && !is_array($params->data)) {
                 return ["code" => 400, "data" => "Sorry! The data array must be a valid array."];
@@ -391,7 +397,7 @@ class Classes extends Myschoolgh {
             }
 
             // confirm if the current class fees must be assign to the students
-            $assignFees = (bool) isset($params->data["assign_fees"]) && ($params->data["assign_fees"] == "assign");
+            $assignFees = (bool) !empty($params->data["assign_fees"]) && ($params->data["assign_fees"] == "assign");
 
             // update query
             $update = $this->db->prepare("UPDATE users SET class_id = ? WHERE id = ? AND client_id = ? AND user_type = ? LIMIT 1");
