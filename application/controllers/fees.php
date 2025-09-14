@@ -645,6 +645,9 @@ class Fees extends Myschoolgh {
         /** Load the payment information that has been allocated to the student */
         $allocation = isset($params->allocation_info) ? $params->allocation_info : $this->confirm_student_payment_record($params);
         
+        // set the arrears to 0
+        $studentInfo['arrears'] = $studentInfo['arrears'] ?? 0;
+
         // check for the arrears of the student
         if(empty($studentInfo) && !empty($allocation)) {
             if(is_array($allocation)) {
@@ -774,9 +777,6 @@ class Fees extends Myschoolgh {
                         $last_payment_id[] = $fees->last_payment_id;
                     }
                 }
-                // $last_payment_id = array_unique($last_payment_id);
-                // print_r($last_payment_id);
-                // exit;
             }
 
             // loop through the allocations list
@@ -846,12 +846,23 @@ class Fees extends Myschoolgh {
                 $owings_list .= "</tr>";
             }
 
+            // if the arrears is not set
+            if(empty($studentInfo['arrears'])) {
+                $studentArrears = $this->pushQuery("arrears_total", "users_arrears", "student_id='{$params->student_id}' AND client_id='{$params->clientId}' LIMIT 1");
+                if(!empty($studentArrears)) {
+                    $studentInfo['arrears'] = $studentArrears[0]->arrears_total;
+                    $amount_due += $studentInfo['arrears'];
+                }
+            }
+
+            // if the arrears is not empty
             if(!empty($studentInfo) && !empty($studentInfo['arrears'])) {
                 $owings_list .= "<tr>";
                 $owings_list .= "<td colspan='3' class='font-weight-bold'>Arrears</td>";
                 $owings_list .= "<td class='font-weight-bold'>".number_format($studentInfo['arrears'], 2)."</td>";
                 $owings_list .= "</tr>";
             }
+
 
             $owings_list .= "</table>";
 
@@ -973,7 +984,6 @@ class Fees extends Myschoolgh {
             }
             
             // show the paid button
-            // $html_form .= "<p class='mt-3 mb-0 pb-0' id='print_receipt'><a href='{$this->baseUrl}receipt/{$data_content->last_payment_id}' class='btn btn-sm btn-outline-primary' target='_blank'><i class='fa fa-print'></i> Print Receipt</a></p>";
             $html_form .= "</td></tr>";
             $html_form .= "</table>";
         }
@@ -1009,7 +1019,7 @@ class Fees extends Myschoolgh {
         $html_form .= "</div>";
 
         $response["form"] = $html_form;
-        $response["student_details"] = is_array($allocation) ? $allocation[0]->student_details : ($allocation->student_details ?? []);
+        $response["student_details"] = is_array($allocation) ? ($allocation[0]->student_details ?? []) : ($allocation->student_details ?? []);
 
         return ["data" => $response];
 
@@ -1578,11 +1588,16 @@ class Fees extends Myschoolgh {
 
         try {
 
-            global $defaultUser, $clientPrefs, $defaultCurrency, $defaultClientData;
+            global $clientPrefs, $accessObject;
 
             // readonly mode session
             if(!empty($this->session->is_only_readable_app)) {
                 return $this->readonly_mode;
+            }
+
+            // confirm that the user has the required permissions
+            if(!$accessObject->hasAccess("receive", "fees")) {
+                return ["code" => 400, "data" => "Sorry! You do not have the required permissions to perform this action."];
             }
             
             // get the preference of the client
@@ -1603,9 +1618,23 @@ class Fees extends Myschoolgh {
             $params->clean_payment_info = true;
             $paymentRecord = $this->confirm_student_payment_record($params);
 
+            // set the initial value for $payArrearsOnly
+            $payArrearsOnly = false;
+
             /** If no allocation record was found */
             if(empty($paymentRecord)) {
-                return ["code" => 400, "data" => "Sorry! No fees allocation for this selected category found."];
+
+                $amount_due = 0;
+
+                $studentArrears = $this->pushQuery("arrears_total", "users_arrears", "student_id='{$params->student_id}' AND client_id='{$params->clientId}' LIMIT 1");
+                if(!empty($studentArrears)) {
+                    $amount_due = $studentArrears[0]->arrears_total;
+                    $payArrearsOnly = true;
+                }
+
+                if(empty($amount_due)) {
+                    return ["code" => 400, "data" => "Sorry! No fees allocation for this selected category found."];
+                }
             }
 
             /** Validate email address */
@@ -1616,11 +1645,11 @@ class Fees extends Myschoolgh {
             /** Re use payment id */
             $reUsePaymentId = false;
 
-            if(!empty($paymentRecord) && is_array($paymentRecord)) {
+            if((!empty($paymentRecord) && is_array($paymentRecord)) || !empty($payArrearsOnly)) {
 
-                if(!empty($paymentRecord[0]->arrears)) {
+                if(!empty($paymentRecord[0]->arrears)|| !empty($payArrearsOnly)) {
 
-                    $arrears = $paymentRecord[0]->arrears;
+                    $arrears = $paymentRecord[0]->arrears ?? ($amount_due ?? 0);
 
                     $amountPayable = $params->amount;
                     if($params->amount > $arrears) {
@@ -1646,6 +1675,10 @@ class Fees extends Myschoolgh {
                     $payArrears = load_class("arrears", "controllers", $newpayload)->make_payment($newpayload);
                     if(isset($payArrears["code"]) && $payArrears["code"] == 200 && isset($payArrears["additional"]["payment_id"])) {
                         $reUsePaymentId = $payArrears["additional"]["payment_id"];
+                        if($payArrearsOnly) {
+                            $payArrears["additional"]["uniqueId"] = $reUsePaymentId;
+                            return $payArrears;
+                        }
                     }
                 }
             }
@@ -2294,7 +2327,7 @@ class Fees extends Myschoolgh {
                                             <h2 style="margin-top:5px;margin-bottom:5px;">'.(!$isPDF ? "Official Receipt" : "Payment History").'</h2>
                                             <span style="font-size:16px;"><strong>Date & Time:</strong> '.date("d-m-Y h:iA").'</span>
                                             <div><strong>Receipt ID:</strong> <strong>'.$data[0]->receipt_id.'</strong></div>
-                                            <div><strong>Payment Method:</strong> <strong>'.ucwords($data[0]->payment_method).'</strong></div>
+                                            <div><strong>Payment Method:</strong> <strong>'.(!empty($data[0]->payment_method) ? ucwords($data[0]->payment_method) : "Cash").'</strong></div>
                                         </div>
                                     </td>
                                     <td align="right">

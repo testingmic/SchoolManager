@@ -26,9 +26,29 @@ function div_labels($title) {
     return '<div class="col-lg-12"><h5 class="text-primary border-primary border-bottom pb-2 mt-3 mb-3">'.$title.'</h5></div>';
 }
 
+/**
+ * Iframe Holder
+ * 
+ * @param string $video_link
+ * @param string $height
+ * @return string
+ */
 function iframe_holder($video_link, $height = "315") {
     $video_link = str_replace("watch?v=", "embed/", $video_link);
     return '<iframe width="100%" height="'.$height.'" src="'.$video_link.'" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+}
+
+/**
+ * Format Date of Birth
+ * 
+ * @param string $date_of_birth
+ * @return string
+ */
+function format_date_of_birth($date_of_birth) {
+    if(empty($date_of_birth) || ($date_of_birth == "1970-01-01")) {
+        return "N/A";
+    }
+    return date('d M Y', strtotime($date_of_birth));
 }
 
 /**

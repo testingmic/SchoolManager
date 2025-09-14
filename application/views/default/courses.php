@@ -47,6 +47,10 @@ $statistics = [
         'count' => 0,
         'label' => 'TOTAL SUBJECTS'
     ],
+    'with_tutors' => [
+        'count' => 0,
+        'label' => 'SUBJECTS WITH TUTORS'
+    ],
     'no_tutors' => [
         'count' => 0,
         'label' => 'SUBJECTS WITH NO TUTORS'
@@ -103,6 +107,7 @@ foreach($item_list["data"] as $key => $each) {
         foreach($each->course_tutors as $tutor) {
             $courses .= "<p class='mb-0 pb-0'><span class='user_name' onclick='return load(\"staff/{$tutor->item_id}/documents\");'>".$tutor->name."</a></p>";
         }
+        $statistics['with_tutors']['count']++;
     } else {
         $statistics['no_tutors']['count']++;
     }
@@ -193,7 +198,7 @@ $response->html = '
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="row mb-3">
                     '.$statistics_card.'
-                    <div class="col-md-6 text-right">
+                    <div class="col-md-3 text-right">
                         '.($hasAdd ? '
                             <a class="btn btn-outline-success" href="'.$baseUrl.'class_add"><i class="fas fa-graduation-cap"></i> Create New Class</a>' : ''
                         ).'

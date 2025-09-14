@@ -139,7 +139,7 @@ if(!empty($user_id)) {
                         <td>'.($record->description ? $record->description : null).'</td>
                         <td>'.$record->recorded_date.'</td>
                         <td>'.number_format($record->amount_paid, 2).'</td>
-                        <td>'.($record->reversed ? "<span class='badge p-1 badge-danger'>Reversed</span>" : 
+                        <td class="text-center">'.($record->reversed ? "<span class='badge p-1 badge-danger'>Reversed</span>" : 
                             '<a href="'.$myClass->baseUrl.'receipt/'.$record->payment_id.'" target="_blank" title="Click to print Receipt" class="btn btn-sm btn-outline-warning"><i class="fa fa-print"></i></a></td>').'
                     </tr>';
                 }

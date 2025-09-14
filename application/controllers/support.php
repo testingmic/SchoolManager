@@ -408,7 +408,7 @@ class Support extends Myschoolgh {
                 "code" => 200, 
                 "data" => "The article was successfully created.",
                 "additional" => [
-                    "href" => "{$this->baseUrl}article/modify/{$item_id}"
+                    "href" => "{$this->baseUrl}knowledgebase"
                 ]
             ];
 

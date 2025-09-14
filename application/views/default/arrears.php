@@ -226,7 +226,9 @@ if(!empty($user_id) && ($user_id !== "add")) {
                                 <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
                                 <div class="text-center border-top mt-0">
                                     <div class="author-box-description font-22 text-success font-weight-bold">REG. ID: '.$data->unique_id.'</div>
-                                    <div title="Date of Birth" class="author-box-description font-22 font-weight-bold mt-1"><i class="fa fa-calendar"></i> '.$data->date_of_birth.'</div>
+                                    <div title="Date of Birth" class="author-box-description font-22 font-weight-bold mt-1">
+                                        <i class="fa fa-calendar"></i> '.format_date_of_birth($data->date_of_birth).'
+                                    </div>
                                     <div title="Class Name" class="author-box-description font-22 text-info font-weight-bold mt-1"><i class="fa fa-house-damage"></i> '.$data->class_name.'</div>
                                     <div title="Department Name" class="author-box-description font-22 text-info font-weight-bold mt-1">'.$data->department_name.'</div>
                                     <div class="w-100 mt-2 border-top pt-3">
