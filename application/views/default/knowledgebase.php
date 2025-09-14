@@ -212,7 +212,7 @@ $response->html = '
                 <div class="card mb-2">
                     <div class="card-header bg-teal">
                         <div class="row" style="width:100%">
-                            <div class="col-md-8"><h4 class="card-title text-white">Article #'.$knowledge_id.' - '.$data->subject.'</h4></div>
+                            <div class="col-md-8"><h4 class="card-title text-white">Article #'.$data->id.' - '.$data->subject.'</h4></div>
                         </div>
                     </div>
                     <div class="card-body">
