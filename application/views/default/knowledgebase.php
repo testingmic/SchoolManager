@@ -75,7 +75,7 @@ if((count($support_array) > 1) || empty($knowledge_id)) {
                 <div class='card'>
                     <div class='card-body p-0'>
                         <div class='card-header pb-0'>
-                            <h3 class='font-20'>
+                            <h3 class='font-20' title='{$ticket->subject}'>
                                 <a class=\"text-success\" href=\"{$action}\">
                                     {$ticket->subject}
                                 </a>
@@ -270,6 +270,7 @@ $response->html = '
                                     </div>
                                 </div>
                                 <div>'.($isSupport ? $data->content : auto_link($data->content, "url")).'</div>
+                                <div>'.(!empty($data->video_link) ? "<div class='mt-2'>".iframe_holder($data->video_link, "550")."</div>" : null).'</div>
                                 <div>'.$data->attachment_html.'</div>
                             </div>
                         </div>

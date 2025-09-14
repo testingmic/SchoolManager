@@ -26,9 +26,9 @@ function div_labels($title) {
     return '<div class="col-lg-12"><h5 class="text-primary border-primary border-bottom pb-2 mt-3 mb-3">'.$title.'</h5></div>';
 }
 
-function iframe_holder($video_link) {
+function iframe_holder($video_link, $height = "315") {
     $video_link = str_replace("watch?v=", "embed/", $video_link);
-    return '<iframe width="100%" height="315" src="'.$video_link.'" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+    return '<iframe width="100%" height="'.$height.'" src="'.$video_link.'" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
 }
 
 /**
