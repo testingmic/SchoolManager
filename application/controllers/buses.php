@@ -309,6 +309,148 @@ class Buses extends Myschoolgh {
 	}
 
 	/**
+     * Get the financials of a bus
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+	public function financials(stdClass $params) {
+		
+		global $accessObject;
+
+		// set the permissions
+		$a = "financials";
+
+		// if the user does not have the required permissions
+		if(!$accessObject->hasAccess($a, "buses")) {
+			return ["code" => 403, "data" => $this->permission_denied];
+		}
+
+		// date range filter
+		$date_range = $params->date_range ?? date("Y-m-d", strtotime("-1 month")).":".date("Y-m-d");
+		$start_date = explode(":", $date_range)[0];
+		$end_date = explode(":", $date_range)[1];
+
+		// get the list of all classes
+		$params = (object)[
+			"route" => "deposit",
+			"clientId" => $params->clientId,
+			"date_range" => $date_range,
+			"order_by" => "DESC",
+			"busFinancials" => true,
+			"attach_to_object" => "bus",
+			"userData" => $params->userData
+		];
+
+		// get the transactions list
+		$financials = load_class("accounting", "controllers", $params)->list_transactions($params)["data"];
+
+		$statistics = [
+			'count' => 0,
+			'summation' => 0,
+			'summation_by_type' => [
+				'Deposit' => 0,
+				'Expense' => 0,
+				'Balance' => 0
+			],
+			'type' => [],
+			'buses' => [],
+			'charts' => [
+				'labels' => [],
+				'data' => [
+					0 => [],
+					1 => []
+				]
+			],
+			'days_chart' => [],
+		];
+		
+		$list_days = $this->listDays($start_date, $end_date, "Y-m-d");
+		foreach($list_days as $day) {
+			$statistics['charts']['labels'][] = date("jS M Y", strtotime($day));
+			$statistics['days_chart'][$day] =  [
+				'transactions' => 0,
+				'labels' => [
+					'Deposit' => 0,
+					'Expense' => 0
+				],
+				'data' => [
+					'Deposit' => 0,
+					'Expense' => 0
+				]
+			];
+		}
+
+		// loop through the financials
+		foreach($financials as $transaction) {
+
+			// if the transaction is reversed, then skip
+			if($transaction->reversed == 1) continue;
+
+			// set the statistics
+			$statistics['count']++;
+			$statistics['summation'] += $transaction->amount;
+			$statistics['type'][$transaction->item_type] = isset($statistics['type'][$transaction->item_type]) ? $statistics['type'][$transaction->item_type] + 1 : 1;
+		
+			// set the summation by type
+			$statistics['summation_by_type'][$transaction->item_type] += $transaction->amount;
+		
+			// set the days chart
+			if(!isset($statistics['days_chart'][$transaction->record_date])) {
+				$statistics['days_chart'][$transaction->record_date] =  [
+					'transactions' => 0,
+					'labels' => [
+						'Deposit' => 0,
+						'Expense' => 0
+					],
+					'data' => [
+						'Deposit' => 0,
+						'Expense' => 0
+					]
+				];
+			}
+			$statistics['days_chart'][$transaction->record_date]['transactions']++;
+
+			// set the buses
+			$bus_name = !empty($transaction->bus_name) ? $transaction->bus_name : "N/A";
+			if(!isset($statistics['buses'][$bus_name])) {
+				$statistics['buses'][$bus_name] = [
+					'count' => 0,
+					'Deposit' => 0,
+					'Expense' => 0
+				];
+			}
+			$statistics['buses'][$bus_name]['count']++;
+			$statistics['buses'][$bus_name][$transaction->item_type] += $transaction->amount;
+		
+			// set the labels and data
+			if(!isset($statistics['days_chart'][$transaction->record_date]['labels'][$transaction->item_type])) {
+				$statistics['days_chart'][$transaction->record_date]['labels'][$transaction->item_type] = 0;
+			}
+			$statistics['days_chart'][$transaction->record_date]['labels'][$transaction->item_type]++;
+			$statistics['days_chart'][$transaction->record_date]['data'][$transaction->item_type] += $transaction->amount;
+		}
+
+		// set the balance
+		$statistics['summation_by_type']['Balance'] = $statistics['summation_by_type']['Deposit'] - $statistics['summation_by_type']['Expense'];
+
+		foreach($statistics['days_chart'] as $day => $data) {
+			$statistics['charts']['data'][0][] = $data['data']['Deposit'];
+			$statistics['charts']['data'][1][] = $data['data']['Expense'];
+		}
+
+		return [
+			"code" => 200,
+			"data" => [
+				'statistics' => $statistics,
+				'list_days' => $list_days
+			]
+		];
+
+	}
+
+	/**
      * Delete a bus record
      * 
      * @param stdClass $params

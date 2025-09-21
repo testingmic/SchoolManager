@@ -65,7 +65,6 @@ $total_expenses = 0;
 $list_transactions = "";
 $transactions_array_list = [];
 foreach($transactions_list as $key => $transaction) {
-    $transactions_array_list[$transaction->item_id] = $transaction;
     $total_expenses += $transaction->amount;
     $count++;
 
@@ -100,6 +99,10 @@ foreach($transactions_list as $key => $transaction) {
     $list_transactions .= "<td>{$transaction->state_label}</td>";
     $list_transactions .= "<td class='text-center'><span data-action_id='{$transaction->item_id}'>{$action}</span></td>";
     $list_transactions .= "</tr>";
+
+    // set the transactions array list
+    $transactions_array_list[$transaction->item_id] = filterAccountingObject($transaction);
+
 }
 
 $response->page_programming["left"] = [

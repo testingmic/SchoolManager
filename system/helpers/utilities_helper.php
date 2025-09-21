@@ -28,6 +28,27 @@ function filterWeekendDates(array $dates): array {
 }
 
 /**
+ * Filter the accounting object
+ * 
+ * @param object $object
+ * 
+ * @return object
+ */
+function filterAccountingObject($object) {
+    // list of keys to remove
+    $keys_to_remove = [
+        "reversed", "status", "attach_to_object", "record_object", 
+        "account_bank", "account_number", "student_id", "account_id"
+    ];
+
+    // loop through the object
+    foreach($keys_to_remove as $key) {
+        unset($object->{$key});
+    }
+    return $object;
+}
+
+/**
  * Print the page content
  * 
  * @return string

@@ -332,6 +332,17 @@ var reverse_transaction = (transaction_id, item_name, amount_paid) => {
     });
 }
 
+if($(`div[data-summary="bus_financials"]`).length) {
+    $.get(`${baseUrl}api/buses/financials`).then((response) => {
+        if(response.code == 200) {
+            let statistics = response.data.result.statistics;
+            $.each(statistics.summation_by_type, (key, value) => {
+                $(`div[data-summary="bus_financials"] [data-summary="${key}"]`).html(`${formatMoney(value)}`);
+            });
+        }
+    });
+}
+
 $(`div[id="transactions_list"] button[id="filter_Transaction"]`).on("click", function() {
     let item = $(this).attr(`data-type`);
     let account_id = $(`div[id="transactions_list"] select[name="account_id"]`).val(),

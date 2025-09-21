@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $clientFeatures;
+global $myClass, $clientFeatures, $defaultCurrency;
 
 // initial variables
 $appName = $myClass->appName;
@@ -47,6 +47,7 @@ $params = (object)[
     "order_by" => "DESC",
     "attach_to_object" => "bus",
     "userData" => $defaultUser,
+    "busFinancials" => true,
     "client_data" => $defaultUser->client,
     "transaction_id" => $filter->transaction_id ?? null,
     "account_id" => $filter->account_id ?? null,
@@ -56,55 +57,12 @@ $params = (object)[
 // get the transactions list
 $transactions_list = load_class("accounting", "controllers", $params)->list_transactions($params)["data"];
 
-$statistics = [
-    'count' => 0,
-    'summation' => 0,
-    'summation_by_type' => [
-        'Deposit' => 0,
-        'Expense' => 0
-    ],
-    'type' => [],
-    'days_chart' => []
-];
-
 $count = 0;
 $list_transactions = "";
 $transactions_array_list = [];
 foreach($transactions_list as $key => $transaction) {
     // set the transaction array list
-    $transactions_array_list[$transaction->item_id] = $transaction;
     $count++;
-
-    // set the statistics
-    $statistics['count']++;
-    $statistics['summation'] += $transaction->amount;
-    $statistics['type'][$transaction->item_type] = isset($statistics['type'][$transaction->item_type]) ? $statistics['type'][$transaction->item_type] + 1 : 1;
-
-    // set the summation by type
-    $statistics['summation_by_type'][$transaction->item_type] += $transaction->amount;
-
-    // set the days chart
-    if(!isset($statistics['days_chart'][$transaction->record_date])) {
-        $statistics['days_chart'][$transaction->record_date] =  [
-            'transactions' => 0,
-            'labels' => [
-                'Deposit' => 0,
-                'Expense' => 0
-            ],
-            'data' => [
-                'Deposit' => 0,
-                'Expense' => 0
-            ]
-        ];
-    }
-    $statistics['days_chart'][$transaction->record_date]['transactions']++;
-
-    // set the labels and data
-    if(!isset($statistics['days_chart'][$transaction->record_date]['labels'][$transaction->item_type])) {
-        $statistics['days_chart'][$transaction->record_date]['labels'][$transaction->item_type] = 0;
-    }
-    $statistics['days_chart'][$transaction->record_date]['labels'][$transaction->item_type]++;
-    $statistics['days_chart'][$transaction->record_date]['data'][$transaction->item_type] += $transaction->amount;
 
     // view button
     $checkbox = "";
@@ -123,9 +81,9 @@ foreach($transactions_list as $key => $transaction) {
         }
     }
 
-    $reference = !empty($transaction->attach_to_object) ? ucwords($transaction->attach_to_object) : "N/A";
+    $reference = !empty($transaction->bus_name) ? ucwords($transaction->bus_name) : "N/A";
 
-    if(!empty($transaction->record_object) && $transaction->record_object !== 'null') {
+    if(!empty($transaction->bus_name) && $transaction->bus_name !== 'null') {
         $reference = "<a class='text-primary' href='{$baseUrl}{$transaction->attach_to_object}/{$transaction->record_object}'>{$reference} Object</a>";
     }
 
@@ -139,11 +97,55 @@ foreach($transactions_list as $key => $transaction) {
     $list_transactions .= "<td class='text-center'>{$transaction->state_label}</td>";
     $list_transactions .= "<td class='text-center'><span data-action_id='{$transaction->item_id}'>{$action}</span></td>";
     $list_transactions .= "</tr>";
+
+    $transactions_array_list[$transaction->item_id] = filterAccountingObject($transaction);
 }
 
 $response->scripts = ["assets/js/accounting.js", "assets/js/upload.js"];
 $response->array_stream["transactions_array_list"] = $transactions_array_list;
-$response->array_stream["statistics"] = $statistics;
+
+$charts = '';
+$chartContent = [
+    [
+        'label' => 'Income',
+        'color' => 'blue',
+        'type' => 'Deposit',
+        'icon' => 'fas fa-money-bill-alt'
+    ],
+    [
+        'label' => 'Expense',
+        'color' => 'red',
+        'type' => 'Expense',
+        'icon' => 'fas fa-money-check-alt'
+    ],
+    [
+        'label' => 'Balance',
+        'color' => 'green',
+        'type' => 'Balance',
+        'icon' => 'fas fa-balance-scale'
+    ]
+];
+
+foreach($chartContent as $each) {
+$charts .= '
+    <div class="col-xl-3 col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
+        <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-'.$each['color'].'">
+            <div class="card-body pr-2 pl-3 card-type-3">
+                <div class="row">
+                    <div class="col">
+                        <h6 class="font-14 text-uppercase font-bold mb-0">'.$each['label'].'</h6>
+                        <span class="font-bold font-20 mb-0" data-summary="'.$each['type'].'">'.$defaultCurrency.' '.number_format(0, 2).'</span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="bg-'.$each['color'].' text-white card-circle">
+                            <i class="fas '.$each['icon'].'"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>';
+}
 
 // document information
 $response->html = '
@@ -156,32 +158,33 @@ $response->html = '
             <div class="breadcrumb-item">'.$pageTitle.'</div>
         </div>
     </div>
-    <div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table data-empty="" class="table table-sm table-bordered table-striped datatable">
-                        <thead>
-                            <tr>
-                                <th class="text-center" width="5%">No.</th>
-                                <th width="22%">Bus</th>
-                                <th>Driver</th>
-                                <th>Date</th>
-                                <th>Amount</th>
-                                <th width="8%">Type</th>
-                                <th class="text-center">Status</th>
-                                <th width="12%" class="text-center">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            '.$list_transactions.'
-                        </tbody>
-                    </table>
+    <div class="row" data-summary="bus_financials">
+        '.$charts.'
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table data-empty="" class="table table-sm table-bordered table-striped datatable">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" width="5%">No.</th>
+                                    <th width="22%">Bus</th>
+                                    <th>Account</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th width="8%">Type</th>
+                                    <th class="text-center">Status</th>
+                                    <th width="12%" class="text-center">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                '.$list_transactions.'
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 </section>';
 

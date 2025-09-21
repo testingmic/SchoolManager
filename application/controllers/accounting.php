@@ -344,9 +344,21 @@ class Accounting extends Myschoolgh {
      */
     public function list_transactions(stdClass $params, $column = "record_date") {
 
+        global $accessObject;
+
         $params->query = "1";
 
+        // set the permissions
+		$a = "financials";
+		$b = "deposits";
+		$c = "accounts";
+
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+        // if the user does not have the required permissions
+		if(!$accessObject->hasAccess($a, "buses") && $accessObject->hasAccess($b, "accounting") && $accessObject->hasAccess($c, "accounting")) {
+			return ["code" => 403, "data" => $this->permission_denied];
+		}
 
         $params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
         $params->query .= !empty($params->q) && !empty($params->q) ? " AND a.name LIKE '%{$params->q}%'" : null;
@@ -378,8 +390,10 @@ class Accounting extends Myschoolgh {
                     c.account_name, c.account_bank, c.account_number,
                     (SELECT CONCAT(b.name,'|',COALESCE(b.phone_number, 'NULL'),'|',COALESCE(b.email, 'NULL'),'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info,
                     (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment
+                    ".(!empty($params->busFinancials) ? ", b.brand AS bus_name, b.reg_number, b.insurance_company" : null)."
                 FROM accounts_transaction a
                 LEFT JOIN accounts c ON c.item_id = a.account_id
+                ".(!empty($params->busFinancials) ? "LEFT JOIN buses b ON b.item_id = a.record_object" : null)."
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id {$order_by} LIMIT {$params->limit}
             ");
             $stmt->execute([1]);
