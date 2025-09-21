@@ -15,30 +15,27 @@ $baseUrl = $myClass->baseUrl;
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$response = (object) ["current_user_url" => $session->user_current_url];
 $filter = (object) array_map("xss_clean", $_POST);
 $pageTitle = "Simple Accounting - Income";
 $response->title = $pageTitle;
-
-// add the scripts to load
-$response->scripts = ["assets/js/accounting.js", "assets/js/upload.js", "assets/js/object_selector.js"];
 
 // permission to modify and validate
 $canDeposit = $accessObject->hasAccess("deposits", "accounting");
 
 // if the user does not have the required permissions
 if(!$canDeposit) {
-    // unset the page additional information
-    $response->page_programming = [];
-    // permission denied information
     $response->html = page_not_found("permission_denied");
     echo json_encode($response);
     exit;
 }
 
+// add the scripts to load
+$response->scripts = ["assets/js/accounting.js", "assets/js/upload.js", "assets/js/object_selector.js"];
+
 // additional permissions
 $hasValidate = $accessObject->hasAccess("validate", "accounting");
-$canReverse = $accessObject->hasAccess("modify", "accounting");
+$hasModify = $accessObject->hasAccess("modify", "accounting");
 
 // date range filter
 $date_range = $filter->date_range ?? date("Y-m-d", strtotime("monday this week")).":".date("Y-m-d", strtotime("sunday this week"));
@@ -61,12 +58,10 @@ $params = (object)[
 $transactions_list = load_class("accounting", "controllers", $params)->list_transactions($params)["data"];
 
 $count = 0;
-$total_income = 0;
 $list_transactions = "";
 $transactions_array_list = [];
 foreach($transactions_list as $key => $transaction) {
     $transactions_array_list[$transaction->item_id] = $transaction;
-    $total_income += $transaction->amount;
     $count++;
 
     // view button
@@ -77,19 +72,19 @@ foreach($transactions_list as $key => $transaction) {
     if($transaction->state === "Pending") {
         // validate the transaction
         if($hasValidate) {
-            $action .= "&nbsp;<button onclick='return validate_transaction(\"{$transaction->item_id}\",\"deposits\")' class=\"btn btn-sm btn-outline-primary mb-1\" title=\"Validate\"><i class='fa fa-check'></i></button>";
+            $action .= "&nbsp;<button onclick='return validate_transaction(\"{$transaction->item_id}\",\"{$baseUrl}incomes\")' class=\"btn btn-sm btn-outline-primary mb-1\" title=\"Validate Transaction\"><i class='fa fa-check'></i></button>";
         }
 
         // if the user has permission to modify record
-        if($canReverse) {
-            $action .= "&nbsp;<button onclick='return reverse_transaction(\"{$transaction->item_id}\",\"{$transaction->account_type_name}\",\"{$transaction->amount}\");' title='Reverse this transaction' class='btn btn-outline-danger mb-1 btn-sm'><i class='fa fa-recycle'></i></button>";
+        if($hasModify) {
+            $action .= "&nbsp;<button onclick='return reverse_transaction(\"{$transaction->item_id}\",\"{$transaction->account_type_name}\",\"{$transaction->amount}\");' title='Click to reverse this transaction' class='btn btn-outline-danger mb-1 btn-sm'><i class='fa fa-recycle'></i></button>";
         }
     }
 
     $reference = !empty($transaction->attach_to_object) ? ucwords($transaction->attach_to_object) : "N/A";
 
-    if(!empty($transaction->record_object)) {
-        $reference = "<a href='{$baseUrl}{$transaction->attach_to_object}/{$transaction->record_object}'>{$reference} Object</a>";
+    if(!empty($transaction->record_object) && $transaction->record_object !== 'null') {
+        $reference = "<a class='text-primary' href='{$baseUrl}{$transaction->attach_to_object}/{$transaction->record_object}'>{$reference} Object</a>";
     }
 
     $list_transactions .= "<tr data-row_id=\"{$transaction->item_id}\">";
@@ -104,10 +99,7 @@ foreach($transactions_list as $key => $transaction) {
     $list_transactions .= "</tr>";
 }
 $response->array_stream["transactions_array_list"] = $transactions_array_list;
-$response->page_programming["left"] = [
-    "Total Income" => number_format($total_income, 2),
-    "Average Income" => $total_income > 0 ? number_format(($total_income/count($transactions_list)), 2) : 0
-];
+
 // confirm if the account check is empty
 if(empty($defaultClientData->default_account_id) || $isReadOnly) {
     // set the content
@@ -160,7 +152,7 @@ $response->html = '
             </div>
             <div class="col-xl-2 col-md-2 col-12 form-group">
                 <label class="d-sm-none d-md-block" for="">&nbsp;</label>
-                <button id="filter_Transaction" data-type="incomes" type="submit" class="btn height-40 btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+                <button id="filter_Transaction" data-type="deposits" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>
 
             <div class="col-12 col-sm-12 col-lg-12">
@@ -182,12 +174,12 @@ $response->html = '
 
                                     </div>
                                     <div class="table-responsive trix-slim-scroll">
-                                        <table class="table table-bordered table-sm table-striped datatable">
+                                        <table class="table table-bordered table-striped datatable">
                                             <thead>
                                                 <tr>
                                                     <th></th>
-                                                    <th width="16%">Account Name</th>
-                                                    <th width="19%">Account Type Head</th>
+                                                    <th width="22%">Account Name</th>
+                                                    <th width="15%">Account Type Head</th>
                                                     <th>Reference</th>
                                                     <th>Amount</th>
                                                     <th width="12%">Date</th>
@@ -200,7 +192,7 @@ $response->html = '
                                     </div>
                                 </div>
                                 '.($canDeposit ? '
-                                    <div class="tab-pane fade" id="upload_reports" role="tabpanel" aria-labelledby="upload_reports-tab2">
+                                    <div class="tab-pane fade bg-lighter" id="upload_reports" role="tabpanel" aria-labelledby="upload_reports-tab2">
                                         '.$the_form.'
                                     </div>': null
                                 ).'

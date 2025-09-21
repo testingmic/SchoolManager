@@ -71,9 +71,9 @@ var view_bTranc = (transaction_id) => {
                             <tr>
                                 <td class="font-weight-bold">Recorded By</td>
                                 <td>
-                                    <div><i class="fa fa-user"></i> ${data.createdby_info.name}</div>
-                                    <div><i class="fa fa-phone"></i> ${data.createdby_info.phone_number}</div>
-                                    <div><i class="fa fa-envelope"></i> ${data.createdby_info.email}</div>
+                                    <div><i class="fa fa-user"></i> ${data?.createdby_info?.name}</div>
+                                    <div><i class="fa fa-phone"></i> ${data?.createdby_info?.phone_number}</div>
+                                    <div><i class="fa fa-envelope"></i> ${data?.createdby_info?.email}</div>
                                 </td>
                             </tr>
                             <tr>
@@ -159,9 +159,9 @@ var view_transaction = (transaction_id) => {
                             <tr>
                                 <td class="font-weight-bold">Recorded By</td>
                                 <td>
-                                    <div><i class="fa fa-user"></i> ${data.createdby_info.name}</div>
-                                    <div><i class="fa fa-phone"></i> ${data.createdby_info.phone_number}</div>
-                                    <div><i class="fa fa-envelope"></i> ${data.createdby_info.email}</div>
+                                    <div><i class="fa fa-user"></i> ${data?.createdby_info?.name}</div>
+                                    <div><i class="fa fa-phone"></i> ${data?.createdby_info?.phone_number}</div>
+                                    <div><i class="fa fa-envelope"></i> ${data?.createdby_info?.email}</div>
                                 </td>
                             </tr>
                             <tr>

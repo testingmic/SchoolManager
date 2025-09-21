@@ -168,7 +168,9 @@ if(empty($bus_id)) {
             <div class="row">
 
                 <div class="col-md-4">
-                    '.$buses_list.'
+                    <div class="'.($attandenceEnabled ? "stick_to_top" : null).'">
+                        '.$buses_list.'
+                    </div>
                 </div>
 
                 <div class="col-md-8">

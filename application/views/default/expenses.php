@@ -86,8 +86,8 @@ foreach($transactions_list as $key => $transaction) {
 
     $reference = !empty($transaction->attach_to_object) ? ucwords($transaction->attach_to_object) : "N/A";
 
-    if(!empty($transaction->record_object)) {
-        $reference = "<a href='{$baseUrl}{$transaction->attach_to_object}/{$transaction->record_object}'>{$reference} Object</a>";
+    if(!empty($transaction->record_object) && $transaction->record_object !== 'null') {
+        $reference = "<a class='text-primary' href='{$baseUrl}{$transaction->attach_to_object}/{$transaction->record_object}'>{$reference} Object</a>";
     }
 
     $list_transactions .= "<tr data-row_id=\"{$transaction->item_id}\">";
@@ -183,8 +183,8 @@ $response->html = '
                                             <thead>
                                                 <tr>
                                                     <th></th>
-                                                    <th width="16%">Account Name</th>
-                                                    <th width="19%">Account Type Head</th>
+                                                    <th width="22%">Account Name</th>
+                                                    <th width="15%">Account Type Head</th>
                                                     <th>Reference</th>
                                                     <th>Amount</th>
                                                     <th width="12%">Date</th>

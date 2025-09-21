@@ -5720,23 +5720,31 @@ class Forms extends Myschoolgh {
                             </div>
                         </div>
                         ".forms_header("Set amount and date", "mt-2")."
-                        <div class=\"form-group\">
-                            <label>Amount <span class=\"required\">*</span></label>
-                            <input type=\"number\" name=\"amount\" value=\"".($data->amount ?? null)."\" class=\"form-control\">
-                        </div>
-                        <div class=\"form-group\">
-                            <label>Date <span class=\"required\">*</span></label>
-                            <input type=\"text\" name=\"date\" readonly value=\"".($data->record_date ?? date("Y-m-d"))."\" class=\"form-control\">
-                        </div>
-                        <div class=\"form-group\">
-                            <label>Pay Via</label>
-                            <select data-width=\"100%\" name=\"payment_medium\" class=\"form-control selectpicker\">
-                                <option value=\"\">Select Payment Medium</option>";
-                                foreach($this->payment_methods as $key => $value) {
-                                   $html .= "<option ".(!empty($data) && $key === $data->payment_medium ? "selected" : null)." value=\"{$key}\">{$value}</option>"; 
-                                }
-                            $html .= "
-                            </select>
+                        <div class='row'>
+                            <div class='col-md-4'>
+                                <div class=\"form-group\">
+                                    <label>Amount <span class=\"required\">*</span></label>
+                                    <input type=\"number\" name=\"amount\" value=\"".($data->amount ?? null)."\" class=\"form-control\">
+                                </div>
+                            </div>
+                            <div class='col-md-4'>
+                                <div class=\"form-group\">
+                                    <label>Date <span class=\"required\">*</span></label>
+                                    <input type=\"text\" name=\"date\" value=\"".($data->record_date ?? date("Y-m-d"))."\" class=\"form-control datepicker\">
+                                </div>
+                            </div>
+                            <div class='col-md-4'>
+                                <div class=\"form-group\">
+                                    <label>Pay Via</label>
+                                    <select data-width=\"100%\" name=\"payment_medium\" class=\"form-control selectpicker\">
+                                        <option value=\"\">Select Payment Medium</option>";
+                                        foreach($this->payment_methods as $key => $value) {
+                                        $html .= "<option ".(!empty($data) && $key === $data->payment_medium ? "selected" : null)." value=\"{$key}\">{$value}</option>"; 
+                                        }
+                                    $html .= "
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div class=\"form-group\">
                             <label>Description</label>

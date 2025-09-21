@@ -2,7 +2,7 @@
 
 class Accounting extends Myschoolgh {
 
-	public function __construct(stdClass $params = null) {
+	public function __construct($params = null) {
 		parent::__construct();
 
         // get the client data
@@ -355,7 +355,9 @@ class Accounting extends Myschoolgh {
         $params->query .= !empty($params->account_type) && !empty($params->account_type) ? " AND a.account_type='{$params->account_type}'" : null;
         $params->query .= !empty($params->transaction_id) && !empty($params->transaction_id) ? " AND a.item_id='{$params->transaction_id}'" : null;
         $params->query .= isset($params->date) && !empty($params->date) ? " AND DATE(a.record_date) ='{$params->date}'" : "";
-        $params->query .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", $column) : null;
+        $params->query .= !empty($params->date_range) ? $this->dateRange($params->date_range, "a", $column) : null;
+        $params->query .= !empty($params->attach_to_object) ? " AND a.attach_to_object='{$params->attach_to_object}'" : null;
+        $params->query .= !empty($params->record_object) ? " AND a.record_object='{$params->record_object}'" : null;
 
         // return the where clause
         if(isset($params->return_where_clause)){
@@ -624,6 +626,11 @@ class Accounting extends Myschoolgh {
 
             // set the payment medium if not set
             $params->payment_medium = isset($params->payment_medium) ? $params->payment_medium : "cash";
+
+            // if the attach to object is set but the record object is not set
+            if(!empty($params->attach_to_object) && empty($params->record_object)) {
+                return ["code" => 400, "data" => "Sorry! You must select an object to attach to."];
+            }
 
             // insert the record
             $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 

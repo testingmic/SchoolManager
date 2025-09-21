@@ -16,7 +16,7 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
-$pageTitle = "Manage Buses";
+$pageTitle = "Shuttle Service";
 $response->title = $pageTitle;
 
 // set the item unique id
