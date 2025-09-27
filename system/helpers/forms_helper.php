@@ -39,6 +39,27 @@ function iframe_holder($video_link, $height = "315") {
 }
 
 /**
+ * Text editor to show
+ * 
+ * @param String $preference
+ * @param String $data
+ * @param String $name          Default is faketext
+ * @param String $id            Default is ajax-form-content
+ * 
+ * @return String
+ */
+function textarea_editor($data = null, $name = "faketext", $id = "ajax-form-content", $predefined = "description") {
+    // set the form
+    $data = !empty($data) ? str_ireplace("'", "", $data) : null;
+    $name = empty($name) ? "faketext" : $name;
+    $form_content = "<input type='hidden' hidden id='trix-editor-input' value='{$data}'>";
+    $form_content .= "<trix-editor name=\"{$name}\" data-predefined_name=\"{$predefined}\" input='trix-editor-input' class=\"trix-slim-scroll height-200\" id=\"{$id}\"></trix-editor>";
+
+    // return the results
+    return $form_content;
+}
+
+/**
  * Format Date of Birth
  * 
  * @param string $date_of_birth

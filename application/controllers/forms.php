@@ -1044,14 +1044,7 @@ class Forms extends Myschoolgh {
      */
     public function textarea_editor($data = null, $name = "faketext", $id = "ajax-form-content", $predefined = "description") {
 
-        // set the form
-        $data = !empty($data) ? str_ireplace("'", "", $data) : null;
-        $name = empty($name) ? "faketext" : $name;
-        $form_content = "<input type='hidden' hidden id='trix-editor-input' value='{$data}'>";
-        $form_content .= "<trix-editor name=\"{$name}\" data-predefined_name=\"{$predefined}\" input='trix-editor-input' class=\"trix-slim-scroll {$this->default_height}\" id=\"{$id}\"></trix-editor>";
-
-        // return the results
-        return $form_content;
+        return textarea_editor($data, $name, $id, $predefined);
 
     }
 
@@ -3049,7 +3042,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <input type="hidden" readonly name="course_id" id="course_id" value="'.($itemData->id ?? null).'">
                         <label for="description">Description</label>
-                        <textarea type="text" rows="5" name="description" id="description" class="form-control">'.($itemData->description ?? null).'</textarea>
+                        '.$this->textarea_editor($itemData->description ?? null, "faketext", "ajax-form-content", "description").'
                     </div>
                 </div>
             </div>

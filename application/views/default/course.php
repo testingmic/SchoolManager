@@ -274,41 +274,29 @@ if(!empty($item_id)) {
             </div>
             <div class="section-body">
             <div class="row mt-sm-4">
-                <div class="col-md-3">
+                <div class="col-12 col-md-12 col-lg-3">
+                <div class="sticky-top stick_to_top">
                     <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                         <div class="card-body p-3 text-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
                             <div class="text-uppercase font-25 font-weight-bolder text-white">'.$data->name.'</div>
                             <div class="font-18 font-weight-bold text-uppercase text-white">('.$data->course_code.')</div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-9 d-none d-sm-block">
+                    <div class="mb-3">
+                        <button onclick="load(\'gradebook/'.$data->item_id.'/grading?class_id='.trim($class_ids_list, ",").'\');" class="btn btn-block btn-outline-success">
+                            <i class="fa fa-book-open"></i> GRADEBOOK
+                            <span class="badge badge-success float-right">New</span>
+                        </button>
+                    </div>
                     <div class="card">
-                        <div class="card-body p-0">
-                            <div class="card-header">
-                                <h4 class="mb-0">SUBJECT DESCRIPTION</h4>
-                            </div>
-                            <div class="p-3 pt-0">
-                            '.(!empty($data->description) ? $data->description : "<div class='text-center'>Description Not Set</div>").'
-                            </div>
+                        <div class="card-header">
+                            <h4 class="mb-0">CLASS NAME</h4>
+                        </div>
+                        <div class="card-body text-center">
+                            '.$data->class_name.'
                         </div>
                     </div>
-                </div>
-                <div class="col-12 col-md-12 col-lg-3">
-                <div class="mb-3">
-                    <button onclick="load(\'gradebook/'.$data->item_id.'/grading?class_id='.trim($class_ids_list, ",").'\');" class="btn btn-block btn-outline-success">
-                        <i class="fa fa-book-open"></i> GRADEBOOK
-                        <span class="badge badge-success float-right">New</span>
-                    </button>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0">CLASS NAME</h4>
-                    </div>
-                    <div class="card-body text-center">
-                        '.$data->class_name.'
-                    </div>
-                </div>';
+                ';
 
             $response->html .= '
                 <div class="card d-none d-sm-block">
@@ -336,7 +324,9 @@ if(!empty($item_id)) {
                         }
                     }
                 $response->html .= empty($data->course_tutors) ? "<div class='p-3 text-center'>Subject Tutors Not Set</div>" : null;
-                $response->html .= '</div></div>';
+                $response->html .= '</div>
+                </div>
+            </div>';
 
             $response->html .= '
             </div>
@@ -345,7 +335,10 @@ if(!empty($item_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(empty($url_link) || $url_link === "classes" ? "active" : null).'" onclick="return appendToUrl(\'classes\')" id="classes-tab2" data-toggle="tab" href="#classes" role="tab" aria-selected="true">Classes List</a>
+                        <a class="nav-link '.(empty($url_link) || $url_link === "description" ? "active" : null).'" onclick="return appendToUrl(\'description\')" id="description-tab2" data-toggle="tab" href="#description" role="tab" aria-selected="true">Description</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link '.($url_link === "classes" ? "active" : null).'" onclick="return appendToUrl(\'classes\')" id="classes-tab2" data-toggle="tab" href="#classes" role="tab" aria-selected="true">Classes List</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link '.($url_link === "lessons" ? "active" : null).'" onclick="return appendToUrl(\'lessons\')" id="lessons-tab2" data-toggle="tab" href="#lessons" role="tab" aria-selected="true">Lesson Planner</a>
@@ -365,8 +358,17 @@ if(!empty($item_id)) {
                     $response->html .= '
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
-                        
-                        <div class="tab-pane fade '.(empty($url_link) || $url_link === "classes" ? "show active" : null).'" id="classes" role="tabpanel" aria-labelledby="classes-tab2">
+                        <div class="tab-pane fade '.(empty($url_link) || $url_link === "description" ? "show active" : null).'" id="description" role="tabpanel" aria-labelledby="description-tab2">
+                            <div class="card-body p-0">
+                                <div class="card-header">
+                                    <h4 class="mb-0">SUBJECT DESCRIPTION</h4>
+                                </div>
+                                <div class="p-3 pt-0">
+                                '.(!empty($data->description) ? clean_html($data->description) : "<div class='text-center'>Description Not Set</div>").'
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade '.($url_link === "classes" ? "show active" : null).'" id="classes" role="tabpanel" aria-labelledby="classes-tab2">
                             <div class="row">';
 
                             // if the class list is not empty
