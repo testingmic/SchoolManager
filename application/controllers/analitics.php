@@ -606,7 +606,8 @@ class Analitics extends Myschoolgh {
                 "userId" => $params->userId,
                 "account_type" => $value->item_id,
                 "date_range" => "{$this->start_date}:{$this->end_date}",
-                "return_where_clause" => true
+                "return_where_clause" => true,
+                "bypass_permissions" => true
             ];
             $where_clause = $transactionClass->list_transactions($fees_param, "date_created");
 
@@ -614,9 +615,6 @@ class Analitics extends Myschoolgh {
             $raw_name = create_slug($value->name, "_");
             $amount_paid = $raw_name;
             $value_count = "{$raw_name}_count";
-
-            print_r($where_clause);
-            exit;
 
             $query = $this->db->prepare("SELECT 
                     COUNT(*) AS {$value_count},
