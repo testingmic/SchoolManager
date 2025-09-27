@@ -615,6 +615,9 @@ class Analitics extends Myschoolgh {
             $amount_paid = $raw_name;
             $value_count = "{$raw_name}_count";
 
+            print_r($where_clause);
+            exit;
+
             $query = $this->db->prepare("SELECT 
                     COUNT(*) AS {$value_count},
                     SUM(amount) AS {$amount_paid}

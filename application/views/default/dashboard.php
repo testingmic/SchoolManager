@@ -86,6 +86,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
 } else {
 
+    $assignment_list = "";
+
     // set the data to stream for an admin user
     if($isAdminAccountant) {
         
