@@ -356,7 +356,7 @@ class Accounting extends Myschoolgh {
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
         // if the user does not have the required permissions
-        if(!empty($params->bypass_permissions)) {
+        if(empty($params->bypass_permissions)) {
             if(!$accessObject->hasAccess($a, "buses") && $accessObject->hasAccess($b, "accounting") && $accessObject->hasAccess($c, "accounting")) {
                 return ["code" => 403, "data" => $this->permission_denied];
             }
@@ -374,7 +374,7 @@ class Accounting extends Myschoolgh {
         $params->query .= !empty($params->record_object) ? " AND a.record_object='{$params->record_object}'" : null;
 
         // return the where clause
-        if(isset($params->return_where_clause)){
+        if(!empty($params->return_where_clause)){
             return $params->query;
         }
 
