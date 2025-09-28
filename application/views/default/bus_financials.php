@@ -160,6 +160,22 @@ $response->html = '
     </div>
     <div class="row" data-summary="bus_financials">
         '.$charts.'
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body" data-chart="income_and_expense">
+                    <div id="income_and_expense" class="height-450" style="width:100%;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body height-450">
+                    <div class="card-body" data-chart="bus_financials_chart">
+                        <canvas class="height-full" id="bus_financials"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="col-12">
             <div class="card">
                 <div class="card-body">

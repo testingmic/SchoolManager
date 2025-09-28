@@ -332,6 +332,83 @@ var reverse_transaction = (transaction_id, item_name, amount_paid) => {
     });
 }
 
+var incomeAndExpenseChart = (statistics) => {
+    if ($(`div[id="income_and_expense"]`).length) {
+
+        $(`div[data-chart="income_and_expense"]`).html(``);
+        $(`div[data-chart="income_and_expense"]`).html(`<div id="income_and_expense" style="width:100%;max-height:405px;height:405px;"></div>`);
+
+        var revenue_flow_chart_options = {
+            chart: {
+                height: 400,
+                type: 'area',
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 2,
+            },
+            series: statistics.data,
+            xaxis: {
+                type: 'datetime',
+                categories: statistics.labels,
+                labels: {
+                    style: {
+                        colors: '#9aa0ac',
+                    }
+                }
+            },
+            yaxis: {
+                labels: {
+                    style: {
+                        color: '#9aa0ac',
+                    }
+                }
+            },
+            tooltip: {
+                x: {
+                    format: 'dd/MM/yyyy'
+                },
+            }
+        }
+
+        var revenue_flow_chart = new ApexCharts(
+            document.querySelector("#income_and_expense"),
+            revenue_flow_chart_options
+        );
+
+        revenue_flow_chart.render();
+
+    }
+    if($(`canvas[id="bus_financials"]`).length) {
+        $(`div[data-chart="bus_financials_chart"]`).html(`<canvas class="height-full" style="max-height:420px;height:420px;" id="bus_financials"></canvas>`);
+        var ctx = document.getElementById("bus_financials").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: statistics.buses.labels,
+                datasets: [{
+                    label: 'Bus Financials',
+                    data: statistics.buses.data,
+                    backgroundColor: ['#304ffe', '#ffa601', '#fc544b', '#63ed7a', '#191d21', '#e83e8c', '#6777ef'],
+                    borderColor: ['#fff', '#fff', '#fff']
+                }]
+            },
+            options: {
+                responsive: true,
+                cutoutPercentage: 70,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "bottom",
+                    display: true
+                }
+            }
+        });
+    }
+}
+
 if($(`div[data-summary="bus_financials"]`).length) {
     $.get(`${baseUrl}api/buses/financials`).then((response) => {
         if(response.code == 200) {
@@ -339,7 +416,10 @@ if($(`div[data-summary="bus_financials"]`).length) {
             $.each(statistics.summation_by_type, (key, value) => {
                 $(`div[data-summary="bus_financials"] [data-summary="${key}"]`).html(`${formatMoney(value)}`);
             });
+            incomeAndExpenseChart(statistics.charts);
         }
+    }).catch((error) => {
+        console.log(error);
     });
 }
 

@@ -37,7 +37,8 @@ var revenueReporting = (revenue) => {
                 enabled: false
             },
             stroke: {
-                curve: 'smooth'
+                curve: 'smooth',
+                width: 2,
             },
             series: [{
                 name: "Fees Payments",
@@ -258,9 +259,8 @@ var summaryReporting = (t_summary, date_range) => {
                     enabled: true
                 },
                 stroke: {
-                    show: true,
+                    curve: 'smooth',
                     width: 2,
-                    colors: ['transparent']
                 },
                 series: [{
                     name: 'Amount',

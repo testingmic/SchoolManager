@@ -359,8 +359,14 @@ class Buses extends Myschoolgh {
 			'charts' => [
 				'labels' => [],
 				'data' => [
-					0 => [],
-					1 => []
+					0 => [
+						'name' => 'Deposit',
+						'data' => []
+					],
+					1 => [
+						'name' => 'Expense',
+						'data' => []
+					]
 				]
 			],
 			'days_chart' => [],
@@ -368,7 +374,7 @@ class Buses extends Myschoolgh {
 		
 		$list_days = $this->listDays($start_date, $end_date, "Y-m-d");
 		foreach($list_days as $day) {
-			$statistics['charts']['labels'][] = date("jS M Y", strtotime($day));
+			$statistics['charts']['labels'][] = date('Y-m-d', strtotime($day));//date("jS M Y", strtotime($day));
 			$statistics['days_chart'][$day] =  [
 				'transactions' => 0,
 				'labels' => [
@@ -435,9 +441,16 @@ class Buses extends Myschoolgh {
 		// set the balance
 		$statistics['summation_by_type']['Balance'] = $statistics['summation_by_type']['Deposit'] - $statistics['summation_by_type']['Expense'];
 
+		// set the days chart
 		foreach($statistics['days_chart'] as $day => $data) {
-			$statistics['charts']['data'][0][] = $data['data']['Deposit'];
-			$statistics['charts']['data'][1][] = $data['data']['Expense'];
+			$statistics['charts']['data'][0]['data'][] = $data['data']['Deposit'];
+			$statistics['charts']['data'][1]['data'][] = $data['data']['Expense'];
+		}
+
+		// set the buses
+		foreach($statistics['buses'] as $bus => $data) {
+			$statistics['charts']['buses']['labels'][] = $bus;
+			$statistics['charts']['buses']['data'][] = $data['Expense'] > $data['Deposit'] ?  0 : ($data['Deposit'] - $data['Expense']);
 		}
 
 		return [

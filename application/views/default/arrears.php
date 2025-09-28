@@ -299,7 +299,7 @@ if(!empty($user_id) && ($user_id !== "add")) {
                                         </div>
                                         <div class="form-group">
                                             <label>Amount <span class="required">*</span></label>
-                                            <input '.$disabled.' class="form-control" name="amount" id="amount" type="number" min="0">
+                                            <input '.$disabled.' class="form-control font-25 text-center" name="amount" id="amount" type="number" min="0">
                                         </div>
                                         <div class="text-right">
                                             '.($disabled ? null : '
