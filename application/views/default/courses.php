@@ -108,7 +108,9 @@ foreach($item_list["data"] as $key => $each) {
             $courses .= "
             <div data-record-row_id='{$tutor->item_id}' class='mb-2 ".($key !== count($each->course_tutors) - 1 ? "border-bottom pb-2" : null)."'>
                 <span class='user_name' onclick='return load(\"staff/{$tutor->item_id}/documents\");'>".$tutor->name."</span>
-                <span onclick='return delete_record(\"{$each->id}\", \"teacher_course\", \"delete\", \"{$tutor->item_id}\", \"data-record-row_id\");' class='cursor-pointer float-right hover:text-red-500'><i class='fa fa-trash'></i></span>
+                ".($hasUpdate ? "<span onclick='return delete_record(\"{$each->id}\", \"teacher_course\", \"delete\", \"{$tutor->item_id}\", \"data-record-row_id\");' class='cursor-pointer float-right hover:text-red-500'>
+                    <i class='fa fa-trash'></i>
+                </span>" : null)."
             </div>";
         }
         $statistics['with_tutors']['count']++;
