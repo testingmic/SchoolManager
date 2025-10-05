@@ -273,7 +273,7 @@ var share_Comment = (resource, item_id) => {
     });
 }
 
-var delete_record = (record_id, resource, action = "delete", extra_id = "") => {
+var delete_record = (record_id, resource, action = "delete", extra_id = "", extra_id_selector = "data-row_id") => {
     let title = (action == "delete") ? "Delete Record" : "Restore Record";
     swal({
         title: title,
@@ -309,7 +309,13 @@ var delete_record = (record_id, resource, action = "delete", extra_id = "") => {
                             }
                         }
                     }
-                    $(`[data-row_id="${record_id}"]`).remove();
+
+                    if($(`[${extra_id_selector}="${record_id}"]`).length) {
+                        $(`[${extra_id_selector}="${record_id}"]`).remove();
+                    }
+                    if($(`[${extra_id_selector}="${extra_id}"]`).length) {
+                        $(`[${extra_id_selector}="${extra_id}"]`).remove();
+                    }
                 }
                 swal({
                     position: "top",
