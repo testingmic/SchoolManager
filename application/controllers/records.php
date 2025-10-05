@@ -68,7 +68,7 @@ class Records extends Myschoolgh {
             ],
             "course" => [
                 "table" => "courses",
-                "update" => "status='0'",
+                "update" => "status='0', deleted = '1'",
                 "where" => "id='{$record_id}'",
                 "query" => "SELECT id FROM courses WHERE id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],

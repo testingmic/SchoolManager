@@ -94,9 +94,9 @@ class Courses extends Myschoolgh {
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM courses a
                 LEFT JOIN classes b ON b.item_id = a.class_id
-                WHERE {$_filters} AND a.deleted = ? ORDER BY {$params->order_by} LIMIT {$params->limit}
+                WHERE {$_filters} AND a.deleted = ? AND a.status = ? ORDER BY {$params->order_by} LIMIT {$params->limit}
             ");
-            $stmt->execute([0]);
+            $stmt->execute([0, 1]);
 
             $minified = isset($params->minified) ? true : false;
 
