@@ -316,6 +316,9 @@ var delete_record = (record_id, resource, action = "delete", extra_id = "", extr
                     if($(`[${extra_id_selector}="${extra_id}"]`).length) {
                         $(`[${extra_id_selector}="${extra_id}"]`).remove();
                     }
+                    if($(`[${extra_id_selector}="${extra_id}_${record_id}"]`).length) {
+                        $(`[${extra_id_selector}="${extra_id}_${record_id}"]`).remove();
+                    }
                 }
                 swal({
                     position: "top",
