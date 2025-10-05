@@ -519,7 +519,7 @@ if(empty($user_id)) {
                         '.(
                             $isTeacher ? '
                             <li class="nav-item">
-                                <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#course_list" role="tab"
+                                <a class="nav-link '.($url_link === "subjects" ? "active" : null).'" id="calendar-tab2" onclick="return appendToUrl(\'subjects\')" data-toggle="tab" href="#course_list" role="tab"
                                 aria-selected="true">Subjects</a>
                             </li>' : null
                         ).'
@@ -552,7 +552,7 @@ if(empty($user_id)) {
                         <div class="tab-content tab-bordered" id="myTab3Content">
                             '.(
                             $isTeacher ? '
-                                <div class="tab-pane fade" id="course_list" role="tabpanel" aria-labelledby="course_list-tab2">
+                                <div class="tab-pane fade '.($url_link === "subjects" ? "show active" : null).'" id="course_list" role="tabpanel" aria-labelledby="course_list-tab2">
                                     <div class="d-flex justify-content-between mb-4">
                                         <div class="mb-2"></div>
                                         '.($addCourse ? '

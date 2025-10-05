@@ -72,6 +72,12 @@ class Records extends Myschoolgh {
                 "where" => "id='{$record_id}'",
                 "query" => "SELECT id FROM courses WHERE id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
+            "teacher_course" => [
+                "table" => "courses",
+                "update" => "status='0'",
+                "where" => "id='{$record_id}'",
+                "query" => "SELECT id, course_tutor FROM courses WHERE id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
+            ],
             "fees_category" => [
                 "table" => "fees_category",
                 "update" => "status='0'",
@@ -277,15 +283,33 @@ class Records extends Myschoolgh {
                 
             }
 
-            // update the database record
-            $this->db->query("UPDATE {$featured["table"]} SET {$featured["update"]} WHERE {$featured["where"]} LIMIT 1");
+            if(in_array($params->resource, ["teacher_course"])) {
+                
+                $courseTutors = array_filter(json_decode($result->course_tutor, true));
 
-            // set the action
-            $action = ($params->action == "delete" ? "deleted" : "restored");
-            
-            if($isSupport) {
-                /** Log the user activity */
-                $this->userLogs("{$params->resource}", $params->record_id, null, "<strong>{$params->userData->name}</strong> {$action} this record from the system.", $params->userData->user_id);
+                // remove the param->extra_id from the courseTutors array
+                $courseTutors = array_filter($courseTutors, function($course_tutor) use ($params) {
+                    return $course_tutor != $params->extra_id;
+                });
+
+                // encode the courseTutors array
+                $tutors = json_encode($courseTutors);
+
+                // update the database record
+                $this->db->query("UPDATE courses SET course_tutor = '{$tutors}' WHERE {$featured["where"]} LIMIT 1");
+
+            } else {
+
+                // update the database record
+                $this->db->query("UPDATE {$featured["table"]} SET {$featured["update"]} WHERE {$featured["where"]} LIMIT 1");
+
+                // set the action
+                $action = ($params->action == "delete" ? "deleted" : "restored");
+                
+                if($isSupport) {
+                    /** Log the user activity */
+                    $this->userLogs("{$params->resource}", $params->record_id, null, "<strong>{$params->userData->name}</strong> {$action} this record from the system.", $params->userData->user_id);
+                }
             }
 
             // return the success response
