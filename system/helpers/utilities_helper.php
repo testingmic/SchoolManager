@@ -72,7 +72,7 @@ function course_renderer($course, $courseObject = null, $hasUpdate = false) {
                             <span class="float-left bold">Code</span>
                             <span class="float-right text-muted">'.$course->course_code.'</span>
                         </p>
-                        <p class="clearfix">
+                        <p class="clearfix hidden">
                             <span class="float-left bold">Credit Hours</span>
                             <span class="float-right text-muted">'.$course->credit_hours.'</span>
                         </p>
