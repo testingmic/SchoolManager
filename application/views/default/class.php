@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser, $defaultCurrency;
+global $myClass, $SITEURL, $defaultUser, $defaultCurrency, $isWardParent, $isTeacher, $isAdmin, $isTutor;
 
 // initial variables
 $appName = $myClass->appName;
@@ -76,6 +76,7 @@ if(!empty($item_id)) {
         // student update permissions
         $students = "";
         $studentUpdate = $accessObject->hasAccess("update", "student");
+        $courseUpdate = $accessObject->hasAccess("update", "course");
 
         // load the class timetable
         $timetable = load_class("timetable", "controllers", $item_param)->class_timetable($data->item_id, $clientId);
@@ -368,38 +369,26 @@ if(!empty($item_id)) {
                             // if the class list is not empty
                             if(!empty($data->class_courses_list)) {
                                 
+                                $permissionsObject = [
+                                    'isWardParent' => $isWardParent,
+                                    'isTeacher' => $isTeacher,
+                                    'isAdmin' => $isAdmin,
+                                    'myClass' => $myClass,
+                                    'isTutor' => $isTutor,
+                                    'item_type' => 'course',
+                                    'defaultUser' => $defaultUser
+                                ];
+
                                 // loop throught the classes list
                                 foreach($data->class_courses_list as $course) {
-                                    $response->html .= '
-                                    <div class="col-lg-6 col-md-6 p-2">
-                                        <div class="card">
-                                            <div class="card-body pr-2 pl-2 pt-0 pb-0">
-                                                <div class="pb-0 pt-3">
-                                                    <p class="clearfix mb-2">
-                                                        <span class="float-left bold">Name</span>
-                                                        <span class="float-right text-muted">
-                                                            <span class="user_name" '.(!$isWardParent && ($isTutor && in_array($course->id, $defaultUser->course_ids)) ? 'onclick="load(\'course/'.$course->item_id.'\');"' : null).'>
-                                                                '.($isAdmin ? "<a href='{$myClass->baseUrl}course/{$course->id}/lessons'>" : null).'
-                                                                    '.$course->name.'
-                                                                '.($isAdmin ? "</a>" : null).'
-                                                            </span>
-                                                        </span>
-                                                    </p>
-                                                    <p class="clearfix">
-                                                        <span class="float-left bold">Code</span>
-                                                        <span class="float-right text-muted">'.$course->course_code.'</span>
-                                                    </p>
-                                                    <p class="clearfix">
-                                                        <span class="float-left bold">Credit Hours</span>
-                                                        <span class="float-right text-muted">'.$course->credit_hours.'</span>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>';
+                                    $permissionsObject['user_id'] = $course->id;
+                                    $response->html .= course_renderer($course, $permissionsObject, $courseUpdate);
                                 }
                             } else {
-                                $response->html .= '<div class="col-lg-12 font-italic">Sorry there are no subjects assigned to this class.</div>';
+                                // if the course listing is empty
+                                $response->html .= "<div class='col-lg-12'>";
+                                $response->html .= no_record_found("No subjects recorded", "No subjects have been recorded for this staff member yet.", null, "Subjects", false, "fa fa-book", false);
+                                $response->html .= "</div>";
                             }
                             
                             $response->html .= ' 

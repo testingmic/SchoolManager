@@ -298,6 +298,8 @@ class Records extends Myschoolgh {
                 // update the database record
                 $this->db->query("UPDATE courses SET course_tutor = '{$tutors}' WHERE {$featured["where"]} LIMIT 1");
 
+                $action = "updated";
+
             } else {
 
                 // update the database record

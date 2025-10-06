@@ -71,6 +71,7 @@ if(empty($user_id)) {
         $updateIncident = $accessObject->hasAccess("update", "incident");
         $deleteIncident = $accessObject->hasAccess("delete", "incident");
         $modifySalaryStructure = $accessObject->hasAccess("modify_payroll", "payslip");
+        $courseUpdate = $accessObject->hasAccess("update", "course");
 
         // has the right to update the user permissions
         $viewPermission = $accessObject->hasAccess("view", "permissions");
@@ -104,27 +105,27 @@ if(empty($user_id)) {
             // Subjects List
             if(!empty($courses_list["data"])) {
 
-                $courseDelete = $accessObject->hasAccess("delete", "course");
-                $courseUpdate = $accessObject->hasAccess("update", "course");
+                $permissionsObject = [
+                    'isWardParent' => $isWardParent,
+                    'isTeacher' => $isTeacher,
+                    'isAdmin' => $isAdmin,
+                    'myClass' => $myClass,
+                    'isTutor' => $isTutor,
+                    'item_type' => "teacher_course",
+                    'user_id' => $user_id,
+                    'defaultUser' => $defaultUser
+                ];
 
                 // loop through the courses that the teacher handles
                 foreach($courses_list["data"] as $key => $each) {
-
-                    $action = "<a href='#' onclick='return load(\"course/{$each->id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
-
-                    if($courseDelete) {
-                        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"teacher_course\", \"delete\", \"{$user_id}\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
-                    }
-
-                    $course_listing .= "<tr data-row_id=\"{$each->id}\">";
-                    $course_listing .= "<td><span class='user_name' onclick='load(\"course/{$each->item_id}\")'>{$each->name}</span></td>";
-                    $course_listing .= "<td>";
-                    foreach($each->class_list as $class) {
-                        $course_listing .= "<p class='mb-0 pb-0'><span class='user_name' ".(!$isWardParent ? 'onclick="load(\'class/'.$class->id.'\');"' : null).">".$class->name."</span></p>";
-                    }
-                    $course_listing .= "</td><td class='text-center'>{$action}</td>";
-                    $course_listing .= "</tr>";
+                    $course_listing .= course_renderer($each, $permissionsObject, $courseUpdate);
                 }
+            }
+            // if the course listing is empty
+            if(empty($course_listing)) {
+                $course_listing = "<div class='col-lg-12'>";
+                $course_listing .= no_record_found("No subjects recorded", "No subjects have been recorded for this staff member yet.", null, "Subjects", false, "fa fa-book", false);
+                $course_listing .= "</div>";
             }
         }
 
@@ -553,7 +554,7 @@ if(empty($user_id)) {
                             '.(
                             $isTeacher ? '
                                 <div class="tab-pane fade '.($url_link === "subjects" ? "show active" : null).'" id="course_list" role="tabpanel" aria-labelledby="course_list-tab2">
-                                    <div class="d-flex justify-content-between mb-4">
+                                    <div class="d-flex justify-content-between mb-2">
                                         <div class="mb-2"></div>
                                         '.($addCourse ? '
                                             <div>
@@ -561,17 +562,8 @@ if(empty($user_id)) {
                                             </div>' 
                                         : null ).'
                                     </div>
-                                    <div class="table-responsive">
-                                        <table data-empty="" class="table table-bordered table-sm table-striped raw_datatable">
-                                            <thead>
-                                                <tr>
-                                                    <th>Subject Title</th>
-                                                    <th width="30%">Class</th>
-                                                    <th class="text-center" width="15%"></th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>'.$course_listing.'</tbody>
-                                        </table>
+                                    <div class="row">
+                                        '.$course_listing.'
                                     </div>
                                 </div>' : null
                             ).'
