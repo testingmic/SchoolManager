@@ -144,62 +144,62 @@ if(!empty($user_id)) {
                         <div class="py-2">
                             <p class="clearfix">
                                 <span class="float-left">Occupation</span>
-                                <span class="float-right text-muted">'.$data->occupation.'</span>
+                                <span class="float-right text-muted">'.(!empty($data->occupation) ? $data->occupation : "N/A").'</span>
                             </p>
                             '.(
                                 !empty($data->employer) ? '
                                 <p class="clearfix">
                                     <span class="float-left">Employer</span>
-                                    <span class="float-right text-muted">'.$data->employer.'</span>
+                                    <span class="float-right text-muted">'.(!empty($data->employer) ? $data->employer : "N/A").'</span>
                                 </p>' : null
                             ).'
                             '.(
                                 !empty($data->employer) ? '
                                 <p class="clearfix">
                                     <span class="float-left">Date of Birth</span>
-                                    <span class="float-right text-muted">'.$data->date_of_birth.'</span>
+                                    <span class="float-right text-muted">'.(!empty($data->date_of_birth) ? $data->date_of_birth : "N/A").'</span>
                                 </p>' : null
                             ).'
                             '.(
                                 !empty($data->blood_group_name) ? '
                                 <p class="clearfix">
                                     <span class="float-left">Blood Group</span>
-                                    <span class="float-right text-muted">'.$data->blood_group_name.'</span>
+                                    <span class="float-right text-muted">'.(!empty($data->blood_group_name) ? $data->blood_group_name : "N/A").'</span>
                                 </p>' : null
                             ).'
                             <p class="clearfix">
                                 <span class="float-left">Gender</span>
-                                <span class="float-right text-muted">'.$data->gender.'</span>
+                                <span class="float-right text-muted">'.(!empty($data->gender) ? $data->gender : "N/A").'</span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Primary Contact</span>
-                                <span class="float-right text-muted">'.$data->phone_number.'</span>
+                                <span class="float-right text-muted">'.(!empty($data->phone_number) ? $data->phone_number : "N/A").'</span>
                             </p>
                             '.($data->phone_number_2 ? 
                                 '<p class="clearfix">
                                     <span class="float-left">Secondary Contact</span>
-                                    <span class="float-right text-muted">'.$data->phone_number_2.'</span>
+                                    <span class="float-right text-muted">'.(!empty($data->phone_number_2) ? $data->phone_number_2 : "N/A").'</span>
                                 </p>' : null
                             ).'
                             '.(
                                 !empty($data->email) ? '
                                 <p class="clearfix">
                                     <span class="float-left">E-Mail</span>
-                                    <span class="float-right text-muted">'.$data->email.'</span>
+                                    <span class="float-right text-muted">'.(!empty($data->email) ? $data->email : "N/A").'</span>
                                 </p>' : null
                             ).'
                             '.(
                                 !empty($data->residence) ? '
                                 <p class="clearfix">
                                     <span class="float-left">Residence</span>
-                                    <span class="float-right text-muted">'.$data->residence.'</span>
+                                    <span class="float-right text-muted">'.(!empty($data->residence) ? $data->residence : "N/A").'</span>
                                 </p>' : null
                             ).'
                             '.(
                                 !empty($data->country_name) ? '
                                 <p class="clearfix">
                                     <span class="float-left">Country</span>
-                                    <span class="float-right text-muted">'.$data->country_name.'</span>
+                                    <span class="float-right text-muted">'.(!empty($data->country_name) ? $data->country_name : "N/A").'</span>
                                 </p>' : null
                             ).'
                             '.$myClass->qr_code_renderer("parent", $data->user_row_id, $clientId, $data->name).'

@@ -476,7 +476,9 @@ if(!empty($user_id)) {
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Student Type</span>
-                                <span class="float-right badge badge-'.($data->student_type == "Weekend" ? "danger" : "success").'">'.$data->student_type.'</span>
+                                <span class="float-right badge badge-'.($data->student_type == "Weekend" ? "danger" : "success").'">
+                                    '.(!empty($data->student_type) ? $data->student_type : "Weekday").'
+                                </span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Gender</span>

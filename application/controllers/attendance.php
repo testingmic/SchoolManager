@@ -369,9 +369,10 @@ class Attendance extends Myschoolgh {
 
         // confirm if the days range list is an array
         $array_list["days_range_list"] = is_array($array_list["days_range_list"]) ? $array_list["days_range_list"] : [];
-        
+        $totalDays = !empty($array_list["days_range_list"]) ? count($array_list["days_range_list"]) : 0;
+
         // width for each column
-        $width = number_format((85 / count($array_list["days_range_list"])), 2);
+        $width = $totalDays > 0 ? number_format((85 / $totalDays), 2) : 100;
 
         // join the names list
         $names_array = [];
@@ -486,6 +487,7 @@ class Attendance extends Myschoolgh {
                 $table_content .= "<tr> \n";
                 $table_content .= "<th ".($isDownloadable ? "style='border: 1px solid #dee2e6;'" : "")." width=\"10%\" align=\"left\">".($isDownloadable ? "<strong>Name</strong>" : "Student Name")."</th>\n";
                 foreach($data as $key => $value) {
+                    if(!is_array($value)) continue;
                     $new_array_list[$value["record"]["date"]["raw"]] = rearrange_list($value["record"]["users_data"]);
                     $table_content .= "<th ".($isDownloadable ? "style='font-size:12px;border: 1px solid #dee2e6;'" : "")." width=\"{$width}%\" align=\"center\">
                             <strong>".strtoupper($value["record"]["date"]["day"])."</strong>
