@@ -60,6 +60,12 @@ body .btn {
     color: #fff !important;
 }
 
+.btn-success:hover {
+    background-color: #0c5a19 !important;
+    border: solid 1px #0c5a19 !important;
+    color: #fff !important;
+}
+
 .h-98 {
     height: 98%!important;
 }

@@ -172,7 +172,7 @@ if(!empty($delegate_id)) {
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade '.(in_array($url_link, ["about", "view"]) || empty($url_link) ? "show active" : null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
                             '.($data ? "
-                                <div class='mb-3'>
+                                <div>
                                     <div class='card-body p-2 pl-0'>
                                         {$guardians_list}
                                     </div>
@@ -181,7 +181,7 @@ if(!empty($delegate_id)) {
                         </div>
                         <div class="tab-pane fade '.($url_link === "delegates" ? "show active" : null).'" id="delegates" role="tabpanel" aria-labelledby="home-tab2">
                             '.($data ? "
-                                <div class='mb-3'>
+                                <div>
                                     <div class='card-body p-2 pl-0'>
                                         {$students_list}
                                     </div>

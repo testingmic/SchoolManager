@@ -139,10 +139,10 @@ foreach($statistics as $key => $each) {
     $statistics_card .= '
     <div class="col-md-3">
         <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-blue">
-            <div class="card-body pt-3 pl-3 pr-3 pb-2 card-type-3">
+            <div class="card-body pt-3 pl-3 pr-3 card-type-3">
                 <div class="row">
                     <div class="col">
-                        <h6 class="font-14 text-uppercase font-bold mb-0">'.$each['label'].'</h6>
+                        <h6 class="font-14 text-uppercase font-bold">'.$each['label'].'</h6>
                         <span class="font-bold text-primary font-20 mb-0">'.$each['count'].'</span>
                     </div>
                 </div>
@@ -206,7 +206,10 @@ $response->html = '
                     '.$statistics_card.'
                     <div class="col-md-3 text-right">
                         '.($hasAdd ? '
-                            <a class="btn btn-outline-success" href="'.$baseUrl.'class_add"><i class="fas fa-graduation-cap"></i> Create New Class</a>' : ''
+                            <a class="btn btn-outline-success btn-block" href="'.$baseUrl.'course_add"><i class="fas fa-book"></i> Create New Subject</a>' : ''
+                        ).'
+                        '.($hasAdd ? '
+                            <a class="btn btn-outline-success btn-block" href="'.$baseUrl.'class_add"><i class="fas fa-graduation-cap"></i> Create New Class</a>' : ''
                         ).'
                     </div>
                 </div>

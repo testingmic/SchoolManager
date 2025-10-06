@@ -241,12 +241,12 @@ if(!empty($item_id)) {
                         </div>
                     </div>' : null
                 ).'
-                <div class="card pb-0 stick_to_top">
+                <div class="card pb-0">
                     <div class="card-header">
                         <h4 class="mb-0">CLASS TEACHER</h4>
                     </div>
-                    <div class="card-body pt-0 pb-0">
-                    '.(empty($data->class_teacher_info) ? '<div class="py-4 pt-0 text-center">No Class Teacher Set</div>' : 
+                    <div class="card-body '.(!empty($data->course_tutors) ? "pt-0 pb-0" : "p-2").'">
+                    '.(empty($data->class_teacher_info) ? no_record_found("No Tutors Set", "No tutors have been set for this course.", null, "Tutors", false, "fa fa-user", false) : 
                         '<div class="pb-0 pt-0">
                             <p class="clearfix">
                                 <span class="float-left">Fullname</span>
@@ -265,7 +265,7 @@ if(!empty($item_id)) {
                         </div>' ).'
                     </div>
                 </div>
-                <div class="card pb-0 stick_to_top d-none d-sm-block">
+                <div class="card pb-0 d-none d-sm-block">
                     <div class="card-header">
                         <h4 class="mb-0">CLASS PREFECT</h4>
                     </div>
@@ -330,8 +330,8 @@ if(!empty($item_id)) {
                 ).'
             </div>
             <div class="col-12 col-md-12 col-lg-8">
-                <div class="card stick_to_top">
-                <div class="padding-20">
+                <div class="card">
+                <div class="padding-20 stick_to_top">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
                         <a class="nav-link '.(empty($url_link) || $url_link === "students" ? "active" : null).'" onclick="return appendToUrl(\'students\')" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">Student List</a>

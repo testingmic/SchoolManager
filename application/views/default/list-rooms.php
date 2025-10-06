@@ -77,11 +77,11 @@ $response->html = '
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
-                                        <th width="30%">Name</th>
+                                        <th width="25%">Name</th>
                                         <th>Code</th>
                                         <th>Classes</th>
                                         <th width="15%">Capacity</th>
-                                        <th align="center" width="10%"></th>
+                                        <th align="center" width="13%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$rooms_list.'</tbody>

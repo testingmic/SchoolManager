@@ -283,7 +283,7 @@ if(!empty($item_id)) {
                         </div>
                     </div>
                     <div class="mb-3">
-                        <button onclick="load(\'gradebook/'.$data->item_id.'/grading?class_id='.trim($class_ids_list, ",").'\');" class="btn btn-block btn-outline-success">
+                        <button onclick="load(\'gradebook/'.$data->item_id.'/grading?class_id='.trim($class_ids_list, ",").'\');" class="btn pt-3 pb-3 btn-block btn-outline-success">
                             <i class="fa fa-book-open"></i> GRADEBOOK
                             <span class="badge badge-success float-right">New</span>
                         </button>
@@ -303,7 +303,7 @@ if(!empty($item_id)) {
                     <div class="card-header">
                         <h4 class="mb-0">SUBJECT TUTOR DETAILS</h4>
                     </div>
-                    <div class="card-body pt-0 pb-0">';
+                    <div class="card-body '.(!empty($data->course_tutors) ? "pt-0 pb-0" : "p-2").'">';
                     if(!empty($data->course_tutors)) {
                         foreach($data->course_tutors as $tutor) {
                             $response->html .= '
@@ -322,8 +322,9 @@ if(!empty($item_id)) {
                                 </p>
                             </div>';
                         }
+                    } else {
+                        $response->html .= no_record_found("No Tutors Set", "No tutors have been set for this course.", null, "Tutors", false, "fa fa-user", false);
                     }
-                $response->html .= empty($data->course_tutors) ? "<div class='p-3 text-center'>Subject Tutors Not Set</div>" : null;
                 $response->html .= '</div>
                 </div>
             </div>';
