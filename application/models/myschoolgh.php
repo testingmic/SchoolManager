@@ -120,6 +120,83 @@ class Myschoolgh extends Models {
 	}
 
 	/**
+	 * List the tutorials
+	 * 
+	 * @return Array
+	 */
+	public function tutorials_list($item_param) {
+
+		global $isSupport;
+
+		// get the list of all the templates
+		$support_array = load_class("support", "controllers", $item_param)->knowledgebase_list($item_param)["data"];
+		// init variables
+		$count = 0;
+		$knowledge_base_list = "";
+
+		// loop through the templates list
+		if((count($support_array) > 1) || empty($knowledge_id)) {
+
+			// if the support array is not empty
+			if(!empty($support_array)) {
+				// loop through the list
+				foreach($support_array as $key => $ticket) {
+					$count++;
+
+					// view button
+					$ticket->section = str_ireplace("_", " ", $ticket->section);
+
+					// if the record is still pending
+					$action = "{$item_param->baseUrl}knowledgebase/item/{$ticket->item_id}";
+
+					$ticket->content = limit_words($ticket->content, 80, ["strong", "p", "br"]);
+
+					$knowledge_base_list .= "
+					<div data-item_function='filter' data-section_title=\"{$ticket->section}\" data-subject_title=\"{$ticket->subject}\" class='{$item_param->width} col-md-6'>
+						<div class='card'>
+							<div class='card-body p-0'>
+								<div class='card-header pb-0'>
+									<h3 class='font-20' title='{$ticket->subject}'>
+										<a class=\"text-success\" href=\"{$action}\">
+											{$ticket->subject}
+										</a>
+									</h3>
+								</div>
+								<div class='card-body pt-2 mb-1' style='height:325px;overflow:hidden;'>
+									".(!empty($ticket->video_link) ? "<div>".iframe_holder($ticket->video_link)."</div>" : null)."
+								</div>
+								<div class='card-footer pt-0 mt-3' align='right'>
+									<a class='btn btn-outline-success' href=\"{$action}\">
+										<i class='fa fa-book-open'></i> Watch Video
+									</a>
+									".($isSupport ? 
+										"<a class='btn btn-outline-primary' href=\"{$item_param->baseUrl}article/modify/{$ticket->item_id}\">
+											<i class='fa fa-edit'></i> Modify
+										</a>"
+									: null)."
+								</div>
+							</div>
+						</div>
+					</div>";
+				}
+			} else {
+				// set the default variable
+				$knowledge_base_list = "
+				<div class='col-lg-12 text-center'>
+					<div class='card'>
+						<div class='card-body text-danger'>
+							Sorry! No article has been uploaded the moment. Please check back later.
+						</div>
+					</div>
+				</div>";
+			}
+
+		}
+
+		return $knowledge_base_list;
+	}
+
+	/**
 	* menu_content_array
 	* 
 	* @return Array

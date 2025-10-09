@@ -3,6 +3,7 @@ var client_auto_save, disabled_inputs = new Array(),
     csvContent = new Array(),
     dictionary_div = $(`div[id="dictionary_query_results"]`),
     quick_search_loader = $(`div[id="quick_search_loader"]`),
+    tutorials_div = $(`div[id="tutorials_query_results"]`),
     current_focused_user_id, current_focused_msg_id, users_array_list = {};
 var initDashboard = () => {}
 
@@ -652,18 +653,30 @@ $(`div[class~="settingSidebar"] input[name="dictionary"]`).on("keyup", function(
 $(`div[class~="settingSidebar"] div[class~="quick_search"] div`).on("click", function() {
     let item = $(this);
     let request = item.attr("data-content");
-    if(request !== "dictionary") {
+    if(request == "system") {
         $(`div[data-content="system"]`).addClass("selected");
         $(`div[data-content="dictionary"]`).removeClass("selected");
+        $(`div[data-content="tutorials"]`).removeClass("selected");
         $(`h6[data-item="title"]`).html("Quick System Search");
         $(`div[id="system_query_results"], div[class~="system_content"]`).removeClass("hidden");
         $(`div[id="dictionary_query_results"], div[class~="dictionary_content"]`).addClass("hidden");
-    } else {
+        $(`div[id="tutorials_query_results"], div[class~="tutorials_content"]`).addClass("hidden");
+    } else if(request == "dictionary") {
         $(`div[data-content="system"]`).removeClass("selected");
         $(`div[data-content="dictionary"]`).addClass("selected");
+        $(`div[data-content="tutorials"]`).removeClass("selected");
         $(`h6[data-item="title"]`).html("Onboard Dictionary");
         $(`div[id="system_query_results"], div[class~="system_content"]`).addClass("hidden");
         $(`div[id="dictionary_query_results"], div[class~="dictionary_content"]`).removeClass("hidden");
+        $(`div[id="tutorials_query_results"], div[class~="tutorials_content"]`).addClass("hidden");
+    } else if(request == "tutorials") {
+        $(`div[data-content="system"]`).removeClass("selected");
+        $(`div[data-content="dictionary"]`).removeClass("selected");
+        $(`div[data-content="tutorials"]`).addClass("selected");
+        $(`h6[data-item="title"]`).html("Onboard Tutorials");
+        $(`div[id="system_query_results"], div[class~="system_content"]`).addClass("hidden");
+        $(`div[id="dictionary_query_results"], div[class~="dictionary_content"]`).addClass("hidden");
+        $(`div[id="tutorials_query_results"], div[class~="tutorials_content"]`).removeClass("hidden");
     }
     $(`div[class~="settingSidebar"] input[name="${request}"]`).val('').focus();
 });

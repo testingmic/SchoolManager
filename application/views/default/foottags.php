@@ -12,6 +12,16 @@
         $accountObj = load_class("account", "controllers", (object) ["client_data" => $defaultUser->client]);
 
         $userQrCode = $myClass->qr_code_renderer($defaultUser->user_type, $defaultUser->user_row_id, $defaultUser->client_id, $defaultUser->name, true);
+        
+        // set the parameters
+        $item_param = (object) [
+            "baseUrl" => $baseUrl,
+            "width" => "col-lg-12",
+            "clientId" => $userPrefs->clientId,
+            "client_data" => $defaultUser->client
+        ];
+        // get the list of all the templates
+        $knowledge_base_list = $myClass->tutorials_list($item_param);
         ?>
         <?php if($isAdminAccountant || $isSupport) { ?>
         <footer class="main-footer">
@@ -137,13 +147,18 @@
                         <?php if($isEmployee || $isTutor || $isAdminAccountant) { ?>
                         <div class="quick_search">
                             <?php if(!$isEmployee) { ?>
-                            <div data-content="system" class="col-sm-6 selected button">
+                            <div data-content="system" class="<?= $isAdminAccountant ? "col-sm-4" : "col-sm-6" ?> border-right border-white selected button">
                                 Search
                             </div>
                             <?php } ?>
-                            <div data-content="dictionary" class="<?= $isEmployee ? "col-sm-12" : "col-sm-6" ?> button">
+                            <div data-content="dictionary" class="<?= $isEmployee ? "col-sm-12" : ($isAdminAccountant ? "col-sm-4" : "col-sm-6") ?> border-right border-white button">
                                 Dictionary
                             </div>
+                            <?php if($isAdminAccountant) { ?>
+                                <div data-content="tutorials" class="col-sm-4 border-right border-white button">
+                                    Tutorials
+                                </div>
+                            <?php } ?>
                         </div>
                         <?php } ?>
                         <div class="p-15 border-bottom">
@@ -182,6 +197,13 @@
                             </div>
                             <div id="dictionary_query_results"></div>
                             <div id="system_query_results"></div>
+                            <div id="tutorials_query_results">
+                                <div class="tutorials_content hidden">
+                                    <div class="row">
+                                        <?= $knowledge_base_list ?>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

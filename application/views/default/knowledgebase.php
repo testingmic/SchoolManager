@@ -25,7 +25,9 @@ $knowledge_id = (confirm_url_id(1, "item") && confirm_url_id(2)) ? $SITEURL[2] :
 
 // set the parameters
 $item_param = (object) [
+    "baseUrl" => $baseUrl,
     "clientId" => $clientId,
+    "width" => "col-lg-4",
     "knowledge_id" => $knowledge_id,
     "client_data" => $defaultUser->client
 ];
@@ -41,77 +43,7 @@ $support_array = load_class("support", "controllers", $item_param)->knowledgebas
 $count = 0;
 $item_found = false;
 $isPermitted = false;
-$knowledge_base_list = "";
-$knowledge_base_table_list = "";
-
-// loop through the templates list
-if((count($support_array) > 1) || empty($knowledge_id)) {
-
-    // if the support array is not empty
-    if(!empty($support_array)) {
-        // loop through the list
-        foreach($support_array as $key => $ticket) {
-            $count++;
-
-            // view button
-            $checkbox = "";
-            $ticket->section = str_ireplace("_", " ", $ticket->section);
-
-            // if the record is still pending
-            $action = "{$baseUrl}knowledgebase/item/{$ticket->item_id}";
-
-            // $knowledge_base_table_list .= "<tr class=\"cursor clickable-row\" data-href=\"{$action}\" data-row_id=\"{$ticket->id}\">";
-            // $knowledge_base_table_list .= "<td>{$ticket->id}</td>";
-            // $knowledge_base_table_list .= "<td><a class=\"text-success\" href=\"{$action}\">{$ticket->subject}</a></td>";
-            // $knowledge_base_table_list .= "<td>{$ticket->section}</td>";
-            // $knowledge_base_table_list .= "<td>".count($ticket->replies)."</td>";
-            // $knowledge_base_table_list .= "<td>".date("jS M Y h:iA", strtotime($ticket->date_created))."</td>";
-            // $knowledge_base_table_list .= "</tr>";
-            
-            $ticket->content = limit_words($ticket->content, 80, ["strong", "p", "br"]);
-
-            $knowledge_base_list .= "
-            <div data-item_function='filter' data-section_title=\"{$ticket->section}\" data-subject_title=\"{$ticket->subject}\" class='col-lg-4 col-md-6'>
-                <div class='card'>
-                    <div class='card-body p-0'>
-                        <div class='card-header pb-0'>
-                            <h3 class='font-20' title='{$ticket->subject}'>
-                                <a class=\"text-success\" href=\"{$action}\">
-                                    {$ticket->subject}
-                                </a>
-                            </h3>
-                        </div>
-                        <div class='card-body mb-1' style='height:350px;overflow:hidden;'>
-                            ".($isSupport ? $ticket->content : auto_link($ticket->content, "url"))."
-                            ".(!empty($ticket->video_link) ? "<div class='mt-2'>".iframe_holder($ticket->video_link)."</div>" : null)."
-                        </div>
-                        <div class='card-footer pt-0 mt-3' align='right'>
-                            <a class='btn btn-outline-success' href=\"{$action}\">
-                                <i class='fa fa-book-open'></i> Read Article
-                            </a>
-                            ".($isSupport ? 
-                                "<a class='btn btn-outline-primary' href=\"{$baseUrl}article/modify/{$ticket->item_id}\">
-                                    <i class='fa fa-edit'></i> Modify
-                                </a>"
-                             : null)."
-                        </div>
-                    </div>
-                </div>
-            </div>";
-        }
-    } else {
-        // set the default variable
-        $knowledge_base_list = "
-        <div class='col-lg-12 text-center'>
-            <div class='card'>
-                <div class='card-body text-danger'>
-                    Sorry! No article has been uploaded the moment. Please check back later.
-                </div>
-            </div>
-        </div>";
-    }
-
-}
+$knowledge_base_list = $myClass->tutorials_list($item_param);
 
 // else if the support ticket was parsed and the item is not empty
 if($knowledge_id && !empty($support_array)) {
@@ -188,24 +120,6 @@ $response->html = '
                         </div>
                     </div>
                     '.$knowledge_base_list.'
-                </div>
-                <div class="card hidden">
-                    <div class="card-body">
-                        <div class="table-responsive table-student_staff_list">
-                            <table data-empty="" class="table table-bordered table-sm table-striped raw_datatable">
-                                <thead>
-                                    <tr>
-                                        <th width="8%" class="text-center">#</th>
-                                        <th>Subject</th>
-                                        <th width="20%">Section</th>
-                                        <th width="13%">Replies Count</th>
-                                        <th width="15%">Last Updated</th>
-                                    </tr>
-                                </thead>
-                                <tbody>'.$knowledge_base_table_list.'</tbody>
-                            </table>
-                        </div>
-                    </div>
                 </div>';
             } else {
             $response->html .= '
