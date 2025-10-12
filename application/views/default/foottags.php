@@ -17,7 +17,7 @@
         $item_param = (object) [
             "baseUrl" => $baseUrl,
             "width" => "col-lg-12",
-            "clientId" => $userPrefs->clientId,
+            "clientId" => $userPrefs->clientId ?? $defaultUser->client_id,
             "client_data" => $defaultUser->client
         ];
         // get the list of all the templates

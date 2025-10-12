@@ -194,6 +194,6 @@ if ($(`.all-buttons`).length) {
         } else {
             $(this).text("Show Calculator");
         }
-        $(`div[class="calculator"] div[class~="display"], div[class="calculator"] div[class~="all-buttons"]`).toggleClass("hidden");
+        // $(`div[class="calculator"] div[class~="display"], div[class="calculator"] div[class~="all-buttons"]`).toggleClass("hidden");
     });
 }

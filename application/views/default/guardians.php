@@ -99,6 +99,7 @@ foreach($guardian_list as $kkey => $each) {
         </div>
     </td>";
     $guardians .= "<td>".(!empty($each->email) ? strtolower($each->email) : null)."</td>";
+    $guardians .= "<td>{$each->address}</td>";
     $guardians .= "<td>{$each->phone_number}</td>";
     $guardians .= "<td>{$wards_list}</td>";
     $guardians .= "<td width='13%' class='text-center'>{$action}</td>";
@@ -138,6 +139,7 @@ $response->html = '
                                         <th width="5%" class="text-center">#</th>
                                         <th>Guardian Name</th>
                                         <th>Email</th>
+                                        <th>Address</th>
                                         <th>Contact</th>
                                         <th width="25%">Wards</th>
                                         <th width="13%"></th>

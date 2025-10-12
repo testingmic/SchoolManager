@@ -144,7 +144,7 @@ class Myschoolgh extends Models {
 					$count++;
 
 					// view button
-					$ticket->section = str_ireplace("_", " ", $ticket->section);
+					$ticket->section = !empty($ticket->section) ? str_ireplace("_", " ", $ticket->section) : null;
 
 					// if the record is still pending
 					$action = "{$item_param->baseUrl}knowledgebase/item/{$ticket->item_id}";

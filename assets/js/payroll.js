@@ -76,6 +76,10 @@ var recalculateTotal = () => {
     let deductions = parseInt($(`div[class~="summary-list"] input[name="total_deductions"]`).val());
     let basic_salary = parseInt($(`div[class~="summary-list"] input[name="basic_salary"]`).val());
 
+    basic_salary = isNaN(basic_salary) ? 0 : basic_salary;
+    allowance = isNaN(allowance) ? 0 : allowance;
+    deductions = isNaN(deductions) ? 0 : deductions;
+
     let grandTotal = (basic_salary + allowance - deductions);
 
     $(`div[class~="summary-list"] input[name="net_salary"]`).val(grandTotal);
@@ -86,6 +90,7 @@ var recalculateAllowance = () => {
     $.each($(`div[class~="allowances-list"] div[class~="initial"]`), function(i, e) {
         allowance += parseInt($(`input[id^="allowance_amount_${$(this).attr('data-row')}"]`).val());
     });
+    allowance = isNaN(allowance) ? 0 : allowance;
     $(`div[class~="summary-list"] input[name="total_allowances"]`).val(allowance);
 
     recalculateTotal();
@@ -157,7 +162,7 @@ var save_staff_allowances = () => {
                 if (response.code === 200) {
                     s_icon = "success";
                     setTimeout(() => {
-                        loadPage(`${baseUrl}payroll-view/${employee_id}`);
+                        loadPage(`${baseUrl}payroll-view/${employee_id}/salary`);
                     }, refresh_seconds);
                 }
                 swal({

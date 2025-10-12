@@ -6223,6 +6223,7 @@ class Forms extends Myschoolgh {
                         </div>
                         <div class="modal-body">
                             <div class="row">
+                                '.forms_header("Bus Information").'
                                 <div class="col-md-8">
                                     <div class="form-group">
                                         <label for="name">Brand Name <span class="required">*</span></label>
@@ -6253,6 +6254,7 @@ class Forms extends Myschoolgh {
                                         <input type="text" maxlength="20" name="year_of_purchase" class="form-control datepicker">
                                     </div>
                                 </div>
+                                '.forms_header("Insurance Information").'
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="insurance_company">Insurance Company <span class="required">*</span></label>
@@ -6271,7 +6273,10 @@ class Forms extends Myschoolgh {
                                         <input type="text" maxlength="12" name="insurance_date" class="form-control datepicker">
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <!-- '.forms_header("Bus Route").' -->
+
+                                '.forms_header("Driver Information").'
+                                <div class="col-md-5">
                                     <div class="form-group">
                                         <label for="driver_id">Driver Name <span class="required">*</span></label>
                                         <select data-width="100%" class="form-control selectpicker" name="driver_id" id="driver_id">
@@ -6282,7 +6287,7 @@ class Forms extends Myschoolgh {
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-12">
+                                <div class="col-md-7">
                                     <div class="form-group">
                                         <label for="description">Description</label>
                                         <textarea placeholder="" maxlength="255" name="description" id="description" rows="5" class="form-control"></textarea>

@@ -286,7 +286,8 @@ class Payroll extends Myschoolgh {
         }
 
         return [
-            "data" => $data
+            "data" => $data,
+            "additional" => ["clear" => true, "href" => "{$this->baseUrl}payroll-view/{$params->employee_id}/salary"]
         ];
     }
 

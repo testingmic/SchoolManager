@@ -55,6 +55,8 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
             $response->html = page_not_found();
         } else {
 
+            $response->array_stream['url_link'] = "payroll-view/{$userId}/";
+
             // set the first key
             $data = $data["data"][0];
 
@@ -141,7 +143,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                         <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                             <div class="card-body text-center bg-gradient-to-br from-amber-500 to-amber-300 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="font-18 text-white">STAFF ID</div>
-                                <div class="font-22 font-weight-bold text-uppercase text-white">'.$data->unique_id.'</div>
+                                <div class="font-20 font-weight-bold text-uppercase text-white">'.$data->unique_id.'</div>
                             </div>
                         </div>
                     </div>
@@ -149,7 +151,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                         <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                             <div class="card-body text-center bg-gradient-to-br from-pink-500 to-pink-300 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="font-18 text-white">APPOINTMENT DATE</div>
-                                <div class="font-22 font-weight-bold text-uppercase text-white">
+                                <div class="font-20 font-weight-bold text-uppercase text-white">
                                     '.($data->enrollment_date ? $data->enrollment_date : '-' ).'
                                 </div>
                             </div>
@@ -159,7 +161,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                         <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                             <div class="card-body text-center bg-gradient-to-br pr-2 pl-2 from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="font-18 text-white">POSITION</div>
-                                <div class="font-22 font-weight-bold text-uppercase text-white">'.($data->position ? $data->position : '-' ).'</div>
+                                <div class="font-20 font-weight-bold text-uppercase text-white">'.($data->position ? $data->position : '-' ).'</div>
                             </div>
                         </div>
                     </div>
@@ -167,7 +169,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                         <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                             <div class="card-body text-center bg-gradient-to-br from-green-500 to-green-300 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="font-18 text-white">DEPARTMENT</div>
-                                <div class="font-22 font-weight-bold text-uppercase text-white">
+                                <div class="font-20 font-weight-bold text-uppercase text-white">
                                     '.($data->section_name ? $data->section_name : '-' ).'
                                 </div>
                             </div>
@@ -227,15 +229,15 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                             <div class="padding-20">
                                 <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                     <li class="nav-item">
-                                        <a class="nav-link active" id="bank_details-tab2" data-toggle="tab" href="#bank_details" role="tab" aria-selected="false">
-                                            Bank & Employee Information
+                                        <a class="nav-link active" onclick="return appendToUrl(\'bank_details\')" id="bank_details-tab2" data-toggle="tab" href="#bank_details" role="tab" aria-selected="false">
+                                            Bank Information
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="allowances-tab2" data-toggle="tab" href="#allowances" role="tab" aria-selected="true">Allowances</a>
+                                        <a class="nav-link" id="allowances-tab2" onclick="return appendToUrl(\'salary\')" data-toggle="tab" href="#allowances" role="tab" aria-selected="true">Salary Structure</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="payslips-tab2" data-toggle="tab" href="#payslips" role="tab" aria-selected="true">Payslips</a>
+                                        <a class="nav-link" id="payslips-tab2" onclick="return appendToUrl(\'payslips\')" data-toggle="tab" href="#payslips" role="tab" aria-selected="true">Payslips</a>
                                     </li>
                                 </ul>
                                 <div class="tab-content tab-bordered" id="myTab3Content">
@@ -244,7 +246,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                         '.$payroll_form["bank_detail"].'
                                         
                                         <div class="row">
-                                        '.div_labels("EMPLOYEE INFORMATION").'
+                                        '.div_labels("ADDITIONAL INFORMATION").'
                                             <div class="col-lg-6">
                                                 <div class="font-14 text-uppercase">
                                                     <div class="font-14 text-uppercase mt-0 mb-2 font-weight-bold mb-0">EXPECTED DAYS</div>
