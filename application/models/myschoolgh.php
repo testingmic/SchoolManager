@@ -108,6 +108,7 @@ class Myschoolgh extends Models {
 		
 		// prepare and execute the statement
 		$fix[] = ("ALTER TABLE `accounts_transaction` ADD COLUMN `assign_to_object` VARCHAR(255) DEFAULT NULL;");
+		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `is_statutory` VARCHAR(10) DEFAULT 'No';");
 
 		foreach($fix as $stmt) {
 			try {

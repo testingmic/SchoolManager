@@ -5073,7 +5073,7 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
                 '.div_labels("ALLOWANCES").'
-                <div class="col-lg-10">
+                <div class="col-lg-11">
                     <div width="100%" class="text-right mb-2">
                         <button type="button" class="btn btn-info add-allowance"><i class="fa fa-plus"></i></button>
                     </div>
@@ -5082,7 +5082,7 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
                 '.div_labels("DEDUCTIONS").'
-                <div class="col-lg-10">
+                <div class="col-lg-11">
                     <div width="100%" class="text-right mb-2">
                         <button type="button" class="btn btn-info add-deductions"><i class="fa fa-plus"></i></button>
                     </div>
@@ -5090,7 +5090,7 @@ class Forms extends Myschoolgh {
                         '.$deductions_list.'
                     </div>
                 </div>
-                <div class="col-md-10 text-right">
+                <div class="col-md-11 text-right">
                     <input type="hidden" value="'.$userId.'" id="employee_id" name="employee_id" readonly>
                     <button onclick="return save_staff_allowances(\''.$userId.'\')" type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>

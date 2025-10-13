@@ -79,7 +79,7 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
         <tr data-staff_id='{$each->item_id}' class='{$row_class}'>
             <td>
                 <div style='padding-left: 2.5rem;' class='custom-control cursor col-lg-12 custom-switch switch-primary'>
-                    <input type='checkbox' name='user_ids[]' value='{$each->item_id}' class='custom-control-input cursor' id='user_id_{$each->item_id}' checked='checked'>
+                    <input data-item='staff_checkbox' type='checkbox' name='user_ids[]' value='{$each->item_id}' class='custom-control-input cursor' id='user_id_{$each->item_id}' checked='checked'>
                     <label class='custom-control-label cursor' for='user_id_{$each->item_id}'>{$each->name} 
                         <br><strong>{$each->unique_id}</strong>
                     </label>

@@ -57,10 +57,14 @@ class Payroll extends Myschoolgh {
             $payslipDetails = (bool) (isset($params->payslip_detail) && $params->payslip_detail);
 
             $stmt = $this->db->prepare("
-                SELECT a.*,
-                    (SELECT CONCAT(c.item_id,'|',c.name,'|',c.phone_number,'|',c.email,'|',c.image,'|',c.unique_id,'|',c.last_seen,'|',c.online,'|',c.user_type) FROM users c WHERE c.item_id = a.employee_id LIMIT 1) AS employee_info,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.unique_id,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
+                SELECT a.*, 
+                    u.name AS emp_name, u.phone_number AS emp_phone, u.email AS emp_email, 
+                    u.image AS emp_image, u.unique_id AS emp_unique_id, u.last_seen AS emp_last_seen, 
+                    u.online AS emp_online, u.user_type AS emp_user_type,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.unique_id,'|',b.last_seen,'|',b.online,'|',b.user_type) 
+                        FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM payslips a
+                LEFT JOIN users u ON u.item_id = a.employee_id
                 WHERE {$params->query} AND a.deleted = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
             $stmt->execute([0]);
@@ -69,10 +73,19 @@ class Payroll extends Myschoolgh {
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
                 // loop through the information
-                foreach(["employee_info", "created_by_info"] as $each) {
+                foreach(["created_by_info"] as $each) {
                     // convert the created by string into an object
                     $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","unique_id","last_seen","online","user_type"]);
                 }
+
+                $result->employee_info = (object) [
+                    "name" => $result->emp_name,
+                    "phone_number" => $result->emp_phone,
+                    "email" => $result->emp_email,
+                    "image" => $result->emp_image,
+                    "user_type" => $result->emp_user_type,
+                    "unique_id" => $result->emp_unique_id,
+                ];
 
                 if($payslipDetails) {
                     $detail = $this->pushQuery("a.*, at.name AS allowance_type", 
@@ -158,7 +171,7 @@ class Payroll extends Myschoolgh {
                         'allowance_amount' => $value,
                         'allowance_type' => 'Deduction'
                     ];
-                    $t_allowances += !empty($value) && preg_match("/^[0-9]+$/", $value) ? $value : 0;
+                    $t_deductions += !empty($value) && preg_match("/^[0-9]+$/", $value) ? $value : 0;
                 }
             }
         }
@@ -843,13 +856,22 @@ class Payroll extends Myschoolgh {
         }
 
         if(!$found) {
-            $stmt = $this->db->prepare("INSERT INTO payslips_allowance_types SET default_amount = ?, name = ?, description = ?, type = ?, client_id = ?");
-            $stmt->execute([$params->default_amount ?? null, $params->name, $params->description ?? null, $params->type, $params->clientId]);
+            $stmt = $this->db->prepare("INSERT INTO payslips_allowance_types 
+                SET default_amount = ?, name = ?, description = ?, type = ?, client_id = ?, is_statutory = ?");
+            $stmt->execute([
+                $params->default_amount ?? null, $params->name, $params->description ?? null, 
+                $params->type, $params->clientId, $params->is_statutory ?? 'No'
+            ]);
             // log the user activity
             $this->userLogs("payslip", $this->lastRowId("payslips_allowance_types"), null, "<strong>{$params->userData->name}</strong> added a new {$params->type} record under the payroll section", $params->userId);
         } else {
-            $stmt = $this->db->prepare("UPDATE payslips_allowance_types SET default_amount = ?, name = ?, description = ?, type = ? WHERE id = ? AND client_id = ?");
-            $stmt->execute([$params->default_amount ?? null, $params->name, $params->description ?? null, $params->type, $params->allowance_id, $params->clientId]);
+            $stmt = $this->db->prepare("UPDATE payslips_allowance_types 
+                SET default_amount = ?, name = ?, description = ?, type = ?, is_statutory = ? 
+                WHERE id = ? AND client_id = ?");
+            $stmt->execute([
+                $params->default_amount ?? null, $params->name, $params->description ?? null, 
+                $params->type, $params->is_statutory ?? 'No', $params->allowance_id, $params->clientId
+            ]);
             // log the user activity
             $this->userLogs("payslip", $params->allowance_id, null, "<strong>{$params->userData->name}</strong> updated the {$params->type} record under the payroll section", $params->userId);
         }

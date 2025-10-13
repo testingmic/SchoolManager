@@ -1353,6 +1353,10 @@ h4 {
     }    
 }
 
+.modal-dialog {
+    margin: 5.75rem auto;
+}
+
 .card-preview-front,
 .card-preview-back {
     min-height: 275px;
@@ -2130,7 +2134,7 @@ body.dark table.dataTable img {
         padding: 0px;
     }
     .modal-dialog {
-         margin: 0rem;
+         margin: 4rem auto;
     }
 }
 

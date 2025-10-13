@@ -59,6 +59,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
         $staff_list .= "<td>{$each->name}</td>";
         $staff_list .= "<td><span class='badge badge-{$color[$each->type]}'>{$each->type}</span></td>";
         $staff_list .= "<td>{$each->description}</td>";
+        $staff_list .= "<td>{$each->is_statutory}</td>";
         $staff_list .= "<td class='text-center'>{$action}</td>";
         $staff_list .= "</tr>";
     }
@@ -109,6 +110,16 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
+                                            <label for="is_statutory">Is Statutory</label>
+                                            <select name="is_statutory" data-width="100%" id="is_statutory" class="form-control selectpicker">
+                                                <option value="null">Please select</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
                                             <label for="description">Description</label>
                                             <textarea placeholder="" maxlength="255" name="description" id="description" rows="5" class="form-control"></textarea>
                                         </div>
@@ -142,6 +153,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                             <th>Name</th>
                                             <th>Type</th>
                                             <th>Description</th>
+                                            <th>Is Statutory</th>
                                             <th width="8%" align="center"></th>
                                         </tr>
                                     </thead>

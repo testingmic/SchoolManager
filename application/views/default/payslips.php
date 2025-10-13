@@ -105,9 +105,9 @@ foreach($payslips_array["data"] as $key => $each) {
                     <img class='rounded-2xl author-box-picture' width='40px' src=\"{$baseUrl}{$each->employee_info->image}\"></div>
                 <div>
                     <a class='text-uppercase' title='Click to view the details of this employee' href='#' onclick='return load(\"payroll-view/{$each->employee_id}\");'>{$each->employee_info->name}</a> 
-                    <span class='text-uppercase badge badge-{$color[$each->employee_info->user_type]} p-1'>{$each->employee_info->user_type}</span>
-                    <br><span class='p-2'><i class='fa fa-phone'></i> ".($each->employee_info?->phone_number ?? "N/A")."</span>
-                    <br><span class='p-2'><i class='fa fa-envelope'></i> ".($each->employee_info?->email ?? "N/A")."</span>
+                    <br><span class='text-uppercase badge badge-{$color[$each->employee_info->user_type]} p-1'>{$each->employee_info->user_type}</span>
+                    <br><span class='pl-0'><i class='fa fa-phone'></i> ".($each->employee_info?->phone_number ?? "N/A")."</span>
+                    <br><span class='pl-0'><i class='fa fa-envelope'></i> ".($each->employee_info?->email ?? "N/A")."</span>
                 </div>
             </div>
         </td>";
