@@ -100,6 +100,34 @@ $(`div[class="summary-list"] input[name="basic_salary"]`).on('input', function()
     recalculateTotal();
 });
 
+if($(`input[name='basic_salary']`).length) {
+    $(`input[name='basic_salary']`).on('input', function() {
+        let row_id = $(this).attr('data-staff_id');
+        let allowance = parseInt($(`tr[data-staff_id='${row_id}'] span[class~="allowances"]`).text());
+        let deductions = parseInt($(`tr[data-staff_id='${row_id}'] span[class~="deductions"]`).text());
+        let basic_salary = parseInt($(this).val());
+
+        allowance = isNaN(allowance) ? 0 : allowance;
+        deductions = isNaN(deductions) ? 0 : deductions;
+        basic_salary = isNaN(basic_salary) ? 0 : basic_salary;
+
+        let net_salary = basic_salary + allowance - deductions;
+        if(net_salary > 50000) {
+            notify("Sorry! The net salary cannot be greater than " + format_currency(50000, 2));
+            $(`input[name="basic_salary"][data-staff_id="${row_id}"]`).val(50000);
+            net_salary = 50000;
+        }
+        net_salary = format_currency(net_salary, 2);
+        $(`tr[data-staff_id='${row_id}'] span[class~="net_salary"]`).text(net_salary);
+    });
+}
+
+var reload_employee_payslips = () => {
+    let year_id = $(`div[id="payslip_container"] select[name="bulk_year_id"]`).val(),
+        month_id = $(`div[id="payslip_container"] select[name="bulk_month_id"]`).val();
+    loadPage(`${baseUrl}payslip-bulkgenerate?bulk_year_id=${year_id}&bulk_month_id=${month_id}`);
+}
+
 var allowanceKeyControl = () => {
     $(`input[id^="allowance_amount_"]`).on('input', function() {
         recalculateAllowance();

@@ -80,7 +80,7 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                     <label>Select Year</label>
                                     <select '.(!$limit ? "disabled" : 'name="year_id"').' data-width="100%" class="form-control selectpicker">
                                         <option value="">Please Select </option>';
-                                        for($i = date("Y")-2; $i < date("Y")+3; $i++) {
+                                        for($i = date("Y") - 2; $i < date("Y") + 1; $i++) {
                                             $response->html .= "<option ".(($i == date("Y")) ? "selected" : "")." value=\"{$i}\">{$i}</option>";                            
                                         }
                                         $response->html .= '
