@@ -100,8 +100,28 @@ $(`div[class="summary-list"] input[name="basic_salary"]`).on('input', function()
     recalculateTotal();
 });
 
-if($(`input[name='basic_salary']`).length) {
-    $(`input[name='basic_salary']`).on('input', function() {
+var calculateOverallMonthPayments = () => {
+    let allowances = 0;
+    let deductions = 0;
+    let basic_salary = 0;
+    $.each($(`div[id="payslip_container"] tr[data-staff_id]`), function(i, e) {
+        allowances += parseInt($(`tr[data-staff_id='${$(this).attr('data-staff_id')}'] span[class~="allowances"]`).text());
+        deductions += parseInt($(`tr[data-staff_id='${$(this).attr('data-staff_id')}'] span[class~="deductions"]`).text());
+        basic_salary += parseInt($(`tr[data-staff_id='${$(this).attr('data-staff_id')}'] input[name="basic_salary"]`).val());
+    });
+    allowances = isNaN(allowances) ? 0 : allowances;
+    deductions = isNaN(deductions) ? 0 : deductions;
+    basic_salary = isNaN(basic_salary) ? 0 : basic_salary;
+    let net_salary = basic_salary + allowances - deductions;
+
+    $(`div[id="payslip_container"] span[class~="total_basic_salary"]`).text(format_currency(basic_salary));
+    $(`div[id="payslip_container"] span[class~="total_allowances"]`).text(format_currency(allowances));
+    $(`div[id="payslip_container"] span[class~="total_deductions"]`).text(format_currency(deductions));
+    $(`div[id="payslip_container"] span[class~="total_net_salary"]`).text(format_currency(net_salary));
+}
+
+if($(`div[id="payslip_container"] input[name='basic_salary']`).length) {
+    $(`div[id="payslip_container"] input[name='basic_salary']`).on('input', function() {
         let row_id = $(this).attr('data-staff_id');
         let allowance = parseInt($(`tr[data-staff_id='${row_id}'] span[class~="allowances"]`).text());
         let deductions = parseInt($(`tr[data-staff_id='${row_id}'] span[class~="deductions"]`).text());
@@ -119,7 +139,9 @@ if($(`input[name='basic_salary']`).length) {
         }
         net_salary = format_currency(net_salary, 2);
         $(`tr[data-staff_id='${row_id}'] span[class~="net_salary"]`).text(net_salary);
+        calculateOverallMonthPayments();
     });
+    calculateOverallMonthPayments();
 }
 
 var reload_employee_payslips = () => {

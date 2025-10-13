@@ -152,7 +152,7 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                             <div class="table-responsive table-student_staff_list">
                                 <table data-empty="" class="table table-bordered table-md table-striped">
                                     <thead>
-                                        <tr>
+                                        <tr class="font-17">
                                             <th width="30%">Staff Name</th>
                                             <th>Basic Salary</th>
                                             <th class="text-center">Allowances</th>
@@ -160,7 +160,24 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                             <th class="text-center">Net Salary</th>
                                         </tr>
                                     </thead>
-                                    <tbody>'.$users_list.'</tbody>
+                                    <tbody>
+                                        '.$users_list.'
+                                        <tr id="total_row" class="text-white bg-success font-25 font-bold">
+                                            <td></td>
+                                            <td>
+                                                <span class="total_net_salary">0</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="total_allowances">0</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="total_deductions">0</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="total_net_salary">0</span>
+                                            </td>   
+                                        </tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
