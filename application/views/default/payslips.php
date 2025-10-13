@@ -133,7 +133,7 @@ $response->html = '
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="text-right mb-2">
                     <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'payslip-generate"><i class="fa fa-plus"></i> Generate Payslip</a>
-                    <a class="btn btn-sm hidden btn-outline-success" href="'.$baseUrl.'payslip-bulkgenerate"><i class="fa fa-users"></i> Generate Multiple Payslip</a>
+                    <a class="btn btn-sm btn-outline-success" href="'.$baseUrl.'payslip-bulkgenerate"><i class="fa fa-users"></i> Generate Multiple Payslip</a>
                 </div>
             </div>' : null).'
             <div class="col-12 col-sm-12 col-lg-12">

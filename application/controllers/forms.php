@@ -5698,18 +5698,23 @@ class Forms extends Myschoolgh {
                         <div class=\"form-group\">
                             <div class='row'>
                                 <div class='col-md-6'>
-                                    <label>Attach to Object</label>
+                                    <div class='form-group'>
+                                    <label for='attach_to_object'>Attach to Object</label>
                                     <select data-width=\"100%\" name=\"attach_to_object\" id=\"attach_to_object\" class=\"form-control selectpicker\">
                                         <option value=\"\">Select Attach to Object</option>
                                         <option value=\"bus\">Bus</option>
                                     </select>
+                                    </div>
                                 </div>
                                 <div class='col-md-6'>
-                                    <label>Select Object</label>
-                                    <select data-width=\"100%\" name=\"record_object\" id=\"record_object\" class=\"form-control selectpicker\">
-                                        <option value=\"\">Select Object</option>
-                                    </select>
+                                    <div class='form-group'>
+                                        <label for='record_object'>Select Object</label>
+                                        <select data-width=\"100%\" name=\"record_object\" id=\"record_object\" class=\"form-control selectpicker\">
+                                            <option value=\"\">Select Object</option>
+                                        </select>
+                                    </div>
                                 </div>
+                                ".(strtolower($params->route) == "deposit" ? "<div class='col-md-6' id='assign_to_object'></div>" : null)."
                             </div>
                         </div>
                         ".forms_header("Set amount and date", "mt-2")."

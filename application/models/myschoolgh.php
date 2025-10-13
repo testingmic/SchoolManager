@@ -107,7 +107,7 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("ALTER TABLE `knowledge_base` CHANGE `status` `status` ENUM('Pending','Answered','Closed','Waiting','Reopened','Active','Deleted') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Pending';");
+		$fix[] = ("ALTER TABLE `accounts_transaction` ADD COLUMN `assign_to_object` VARCHAR(255) DEFAULT NULL;");
 
 		foreach($fix as $stmt) {
 			try {

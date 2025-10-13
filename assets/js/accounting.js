@@ -136,6 +136,13 @@ var view_transaction = (transaction_id) => {
                                 <td class="font-weight-bold">Amount</td>
                                 <td>${data.amount}</td>
                             </tr>
+                            ${
+                                data.attach_to_object !== null ? 
+                                `<tr>
+                                    <td class="font-weight-bold">Received From</td>
+                                    <td>${data.assign_to_object_name} - ${data.assign_to_object_unique_id}</td>
+                                </tr>` : ""
+                            }
                             <tr>
                                 <td class="font-weight-bold">Payment Medium</td>
                                 <td>${data.payment_medium.toUpperCase()}</td>

@@ -41,7 +41,7 @@ $hasModify = $accessObject->hasAccess("modify", "accounting");
 $response->scripts = ["assets/js/accounting.js", "assets/js/upload.js", "assets/js/object_selector.js"];
 
 // date range filter
-$date_range = $filter->date_range ?? date("Y-m-d", strtotime("monday this week")).":".date("Y-m-d", strtotime("sunday this week"));
+$date_range = $filter->date_range ?? date("Y-m-01").":".date("Y-m-d", strtotime("sunday this week"));
 
 // get the list of all classes
 $params = (object)[

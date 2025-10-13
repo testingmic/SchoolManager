@@ -392,10 +392,12 @@ class Accounting extends Myschoolgh {
                     c.account_name, c.account_bank, c.account_number,
                     (SELECT CONCAT(b.name,'|',COALESCE(b.phone_number, 'NULL'),'|',COALESCE(b.email, 'NULL'),'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info,
                     (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment
-                    ".(!empty($params->busFinancials) ? ", b.brand AS bus_name, b.reg_number, b.insurance_company" : null)."
+                    ".(!empty($params->busFinancials) ? ", b.brand AS bus_name, b.reg_number, b.insurance_company" : null).",
+                    d.name AS assign_to_object_name, d.unique_id AS assign_to_object_unique_id, d.user_type AS assign_to_object_user_type
                 FROM accounts_transaction a
                 LEFT JOIN accounts c ON c.item_id = a.account_id
                 ".(!empty($params->busFinancials) ? "LEFT JOIN buses b ON b.item_id = a.record_object" : null)."
+                LEFT JOIN users d ON d.item_id = a.assign_to_object
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id {$order_by} LIMIT {$params->limit}
             ");
             $stmt->execute([1]);
@@ -653,14 +655,14 @@ class Accounting extends Myschoolgh {
                 item_id = ?, client_id = ?, account_id = ?, account_type = ?, 
                 item_type = ?, reference = ?, amount = ?, created_by = ?, record_date = ?,
                 payment_medium = ?, description = ?, academic_year = ?, academic_term = ?, balance = ?,
-                attach_to_object = ?, record_object = ?
+                attach_to_object = ?, record_object = ?, assign_to_object = ?
             ");
             $stmt->execute([
                 $item_id, $params->clientId, $params->account_id, $params->account_type, 
                 'Deposit', $params->reference ?? null, $params->amount, $params->userId, 
                 $params->date, $params->payment_medium, $params->description ?? null,
                 $params->academic_year, $params->academic_term, ($accountData[0]->balance + $params->amount),
-                $params->attach_to_object ?? null, $params->record_object ?? null
+                $params->attach_to_object ?? null, $params->record_object ?? null, $params->assign_to_object ?? null
             ]);
 
             // add up to the credit line
@@ -732,6 +734,7 @@ class Accounting extends Myschoolgh {
                 payment_medium = ?, description = ?, balance = ? 
                 ".(!empty($params->attach_to_object) ? ", attach_to_object = '{$params->attach_to_object}'" : "")."
                 ".(!empty($params->record_object) ? ", record_object = '{$params->record_object}'" : "")."
+                ".(!empty($params->assign_to_object) ? ", assign_to_object = '{$params->assign_to_object}'" : "")."
                 WHERE item_id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([
@@ -794,14 +797,14 @@ class Accounting extends Myschoolgh {
                 item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
                 reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
                 description = ?, academic_year = ?, academic_term = ?, balance = ?,
-                attach_to_object = ?, record_object = ?
+                attach_to_object = ?, record_object = ?, assign_to_object = ?
             ");
             $stmt->execute([
                 $item_id, $params->clientId, $params->account_id, $params->account_type, 
                 'Expense', $params->reference ?? null, $params->amount, $params->userId, 
                 $params->date, $params->payment_medium, $params->description ?? null,
                 $params->academic_year, $params->academic_term, ($accountData[0]->balance - $params->amount),
-                $params->attach_to_object ?? null, $params->record_object ?? null
+                $params->attach_to_object ?? null, $params->record_object ?? null, $params->assign_to_object ?? null
             ]);
 
             // add up to the expense
@@ -873,6 +876,7 @@ class Accounting extends Myschoolgh {
                 payment_medium = ?, description = ?, balance = ? 
                 ".(!empty($params->attach_to_object) ? ", attach_to_object = '{$params->attach_to_object}'" : "")."
                 ".(!empty($params->record_object) ? ", record_object = '{$params->record_object}'" : "")."
+                ".(!empty($params->assign_to_object) ? ", assign_to_object = '{$params->assign_to_object}'" : "")."
                 WHERE item_id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([

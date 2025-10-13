@@ -38,7 +38,7 @@ $hasValidate = $accessObject->hasAccess("validate", "accounting");
 $hasModify = $accessObject->hasAccess("modify", "accounting");
 
 // date range filter
-$date_range = $filter->date_range ?? date("Y-m-d", strtotime("monday this week")).":".date("Y-m-d", strtotime("sunday this week"));
+$date_range = $filter->date_range ?? date("Y-m-01").":".date("Y-m-d", strtotime("sunday this week"));
 
 // get the list of all classes
 $params = (object)[
@@ -89,7 +89,15 @@ foreach($transactions_list as $key => $transaction) {
     $list_transactions .= "<tr data-row_id=\"{$transaction->item_id}\">";
     $list_transactions .= "<td>{$count}</td>";
     $list_transactions .= "<td>{$transaction->account_name}</td>";
-    $list_transactions .= "<td>{$transaction->account_type_name}</td>";
+    $list_transactions .= "<td>
+        {$transaction->account_type_name}
+        ".(strtolower($transaction->attach_to_object) == "bus" ? "
+        <div class='text-primary'>
+        <a href='{$baseUrl}student/{$transaction->assign_to_object}/payments'>
+            ({$transaction->assign_to_object_name} - {$transaction->assign_to_object_unique_id})
+        </a>
+        </div>" : null)."
+    </td>";
     $list_transactions .= "<td>{$reference}</td>";
     $list_transactions .= "<td>".number_format($transaction->amount, 2)."</td>";
     $list_transactions .= "<td>".date("jS M Y", strtotime($transaction->record_date))."</td>";
@@ -180,8 +188,8 @@ $response->html = '
                                             <thead>
                                                 <tr>
                                                     <th></th>
-                                                    <th width="22%">Account Name</th>
-                                                    <th width="15%">Account Type Head</th>
+                                                    <th width="17%">Account Name</th>
+                                                    <th width="20%">Account Type Head</th>
                                                     <th>Reference</th>
                                                     <th>Amount</th>
                                                     <th width="12%">Date</th>

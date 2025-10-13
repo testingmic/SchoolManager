@@ -24,20 +24,43 @@ class Related extends Myschoolgh {
 
         // convert the module to lowercase
         $params->module = strtolower($params->module);
+
+        $result = [];
+        $additional = [];
+
+        $loadStudents = (bool) !empty($params->students);
         
         /** Get the buses */
         if(in_array($params->module, ["bus"])) {
-            $buses = $this->bus_list($params->clientId, "id, item_id, brand, reg_number, driver_id, description");
-            return ["code" => 200, "data" => $buses];
-        }
+            $result = $this->bus_list($params->clientId, "id, item_id, brand, reg_number, driver_id, description");
+
+            if($loadStudents) {
+                $iResult = $result;
+            }
+         }
 
         /** Get the students, parents, and staff */
-        if(in_array($params->module, ["student", "parent", "staff"])) {
+        if(in_array($params->module, ["student", "parent", "staff"]) || $loadStudents) {
             $columns = $params->module == "staff" ? "admin,employee,accountant" : $params->module;
+
+            if($loadStudents) {
+                $columns = "student";
+            }
+
             $columns = stringToArray($columns);
-            $students = $this->pushQuery("id, item_id, unique_id, name", "users", "client_id = '{$params->clientId}' AND user_type IN {$this->inList($columns)} AND status = '1'", false, "ASSOC");
-            return ["code" => 200, "data" => $students, "code" => 200];
+            $result = $this->pushQuery("id, item_id, unique_id, name", "users", "client_id = '{$params->clientId}' AND user_type IN {$this->inList($columns)} AND status = '1'", false, "ASSOC");
+
+            if($loadStudents) {
+                $additional["students"] = $result;
+                $result = [];
+            }
         }
+
+        return [
+            "code" => 200, 
+            "data" => $iResult ?? $result, 
+            "additional" => $additional
+        ];
 
     }
 
