@@ -202,7 +202,7 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                         <tr id="total_row" class="text-white bg-success font-25 font-bold">
                                             <td></td>
                                             <td>
-                                                <span class="total_net_salary">0</span>
+                                                <span class="total_basic_salary">0</span>
                                             </td>
                                             <td class="text-center">
                                                 <span class="total_allowances">0</span>
