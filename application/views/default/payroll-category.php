@@ -47,6 +47,9 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
 
     $allowance_array_list = [];
 
+    // load the form
+    $category_form = load_class("forms", "controllers")->payroll_category_form($clientId, $baseUrl);
+
     // loop through the payslip category list
     foreach($allowance_types as $key => $each) {
         $allowance_array_list[$each->id] = $each;
@@ -81,59 +84,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                 </div>
             </div>
             <div data-backdrop="static" data-keyboard="false" class="modal fade" id="allowanceTypesModal">
-                <form method="POST" action="'.$baseUrl.'api/payroll/saveallowance" class="ajax-data-form" id="ajax-data-form-content">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Allowance / Deduction Types</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="name">Name</label>
-                                            <input type="text" maxlength="100" placeholder="Type name" name="name" id="name" class="form-control">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="allowance_type">Type</label>
-                                            <select name="type" data-width="100%" id="type" class="form-control selectpicker">
-                                                <option value="null">Please select type</option>
-                                                <option value="Allowance">Allowance</option>
-                                                <option value="Deduction">Deduction</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="is_statutory">Is Statutory</label>
-                                            <select name="is_statutory" data-width="100%" id="is_statutory" class="form-control selectpicker">
-                                                <option value="null">Please select</option>
-                                                <option value="No">No</option>
-                                                <option value="Yes">Yes</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="description">Description</label>
-                                            <textarea placeholder="" maxlength="255" name="description" id="description" rows="5" class="form-control"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer p-0">
-                                    <input type="hidden" name="allowance_id">
-                                    <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
-                                    <button data-form_id="ajax-data-form-content" type="button-submit" class="btn btn-primary">Save changes</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+                '.$category_form.'
             </div>
 
             <div class="row">

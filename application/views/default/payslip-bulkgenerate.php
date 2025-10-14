@@ -66,27 +66,64 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
 
     $users_list = "";
 
+    // user payload for the salary information
+    $userPayload = (object)[
+        'month_id' => $selectedMonth,
+        'year_id' => $selectedYear,
+        'clientId' => $clientId,
+        'simple_data' => true,
+        'limit' => 1,
+    ];
+
+    // payroll object
+    $payrollObject = load_class("payroll", "controllers");
+
     // loop through the users
     foreach($users_array_list as $each) {
 
+        // set the user payload
         $basic_salary = !empty($each->basic_salary) ? $each->basic_salary : 0;
         $allowances = !empty($each->allowances) ? $each->allowances : 0;
         $deductions = !empty($each->deductions) ? $each->deductions : 0;
 
-        $row_class = empty($each->basic_salary) ? "text-white bg-danger" : "";
+        $userPayload->employee_id = $each->item_id;
+        $salaryInfo = $payrollObject->paysliplist($userPayload)["data"] ?? [];
+
+        $validatedSalary = false;
+        $salaryCreated = false;
+        $isDisabled = false;
+
+        $row_id = "data-staff_id='{$each->item_id}'";
+        $append_color = "";
+        $inputValue = "value='{$each->item_id}'";
+        $row_class = empty($each->basic_salary) ? "text-white bg-danger-light" : "";
+
+        // if the salary info is not empty
+        if(!empty($salaryInfo)) {
+            $validatedSalary = $salaryInfo[0]->validated;
+            $salaryCreated = $salaryInfo[0]->date_log;
+
+            if($validatedSalary) {
+                $inputValue = "";
+                $row_id .= " title='Payslip Created on {$salaryCreated} and validated on {$salaryInfo[0]->validated_date}'";
+                $append_color = "text-white";
+                $row_class = "text-white bg-success";
+                $isDisabled = "disabled checked";
+            }
+        }
 
         $users_list .= "
-        <tr data-staff_id='{$each->item_id}' class='{$row_class}'>
+        <tr {$row_id} class='{$row_class}'>
             <td>
                 <div style='padding-left: 2.5rem;' class='custom-control cursor col-lg-12 custom-switch switch-primary'>
-                    <input data-item='staff_checkbox' type='checkbox' name='user_ids[]' value='{$each->item_id}' class='custom-control-input cursor' id='user_id_{$each->item_id}' checked='checked'>
-                    <label class='custom-control-label cursor' for='user_id_{$each->item_id}'>{$each->name} 
+                    <input {$isDisabled} data-item='staff_checkbox' type='checkbox' name='user_ids[]' class='custom-control-input cursor' id='user_id_{$each->item_id}' checked='checked'>
+                    <label class='custom-control-label {$append_color} cursor' for='user_id_{$each->item_id}'>{$each->name} 
                         <br><strong>{$each->unique_id}</strong>
                     </label>
                 </div>
             </td>
             <td>
-                <input type='text' data-staff_id='{$each->item_id}' name='basic_salary' value='{$basic_salary}' class='form-control text-center font-20 w-[150px]'>
+                <input type='text' {$isDisabled} {$row_id} name='basic_salary' value='{$basic_salary}' class='form-control text-center font-20 w-[150px]'>
             </td>
             <td class='text-center font-18'>
                 <span class='allowances'>{$allowances}</span>
@@ -179,6 +216,11 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+                            <div class="text-center mt-1">
+                                <button onclick="return generate_payslips()" id="generate_payslips" class="btn py-3 font-17 btn-outline-success">
+                                    <i class="fas fa-project-diagram"></i> Generate Multiple Payslips
+                                </button>
                             </div>
                         </div>
                     </div>

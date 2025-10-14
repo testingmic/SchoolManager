@@ -106,16 +106,17 @@ var calculateOverallMonthPayments = () => {
     let allowances = 0;
     let deductions = 0;
     let basic_salary = 0;
+    let selectedEmployees = 0;
     $.each($(`div[id="payslip_container"] tr[data-staff_id]`), function(i, e) {
         let row_id = $(this).attr('data-staff_id');
         // only calculate if the checkbox is checked
         if($(`tr[data-staff_id='${row_id}'] input[name="user_ids[]"]`).is(':checked')) {
+            selectedEmployees++;
             allowances += parseInt($(`tr[data-staff_id='${row_id}'] span[class~="allowances"]`).text());
             deductions += parseInt($(`tr[data-staff_id='${row_id}'] span[class~="deductions"]`).text());
             basic_salary += parseInt($(`tr[data-staff_id='${row_id}'] input[name="basic_salary"]`).val());
         }
     });
-    console.log(allowances, deductions, basic_salary);
     allowances = isNaN(allowances) ? 0 : allowances;
     deductions = isNaN(deductions) ? 0 : deductions;
     basic_salary = isNaN(basic_salary) ? 0 : basic_salary;
@@ -125,6 +126,12 @@ var calculateOverallMonthPayments = () => {
     $(`div[id="payslip_container"] span[class~="total_allowances"]`).text(format_currency(allowances));
     $(`div[id="payslip_container"] span[class~="total_deductions"]`).text(format_currency(deductions));
     $(`div[id="payslip_container"] span[class~="total_net_salary"]`).text(format_currency(net_salary));
+
+    if(!selectedEmployees) {
+        $(`button[id="generate_payslips"]`).prop('disabled', true);
+    } else {
+        $(`button[id="generate_payslips"]`).prop('disabled', false);
+    }
 }
 
 if($(`div[id="payslip_container"] input[name='basic_salary']`).length) {

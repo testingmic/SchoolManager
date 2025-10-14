@@ -368,6 +368,10 @@ body .btn {
     100% { transform: rotate(360deg); }
 }
 
+.bg-danger-light {
+    background-color: #e86760 !important;
+}
+
 /* Enhanced Form Styling */
 .setup-form .form-group {
     margin-bottom: 1.5rem;

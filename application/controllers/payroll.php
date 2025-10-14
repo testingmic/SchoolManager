@@ -3,8 +3,7 @@
 class Payroll extends Myschoolgh {
 
     
-
-    public function __construct(stdClass $params = null) {
+    public function __construct($params = null) {
 		parent::__construct();
 
         // get the client data
@@ -34,9 +33,7 @@ class Payroll extends Myschoolgh {
         // get global variables
         global $accessObject, $defaultUser;
 
-        if(isset($params->employee_id)) {
-            $params->employee_id = $params->employee_id;
-        } else {
+        if(empty($params->employee_id)) {
             if(!$accessObject->hasAccess("generate", "payslip") && !isset($params->payslip_id)) {
                 $params->employee_id = $params->userId ?? $defaultUser->user_id;
             }
@@ -46,25 +43,26 @@ class Payroll extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
         
-        $params->query .= (isset($params->year_id)) ? " AND a.year_id='{$params->year_id}'" : null;
-        $params->query .= (isset($params->month_id)) ? " AND a.month_id='{$params->month_id}'" : null;
-        $params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->employee_id) && !empty($params->employee_id)) ? " AND a.employee_id='{$params->employee_id}'" : null;
-        $params->query .= (isset($params->payslip_id) && !empty($params->payslip_id)) ? " AND a.item_id='{$params->payslip_id}'" : null;
+        $params->query .= !empty($params->year_id) ? " AND a.payslip_year ='{$params->year_id}'" : null;
+        $params->query .= !empty($params->month_id) ? " AND a.payslip_month ='{$params->month_id}'" : null;
+        $params->query .= !empty($params->clientId) ? " AND a.client_id = '{$params->clientId}'" : null;
+        $params->query .= !empty($params->employee_id) ? " AND a.employee_id = '{$params->employee_id}'" : null;
+        $params->query .= !empty($params->payslip_id) ? " AND a.item_id = '{$params->payslip_id}'" : null;
 
         try {
 
-            $payslipDetails = (bool) (isset($params->payslip_detail) && $params->payslip_detail);
+            $payslipDetails = (bool) (isset($params->payslip_detail) && !empty($params->payslip_detail));
+            $simpleData = (bool) (isset($params->simple_data) && !empty($params->simple_data));
 
             $stmt = $this->db->prepare("
-                SELECT a.*, 
+                SELECT a.* ".(!$simpleData ? ", 
                     u.name AS emp_name, u.phone_number AS emp_phone, u.email AS emp_email, 
                     u.image AS emp_image, u.unique_id AS emp_unique_id, u.last_seen AS emp_last_seen, 
-                    u.online AS emp_online, u.user_type AS emp_user_type,
+                    u.online AS emp_online, u.user_type AS emp_user_type, 
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.unique_id,'|',b.last_seen,'|',b.online,'|',b.user_type) 
-                        FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
+                    FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info " : null)."
                 FROM payslips a
-                LEFT JOIN users u ON u.item_id = a.employee_id
+                ".(!$simpleData ? " LEFT JOIN users u ON u.item_id = a.employee_id " : null)."
                 WHERE {$params->query} AND a.deleted = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
             $stmt->execute([0]);
@@ -72,30 +70,36 @@ class Payroll extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
-                // loop through the information
-                foreach(["created_by_info"] as $each) {
-                    // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","unique_id","last_seen","online","user_type"]);
+                if(!empty($result->created_by_info)) {
+                    // loop through the information
+                    foreach(["created_by_info"] as $each) {
+                        // convert the created by string into an object
+                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","unique_id","last_seen","online","user_type"]);
+                    }
                 }
 
-                $result->employee_info = (object) [
-                    "name" => $result->emp_name,
-                    "phone_number" => $result->emp_phone,
-                    "email" => $result->emp_email,
-                    "image" => $result->emp_image,
-                    "user_type" => $result->emp_user_type,
-                    "unique_id" => $result->emp_unique_id,
-                ];
+                if(!$simpleData) {
+                    $result->employee_info = (object) [
+                        "name" => $result->emp_name,
+                        "phone_number" => $result->emp_phone,
+                        "email" => $result->emp_email,
+                        "image" => $result->emp_image,
+                        "user_type" => $result->emp_user_type,
+                        "unique_id" => $result->emp_unique_id,
+                    ];
 
-                if($payslipDetails) {
-                    $detail = $this->pushQuery("a.*, at.name AS allowance_type", 
-                        "payslips_details a LEFT JOIN payslips_allowance_types at ON at.id = a.allowance_id", 
-                        "a.payslip_id='{$result->id}' AND a.employee_id='{$result->employee_id}'");
-                    $result->payslip_details = [];
-                    foreach($detail as $each) {
-                        $result->payslip_details[$each->detail_type][] = $each;
+                    // if the payslip details is parsed
+                    if($payslipDetails) {
+                        // load the payslip details
+                        $detail = $this->pushQuery("a.*, at.name AS allowance_type", 
+                            "payslips_details a LEFT JOIN payslips_allowance_types at ON at.id = a.allowance_id", 
+                            "a.payslip_id='{$result->id}' AND a.employee_id='{$result->employee_id}'");
+                        $result->payslip_details = [];
+                        foreach($detail as $each) {
+                            $result->payslip_details[$each->detail_type][] = $each;
+                        }
+                        $result->client_details = $this->pushQuery("a.*", "clients_accounts a", "a.client_id = '{$result->client_id}' AND a.client_status='1' LIMIT 1")[0];
                     }
-                    $result->client_details = $this->pushQuery("a.*", "clients_accounts a", "a.client_id = '{$result->client_id}' AND a.client_status='1' LIMIT 1")[0];
                 }
 
                 $data[] = $result;
