@@ -161,6 +161,43 @@ if($(`div[id="payslip_container"] input[name='basic_salary']`).length) {
     calculateOverallMonthPayments();
 }
 
+var generate_payslips = () => {
+    let year_id = $(`div[id="payslip_container"] select[name="bulk_year_id"]`).val(),
+        month_id = $(`div[id="payslip_container"] select[name="bulk_month_id"]`).val();
+
+    swal({
+        title: "Generate Payslips",
+        text: `Are you sure you want to generate the payslips for the selected employees?\n\nYear: ${year_id}\nMonth: ${month_id}`,
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            let payload = { year_id, month_id, user_ids: [] };
+            $(`div[id="payslip_container"] input[name="user_ids[]"]`).map(function() {
+                let user_id = $(this).val();
+                let user_name = $(this).attr('data-user_name');
+                payload.user_ids.push({
+                    user_id, 
+                    basic_salary: $(`div[id="payslip_container"] input[name="basic_salary"][data-staff_id="${user_id}"]`).val(),
+                    user_name
+                })
+            }).get();
+            $.post(`${baseUrl}api/payroll/generatepayslips`, payload).then((response) => {
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
+                if(typeof response.data.additional !== "undefined") {
+                    setTimeout(() => {
+                        loadPage(response.data.additional.href);
+                    }, refresh_seconds);
+                }
+            });
+        }
+    });
+}
+
 var reload_employee_payslips = () => {
     let year_id = $(`div[id="payslip_container"] select[name="bulk_year_id"]`).val(),
         month_id = $(`div[id="payslip_container"] select[name="bulk_month_id"]`).val();

@@ -508,7 +508,7 @@ class Payroll extends Myschoolgh {
                 <div class=\"text-primary mb-3 text-center\">
                     You are about to generate a Payslip for <strong>{$params->month_id} {$params->year_id}</strong>.
                 </div>
-                <div class='row justify-content-between'>
+                <div class='d-flex justify-content-between'>
                     <div><button onclick='return cancelPayslip()' type=\"reset\" class=\"btn btn-outline-danger\"><i class='fa fa-exclamation-circle'></i>  Cancel</a></div>
                     <div><button onclick='return generate_payslip()' data-action=\"generate\" type=\"submit\" class=\"btn btn-outline-success\"><i class='fa fa-save'></i> Generate Payslip</button></div>
                 </div>";
@@ -526,7 +526,7 @@ class Payroll extends Myschoolgh {
 				$note = "<div class=\"text-danger mb-3 text-center\">
 						This paylip was generated on <strong>{$employeePayslip->date_log}</strong> awaiting redemption. Any updates made will replace the current record.
 						</div>
-						<div class='row justify-content-between'>
+						<div class='d-flex justify-content-between'>
 							<div><button onclick='return cancelPayslip()' type=\"reset\" class=\"btn btn-outline-danger\"><i class='fa fa-exclamation-circle'></i>  Cancel</a></div>
 							<div><button onclick='return generate_payslip()' data-action=\"update\" type=\"submit\" class=\"btn btn-outline-success\"><i class='fa fa-save'></i> Update Payslip</button></div>
 						</div>";
@@ -560,32 +560,39 @@ class Payroll extends Myschoolgh {
         // global variable
         global $usersClass, $accessObject, $noticeClass;
 
-        if(!$accessObject->hasAccess("generate", "payslip")) {
-            return ["code" => 400, "data" => "Sorry! You do not have the permissions to generate a payslip."];
+        // if the bypass checks is not empty
+        if(!empty($params->bypass_checks)) {
+            if(!$accessObject->hasAccess("generate", "payslip")) {
+                return ["code" => 400, "data" => "Sorry! You do not have the permissions to generate a payslip."];
+            }
+
+            if((strlen($params->year_id) !== 4)  || ($params->year_id === "null")) {
+                return ["code" => 400, "data" => "Please select a valid year to load record."];
+            }
+
+            // return error
+            if(strlen($params->month_id) < 3 || ($params->month_id === "null")) {
+                return ["code" => 400, "data" => "Please select a valid month to load record."];
+            }
+
+            // confirm that the user_id does not already exist
+            $i_params = (object) [
+                "limit" => 1, 
+                "user_payroll" => true, 
+                "minified" => "minified_content",
+                "user_id" => $params->employee_id, 
+            ];
+            $the_user = $usersClass->list($i_params)["data"];
+
+            // get the user data
+            if(empty($the_user)) {
+                return ["code" => 201, "data" => "Sorry! Please provide a valid user id."];
+            }
+
+            $data = $the_user[0];
+        } else {
+            $data = $params->user_info;
         }
-
-        if((strlen($params->year_id) !== 4)  || ($params->year_id === "null")) {
-            return ["code" => 400, "data" => "Please select a valid year to load record."];
-        }
-
-        // return error
-        if(strlen($params->month_id) < 3 || ($params->month_id === "null")) {
-            return ["code" => 400, "data" => "Please select a valid month to load record."];
-        }
-
-        // confirm that the user_id does not already exist
-		$i_params = (object) [
-            "limit" => 1, "user_id" => $params->employee_id, 
-            "user_payroll" => true, "minified" => "minified_content"
-        ];
-		$the_user = $usersClass->list($i_params)["data"];
-
-		// get the user data
-		if(empty($the_user)) {
-			return ["code" => 201, "data" => "Sorry! Please provide a valid user id."];
-		}
-        $data = $the_user[0];
-
 
         // inits for the allowances
         $allowances = [];
@@ -829,6 +836,86 @@ class Payroll extends Myschoolgh {
 
         } catch(PDOException $e) {
             $this->db->rollBack();
+            return ["code" => 400, "data" => $e->getMessage()];
+        }
+
+    }
+
+    /**
+     * Generate Payslips
+     * 
+     * Generate the payslips for the selected employees
+     * 
+     * @return Array
+     */
+    public function generatepayslips(stdClass $params) {
+        
+        try {
+
+            // global variable
+            global $usersClass, $accessObject, $noticeClass;
+
+            if(!$accessObject->hasAccess("generate", "payslip")) {
+                return ["code" => 400, "data" => "Sorry! You do not have the permissions to generate a payslip."];
+            }
+
+            if(empty($params->year_id) || empty($params->month_id) || empty($params->user_ids)) {
+                return ["code" => 400, "data" => "Please select a valid year, month and employees to generate payslips."];
+            }
+
+            if((strlen($params->year_id) !== 4)  || ($params->year_id === "null")) {
+                return ["code" => 400, "data" => "Please select a valid year to load record."];
+            }
+    
+            // return error
+            if(strlen($params->month_id) < 3 || ($params->month_id === "null")) {
+                return ["code" => 400, "data" => "Please select a valid month to load record."];
+            }
+
+            // loop through the user ids
+            foreach($params->user_ids as $each) {
+
+                // payload for the payslip generation
+                $payload = (object) [
+                    'payment_mode' => 'Bank',
+                    'userId' => $params->userId,
+                    'year_id' => $params->year_id,
+                    'clientId' => $params->clientId,
+                    'month_id' => $params->month_id,
+                    'userData' => $params->userData,
+                    'employee_id' => $each['user_id'],
+                    'basic_salary' => $each['basic_salary'],
+                    'allowances' => [],
+                    'deductions' => [],
+                    'user_info' => (object)[
+                        'name' => $each['user_name'],
+                        'basic_salary' => $each['basic_salary'],
+                        'unique_id' => $each['user_id']
+                    ],
+                    'bypass_checks' => true
+                ];
+
+                // get the allowances of the employee
+                $allowances = $this->pushQuery("*", "payslips_employees_allowances", "employee_id='{$each['user_id']}' AND client_id='{$params->clientId}'");
+                if(!empty($allowances)) {
+                    foreach($allowances as $eachAllowance) {
+                        if($eachAllowance->type == 'Allowance') {
+                            $payload->allowances[] = $eachAllowance->amount;
+                        } else {
+                            $payload->deductions[] = $eachAllowance->amount;
+                        }
+                    }
+                }
+                $this->generatepayslip($payload);
+            }
+
+            return [
+                "code" => 200, 
+                "data" => "The payslips were successfully generated.",
+                "additional" => ["href" => "{$this->baseUrl}payslips"]
+            ];
+            
+        } catch(PDOException $e) {
             return ["code" => 400, "data" => $e->getMessage()];
         }
 

@@ -165,7 +165,7 @@ load_helpers(['menu_helper']);
                     <button class="decimal" data-type="decimal" id="decimal" value="." >.</button>
                     <button class="equals" data-type="equal" id="equals" value="=" >&#61</button>
                 </div>
-                <div class="toggle-calculator hidden">Show Calculator</div>
+                <!-- <div class="toggle-calculator hidden">Show Calculator</div> -->
             </div>
         </div>
     </section>

@@ -116,7 +116,7 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
         <tr {$row_id} class='{$row_class}'>
             <td>
                 <div style='padding-left: 2.5rem;' class='custom-control cursor col-lg-12 custom-switch switch-primary'>
-                    <input {$isDisabled} data-item='staff_checkbox' type='checkbox' name='user_ids[]' class='custom-control-input cursor' id='user_id_{$each->item_id}' checked='checked'>
+                    <input {$isDisabled} data-item='staff_checkbox' data-user_name='{$each->name}' type='checkbox' value='{$each->item_id}' name='user_ids[]' class='custom-control-input cursor' id='user_id_{$each->item_id}' checked='checked'>
                     <label class='custom-control-label {$append_color} cursor' for='user_id_{$each->item_id}'>{$each->name} 
                         <br><strong>{$each->unique_id}</strong>
                     </label>
@@ -154,7 +154,7 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-lg-3 col-md-6 mb-2">
-                                    <label>Select Year</label>
+                                    <label for="bulk_year_id">Select Year</label>
                                     <select name="bulk_year_id" data-width="100%" class="form-control selectpicker">
                                         <option value="">Please Select </option>';
                                         for($i = date("Y") - 2; $i < date("Y") + 2; $i++) {
@@ -164,7 +164,7 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                     </select>
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
-                                    <label>Select Month</label>
+                                    <label for="bulk_month_id">Select Month</label>
                                     <select name="bulk_month_id" data-width="100%" class="form-control selectpicker">
                                         <option value="">Please Select </option>';
                                         for($i = 0; $i < 12; $i++) {
@@ -176,8 +176,8 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                 </div>
                                 <div class="col-lg-2 col-md-6 mb-2">
                                     <div class="form-group">
-                                        <label for="submit">&nbsp;</label>
-                                        <button onclick="return reload_employee_payslips()" class="btn-block btn btn-outline-success">Load Record</button>
+                                        <label for="reload_employee_payslips">&nbsp;</label>
+                                        <button onclick="return reload_employee_payslips()" id="reload_employee_payslips" class="btn-block btn btn-outline-success">Load Record</button>
                                     </div>
                                 </div>
                             </div>

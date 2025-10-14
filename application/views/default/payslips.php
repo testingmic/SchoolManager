@@ -148,7 +148,7 @@ $response->html = '
                                         <th width="13%">Month / Year</th>
                                         <th width="30%">Summary</th>
                                         <th width="10%">Status</th>
-                                        <th width="14%" align="center"></th>
+                                        <th width="16%" align="center"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$payslips_list.'</tbody>

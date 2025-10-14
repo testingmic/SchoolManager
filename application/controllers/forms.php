@@ -5292,7 +5292,7 @@ class Forms extends Myschoolgh {
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-lg-12 mt-3">
+                                    <div class="col-lg-12 mt-2">
                                         <div class="generate-result text-center"></div>
                                     </div>
                                 </div>
