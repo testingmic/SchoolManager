@@ -842,6 +842,61 @@ class Payroll extends Myschoolgh {
     }
 
     /**
+     * Bulk Validate Payslip
+     * 
+     * @return Array
+     */
+    public function bulkvalidatepayslip(stdClass $params) {
+
+        try {
+
+            global $accessObject;
+
+            // if the user does not have the permissions to validate a payslip
+            if(!$accessObject->hasAccess("validate", "payslip")) {
+                return ["code" => 400, "data" => "Sorry! You do not have the permissions to validate a payslip."];
+            }
+
+            // if the payslip ids is empty
+            if(empty($params->payslip_ids)) {
+                return ["code" => 400, "data" => "Sorry! No payslip ids were parsed."];
+            }
+
+            // if the payslip ids is not an array
+            if(!is_array($params->payslip_ids)) {
+                return ["code" => 400, "data" => "Sorry! The payslip ids must be an array."];
+            }
+
+             // loop through the array list
+            foreach($params->payslip_ids as $record_id) {
+
+                // get the payslip record
+                $payslip = $this->pushQuery("a.payslip_month, a.id, a.payslip_year, (SELECT b.name FROM users b WHERE b.item_id = a.employee_id ORDER BY b.id DESC LIMIT 1) AS employee_name", 
+                    "payslips a", "a.client_id='{$params->clientId}' AND a.deleted='0' AND a.id='{$record_id}' AND a.validated='0' LIMIT 1");
+                
+                // if the payslip record is empty
+                if(empty($payslip)) {
+                    continue;
+                }
+                $this->db->query("UPDATE payslips SET validated='1', validated_date = now(), status='1' WHERE id='{$record_id}' LIMIT 1");
+
+                // change the state of the transaction to approved
+                $this->db->query("UPDATE accounts_transaction 
+                    SET state='Approved', validated_date = now(), validated_by = '{$params->userId}' WHERE id='{$record_id}' AND state != 'Approved' LIMIT 3
+                ");
+
+                // log the user activity
+                $this->userLogs("payslip", $record_id, null, "<strong>{$params->userData->name}</strong> validated the payslip: <strong>{$payslip[0]->employee_name}</strong> for the month: <strong>{$payslip[0]->payslip_month} {$payslip[0]->payslip_year}</strong>", $params->userId);
+
+            }
+
+            return ["code" => 200, "data" => "Payslip successfully validated.", "additional" => ["href" => "{$this->baseUrl}payslips"]];
+        } catch(PDOException $e) {
+            return ["code" => 400, "data" => $e->getMessage()];
+        }
+    }
+
+    /**
      * Generate Payslips
      * 
      * Generate the payslips for the selected employees

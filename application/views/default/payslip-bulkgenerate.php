@@ -115,11 +115,12 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
         $users_list .= "
         <tr {$row_id} class='{$row_class}'>
             <td>
-                <div style='padding-left: 2.5rem;' class='custom-control cursor col-lg-12 custom-switch switch-primary'>
-                    <input {$isDisabled} data-item='staff_checkbox' data-user_name='{$each->name}' type='checkbox' value='{$each->item_id}' name='user_ids[]' class='custom-control-input cursor' id='user_id_{$each->item_id}' checked='checked'>
+                <div style='padding-left: 2.5rem;' class='custom-control cursor col-lg-12 ".($validatedSalary ? "" : "custom-switch switch-primary")."'>
+                    ".(!$validatedSalary ? 
+                    "<input {$isDisabled} data-item='staff_checkbox' data-user_name='{$each->name}' type='checkbox' value='{$each->item_id}' name='user_ids[]' class='custom-control-input cursor' id='user_id_{$each->item_id}' checked='checked'>
                     <label class='custom-control-label {$append_color} cursor' for='user_id_{$each->item_id}'>{$each->name} 
                         <br><strong>{$each->unique_id}</strong>
-                    </label>
+                    </label>" : "<div>{$each->name}</div><div><strong>{$each->unique_id}</strong></div>")."
                 </div>
             </td>
             <td>

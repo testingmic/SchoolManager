@@ -177,11 +177,14 @@ var generate_payslips = () => {
             $(`div[id="payslip_container"] input[name="user_ids[]"]`).map(function() {
                 let user_id = $(this).val();
                 let user_name = $(this).attr('data-user_name');
-                payload.user_ids.push({
-                    user_id, 
-                    basic_salary: $(`div[id="payslip_container"] input[name="basic_salary"][data-staff_id="${user_id}"]`).val(),
-                    user_name
-                })
+                // only append if checked
+                if($(this).is(':checked')) {
+                    payload.user_ids.push({
+                        user_id, 
+                        basic_salary: $(`div[id="payslip_container"] input[name="basic_salary"][data-staff_id="${user_id}"]`).val(),
+                        user_name
+                    });
+                }
             }).get();
             $.post(`${baseUrl}api/payroll/generatepayslips`, payload).then((response) => {
                 swal({
@@ -218,6 +221,96 @@ var recalculateDeductions = () => {
     $(`div[class~="summary-list"] input[name="total_deductions"]`).val(allowance);
 
     recalculateTotal();
+}
+
+var bulk_validate_payslip_finalize = () => {
+    let payload = { payslip_ids: [] };
+    swal({
+        title: "Finalize Payslip Validation",
+        text: "Are you sure you want to finalize the validation of the payslip for the selected employees?.",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $(`div[id="viewOnlyModal"] tbody[id="not_validated_body"] input[name="user_ids[]"]`).map(function() {
+                if($(this).is(':checked')) {
+                    let payslip_id = $(this).attr('data-payslip_id');
+                    payload.payslip_ids.push(payslip_id);
+                }
+            }).get();
+            $.post(`${baseUrl}api/payroll/bulkvalidatepayslip`, {payslip_ids: payload.payslip_ids}).then((response) => {
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
+                if(typeof response.data.additional !== "undefined") {
+                    $(`div[id="viewOnlyModal"]`).modal('hide');
+                    setTimeout(() => {
+                        loadPage(response.data.additional.href);
+                    }, refresh_seconds);
+                }
+            });
+        }
+    });
+}
+
+var bulk_validate_payslip = () => {
+    let not_validated = $.array_stream['not_validated'] ?? [];
+    if(not_validated.length == 0) {
+        swal({
+            text: "No payslips to validate.",
+            icon: "error",
+        });
+        return false;
+    }
+    $(`div[id="viewOnlyModal"]`).modal('show');
+    $(`div[id="viewOnlyModal"] h5[class~="modal-title"]`).html(`Validate Payslips`);
+    $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html(`
+    <table data-empty="" class="table table-bordered table-md table-striped">
+        <thead>
+            <tr class="font-17">
+                <th width="30%">Staff Name</th>
+                <th class="text-center">Period</th>
+                <th>Salary Summary</th>
+            </tr>
+        </thead>
+        <tbody id="not_validated_body"></tbody>
+    </table>`);
+    $(`div[id="viewOnlyModal"] div[class="modal-body"] #not_validated_body`).html(not_validated.map(each => `
+        <tr data-row_id='${each.item_id}'>
+            <td>
+                <div style='padding-left: 2.5rem;' class='custom-control cursor col-lg-12 custom-switch switch-primary'>
+                    <input data-item='staff_checkbox' data-payslip_id='${each.id}' data-user_name='${each.employee.name}' type='checkbox' value='${each.item_id}' data-item_id='${each.item_id}' name='user_ids[]' class='custom-control-input cursor' id='user_id_${each.item_id}_${each.id}' checked='checked'>
+                    <label class='custom-control-label cursor' for='user_id_${each.item_id}_${each.id}'>${each.employee.name} 
+                        <br><strong>${each.unique_id}</strong>
+                    </label>
+                </div>
+            </td>
+            <td width="25%" class='text-center font-16'>
+                <span class='period'>${each.period}</span>
+            </td>
+            <td class='font-16'>
+                <div class='row'>
+                    <div class='col-lg-6'><strong>Basic Salary</strong>:</div> 
+                    <div class='col-lg-6'>${each.salary.basic}</div>
+                    <div class='col-lg-6'><strong>Total Allowances</strong>:</div> 
+                    <div class='col-lg-6'>${each.salary.allowances}</div>
+                    <div class='col-lg-6'><strong>Less Deductions</strong>:</div> 
+                    <div class='col-lg-6'>${each.salary.deductions}</div>
+                    <div class='col-lg-12'>
+                        <hr class='mb-1 mt-1'>
+                    </div>
+                    <div class='col-lg-6 text-success'><strong>Net Salary:</strong></div> 
+                    <div class='col-lg-6 text-success'><strong>${each.salary.net}</strong></div>
+                </div>
+            </td>
+        </tr>
+    `).join(''));
+    $(`div[id="viewOnlyModal"] div[class~="modal-footer"]`).html(`
+        <button class="btn btn-light" data-dismiss="modal">Close</button>
+        <button class="btn btn-success" onclick="return bulk_validate_payslip_finalize()">Finalize Payslip Validation</button>
+    `);
 }
 
 var deductionsKeyControl = () => {

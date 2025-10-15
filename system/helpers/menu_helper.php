@@ -270,8 +270,8 @@
             <li class="dropdown">
                 <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
                 <ul class="dropdown-menu">
-                    <li><a class="nav-link" href="<?= $baseUrl ?>payroll-category">Allowance Category</a></li>
-                    <li><a class="nav-link" href="<?= $baseUrl ?>payroll">Payroll</a></li>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>payroll-category">Payroll Setup</a></li>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>payroll">Staff Payroll List</a></li>
                     <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Payslip List</a></li>
                     <?php if($accessObject->hasAccess("reports", "payslip")) { ?>
                     <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">Payroll Reports</a></li>
@@ -454,7 +454,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Payslip List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Staff Payslip List</a></li>
         </ul>
     </li>
     <?php } ?>
@@ -668,7 +668,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Payslip List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Staff Payslip List</a></li>
         </ul>
     </li>
     <?php } ?>

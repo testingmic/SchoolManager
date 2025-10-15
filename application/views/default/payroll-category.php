@@ -18,7 +18,7 @@ jump_to_main($baseUrl);
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $filter = (object) array_map("xss_clean", $_POST);
 
-$response->title = "Payroll Allowance Types";
+$response->title = "Payslip Setup";
 
 // end query if the user has no permissions
 if(!in_array("payroll", $clientFeatures)) {
@@ -76,11 +76,11 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
         <section class="section">
 
             <div class="section-header">
-                <h1>Allowance Types</h1>
+                <h1>'.$response->title.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'payroll">Payroll List</a></div>
-                    <div class="breadcrumb-item">Allowance Types</div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'payroll">Payroll</a></div>
+                    <div class="breadcrumb-item">'.$response->title.'</div>
                 </div>
             </div>
             <div data-backdrop="static" data-keyboard="false" class="modal fade" id="allowanceTypesModal">
@@ -105,7 +105,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                             <th>Type</th>
                                             <th>Description</th>
                                             <th>Is Statutory</th>
-                                            <th width="8%" align="center"></th>
+                                            <th width="12%" align="center"></th>
                                         </tr>
                                     </thead>
                                     <tbody>'.$staff_list.'</tbody>

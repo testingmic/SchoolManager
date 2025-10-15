@@ -1530,7 +1530,10 @@ class Users extends Myschoolgh {
 		// set the label and generate a new unique id
 		$label = $params->user_type === "student" ? "student_label" : ($params->user_type === "parent" ? "parent_label" : "staff_label");
 		$counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='{$params->user_type}'") + 1), $this->append_zeros);
-        $unique_id = $clientPrefs->labels->$label."/".$counter."/".date("Y");
+        
+		// set the label
+		$ilabel = $clientPrefs->labels->{$label};
+		$unique_id = (!empty($ilabel) ? $ilabel : "MSGH")."/".$counter."/".date("Y");
 
 		// get the last user id
 		$last_id = $this->lastRowId("users") + 1;

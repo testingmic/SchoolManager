@@ -19,7 +19,6 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $filter = (object) array_map("xss_clean", $_POST);
 
 $response->title = "Staff Payslips: {$appName}";
-$response->scripts = ["assets/js/filters.js"];
 
 // end query if the user has no permissions
 if(!in_array("payroll", $clientFeatures)) {
@@ -38,6 +37,8 @@ if(!$isPayableStaff) {
     echo json_encode($response);
     exit;
 }
+
+$response->scripts = ["assets/js/filters.js", "assets/js/payroll.js"];
 
 $generatePermission = $accessObject->hasAccess("generate", "payslip");
 $validatePayslip = $accessObject->hasAccess("validate", "payslip");
@@ -59,6 +60,8 @@ $allowances = 0;
 $deductions = 0;
 $net_salary = 0;
 
+$not_validated = [];
+
 foreach($payslips_array["data"] as $key => $each) {
     
     $basic_salary += $each->basic_salary;
@@ -75,6 +78,29 @@ foreach($payslips_array["data"] as $key => $each) {
         if($validatePayslip) {
             $validated = false;
             $action .= "&nbsp;<a onclick='return validate_payslip(\"{$each->item_id}\",\"{$baseUrl}payslips\")' class=\"btn btn-sm btn-outline-success mb-1\" title=\"Validate Payslip\" href=\"#\"><i class='fa fa-check'></i></a>";
+            $not_validated[] = [
+                'id' => $each->id,
+                'unique_id' => $each->emp_unique_id,
+                'user' => $each->emp_user_type,
+                'item_id' => $each->employee_id,
+                'period' => $each->payslip_month . " / " . $each->payslip_year,
+                'salary' => [
+                    'basic' => $each->basic_salary,
+                    'gross' => $each->gross_salary,
+                    'allowances' => $each->total_allowance,
+                    'deductions' => $each->total_deductions,
+                    'net' => $each->net_salary
+                ],
+                'employee' => [
+                    'id' => $each->employee_id,
+                    'name' => $each->emp_name,
+                    'phone' => $each->emp_phone,
+                    'email' => $each->emp_email,
+                    'image' => $each->emp_image,
+                    'unique_id' => $each->emp_unique_id,
+                    'user_type' => $each->emp_user_type
+                ]
+            ];
         }
     }
     
@@ -101,7 +127,6 @@ foreach($payslips_array["data"] as $key => $each) {
         <td>
             <div class='d-flex justify-content-start'>
                 <div class='mr-2'>
-                    <!--".(!$validated ? "<input name='selected' type='checkbox' value='{$each->id}' class='form-control cursor' style='height:20px'>" : "")."-->
                     <img class='rounded-2xl author-box-picture' width='40px' src=\"{$baseUrl}{$each->employee_info->image}\"></div>
                 <div>
                     <a class='text-uppercase' title='Click to view the details of this employee' href='#' onclick='return load(\"payroll-view/{$each->employee_id}\");'>{$each->employee_info->name}</a> 
@@ -119,6 +144,8 @@ foreach($payslips_array["data"] as $key => $each) {
     
 }
 
+$response->array_stream['not_validated'] = $not_validated;
+
 $response->html = '
     <section class="section">
         <div class="section-header">
@@ -129,13 +156,18 @@ $response->html = '
             </div>
         </div>
         <div class="row">
-            '.($generatePermission ? '
+            
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="text-right mb-2">
-                    <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'payslip-generate"><i class="fa fa-plus"></i> Generate Payslip</a>
-                    <a class="btn btn-sm btn-outline-success" href="'.$baseUrl.'payslip-bulkgenerate"><i class="fa fa-users"></i> Generate Multiple Payslip</a>
+                    '.($generatePermission ? '
+                        <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'payslip-generate"><i class="fa fa-plus"></i> Generate Payslip</a>
+                        <a class="btn btn-sm btn-outline-success" href="'.$baseUrl.'payslip-bulkgenerate"><i class="fa fa-users"></i> Generate Multiple Payslip</a>
+                    ' : null).'
+                    '.($validatePayslip ? '
+                        <a class="btn btn-sm btn-warning" onclick="return bulk_validate_payslip()"><i class="fa fa-check"></i> Validate Payslips</a>
+                    ' : null).'
                 </div>
-            </div>' : null).'
+            </div>
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
                     <div class="card-body">

@@ -94,6 +94,12 @@ body .btn {
     padding-left: 5px!important;
 }
 
+@media (min-width: 992px) {
+    .modal-lg, .modal-xl {
+        max-width: 900px;
+    }
+}
+
 /* Setup Flow Enhancements */
 .setup-tab-nav .nav-link {
     transition: all 0.3s ease;
@@ -1200,6 +1206,18 @@ textarea.custom_form-control {
 
 .btn-plain:hover {
     background-color: #f4f4f4!important;
+}
+
+.btn-outline-warning {
+    color: #ffc107 !important;
+    border-color: #ffc107 !important;
+}
+
+.btn-warning, .btn-warning.disabled {
+    box-shadow: 0 2px 6px #ffc473;
+    background-color: #ffa426;
+    border-color: #ffa426;
+    color: #fff !important;
 }
 
 .btn-warning:hover, .btn-warning:focus, 

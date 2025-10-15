@@ -74,7 +74,7 @@ if(empty($students_array_list)) {
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1><i class="fa fa-graduation-cap"></i> Assign Student Class</h1>
+            <h1><i class="fa fa-graduation-cap"></i> Re-Assign Student Class</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item"><a href="'.$baseUrl.'students">List Students</a></div>
