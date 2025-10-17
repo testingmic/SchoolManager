@@ -162,7 +162,7 @@ function admin_summary_cards($col = "col-lg-3 col-md-3", $append = false) {
         <div class="card card-statistic-1">
             <i class="fas small-hidden fa-user-graduate card-icon col-green"></i>
             <div class="card-wrap">
-                <div class="padding-20">
+                <div class="padding-15">
                     <div class="text-right">
                         <h3 data-attendance_count="student.Marked_Days" class="font-light mb-0">0</h3>
                         <span class="text-black font-13">Student Marked Days</span>
@@ -175,7 +175,7 @@ function admin_summary_cards($col = "col-lg-3 col-md-3", $append = false) {
         <div class="card card-statistic-1">
             <i class="fas small-hidden fa-user-tie card-icon col-orange"></i>
             <div class="card-wrap">
-                <div class="padding-20">
+                <div class="padding-15">
                     <div class="text-right">
                         <h3 data-attendance_count="staff.Marked_Days" class="font-light mb-0">0</h3>
                         <span class="text-black font-13">Staff marked Days</span>
@@ -188,7 +188,7 @@ function admin_summary_cards($col = "col-lg-3 col-md-3", $append = false) {
         <div class="card card-statistic-1">
             <i class="fas small-hidden fas fa-user-check card-icon col-blue card-icon"></i>
             <div class="card-wrap">
-                <div class="padding-20">
+                <div class="padding-15">
                     <div class="text-right">
                         <h3 data-attendance_count="attendanceRate" class="font-light mb-0">0</h3>
                         <span class="text-black">Attendance Rate</span>
@@ -204,7 +204,7 @@ function admin_summary_cards($col = "col-lg-3 col-md-3", $append = false) {
                 <div class="card card-statistic-1">
                     <i class="fas small-hidden fa-ticket-alt card-icon col-green"></i>
                     <div class="card-wrap">
-                        <div class="padding-20">
+                        <div class="padding-15">
                             <div class="text-right">
                                 <h3 data-attendance_count="ActiveSchoolDays" class="font-light mb-0">0</h3>
                                 <span class="text-black font-13">School Active Days</span>
