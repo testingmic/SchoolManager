@@ -1532,7 +1532,7 @@ h4 {
 }
 
 .timer-padding, .card-padding {
-    padding: 1.5rem !important;
+    padding: 1.3rem !important;
 }
 
 @media(max-width:1300px){
@@ -1556,6 +1556,16 @@ h4 {
     }
     .small-hidden {
         display: none !important;
+    }
+}
+
+@media (max-width: 390px) {
+    .timer-padding {
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0.6rem !important;
+        padding-bottom: 0.8rem !important;
+        padding-top: 1rem !important;
     }
 }
 
