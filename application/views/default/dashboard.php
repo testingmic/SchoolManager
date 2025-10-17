@@ -369,7 +369,6 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
         // assign the assignments list
         $calendar_data = '
-        <div class="col-lg-12">
             <div class="card">
                 <div class="card-header text-uppercase">
                     <h4>Academic Calendar</h4>
@@ -381,8 +380,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         ).'
                     </div>
                 </div>
-            </div>
-        </div>';
+            </div>';
 
         // load the wards list
         if($isParent) {
@@ -393,7 +391,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             // stream nothing if the student id has not been set yet
             if(!empty($session->student_id)) {
                 // load the class timetable for student / parent & The lessons if a teacher is logged in
-                $timetable = $timetableClass->class_timetable($session->student_class_id, $clientId, "today", null, "yes");    
+                $timetable = $timetableClass->class_timetable($session->student_class_id, $clientId, "today", null, "yes");
             } else {
                 // set parameters
                 $data_stream = "";
@@ -402,7 +400,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             // if the wards array is not empty
             if(empty($data->wards_list)) {
                 $wards_list = no_record_found("No Wards Found", "No ward has been added to your account yet.", null, "Student", false, "fas fa-user-graduate");
-                $expenses_list = "<div class='col-lg-12 col-md-12 mb-3'>";
+                $expenses_list = "<div class='mb-3'>";
                 $expenses_list .= no_record_found("No Wards Found", "No ward has been added to your account yet.", null, "Student", false, "fas fa-user-graduate");
                 $expenses_list .= "</div>";
             } else {
@@ -555,28 +553,26 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
             $assignment_list .= $calendar_data;
             $assignment_list .= '
-            <div class="col-lg-12 col-md-12 col-12 col-sm-12">
-                <div class="card">
-                    <div class="card-header text-uppercase">
-                        <h4>Class Assessments</h4>
-                    </div>
-                    <div class="card-body trix-slim-scroll">
-                        <div class="table-responsive">
-                            <table data-empty="" class="table table-striped small_datatable" data-rows_count="4">
-                                <thead>
-                                    <tr>
-                                        <th width="5%" class="text-center">#</th>
-                                        <th>Title</th>
-                                        <th>Due Date</th>
-                                        '.($can_Update_Assign ? '
-                                            <th width="20%">Participation</th>' : '<th>Awarded Mark</th>'
-                                        ).'
-                                        <th align="center"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>'.$assigments_list.'</tbody>
-                            </table>
-                        </div>
+            <div class="card">
+                <div class="card-header text-uppercase">
+                    <h4>Class Assessments</h4>
+                </div>
+                <div class="card-body trix-slim-scroll">
+                    <div class="table-responsive">
+                        <table data-empty="" class="table table-striped small_datatable" data-rows_count="4">
+                            <thead>
+                                <tr>
+                                    <th width="5%" class="text-center">#</th>
+                                    <th>Title</th>
+                                    <th>Due Date</th>
+                                    '.($can_Update_Assign ? '
+                                        <th width="20%">Participation</th>' : '<th>Awarded Mark</th>'
+                                    ).'
+                                    <th align="center"></th>
+                                </tr>
+                            </thead>
+                            <tbody>'.$assigments_list.'</tbody>
+                        </table>
                     </div>
                 </div>
             </div>';
@@ -1032,7 +1028,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     ''.($data_stream ? '
                         <div class="col-lg-3 mb-2 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
                             <div class="card card-statistic-1 border border-left-lg border-green border-left-solid bg-gradient-to-br from-green-300 to-green-100">
-                                <div class="flex items-center justify-between p-4">
+                                <div class="flex items-center justify-between card-padding">
                                     <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                         <i class="fas fa-user-check text-white text-xl"></i>
                                     </div>
@@ -1045,7 +1041,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                         <div class="col-lg-3 mb-2 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
                             <div class="card card-statistic-1 border border-left-lg border-danger border-left-solid bg-gradient-to-br from-red-300 to-red-100">
-                                <div class="flex items-center justify-between p-4">
+                                <div class="flex items-center justify-between card-padding">
                                     <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-red-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                         <i class="fas fa-user-alt-slash text-white text-xl"></i>
                                     </div>
@@ -1058,7 +1054,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                         <div class="col-lg-3 mb-2 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
                             <div class="card card-statistic-1 border border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
-                                <div class="flex items-center justify-between p-4">
+                                <div class="flex items-center justify-between card-padding">
                                     <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                         <i class="fas fa-user-edit text-white text-xl"></i>
                                     </div>
@@ -1071,7 +1067,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                         <div class="col-lg-3 mb-2 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
                             <div class="card card-statistic-1 border border-left-lg border-blue border-left-solid bg-gradient-to-br from-blue-300 to-blue-100">
-                                <div class="flex items-center justify-between p-4">
+                                <div class="flex items-center justify-between card-padding">
                                     <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                         <i class="fas fa-list text-white text-xl"></i>
                                     </div>
@@ -1199,11 +1195,11 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     </div>' : null).'
                 </div>
                 <div class="col-lg-8 col-md-12">
-                    <div class="row stick_to_top">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-2">
                         '.($isParent ?                             
-                            '<div class="col-lg-4 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
+                            '<div class="transition-all duration-300 transform hover:-translate-y-1">
                                 <div class="card card-statistic-1 border border-left-lg border-yellow border-left-solid bg-gradient-to-br from-yellow-300 to-yellow-100">
-                                    <div class="flex items-center justify-between p-4">
+                                    <div class="flex items-center justify-between card-padding">
                                         <div class="w-12 h-12 bg-gradient-to-br from-yellow-600 to-yellow-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                             <i class="fas fa-users text-white text-xl"></i>
                                         </div>
@@ -1214,9 +1210,9 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="transition-all duration-300 transform hover:-translate-y-1">
                                 <div class="card card-statistic-1 border border-left-lg border-green border-left-solid bg-gradient-to-br from-green-300 to-green-100">
-                                    <div class="flex items-center justify-between p-4">
+                                    <div class="flex items-center justify-between card-padding">
                                         <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                             <i class="fas fa-money-bill text-white text-xl"></i>
                                         </div>
@@ -1227,22 +1223,22 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-md-6 col-sm-12 transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="transition-all duration-300 transform hover:-translate-y-1">
                                 <div class="card card-statistic-1 border border-left-lg border-red border-left-solid bg-gradient-to-br from-red-300 to-red-100">
-                                    <div class="flex items-center justify-between p-4">
+                                    <div class="flex items-center justify-between card-padding">
                                         <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-red-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                             <i class="fas fa-money-bill text-white text-xl"></i>
                                         </div>
                                         <div class="card-wrap text-right">
                                             <h3 data-attendance_count="Payments" class="font-light text-black mb-0">'.(!empty($total_outstanding) ? number_format($total_outstanding, 2) : 0).'</h3>
-                                            <span class="text-dark">Total Outstanding</span>
+                                            <span class="text-dark">Outstanding</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>' : null
                         ).'
-                        '.($isTutorStudent ? $assignment_list : ($expenses_list ?? $admission_enquiry)).'
                     </div>
+                    '.($isTutorStudent ? $assignment_list : ($expenses_list ?? $admission_enquiry)).'
                 </div>
                 ' : '').'
             </div>

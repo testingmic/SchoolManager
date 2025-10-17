@@ -571,6 +571,7 @@ class Timetable extends Myschoolgh {
                 if($no_client_data === "yes") {
                     // init
                     $lessons_list = "<div class='row'>";
+                    $recordFound = false;
                     if(isset($data->allocations) && is_array($data->allocations)) {
 
                         // loop through the allocations list
@@ -585,7 +586,7 @@ class Timetable extends Myschoolgh {
                                 // configure the lesson start and end time
                                 $course->lesson_start_time = date("h:i A", strtotime("{$data->start_time} +{$start} minutes"));
                                 $course->lesson_end_time = date("h:i A", strtotime("{$data->start_time} +{$end} minutes"));
-
+                                $recordFound = true;
                                 // append the subjects list
                                 $lessons_list .= "
                                     <div class='col-lg-3 col-md-6'>
@@ -609,6 +610,9 @@ class Timetable extends Myschoolgh {
                     }
                     $lessons_list .= "</div>";
 
+                    if(!$recordFound) {
+                        $lessons_list = no_record_found("No Lessons Found", "You do not have any lessons to teach today.", null, "Lesson", false, "fas fa-book-reader");
+                    }
                     return $lessons_list;
                 }
                 
