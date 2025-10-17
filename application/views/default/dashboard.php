@@ -672,7 +672,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 '<div class="row">
                     <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
                         <div class="card card-statistic-1 border border-left-lg border-success border-left-solid bg-gradient-to-br from-green-200 to-green-100">
-                            <div class="flex items-center justify-between p-4">
+                            <div class="flex items-center justify-between card-padding">
                                 <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                     <i class="fas fa-user-graduate text-white text-xl"></i>
                                 </div>
@@ -685,7 +685,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     </div>
                     <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
                         <div class="card card-statistic-1 border border-left-lg border-primary border-left-solid bg-gradient-to-br from-blue-300 to-blue-100">
-                            <div class="flex items-center justify-between p-4">
+                            <div class="flex items-center justify-between card-padding">
                                 <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                     <i class="fas fa-user-secret text-white text-xl"></i>
                                 </div>
@@ -698,25 +698,25 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     </div>
                     <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
                         <div class="card card-statistic-1 border border-left-lg border-purple border-left-solid bg-gradient-to-br from-purple-300 to-purple-100">
-                            <div class="flex items-center justify-between p-4">
+                            <div class="flex items-center justify-between card-padding">
                                 <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                     <i class="fas fa-users text-white text-xl"></i>
                                 </div>
                                 <div class="card-wrap text-right">
                                     <h3 data-count="total_employees_count" class="text-black mb-0">0</h3>
-                                    <span class="text-dark">Employees / Users</span>
+                                    <span class="text-dark">Employees</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6 col-sm-6 transition-all duration-300 transform hover:-translate-y-1">
                         <div class="card card-statistic-1 border border-left-lg border-danger border-left-solid bg-gradient-to-br from-red-300 to-red-100">
-                            <div class="flex items-center justify-between p-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-red-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
+                            <div class="flex items-center justify-between timer-padding">
+                                <div class="w-12 h-12 d-sm-none bg-gradient-to-br from-red-600 to-red-600 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-lg">
                                     <i class="fas fa-clock text-white text-xl"></i>
                                 </div>
                                 <div class="card-wrap text-right">
-                                    <h3 data-attendance_count="Absent" class="font-light text-black mb-0">
+                                    <h3 data-attendance_count="Absent" class="font-light font-25 font-weight-600 text-black mb-0">
                                         <span class="plugin-clock">'.date("h : i A").'</span>
                                     </h3>
                                     <span class="text-dark">'.date("D, F d, Y").'</span>
@@ -823,10 +823,10 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="card mb-0">
                         <div class="card-body mb-0 pb-2 pr-1 pl-1 pt-2">
                             <h4 class="'.$iv[1].'">
-                                <span data-summary="'.$it.'" class="font-20">0.00</span>
+                                <span data-summary="'.$it.'" class="finance-font">0.00</span>
                             </h4>
                             <label class="text-black mb-0">'.$iv[0].'</label>
-                            <div><span class="text-warning font-12">This Term</span></div>
+                            <div class="small-hidden"><span class="text-warning font-12">This Term</span></div>
                         </div>
                     </div>
                 </div>';
@@ -852,13 +852,13 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-12 mb-2">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mb-2">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
                         '.$revenue_summary.'
                         <div class="mb-0 amount hidden text-center">
                             <div class="card mb-0">
                                 <div class="card-body mb-0 pr-1 pl-1 pb-2 pt-2">
                                     <h4 class="text-success">
-                                        <span class="font-20" '.($isAdmin ? 'data-count="total_expenditure"' : 'data-summary="arrears_paid"').'>0.00</span>
+                                        <span class="finance-font" '.($isAdmin ? 'data-count="total_expenditure"' : 'data-summary="arrears_paid"').'>0.00</span>
                                     </h4>
                                     <label class="text-black font-bold">'.($isAdmin ? 'Expenses' : 'Arrears Paid').'</label>
                                 </div>
@@ -868,10 +868,10 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card mb-0">
                                 <div class="card-body mb-0 pr-1 pl-1 pb-2 pt-2">
                                     <h4 class="text-gray">
-                                        <span class="font-20" data-count="arrears_total">0.00</span>
+                                        <span class="finance-font" data-count="arrears_total">0.00</span>
                                     </h4>
                                     <label class="text-black mb-0">Previous Arrears</label>
-                                    <div><span class="text-warning font-12">Previous Term(s)</span></div>
+                                    <div class="small-hidden"><span class="text-warning font-12">Previous Term(s)</span></div>
                                 </div>
                             </div>
                         </div>

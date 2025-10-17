@@ -988,7 +988,7 @@ class Payroll extends Myschoolgh {
      */
     public function saveallowance(stdClass $params) {
         
-        if(!in_array($params->type, ["Allowance", "Deduction"])) {
+        if(!in_array($params->allowance_type, ["Allowance", "Deduction"])) {
             return ["code" => 400, "data" => "Sorry! The type must either be Allowance or Deduction."];
         }
         
@@ -1001,25 +1001,40 @@ class Payroll extends Myschoolgh {
             $found = true;
         }
 
+        if(!empty($params->calculation_method) && !in_array($params->calculation_method, ["fixed_amount", "percentage_on_gross_total"])) {
+            return ["code" => 400, "data" => "Sorry! An invalid calculation method was parsed."];
+        }
+
         if(!$found) {
             $stmt = $this->db->prepare("INSERT INTO payslips_allowance_types 
-                SET default_amount = ?, name = ?, description = ?, type = ?, client_id = ?, is_statutory = ?");
+                SET default_amount = ?, name = ?, description = ?, type = ?, client_id = ?, is_statutory = ?,
+                    pre_tax_deduction = ?, calculation_method = ?, calculation_value = ?,
+                    subject_to_paye = ?, subject_to_ssnit = ?
+            ");
             $stmt->execute([
                 $params->default_amount ?? null, $params->name, $params->description ?? null, 
-                $params->type, $params->clientId, $params->is_statutory ?? 'No'
+                $params->allowance_type, $params->clientId, $params->is_statutory ?? 'No',
+                $params->pre_tax_deduction ?? 'No', $params->calculation_method ?? null, 
+                $params->calculation_value ?? null, $params->subject_to_paye ?? 'No', 
+                $params->subject_to_ssnit ?? 'No'
             ]);
             // log the user activity
-            $this->userLogs("payslip", $this->lastRowId("payslips_allowance_types"), null, "<strong>{$params->userData->name}</strong> added a new {$params->type} record under the payroll section", $params->userId);
+            $this->userLogs("payslip", $this->lastRowId("payslips_allowance_types"), null, "<strong>{$params->userData->name}</strong> added a new {$params->allowance_type} record under the payroll section", $params->userId);
         } else {
             $stmt = $this->db->prepare("UPDATE payslips_allowance_types 
-                SET default_amount = ?, name = ?, description = ?, type = ?, is_statutory = ? 
+                SET default_amount = ?, name = ?, description = ?, type = ?, is_statutory = ?
+                ".(!empty($params->pre_tax_deduction) ? ", pre_tax_deduction = '{$params->pre_tax_deduction}'" : "")."
+                ".(!empty($params->calculation_method) ? ", calculation_method = '{$params->calculation_method}'" : "")."
+                ".(!empty($params->calculation_value) ? ", calculation_value = '{$params->calculation_value}'" : "")."
+                ".(!empty($params->subject_to_paye) ? ", subject_to_paye = '{$params->subject_to_paye}'" : "")."
+                ".(!empty($params->subject_to_ssnit) ? ", subject_to_ssnit = '{$params->subject_to_ssnit}'" : "")."
                 WHERE id = ? AND client_id = ?");
             $stmt->execute([
                 $params->default_amount ?? null, $params->name, $params->description ?? null, 
-                $params->type, $params->is_statutory ?? 'No', $params->allowance_id, $params->clientId
+                $params->allowance_type, $params->is_statutory ?? 'No', $params->allowance_id, $params->clientId
             ]);
             // log the user activity
-            $this->userLogs("payslip", $params->allowance_id, null, "<strong>{$params->userData->name}</strong> updated the {$params->type} record under the payroll section", $params->userId);
+            $this->userLogs("payslip", $params->allowance_id, null, "<strong>{$params->userData->name}</strong> updated the {$params->allowance_type} record under the payroll section", $params->userId);
         }
 
         # set the output to return when successful

@@ -419,6 +419,42 @@ if(!$isSupport) {
     }
 
     /** Print Student Bill */
+    elseif(confirm_url_id(1, "user")) {
+
+        // get the parameters
+        $getObject = (array) $_GET;
+        $getObject = (object) array_map("xss_clean", $getObject);
+
+        // set the parameters
+        $item_param = (object) [
+            "userData" => $defaultUser,
+            "user_id" => $SITEURL[2] ?? null,
+            "clientId" => $defaultUser->client_id,
+            "client_data" => $defaultUser->client
+        ];
+
+        // if the user wants to print it out
+        if(isset($getObject->print)) {
+            $item_param->print = true;
+        } else {
+            $item_param->isPDF = true;
+        }
+
+        // create a new object
+        $usersObject = load_class("users", "controllers", $item_param);
+
+        $orientation = "P";
+        $user_record = $usersObject->generate_user_record($item_param);
+        $file_name = ($user_record['filename'] ?? 'User_Record');
+        $pages_content .= $user_record["record"] ?? "Sorry! No record was found.";
+
+        // if the user wants to print it out
+        if(isset($item_param->print) || empty($user_record["record"])) {
+            die($pages_content);
+        }
+    }
+
+    /** Print Student Bill */
     elseif(confirm_url_id(1, "student_bill")) {
 
         // get the parameters

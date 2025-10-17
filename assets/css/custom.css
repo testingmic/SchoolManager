@@ -1527,9 +1527,35 @@ h4 {
     max-height: 465px;
 }
 
+.d-sm-none {
+    display: flex !important;
+}
+
+.timer-padding, .card-padding {
+    padding: 1.5rem !important;
+}
+
+@media(max-width:1300px){
+    .timer-padding, .card-padding {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+
 @media(max-width:576px){
     .d-sm-none{
-        display:none !important
+        display: none !important
+    }
+    .timer-padding {
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0.8rem !important;
+    }
+    .card-padding {
+        padding: 0.8rem !important;
+    }
+    .small-hidden {
+        display: none !important;
     }
 }
 
@@ -1884,9 +1910,9 @@ body.dark table.dataTable img {
     }
 }
 
-/* .col-sm-6 {
+.col-sm-6 {
     width: 50%!important;
-} */
+}
 
 @media(max-width:425px) {
     .bus-item img {
@@ -2105,6 +2131,10 @@ body.dark table.dataTable img {
     height: 200px;
 }
 
+.finance-font {
+    font-size: 20px !important;
+}
+
 @media(max-width:900px) {
     .client_name {
         font-size: 40px;
@@ -2122,7 +2152,7 @@ body.dark table.dataTable img {
 
 @media(max-width: 768px) {
     .school-logo {
-        max-width: 150px;
+        max-width: 180px;
     }
     .school-details h3 {
         font-size: 19px;
@@ -2146,6 +2176,9 @@ body.dark table.dataTable img {
     }
     .sm-hide {
         display: none;
+    }
+    .finance-font {
+        font-size: 18px !important;
     }
 }
 

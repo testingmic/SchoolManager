@@ -316,3 +316,52 @@ function detectClashes($incoming, $courseMap, $existing, $tutors_names = []) {
 
     return $clashes;
 }
+
+/**
+ * Generate PDF Header
+ * 
+ * @param object $clientData
+ * @param string $baseUrl
+ * @param bool $isPDF
+ * @param bool $saveBill
+ * @return string
+ */
+function generate_pdf_header($clientData, $baseUrl, $isPDF = false, $saveBill = false) {
+
+    // get the client logo content
+    if(!empty($clientData->client_logo) && file_exists($clientData->client_logo)) {
+        $type = pathinfo($clientData->client_logo, PATHINFO_EXTENSION);
+        $logo_data = file_get_contents($clientData->client_logo);
+
+        // set the client logo
+        $client_logo = $saveBill ? $baseUrl . $clientData->client_logo : 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+    }
+
+    $html_string = '
+    <div style="margin:auto auto; '.($isPDF ? '' : "max-width:1050px;").' background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac; width:100%; font-family: \'Calibri Regular\'; width:100%; margin-bottom:2px">
+    <div class="row mb-3">
+        <div class="text-dark table-responsive bg-white col-md-12" style="padding-top:20px;width:90%;margin:auto auto;">
+            <div align="center">
+                '.(!empty($clientData->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "").'
+                <h2 style="color:#6777ef;font-size:25px;font-family:helvetica;padding:0px;margin:0px;"> 
+                    '.strtoupper($clientData->client_name).'
+                </h2>
+                <div>'.$clientData->client_address.'</div>
+                <div><strong>Tel:</strong> '.$clientData->client_contact.' / '.$clientData->client_secondary_contact.'</div>
+                <div><strong>Email:</strong> '.$clientData->client_email.'</div>
+            </div>
+            <div style="background-color: #2196F3 !important;margin-top:5px;border-bottom: 1px solid #dee2e6 !important;height:3px;"></div>
+            ';
+
+    // return the html string
+    return $html_string;
+}
+
+/**
+ * Generate PDF Footer
+ * 
+ * @return string
+ */
+function generate_pdf_footer() {
+    return '</div></div>';
+}

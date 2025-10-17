@@ -160,7 +160,7 @@ function admin_summary_cards($col = "col-lg-3 col-md-3", $append = false) {
     $html = '
     <div class="'.$col.' col-sm-6">
         <div class="card card-statistic-1">
-            <i class="fas fa-user-graduate card-icon col-green"></i>
+            <i class="fas small-hidden fa-user-graduate card-icon col-green"></i>
             <div class="card-wrap">
                 <div class="padding-20">
                     <div class="text-right">
@@ -173,7 +173,7 @@ function admin_summary_cards($col = "col-lg-3 col-md-3", $append = false) {
     </div>
     <div class="'.$col.' col-sm-6">
         <div class="card card-statistic-1">
-            <i class="fas fa-user-tie card-icon col-orange"></i>
+            <i class="fas small-hidden fa-user-tie card-icon col-orange"></i>
             <div class="card-wrap">
                 <div class="padding-20">
                     <div class="text-right">
@@ -186,7 +186,7 @@ function admin_summary_cards($col = "col-lg-3 col-md-3", $append = false) {
     </div>
     <div class="'.$col.' col-sm-6">
         <div class="card card-statistic-1">
-            <i class="fas fas fa-user-check card-icon col-blue card-icon"></i>
+            <i class="fas small-hidden fas fa-user-check card-icon col-blue card-icon"></i>
             <div class="card-wrap">
                 <div class="padding-20">
                     <div class="text-right">
@@ -202,7 +202,7 @@ function admin_summary_cards($col = "col-lg-3 col-md-3", $append = false) {
         $html .= '
             <div class="'.$col.' col-sm-6">
                 <div class="card card-statistic-1">
-                    <i class="fas fa-ticket-alt card-icon col-green"></i>
+                    <i class="fas small-hidden fa-ticket-alt card-icon col-green"></i>
                     <div class="card-wrap">
                         <div class="padding-20">
                             <div class="text-right">

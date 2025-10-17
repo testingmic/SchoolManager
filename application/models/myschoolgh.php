@@ -107,13 +107,16 @@ class Myschoolgh extends Models {
 	public function alter_table() {
 		
 		// prepare and execute the statement
-		$fix[] = ("ALTER TABLE `accounts_transaction` ADD COLUMN `assign_to_object` VARCHAR(255) DEFAULT NULL;");
-		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `is_statutory` VARCHAR(10) DEFAULT 'No';");
+		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `pre_tax_deduction` VARCHAR(255) DEFAULT 'No';");
+		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `calculation_method` VARCHAR(35) DEFAULT 'fixed_amount';");
+		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `calculation_value` VARCHAR(35) DEFAULT 0;");
+		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `subject_to_paye` VARCHAR(35) DEFAULT 'No';");
+		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `subject_to_ssnit` VARCHAR(35) DEFAULT 'No';");
 
 		foreach($fix as $stmt) {
 			try {
-				// $query = $this->db->prepare($stmt);
-				// $query->execute();
+				$query = $this->db->prepare($stmt);
+				$query->execute();
 			} catch(PDOException $e) {
 				// print $e->getMessage();
 			}

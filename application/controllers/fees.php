@@ -2685,14 +2685,6 @@ class Fees extends Myschoolgh {
             // set the save bill variable
             $saveBill = (bool) !empty($params->save_bill);
 
-            // get the client logo content
-            if(!empty($client->client_logo) && file_exists($client->client_logo)) {
-                $type = pathinfo($client->client_logo, PATHINFO_EXTENSION);
-                $logo_data = file_get_contents($client->client_logo);
-
-                // set the client logo
-                $client_logo = $saveBill ? $this->baseUrl . $client->client_logo : 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
-            }
             $counter_ = 0;
             $list_count = count($students_list);
             
@@ -2760,43 +2752,34 @@ class Fees extends Myschoolgh {
                 }
 
                 // set the bill form
-                $student_bill .= '<div style="margin:auto auto; '.($isPDF ? '' : "max-width:1050px;").';background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: \'Calibri Regular\'; width:100%;margin-bottom:2px">
-                    <div class="row mb-3">
-                        <div class="text-dark table-responsive bg-white col-md-12" style="padding-top:20px;width:90%;margin:auto auto;">
-                            <div align="center">
-                                '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "").'
-                                <h2 style="color:#6777ef;font-size:25px;font-family:helvetica;padding:0px;margin:0px;"> '.strtoupper($client->client_name).'</h2>
-                                <div>'.$client->client_address.'</div>
-                                '.(!empty($client->client_contact) ? "<div><strong>Tel:</strong> {$client->client_contact} / {$client->client_secondary_contact}</div>" : "").'
-                                '.(!empty($client->client_email) ? "<div><strong>Email:</strong> {$client->client_email}</div>" : "").'
-                            </div>
-                            <div style="background-color: #2196F3 !important;margin-top:5px;border-bottom: 1px solid #dee2e6 !important;height:3px;"></div>
-                            <div style="margin-top:0px;">
-                            <table border="0" width="100%" cellpadding="5px">
-                                <tr>
-                                    <td align="center" colspan="2">
-                                        <h3 style="border-bottom:solid 1px #ccc;padding:0px;padding-bottom:5px;margin:0px;font-family:\'Calibri Regular\'">OFFICIAL STUDENT BILL</h3>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td width="50%">
-                                        <h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Student Details</h3>
-                                        <div style="text-transform:uppercase;margin-bottom:5px;">Name: <strong>'.$studentRecord->name.'</strong></div>
-                                        <div style="text-transform:uppercase;margin-bottom:5px;">Student ID: <strong>'.$studentRecord->unique_id.'</strong></div>
-                                        <div style="text-transform:uppercase;margin-bottom:5px;">Class: <strong>'.
-                                        (!empty($new_class_name) ? $new_class_name : $studentRecord->class_name).'
-                                        </strong></div>
-                                    </td>
-                                    <td width="50%" align="right">
-                                        <h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Academics</h3>
-                                        <div style="text-transform:uppercase;margin-bottom:5px;">Year: <strong>'.$params->academic_year.'</strong></div>
-                                        <div style="text-transform:uppercase;margin-bottom:5px;">'.$academicSession.': <strong>'.$params->academic_term.'</strong></div>
-                                        <div style="margin-bottom:5px;">'.date("Y-m-d h:ia").'</div>
-                                    </td>
-                                </tr>
-                            </table>
-                            <style>table.table tr td {border:solid 1px #dad7d7;padding:5px;}</style>
-                            <div style="background-color: #ccc !important;margin-top:1px;border-bottom: 1px solid #ccc !important;height:0.5px;margin-bottom:5px;"></div>
+                $student_bill .= generate_pdf_header($client, $this->baseUrl, $isPDF, $saveBill);
+                $student_bill .= '
+                    <div style="margin-top:0px;">
+                        <table border="0" width="100%" cellpadding="5px">
+                            <tr>
+                                <td align="center" colspan="2">
+                                    <h3 style="border-bottom:solid 1px #ccc;padding:0px;padding-bottom:5px;margin:0px;font-family:\'Calibri Regular\'">OFFICIAL STUDENT BILL</h3>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="50%">
+                                    <h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Student Details</h3>
+                                    <div style="text-transform:uppercase;margin-bottom:5px;">Name: <strong>'.$studentRecord->name.'</strong></div>
+                                    <div style="text-transform:uppercase;margin-bottom:5px;">Student ID: <strong>'.$studentRecord->unique_id.'</strong></div>
+                                    <div style="text-transform:uppercase;margin-bottom:5px;">Class: <strong>'.
+                                    (!empty($new_class_name) ? $new_class_name : $studentRecord->class_name).'
+                                    </strong></div>
+                                </td>
+                                <td width="50%" align="right">
+                                    <h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Academics</h3>
+                                    <div style="text-transform:uppercase;margin-bottom:5px;">Year: <strong>'.$params->academic_year.'</strong></div>
+                                    <div style="text-transform:uppercase;margin-bottom:5px;">'.$academicSession.': <strong>'.$params->academic_term.'</strong></div>
+                                    <div style="margin-bottom:5px;">'.date("Y-m-d h:ia").'</div>
+                                </td>
+                            </tr>
+                        </table>
+                        <style>table.table tr td {border:solid 1px #dad7d7;padding:5px;}</style>
+                        <div style="background-color: #ccc !important;margin-top:1px;border-bottom: 1px solid #ccc !important;height:0.5px;margin-bottom:5px;"></div>
                             <table border="0" class="table table-md" width="100%">
                                 <tr>
                                     <td style="font-weight:bold;font-size:13px">#</td>
@@ -2966,22 +2949,21 @@ class Fees extends Myschoolgh {
                                     </tr>                         
                                     ";
                                 }
-                $student_bill .= '
-                                </table>
-                            </div>
-                        </div>
-                        <div align="center" style="margin:40px; font-size:14px;">
-                            <div style="border:solid 1px #ccc;padding:10px;border-radius:5px;">
-                                '.(!empty($billingPref->additional_info) ? "<div style='border-bottom:solid 1px #ccc;padding-bottom:10px;margin-bottom:10px;'>{$billingPref->additional_info}</div>" : "").'
-                                '.(!empty($billingPref->account_info) ? "<div>{$billingPref->account_info}</div>" : "").'
-                                '.(!empty($billingPref->mobile_money) ? "<div style='border-top:solid 1px #ccc;padding-top:10px;margin-top:10px;'><strong>Mobile Money:</strong> {$billingPref->mobile_money}</div>" : "").'
-                            </div>
-                        </div>
-                        <div style="padding:0px;margin-top:10px; text-align:center; padding-bottom:10px;color:#6777ef;">
-                            <em>'.$client->client_slogan.'</em>
+                    $student_bill .= '
+                            </table>
                         </div>
                     </div>
-                </div>';
+                    <div align="center" style="margin:40px; font-size:14px;">
+                        <div style="border:solid 1px #ccc;padding:10px;border-radius:5px;">
+                            '.(!empty($billingPref->additional_info) ? "<div style='border-bottom:solid 1px #ccc;padding-bottom:10px;margin-bottom:10px;'>{$billingPref->additional_info}</div>" : "").'
+                            '.(!empty($billingPref->account_info) ? "<div>{$billingPref->account_info}</div>" : "").'
+                            '.(!empty($billingPref->mobile_money) ? "<div style='border-top:solid 1px #ccc;padding-top:10px;margin-top:10px;'><strong>Mobile Money:</strong> {$billingPref->mobile_money}</div>" : "").'
+                        </div>
+                    </div>
+                    <div style="padding:0px;margin-top:10px; text-align:center; padding-bottom:10px;color:#6777ef;">
+                        <em>'.$client->client_slogan.'</em>
+                    </div>';
+                $student_bill .= generate_pdf_footer();
                             
                 $student_bill .= ($counter_ < $list_count) && $isPDF ? "<div class=\"page_break\"></div>" : null;
 

@@ -98,6 +98,10 @@ class Models {
         "invalid-prevdate" => "Sorry! The start date must not exceed the end date.",
     ];
 
+    public $payroll_frequency_list = [
+        "Weekly", "Bi-Weekly", "Monthly"
+    ];
+
     public $date_range;
     public $info_to_stream;
     public $prevstart_date;
@@ -448,6 +452,13 @@ class Models {
         </script>';
     }
 
+    /*
+     * Accepted Period
+     * 
+     * @param String $n_session
+     * 
+     * @return Array
+     */
     public function accepted_period($n_session = "Term") {
         $this->accepted_period = [
             "this_term" => [
