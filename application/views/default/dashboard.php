@@ -730,7 +730,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 $response->html .= '
                 <div class="col-lg-12">
                     <div class="row">
-                    <div class="col-lg-8 col-md-7 mb-2">
+                    <div class="col-lg-8 col-md-7 small-hidden mb-2">
                         <div class="card rounded-2xl">
                             <div class="card-body school-details" style="min-height:235px">
                                 <div class="row">
