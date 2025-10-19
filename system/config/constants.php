@@ -28,7 +28,7 @@ defined('TIME_PERIOD')      OR define('TIME_PERIOD', 60);
 defined('RANDOM_STRING')    OR define('RANDOM_STRING', 16);
 defined('ATTEMPTS_NUMBER')  OR define('ATTEMPTS_NUMBER', 7);
 
-defined('DEFAULT_PASS')     OR define('DEFAULT_PASS', 'Password1');
+defined('DEFAULT_PASS')     OR define('DEFAULT_PASS', '?Pa$$word!');
 defined('ADMINISTRATOR')    OR define('ADMINISTRATOR', array(1000, 1001));
 defined('DEVELOPER')        OR define('DEVELOPER', array(1001));
 

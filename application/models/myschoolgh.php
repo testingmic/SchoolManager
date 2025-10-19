@@ -48,7 +48,7 @@ class Myschoolgh extends Models {
 	public $last_term_ends;
 	public $defaultClientData;
 	public $dashboardPath;
-	public $defaultPassword = 'Pa$$word!';
+	public $defaultPassword;
 
 	public $thisUser;
 	public $color_set = [
@@ -67,6 +67,8 @@ class Myschoolgh extends Models {
 	public function __construct() {
 
 		parent::__construct();
+
+		$this->defaultPassword = DEFAULT_PASS;
 		
 		global $myschoolgh, $session, $dbConnected;
 
