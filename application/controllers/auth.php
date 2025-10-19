@@ -76,6 +76,8 @@ class Auth extends Myschoolgh {
                     // using the foreach to fetch the information
                     while($results = $stmt->fetch(PDO::FETCH_OBJ)) {
 
+                        print_r($results);
+
                         // verify the password
                         if(password_verify($params->password, $results->password)) {
 
