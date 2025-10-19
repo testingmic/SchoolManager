@@ -73,7 +73,6 @@ class Auth extends Myschoolgh {
                 # if the user has not yet hit the maximum attempt within the last 1 hour
                 if(!$loginAttempt) {
 
-                    print password_hash(DEFAULT_PASS, PASSWORD_DEFAULT);
                     // using the foreach to fetch the information
                     while($results = $stmt->fetch(PDO::FETCH_OBJ)) {
 
