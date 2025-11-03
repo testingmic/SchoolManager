@@ -1,3 +1,5 @@
+var column_to_use = "tr",
+    data_to_use = "table_view";
 var remove_grading_mark = (grading_id) => {
     $(`div[class~="grade_item"][data-grading_id='${grading_id}']`).remove();
     let grades_count = $(`div[id="grading_system_list"] div[class~="grade_item"]`).length;
@@ -36,6 +38,20 @@ var add_grading_mark = () => {
         </div>`;
     $(`button[id="save_grading_mark"]`).removeClass("hidden");
     $(`div[id="grading_system_list"]`).append(grade_html);
+}
+
+// calculate the screen width size
+var calculate_screen_width = () => {
+    let screen_width = $(window).width();
+    if(screen_width < 768) {
+        column_to_use = "div";
+        data_to_use = "mobile_view";
+        $(`div[data-view_port='desktop']`).addClass("hidden");
+    } else {
+        column_to_use = "tr";
+        data_to_use = "table_view";
+        $(`div[data-view_port='desktop']`).removeClass("hidden");
+    }
 }
 
 var remove_report_column = (column_id) => {
@@ -256,7 +272,6 @@ var download_report_csv = () => {
         if (response.code == 200) {
             $(`div[data-option_id="upload_file"]`).removeClass("hidden");
             setTimeout(() => {
-                console.log(`${baseUrl}${response.data.result}`);
                 window.open(`${baseUrl}${response.data.result}`);
             }, 500);
         } else {
@@ -290,14 +305,14 @@ var save_terminal_report = () => {
                     student_id = $(`span[data-student_row_id="${row_id}"][data-student_id]`).attr("data-student_id"),
                     remarks = $(`input[data-input_row_id="${row_id}"][data-input_method='remarks']`).val(),
 
-                    classwork = $(`tr[data-student_row_id="${row_id}"] input[data-input_method="classwork"]`)?.val() ?? 0,
-                    homework = $(`tr[data-student_row_id="${row_id}"] input[data-input_method="homework"]`)?.val() ?? 0,
-                    test = $(`tr[data-student_row_id="${row_id}"] input[data-input_method="test"]`)?.val() ?? 0,
-                    project = $(`tr[data-student_row_id="${row_id}"] input[data-input_method="project"]`)?.val() ?? 0,
-                    midterm_exams = $(`tr[data-student_row_id="${row_id}"] input[data-input_method="midterm_exams"]`)?.val() ?? 0;
+                    classwork = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="classwork"]`)?.val() ?? 0,
+                    homework = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="homework"]`)?.val() ?? 0,
+                    test = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="test"]`)?.val() ?? 0,
+                    project = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="project"]`)?.val() ?? 0,
+                    midterm_exams = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="midterm_exams"]`)?.val() ?? 0;
                     
                 if(typeof name !== 'undefined') {
-                    ss[i] = `name=${name}|id=${student_id}|remarks=${remarks}|sba=${sba}|marks=${marks}|classwork=${classwork}|homework=${homework}|test=${test}|project=${project}|midterm_exams=${midterm_exams}`;
+                    ss[i] = `name=${name}|id=${student_id}|remarks=${remarks}|sba=${sba||0}|marks=${marks||0}|classwork=${classwork||0}|homework=${homework||0}|test=${test||0}|project=${project||0}|midterm_exams=${midterm_exams||0}`;
                 }
             });
             let rs = {
@@ -359,8 +374,9 @@ var load_report_csv_file_data = (formdata) => {
         processData: false,
         success: function(response) {
             if (response.code === 200) {
+                calculate_screen_width();
                 $(`div[id="terminal_reports"] input[name="upload_report_file"]`).val("");
-                $(`div[id='summary_report_sheet_content']`).html(response.data.result);
+                $(`div[id='summary_report_sheet_content']`).html(response.data.result[data_to_use]);
                 total_score_checker();
                 calculate_sba_score();
             } else {
@@ -374,7 +390,6 @@ var load_report_csv_file_data = (formdata) => {
             $.pageoverlay.hide();
         },
         error: function(err) {
-            console.log(err);
             swal({
                 text: "Sorry! An unknown file type was uploaded.",
                 icon: "error",
@@ -385,7 +400,7 @@ var load_report_csv_file_data = (formdata) => {
 }
 
 var calculate_sba_score = () => {
-    $(`div[id="summary_report_sheet_content"] tr[data-student_row_id] input[data-input_type='marks']`).on("input", function() {
+    $(`div[id="summary_report_sheet_content"] ${column_to_use}[data-student_row_id] input[data-input_type='marks']`).on("input", function() {
         let input = $(this);
         let row_id = input.attr("data-input_row_id");
         let max_percentage = input.attr("data-max_percentage");
@@ -408,8 +423,6 @@ var calculate_sba_score = () => {
 
         let sba_score = (row_score * sba_percentage) / 100;
         sba_input.val(sba_score);
-
-        console.log({max_percentage, row_score, sba_percentage, sba_score});
     });
 }
 
@@ -418,8 +431,9 @@ var manual_report_upload = () => {
         course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
     $.post(`${baseUrl}api/terminal_reports/manual_report_upload`, { class_id, course_id }).then((response) => {
         if (response.code == 200) {
+            calculate_screen_width();
             $(`div[id="terminal_reports"] input[name="upload_report_file"]`).val("");
-            $(`div[id='summary_report_sheet_content']`).html(response.data.result);
+            $(`div[id='summary_report_sheet_content']`).html(response.data.result[data_to_use]);
             total_score_checker();
             calculate_sba_score();
         } else {
@@ -496,6 +510,8 @@ $(`div[id="terminal_reports"] select[name="course_id"]`).on("change", function()
                 $(`div[data-option_id="upload_file"]`).removeClass("hidden");
                 $(`button[type="download_csv"]`).prop("disabled", false);
             }
+            $(`div[id='summary_report_sheet_content']`).html(``);
+            calculate_screen_width();
         });
     } else {
         $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", true);

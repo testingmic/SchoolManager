@@ -73,7 +73,7 @@ $response->html = '
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
-                    <div class="card-body">
+                    <div class="card-body p-1">
                         <div class="padding-20">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">

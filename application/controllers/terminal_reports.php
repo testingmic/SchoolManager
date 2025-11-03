@@ -537,6 +537,8 @@ class Terminal_reports extends Myschoolgh {
                 return ["code" => 400, "data" => "Ensure you have uploaded the sample CSV File with the predefined headers."];
             }
         }
+
+        $mobile_view = "<div class='row'>";
         
         // draw a table with the headers
         $report_table = "<div style='max-width: 100%' class='table-responsive trix-slim-scroll'>";
@@ -553,6 +555,7 @@ class Terminal_reports extends Myschoolgh {
 
         // get the preset dataset
         $preset_dataset = !empty($params->r_csv_data) && !empty($params->preset_dataset) ? $params->preset_dataset : [];
+        $remarks_dataset = !empty($params->r_csv_data) && !empty($params->remarks_dataset) ? $params->remarks_dataset : [];
 
         // set the files
         foreach($complete_csv_data as $key => $result) {
@@ -560,7 +563,20 @@ class Terminal_reports extends Myschoolgh {
             if(empty($result[2]) && empty($result[3])) continue;
 
             $report_table .= "<tr data-student_row_id='{$key}'>";
+
+            $mobile_view .= "<div class='col-12 col-md-6 col-lg-3 pr-2 pl-2' data-student_row_id='{$key}'>";
+
+            // set the name as the header
+            $mobile_view .= "<div class='card'>";
             
+            $mobile_view .= "<div class='card-header pb-0 flex-column'>";
+            $mobile_view .= "<div><h5 class='text-primary mb-0 pb-0'>".strtoupper($result[0])."</h5></div>";
+            $mobile_view .= "<div class='text-muted'>".$result[1]."</div>";
+            $mobile_view .= "</div>";
+
+            $mobile_view .= "<div class='card-body p-2'>";
+            
+
             foreach($result as $kkey => $kvalue) {
                 if(in_array($kkey, [2])) continue;
                 
@@ -578,23 +594,47 @@ class Terminal_reports extends Myschoolgh {
                         if($column == 'examination') {
                             $kvalue = $preset_dataset[$result[1]]['marks'] ?? 0;
                             $kvalue = $kvalue > 0 ? round(($kvalue / $columns["columns"][$file_headers[$kkey]]['percentage']) * 100) : 0;
+                            $kvalue = empty($kvalue) ? '' : $kvalue;
                         }
                     }
+
+                    $iName = $file_headers[$kkey] == 'SCHOOL BASED ASSESSMENT' ? 'SBA' : $file_headers[$kkey];
 
                     $report_table .= "<td>
                     <input style='min-width:100px;' ".($columns["columns"][$file_headers[$kkey]] == "100" ? 
                         "disabled='disabled' data-input_total_id='{$key}'" : 
                         "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." 
-                        class='form-control pl-0 pr-0 font-18 text-center' data-max_percentage='{$columns["columns"][$file_headers[$kkey]]['percentage']}' name='{$column}' min='0' max='1000' type='number' value='{$kvalue}' {$readOnly}>
+                        class='form-control pl-0 pr-0 font-18 text-center' data-max_percentage='{$columns["columns"][$file_headers[$kkey]]['percentage']}' 
+                        name='{$column}' min='0' max='1000' type='number' value='{$kvalue}' {$readOnly}>
                     </td>";
 
+                    $mobile_view .= "<div class='d-flex justify-content-between items-center mb-2'>";
+                    $mobile_view .= "<div>".ucwords($iName)."</div>";
+                    $mobile_view .= "<div>
+                    <input style='min-width:100px;' ".($columns["columns"][$file_headers[$kkey]] == "100" ? 
+                        "disabled='disabled' data-input_total_id='{$key}'" : 
+                        "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." 
+                        class='form-control pl-0 pr-0 font-18 text-center' data-max_percentage='{$columns["columns"][$file_headers[$kkey]]['percentage']}' 
+                        name='{$column}' min='0' max='1000' type='number' value='{$kvalue}' {$readOnly}>
+                    </div>";
+                    $mobile_view .= "</div>";
+
                 } elseif($file_headers[$kkey] == "TEACHER REMARKS") {
-                    $report_table .= "<td><input style='min-width:300px' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'></td>";
+
+                    $kvalue = $remarks_dataset[$result[1]] ?? '';
+                
+                    $report_table .= "<td><input placeholder='Enter your remarks' style='min-width:300px' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'></td>";
+                
+                    $mobile_view .= "<input placeholder='Enter your remarks' style='width:100%' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'>";
+                
                 } elseif($file_headers[$kkey] == "TEACHER ID") {
                     $report_table .= "<td><span style='font-weight-bold font-17'>".(empty($kvalue) ? $params->userData->unique_id : $kvalue)."</span></td>";                    
                 } elseif(in_array($file_headers[$kkey], ['SUBJECT', 'STUDENT', 'STUDENT ID'])) {
                     $data_key = "data-".strtolower(str_ireplace(" ", "_", $file_headers[$kkey]))."='{$kvalue}'";
                     $report_table .= "<td class='text-left'><span data-student_row_id='{$key}' {$data_key}>{$kvalue}</span></td>";
+                    
+                    $mobile_view .= "<div class='text-left'><span data-student_row_id='{$key}' {$data_key}></span></div>";
+
                 } else {
                     $theValue = $sba_percentage_lower[strtolower($file_headers[$kkey])] ?? '';
                     $kvalue = !empty($kvalue) ? $kvalue : '';
@@ -602,6 +642,7 @@ class Terminal_reports extends Myschoolgh {
 
                     if(isset($preset_dataset[$result[1]])) {
                         $kvalue = $preset_dataset[$result[1]][$iname] ?? '';
+                        $kvalue = empty($kvalue) ? '' : $kvalue;
                     }
 
                     $report_table .= "<td class=''>
@@ -610,9 +651,23 @@ class Terminal_reports extends Myschoolgh {
                         data-input_method='{$iname}' data-input_type='marks' data-input_row_id='{$key}' 
                         class='form-control text-center' value='{$kvalue}'>
                         </div></td>";
+
+                    $mobile_view .= "<div class='d-flex justify-content-between items-center mb-2'>";
+                    $mobile_view .= "<div>".ucwords(str_ireplace("_", " ", $file_headers[$kkey]))."</div>";
+                    $mobile_view .= "<div><input style='width:80px; font-size:18px;' type='number' data-max_percentage='{$theValue}'
+                    data-input_method='{$iname}' data-input_type='marks' data-input_row_id='{$key}' 
+                    class='form-control text-center' value='{$kvalue}'></div>";
+                    $mobile_view .= "</div>";
+
                 }
 
             }
+
+            $mobile_view .= "</div>";
+            $mobile_view .= "</div>";
+
+            $mobile_view .= "</div>";
+
             $report_table .= "</tr>";
         }
         $report_table .= "</tbody>";
@@ -621,22 +676,28 @@ class Terminal_reports extends Myschoolgh {
 
         $sba_percentage_lower['Exams'] = 100;
 
-        $report_table .= "<div class='text-right mt-3'>";
-        $report_table .= "<button onclick='return save_terminal_report()' class='btn btn-outline-success'>Save Class Results</button>";
-        $report_table .= "</div>";
+        $footer_table = "<div class='text-right mt-3'>";
+        $footer_table .= "<button onclick='return save_terminal_report()' class='btn btn-outline-success'>Save Class Results</button>";
+        $footer_table .= "</div>";
 
-        $report_table .= "<div class='d-flex justify-content-between border-top border-primary mt-3'>";
-        $report_table .= "<div class='text-left mt-3'>";
+        $footer_table .= "<div class='d-flex justify-content-between border-top border-primary mt-3'>";
+        $footer_table .= "<div class='text-left mt-3'>";
         foreach($sba_percentage_lower as $key => $value) {
-            $report_table .= "<span class='badge badge-success mr-2 mb-1 font-16'>".ucwords(str_ireplace("_", " ", $key)).": {$value}%</span>";
+            $footer_table .= "<span class='badge badge-success mr-2 mb-1 font-16'>".ucwords(str_ireplace("_", " ", $key)).": {$value}%</span>";
         }
-        $report_table .= "</div>";
-        $report_table .= "</div>";
+        $footer_table .= "</div>";
+        $footer_table .= "</div>";
+
+        $mobile_view .= "</div>";
+
+        // append the footer table to the report table and mobile view
+        $report_table .= $footer_table;
+        $mobile_view .= $footer_table;
 
         // save the information in a session
         $this->session->set("terminal_report_{$params->class_id}_{$params->course_id}", ["headers" => $headers, "students" => $complete_csv_data]);
 
-        return ["data" => $report_table];
+        return ["data" => ["table_view" => $report_table, "mobile_view" => $mobile_view]];
 
     }
 
@@ -687,14 +748,17 @@ class Terminal_reports extends Myschoolgh {
             $scores = $item['data'][0]->scores_list;
             
             $students_list = [];
+            $remarks_list = [];
 
             foreach($scores as $score) {
                 $students_list[$score->student_unique_id] = [];
+                $remarks_list[$score->student_unique_id] = $score->class_teacher_remarks;
                 foreach($score->scores as $i => $v) {
                     $students_list[$score->student_unique_id][$i] = $v['score'];
                 }
             }
 
+            $params->remarks_dataset = $remarks_list;
             $params->preset_dataset = $students_list;
         }
 
@@ -798,16 +862,16 @@ class Terminal_reports extends Myschoolgh {
                         }
                         $scores_array[$student_id]["marks"][] = [
                             "item" => $spl[0],
-                            "score" => $spl[1]
+                            "score" => empty($spl[1]) ? 0 : $spl[1]
                         ];
                         if(!isset($scores_array[$student_id]["total_score"])) {
                             $scores_array[$student_id]["total_score"] = 0;
                             $scores_array[$student_id]["total_percentage"] = 0;
                         }
                         if(in_array($spl[0], ['sba', 'marks'])) {
-                            $scores_array[$student_id]["total_percentage"] += $spl[1];
+                            $scores_array[$student_id]["total_percentage"] += empty($spl[1]) ? 0 : $spl[1];
                         }
-                        $scores_array[$student_id]["total_score"] += $spl[1];
+                        $scores_array[$student_id]["total_score"] += empty($spl[1]) ? 0 : $spl[1];
                     }
                 }
             }
@@ -876,10 +940,6 @@ class Terminal_reports extends Myschoolgh {
                 );
 
             }
-
-            // insert the activity into the cron_scheduler
-            // $query = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = '{$params->clientId}', item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
-            // $query->execute([$report_id, $params->userId, "terminal_report"]);
 
             // delete the session
             $this->session->remove("terminal_report_{$report->class_id}_{$report->course_id}");
