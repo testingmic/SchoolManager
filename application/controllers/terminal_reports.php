@@ -564,7 +564,7 @@ class Terminal_reports extends Myschoolgh {
 
             $report_table .= "<tr data-student_row_id='{$key}'>";
 
-            $mobile_view .= "<div class='col-12 col-md-6 col-lg-3 pr-2 pl-2' data-student_row_id='{$key}'>";
+            $mobile_view .= "<div class='col-12 col-md-6 col-lg-4 mb-2 pr-2 pl-2' data-student_row_id='{$key}'>";
 
             // set the name as the header
             $mobile_view .= "<div class='card'>";
