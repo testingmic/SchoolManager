@@ -108,6 +108,8 @@ class Myschoolgh extends Models {
 	 */
 	public function alter_table() {
 		
+		if(empty($this->db)) return true;
+
 		// prepare and execute the statement
 		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `pre_tax_deduction` VARCHAR(255) DEFAULT 'No';");
 		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `calculation_method` VARCHAR(35) DEFAULT 'fixed_amount';");

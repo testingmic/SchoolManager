@@ -79,7 +79,7 @@ function format_date_of_birth($date_of_birth) {
  * @return string
  */
 function forms_header($title, $class = "col-lg-12") {
-    return '<div class="'.$class.' border-bottom border-primary text-primary mb-3"><h5>'.$title.'</h5></div>';
+    return '<div class="'.$class.' border-bottom border-primary text-primary mb-3 mt-1"><h5>'.$title.'</h5></div>';
 }
 
 /**

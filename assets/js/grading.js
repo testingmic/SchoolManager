@@ -254,7 +254,7 @@ var download_report_csv = () => {
         course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
     $.get(`${baseUrl}api/terminal_reports/download_csv`, { class_id, course_id }).then((response) => {
         if (response.code == 200) {
-            $(`div[id='upload_file']`).removeClass("hidden");
+            $(`div[data-option_id="upload_file"]`).removeClass("hidden");
             setTimeout(() => {
                 console.log(`${baseUrl}${response.data.result}`);
                 window.open(`${baseUrl}${response.data.result}`);
@@ -361,6 +361,7 @@ var load_report_csv_file_data = (formdata) => {
                 $(`div[id="terminal_reports"] input[name="upload_report_file"]`).val("");
                 $(`div[id='summary_report_sheet_content']`).html(response.data.result);
                 total_score_checker();
+                calculate_sba_score();
             } else {
                 swal({
                     text: response.data.result,
@@ -378,6 +379,53 @@ var load_report_csv_file_data = (formdata) => {
                 icon: "error",
             });
             $.pageoverlay.hide();
+        }
+    });
+}
+
+var calculate_sba_score = () => {
+    $(`div[id="summary_report_sheet_content"] tr[data-student_row_id] input[data-input_type='marks']`).on("input", function() {
+        let input = $(this);
+        let row_id = input.attr("data-input_row_id");
+        let max_percentage = input.attr("data-max_percentage");
+        let input_value = parseInt(input.val());
+        input_value = isNaN(input_value) ? 0 : input_value;
+        if(input_value > max_percentage) {
+            input.val(max_percentage);
+            input_value = max_percentage;
+            input.val(input_value);
+        }
+
+        let row_score = 0;
+        $.each($(`input[data-input_row_id="${row_id}"][data-input_type='marks']`), function(i, e) {
+            let value = parseInt($(this).val());
+            row_score += isNaN(value) ? 0 : value;
+        });
+
+        let sba_input = $(`input[name="school_based_assessment"][data-input_row_id="${row_id}"]`);
+        let sba_percentage = sba_input.attr("data-max_percentage");
+
+        let sba_score = (row_score * sba_percentage) / 100;
+        sba_input.val(sba_score);
+
+        console.log({max_percentage, row_score, sba_percentage, sba_score});
+    });
+}
+
+var manual_report_upload = () => {
+    var class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val(),
+        course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
+    $.post(`${baseUrl}api/terminal_reports/manual_report_upload`, { class_id, course_id }).then((response) => {
+        if (response.code == 200) {
+            $(`div[id="terminal_reports"] input[name="upload_report_file"]`).val("");
+            $(`div[id='summary_report_sheet_content']`).html(response.data.result);
+            total_score_checker();
+            calculate_sba_score();
+        } else {
+            swal({
+                text: response.data.result,
+                icon: responseCode(response.code),
+            });
         }
     });
 }
@@ -408,7 +456,8 @@ var generate_terminal_report = () => {
 $(`div[id="terminal_reports"] select[name="class_id"]`).on("change", function() {
     let class_id = $(this).val();
     $(`div[id="notification"]`).html(``);
-    $(`div[id='upload_file']`).addClass("hidden");
+    $(`div[data-option_id="upload_file"]`).addClass("hidden");
+    $(`div[id="summary_report_sheet_content"]`).html(``);
     let option_link = $(`select[name="course_id"]`).length !== 0 ? "course_id" : "student_id";
     let option_name = option_link === "course_id" ? "Select the Subject" : "Select the Student";
     $(`div[id="terminal_reports"] select[name='${option_link}']`).find('option').remove().end();
@@ -435,15 +484,15 @@ $(`div[id="terminal_reports"] select[name="course_id"]`).on("change", function()
     let course_id = $(this).val();
     $(`div[id="notification"]`).html(``);
     if (course_id !== "null") {
-        $(`div[id="upload_file"]`).addClass("hidden");
+        $(`div[data-option_id="upload_file"]`).addClass("hidden");
         let class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val();
         $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);
         $.get(`${baseUrl}api/terminal_reports/check_existence`, { course_id, class_id }).then((response) => {
-            $(`div[id="notification"]`).html(`<span class="text-${response.code == 200 ? "success" : "danger"}">${response.data.result}</span>`);
+            $(`div[id="notification"]`).html(`<div class="text-${response.code == 200 ? "success" : "danger"} font-18">${response.data.result}</div>`);
             if(response.code !== 200) {
                 $(`button[type="download_csv"]`).prop("disabled", true);
             } else {
-                $(`div[id='upload_file']`).removeClass("hidden");
+                $(`div[data-option_id="upload_file"]`).removeClass("hidden");
                 $(`button[type="download_csv"]`).prop("disabled", false);
             }
         });
@@ -454,7 +503,7 @@ $(`div[id="terminal_reports"] select[name="course_id"]`).on("change", function()
 
 $(`div[id="terminal_reports"] select[name='upload_type']`).on("change", function() {
     let value = $(this).val();
-    $(`div[id='upload_file']`).addClass("hidden");
+    $(`div[data-option_id="upload_file"]`).addClass("hidden");
     if (value === "download") {
         $(`div[id="terminal_reports"] div[id='upload_button']`).addClass("hidden");
         $(`div[id="terminal_reports"] div[id='download_button']`).removeClass("hidden");

@@ -98,6 +98,49 @@ var recalculateAllowance = () => {
     recalculateTotal();
 }
 
+var reset_allowance_type_fields = () => {
+    ['subject_to_paye', 'subject_to_ssnit', 'pre_tax_deduction'].forEach(function(item) {
+        $(`div[id="allowanceTypesModal"] input[name="${item}"]`).prop('checked', false);
+    });
+    $(`input[name="calculation_value"]`).val('');
+}
+
+var save_payroll_settings = () => {
+    let payload = {
+        auto_calculate_paye: $(`input[name="auto_calculate_paye"]`).prop('checked'),
+        auto_calculate_ssnit: $(`input[name="auto_calculate_ssnit"]`).prop('checked'),
+        auto_calculate_tier_2: $(`input[name="auto_calculate_tier_2"]`).prop('checked'),
+        payroll_frequency: $(`select[name="payroll_frequency"]`).val(),
+        payment_day: $(`input[name="payment_day"]`).val(),
+    };
+    $.post(`${baseUrl}api/payroll/savepayrollsettings`, payload).then((response) => {
+        notify(response?.data?.result || 'Error processing request.', responseCode(response.code));
+    });
+}
+
+function allowanceTypeChange() {
+    $(`select[name="allowance_type"]`).on('change', function() {
+        let allowance_type = $(this).val();
+        if(allowance_type == "Deduction") {
+            $(`div[data-item_type="deduction"]`).removeClass('hidden');
+            $(`div[data-item_type="allowance"]`).addClass('hidden');
+        } else {
+            $(`div[data-item_type="deduction"]`).addClass('hidden');
+            $(`div[data-item_type="allowance"]`).removeClass('hidden');
+        }
+        reset_allowance_type_fields();
+    });
+}
+
+$(`select[name="calculation_method"]`).on('change', function() {
+    let calculation_method = $(this).val();
+    if(calculation_method == "fixed_amount") {
+        $(`input[name="calculation_value"]`).prop('disabled', false);
+    } else {
+        $(`input[name="calculation_value"]`).prop('disabled', true);
+    }
+});
+
 $(`div[class="summary-list"] input[name="basic_salary"]`).on('input', function() {
     recalculateTotal();
 });
@@ -558,30 +601,21 @@ if ($(`input[id^="deductions_amount_"]`).length) {
 var update_allowance = (allowance_id) => {
     if ($.array_stream["allowance_array_list"] !== undefined) {
         let activity_log = $.array_stream["allowance_array_list"];
-        if (activity_log[allowance_id] !== undefined) {
-            let allowance = activity_log[allowance_id];
-            $(`div[id="allowanceTypesModal"] h5[class="modal-title"]`).html(`Update ${allowance.type} Record`);
-            $(`div[id="allowanceTypesModal"]`).modal("show");
-            $(`div[id="allowanceTypesModal"] input[name="name"]`).val(allowance.name);
-            $(`div[id="allowanceTypesModal"] input[name="allowance_id"]`).val(allowance_id);
-            $(`div[id="allowanceTypesModal"] select[name="type"]`).val(allowance.type).change();
-            $(`div[id="allowanceTypesModal"] select[name="is_statutory"]`).val(allowance.is_statutory).change();
-            $(`div[id="allowanceTypesModal"] textarea[name="description"]`).val(allowance.description);
-            $(`div[id="allowanceTypesModal"] input[name="default_amount"]`).val(allowance.default_amount);
-            setTimeout(() => {
-                $(`div[class~="modal-backdrop"]`).addClass("hidden");
-            }, 200);
-        }
+        loadPage(`${baseUrl}payroll-category/preview/${allowance_id}`);
     }
 }
 
 var add_allowance = () => {
     $(`div[id="allowanceTypesModal"]`).modal("show");
-    $(`div[class~="modal-backdrop"]`).addClass("hidden");
     $(`div[id="allowanceTypesModal"] h5[class="modal-title"]`).html(`Add Allowance Item`);
     $(`div[id="allowanceTypesModal"] input, div[id="allowanceTypesModal"] textarea`).val("");
     $(`div[id="allowanceTypesModal"] select[name="is_statutory"]`).val("No").change();
+    $(`div[data-item_type="deduction"]`).addClass('hidden');
+    $(`div[data-item_type="allowance"]`).addClass('hidden');
+    reset_allowance_type_fields();
 }
+
+allowanceTypeChange();
 
 if(typeof update_expected_days == "undefined") {
     var update_expected_days = (user_id, table) => {

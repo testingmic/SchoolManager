@@ -1583,6 +1583,9 @@ class Users extends Myschoolgh {
 		
 		// grouping guardian
 		$guardian = [];
+
+		/** Convert the email address to lowercase */
+		$params->email = strtolower($params->email);
 		
 		// insert the user information
 		try {
@@ -1858,6 +1861,85 @@ class Users extends Myschoolgh {
 	}
 
 	/**
+	 * Generate a user record
+	 * 
+	 * @param \stdClass $params
+	 * 
+	 * @return mixed
+	 */
+	public function generate_user_record(stdClass $params) {
+		// global variable
+		global $defaultClientData, $defaultCurrency, $academicSession, $defaultAcademics;
+
+		// get the student information
+		$userRecord = $this->pushQuery("
+			a.*, (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
+			us.arrears_details, us.arrears_category, us.fees_category_log, us.arrears_total",
+			"users a LEFT JOIN users_arrears us ON us.student_id = a.item_id", 
+			"a.client_id='{$params->clientId}' AND a.item_id='{$params->user_id}'  AND a.status = '1'
+			LIMIT 1"
+		);
+
+		if(empty($userRecord)) {
+			return false;
+		}
+
+		$userRecord = $userRecord[0];
+
+		// academic year and term
+		$params->academic_year = $params->academic_year ?? $this->academic_year;
+		$params->academic_term = $params->academic_term ?? $this->academic_term;
+
+		// header("Content-Type: application/json");
+		// echo json_encode($userRecord);exit;
+
+		// generate the pdf header
+		$html_string = generate_pdf_header($params->client_data, $this->baseUrl, $params->isPDF, false);
+
+		$html_string .= '
+			<div style="margin-top:0px;">
+				<table border="0" width="100%" cellpadding="5px">
+					<tr>
+						<td align="center" colspan="2">
+							<h3 style="border-bottom:solid 1px #ccc;padding:0px;padding-bottom:5px;margin:0px;font-family:\'Calibri Regular\'">
+								'.ucwords($userRecord->user_type).' RECORD
+							</h3>
+						</td>
+					</tr>
+					<tr>
+						<td width="50%">
+							<div style="text-transform:uppercase;margin-bottom:5px;">Name: <strong>'.$userRecord->name.'</strong></div>
+							<div style="text-transform:uppercase;margin-bottom:5px;">'.ucwords($userRecord->user_type).' ID: <strong>'.$userRecord->unique_id.'</strong></div>
+							<div style="text-transform:uppercase;margin-bottom:5px;">'.
+							(!empty($userRecord->class_name) ? "Class: <strong>{$userRecord->class_name}</strong>" : null).'
+							</div>
+						</td>
+						'.($userRecord->user_type === "student" ? '
+						<td width="50%" align="right">
+							<h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Academics</h3>
+							<div style="text-transform:uppercase;margin-bottom:5px;">Year: <strong>'.$params->academic_year.'</strong></div>
+							<div style="text-transform:uppercase;margin-bottom:5px;">'.$academicSession.': <strong>'.$params->academic_term.'</strong></div>
+							<div style="margin-bottom:5px;">'.date("Y-m-d h:ia").'</div>
+						</td>' : null).'
+					</tr>
+					<tr>
+					</tr>
+				</table>
+				<style>table.table tr td {border:solid 1px #dad7d7;padding:5px;}</style>
+			</div>';
+
+		// generate the pdf footer
+		$html_string .= generate_pdf_footer();
+
+		// return the response
+		return [
+			'record' => $html_string,
+			'filename' => "{$userRecord->firstname}_{$userRecord->lastname}.pdf"
+		];
+		
+	}
+
+	/**
 	 * View a users record
 	 * 
 	 * @param \stdClass $params
@@ -1990,6 +2072,8 @@ class Users extends Myschoolgh {
 			if(!empty($this->quick_list($i_params)["data"])) {
 				return ["code" => 201, "response" => "Sorry! The email is already in use."];
 			}
+			/** Convert the email address to lowercase */
+			$params->email = strtolower($params->email);
 		}
 
 		$fileName = null;

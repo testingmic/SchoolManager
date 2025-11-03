@@ -247,14 +247,14 @@ class Terminal_reports extends Myschoolgh {
                 return ["code" => 400, "data" => "Sorry! This result has been submitted pending approval hence cannot be updated."];
             }
         } else {
-            return ["code" => 200, "data" => "You can proceed to upload the results of the class."];
+            return ["code" => 200, "data" => "You can upload the Class Results via the <strong>CSV Uploader</strong> or Manually input the data by clicking on the <strong>Manual Upload</strong> button."];
         }
     }
 
     /**
      * Download the CSV File
      * 
-     * @return Array
+     * @return array|string|null
      */
     public function download_csv(stdClass $params) {
 
@@ -331,6 +331,11 @@ class Terminal_reports extends Myschoolgh {
         // $csv_file .= "TEACHER ID,";
         $csv_file .= "TEACHER REMARKS\n";
         $course_name = str_ireplace(", ", "", $course_name);
+
+        // if the manual upload is true then return the csv file
+        if(!empty($params->manual_report_upload)) {
+            return ['csv_file' => $csv_file, 'students_list' => $students_list, 'course_item' => $course_item];
+        }
 
         // get the sba results only if the grading structure is not empty
         if(!empty($grading_sba)) {
@@ -438,29 +443,35 @@ class Terminal_reports extends Myschoolgh {
         // set the global variable
         global $defaultClientData;
 
-        if(!isset($params->report_file['tmp_name'])) {
-            return ["code" => 400, "data" => "Sorry! Please select a file to upload."];
+        // if the csv headers are not set then upload the file
+        if(empty($params->r_csv_headers)) {
+            if(!isset($params->report_file['tmp_name'])) {
+                return ["code" => 400, "data" => "Sorry! Please select a file to upload."];
+            }
+        
+            // reading tmp_file name
+            $report_file = fopen($params->report_file['tmp_name'], 'r');
         }
-    
-        // reading tmp_file name
-        $report_file = fopen($params->report_file['tmp_name'], 'r');
 
         // get the content of the file
-        $csv_headers = fgetcsv($report_file);
-        $complete_csv_data = [];
+        $csv_headers = !empty($params->r_csv_headers) ? $params->r_csv_headers : fgetcsv($report_file);
+        $complete_csv_data = !empty($params->r_csv_data) ? $params->r_csv_data : [];
 
-        //using while loop to get the information
-        while($row = fgetcsv($report_file)) {
-            // session data
-            $complete_csv_data[] = $row;
+        if(empty($params->r_csv_data)) {
+            //using while loop to get the information
+            while($row = fgetcsv($report_file)) {
+                // session data
+                $complete_csv_data[] = $row;
+            }
         }
+
 
         // check the file that have been uploaded
         $headers = ["STUDENT","STUDENT ID","SUBJECT"];
 
         // get the client data
         $client_data = $defaultClientData;
-        $columns = json_encode($client_data->grading_structure);
+        $columns = json_encode($client_data->grading_structure ?? '[]');
         $columns = json_decode($columns, true);
 
         // get the grading structure
@@ -484,6 +495,7 @@ class Terminal_reports extends Myschoolgh {
         }
         $grading_sba = $client_data->grading_sba ?? [];
         $sba_percentage = [];
+        $sba_percentage_lower = [];
 
         // get the grading structure
         if(!empty($grading_sba)) {
@@ -491,6 +503,7 @@ class Terminal_reports extends Myschoolgh {
                 if($item['sba_checkbox'] == 'true') {
                     $headers[] = strtoupper($keyName);
                     $sba_percentage[$keyName] = $item['percentage'];
+                    $sba_percentage_lower[strtolower($keyName)] = $item['percentage'];
                 }
             }
         }
@@ -540,23 +553,41 @@ class Terminal_reports extends Myschoolgh {
 
         // set the files
         foreach($complete_csv_data as $key => $result) {
+            
             if(empty($result[2]) && empty($result[3])) continue;
-            $report_table .= "<tr>";
+
+            $report_table .= "<tr data-student_row_id='{$key}'>";
+            
             foreach($result as $kkey => $kvalue) {
                 if(in_array($kkey, [2])) continue;
                 // if the key is in the array list
                 if(in_array($file_headers[$kkey], array_keys($columns["columns"]))) {
                     $column = create_slug($file_headers[$kkey], "_");
                     $readOnly = in_array($column, ['school_based_assessment']) ? "readonly='readonly'" : "";
-                    $report_table .= "<td><input style='min-width:100px;' ".($columns["columns"][$file_headers[$kkey]] == "100" ? "disabled='disabled' data-input_total_id='{$key}'" : "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." class='form-control pl-0 pr-0 font-18 text-center' name='{$column}' min='0' max='1000' type='number' value='{$kvalue}' {$readOnly}></td>";
+                    $report_table .= "<td>
+                    <input style='min-width:100px;' ".($columns["columns"][$file_headers[$kkey]] == "100" ? 
+                        "disabled='disabled' data-input_total_id='{$key}'" : 
+                        "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." 
+                        class='form-control pl-0 pr-0 font-18 text-center' data-max_percentage='{$columns["columns"][$file_headers[$kkey]]['percentage']}' name='{$column}' min='0' max='1000' type='number' value='{$kvalue}' {$readOnly}>
+                    </td>";
                 } elseif($file_headers[$kkey] == "TEACHER REMARKS") {
                     $report_table .= "<td><input style='min-width:300px' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'></td>";
                 } elseif($file_headers[$kkey] == "TEACHER ID") {
                     $report_table .= "<td><span style='font-weight-bold font-17'>".(empty($kvalue) ? $params->userData->unique_id : $kvalue)."</span></td>";                    
-                } else {
+                } elseif(in_array($file_headers[$kkey], ['SUBJECT', 'STUDENT', 'STUDENT ID'])) {
                     $data_key = "data-".strtolower(str_ireplace(" ", "_", $file_headers[$kkey]))."='{$kvalue}'";
-                    $report_table .= "<td class='text-center'><span data-student_row_id='{$key}' {$data_key}>{$kvalue}</span></td>";
+                    $report_table .= "<td class='text-left'><span data-student_row_id='{$key}' {$data_key}>{$kvalue}</span></td>";
+                } else {
+                    $theValue = $sba_percentage_lower[strtolower($file_headers[$kkey])] ?? '';
+                    $kvalue = !empty($kvalue) ? $kvalue : '';
+                    $report_table .= "<td class=''>
+                        <div class='d-flex justify-content-around items-center'>
+                        <input style='width:80px; font-size:18px;' type='number' data-max_percentage='{$theValue}'
+                        data-input_method='{$file_headers[$kkey]}' data-input_type='marks' data-input_row_id='{$key}' 
+                        class='form-control text-center' value='{$kvalue}'>
+                        </div></td>";
                 }
+
             }
             $report_table .= "</tr>";
         }
@@ -564,8 +595,17 @@ class Terminal_reports extends Myschoolgh {
         $report_table .= "</table>";
         $report_table .= "</div>";
 
+        $sba_percentage_lower['Exams'] = 100;
+
+        $report_table .= "<div class='d-flex justify-content-between'>";
+        $report_table .= "<div class='text-left mt-3'>";
+        foreach($sba_percentage_lower as $key => $value) {
+            $report_table .= "<span class='badge badge-success mr-2 mb-1 font-16'>".ucwords(str_ireplace("_", " ", $key)).": {$value}%</span>";
+        }
+        $report_table .= "</div>";
         $report_table .= "<div class='text-right mt-3'>";
         $report_table .= "<button onclick='return save_terminal_report()' class='btn btn-outline-success'>Save Report</button>";
+        $report_table .= "</div>";
         $report_table .= "</div>";
 
         // save the information in a session
@@ -573,6 +613,45 @@ class Terminal_reports extends Myschoolgh {
 
         return ["data" => $report_table];
 
+    }
+
+    /**
+     * Manual Report Upload
+     * 
+     * @param       $params->academic_year
+     * @param       $params->academic_term
+     * @param       $params->class_id
+     * @param       $params->course_id
+     * 
+     * @return Array
+     */
+    public function manual_report_upload(stdClass $params) {
+
+        // set the manual report upload to true
+        $params->manual_report_upload = true;
+
+        $data = $this->download_csv($params);
+
+        // get the headers
+        $headers = explode(",", $data['csv_file']);
+
+        // map the headers
+        $params->r_csv_headers = array_map('trim', $headers);
+        
+        foreach($data['students_list'] as $ii => $student) {
+            for($i = 0; $i < count($headers); $i++) {
+                $ivalue = $i == 0 ? $student->name : (
+                    $i == 1 ? $student->unique_id : (
+                        $i == count($headers) - 1 ? null : (
+                            $i == 2 ? $data['course_item']->name : 0
+                        )
+                    )
+                );
+                $params->r_csv_data[$ii][$i] = $ivalue;
+            }
+        }
+
+        return $this->upload_csv($params);
     }
 
     /**

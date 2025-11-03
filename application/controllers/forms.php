@@ -4750,18 +4750,24 @@ class Forms extends Myschoolgh {
                     <div class='col-lg-2 hidden' id='upload_button'>
                         <button onclick='return download_student_list()' disabled type='upload_button' class='btn btn-block btn-outline-primary'>Load Students</button>
                     </div>
-                    <div class='col-lg-12 mt-4'></div>
                     <div class='col-lg-12 mt-1 text-center' id='notification'></div>
-                    <div class='col-md-4 hidden' id='upload_file'>
-                        <div class='form-group'>
-                            <label>Select file to upload</label>
-                            <input type='file' name='upload_report_file' accept='.csv' class='form-control'>
-                        </div>
-                    </div>
-                    <div class='col-md-3 hidden' id='upload_file'>
-                        <div class='form-group'>
-                            <label>&nbsp;</label>
-                            <button onclick='return upload_csv_file();' class='btn btn-block btn-primary'><i class='fa fa-upload'></i> Click to Upload</button>
+                    <div class='col-lg-12 text-center'>
+                        <div class='d-flex justify-content-center border-top mt-1 pt-3 gap-4'>
+                            <div class='hidden' data-option_id='upload_file'>
+                                <div class='form-group'>
+                                    <input type='file' name='upload_report_file' accept='.csv' class='form-control'>
+                                </div>
+                            </div>
+                            <div class='hidden' data-option_id='upload_file'>
+                                <div class='form-group'>
+                                    <button onclick='return upload_csv_file();' class='btn btn-block btn-primary'><i class='fa fa-upload'></i> Click to Upload</button>
+                                </div>
+                            </div>
+                            <div class='hidden' data-option_id='upload_file'>
+                                <div class='form-group'>
+                                    <button onclick='return manual_report_upload();' class='btn btn-block btn-outline-primary'><i class='fa fa-download'></i> Manual Upload</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class='col-lg-12 mt-4' id='summary_report_sheet_content'></div>
@@ -5126,15 +5132,15 @@ class Forms extends Myschoolgh {
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="name">Name</label>
+                                    <label for="name" class="font-weight-bold">Name <span class="required">*</span></label>
                                     <input type="text" maxlength="100" placeholder="Type name" name="name" id="name" class="form-control">
                                 </div>
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="allowance_type">Type</label>
-                                    <select name="type" data-width="100%" id="type" class="form-control selectpicker">
-                                        <option value="null">Please select type</option>
+                                    <label for="allowance_type" class="font-weight-bold">Type <span class="required">*</span></label>
+                                    <select name="allowance_type" data-width="100%" id="allowance_type" class="form-control selectpicker">
+                                        <option value="">Please select type</option>
                                         <option value="Allowance">Allowance</option>
                                         <option value="Deduction">Deduction</option>
                                     </select>
@@ -5142,17 +5148,61 @@ class Forms extends Myschoolgh {
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="is_statutory">Is Statutory</label>
+                                    <label for="is_statutory" class="font-weight-bold">Is Statutory</label>
                                     <select name="is_statutory" data-width="100%" id="is_statutory" class="form-control selectpicker">
-                                        <option value="null">Please select</option>
+                                        <option value="">Please select</option>
                                         <option value="No">No</option>
                                         <option value="Yes">Yes</option>
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-md-12 hidden" data-item_type="allowance">
+                                <div class="form-group">
+                                    <div style="padding-left: 2.5rem;" class="custom-control cursor col-lg-12 custom-switch switch-primary">
+                                        <input type="checkbox" value="1" name="subject_to_paye" id="subject_to_paye" class="custom-control-input cursor">
+                                        <label class="custom-control-label cursor font-weight-bold" for="subject_to_paye">Subject to PAYE Tax</label>
+                                    </div>
+                                    <div class="text-muted text-italic">Should this earning be included in taxable income?</div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 hidden" data-item_type="allowance">
+                                <div class="form-group">
+                                    <div style="padding-left: 2.5rem;" class="custom-control cursor col-lg-12 custom-switch switch-primary">
+                                        <input type="checkbox" value="1" name="subject_to_ssnit" id="subject_to_ssnit" class="custom-control-input cursor">
+                                        <label class="custom-control-label cursor font-weight-bold" for="subject_to_ssnit">Subject to SSNIT/Pension</label>
+                                    </div>
+                                    <div class="text-muted text-italic">Should this earning be used for pension calculations?</div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 hidden" data-item_type="deduction">
+                                <div class="form-group">
+                                    <div style="padding-left: 2.5rem;" class="custom-control cursor col-lg-12 custom-switch switch-primary">
+                                        <input type="checkbox" value="1" name="pre_tax_deduction" id="pre_tax_deduction" class="custom-control-input cursor">
+                                        <label class="custom-control-label cursor font-weight-bold" for="pre_tax_deduction">Pre Tax Deduction</label>
+                                    </div>
+                                    <div class="text-muted text-italic">Deducted before tax calculation?</div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 hidden" data-item_type="deduction">
+                                <div class="form-group">
+                                    <label for="calculation_method" class="font-weight-bold">Calculation Settings</label>
+                                    <select name="calculation_method" data-width="100%" id="calculation_method" class="form-control selectpicker">
+                                        <option value="">Please select</option>
+                                        <option value="fixed_amount">Fixed Amount</option>
+                                        <option value="percentage_on_gross_total">Percentage on Gross Total</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-12 hidden" data-item_type="deduction">
+                                <div class="form-group">
+                                    <label for="calculation_value" class="font-weight-bold">Calculation Value</label>
+                                    <input type="number" placeholder="Value" name="calculation_value" id="calculation_value" class="form-control">
+                                    <div class="text-muted text-italic">The value to be used for the calculation.</div>
+                                </div>
+                            </div>
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="description">Description</label>
+                                    <label for="description" class="font-weight-bold">Description</label>
                                     <textarea placeholder="" maxlength="255" name="description" id="description" rows="5" class="form-control"></textarea>
                                 </div>
                             </div>
