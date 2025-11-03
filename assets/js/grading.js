@@ -289,11 +289,12 @@ var save_terminal_report = () => {
                     name = $(`span[data-student_row_id="${row_id}"][data-student]`).attr("data-student"),
                     student_id = $(`span[data-student_row_id="${row_id}"][data-student_id]`).attr("data-student_id"),
                     remarks = $(`input[data-input_row_id="${row_id}"][data-input_method='remarks']`).val(),
-                    classwork = $(`span[data-student_row_id="${row_id}"][data-classwork]`).attr("data-classwork"),
-                    homework = $(`span[data-student_row_id="${row_id}"][data-homework]`).attr("data-homework"),
-                    test = $(`span[data-student_row_id="${row_id}"][data-test]`).attr("data-test"),
-                    project = $(`span[data-student_row_id="${row_id}"][data-project]`).attr("data-project"),
-                    midterm_exams = $(`span[data-student_row_id="${row_id}"][data-midterm_exams]`).attr("data-midterm_exams");
+
+                    classwork = $(`tr[data-student_row_id="${row_id}"] input[data-input_method="classwork"]`)?.val() ?? 0,
+                    homework = $(`tr[data-student_row_id="${row_id}"] input[data-input_method="homework"]`)?.val() ?? 0,
+                    test = $(`tr[data-student_row_id="${row_id}"] input[data-input_method="test"]`)?.val() ?? 0,
+                    project = $(`tr[data-student_row_id="${row_id}"] input[data-input_method="project"]`)?.val() ?? 0,
+                    midterm_exams = $(`tr[data-student_row_id="${row_id}"] input[data-input_method="midterm_exams"]`)?.val() ?? 0;
                     
                 if(typeof name !== 'undefined') {
                     ss[i] = `name=${name}|id=${student_id}|remarks=${remarks}|sba=${sba}|marks=${marks}|classwork=${classwork}|homework=${homework}|test=${test}|project=${project}|midterm_exams=${midterm_exams}`;

@@ -1009,7 +1009,14 @@ textarea.custom_form-control {
   margin: 0;
 }
 
+#results_list_table input[type=number]::-webkit-inner-spin-button,
+#results_list_table input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 /* Firefox */
+#results_list_table input[type=number],
 #summary_report_sheet_content input[type=number] {
   -moz-appearance: textfield;
 }
