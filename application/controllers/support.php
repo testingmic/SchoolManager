@@ -419,6 +419,45 @@ class Support extends Myschoolgh {
     }
 
     /**
+     * Update a knowledge base article
+     * 
+     * @param $params->knowledge_id
+     * @param $params->content
+     * @param $params->subject
+     * 
+     * @return Array
+     */
+    public function knowledgebase_update(stdClass $params) {
+        
+        try {
+            
+            global $isSupport;
+
+            // only support personnel are allowed to update
+            if(!$isSupport) {
+                return ["code" => 400, "data" => $this->permission_denied];
+            }
+
+            // modify the content variable
+            $params->content = custom_clean(htmlspecialchars_decode($params->content));
+            $params->content = htmlspecialchars($params->content);
+
+            // update the article data information
+            $stmt = $this->db->prepare("UPDATE knowledge_base SET content = ?, subject = ?, date_updated = now(), 
+                section = ?, video_link = ? WHERE item_id = ? LIMIT 1");
+            $stmt->execute([
+                $params->content, $params->subject, $params->section ?? null, $params->video_link ?? null, $params->item_id
+            ]);
+
+            // return success message
+            return ["code" => 200, "data" => "The article was successfully updated."];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+    }
+
+    /**
      * Save User Access Level Permissions
      *
      * @param $params->data["permission"]
