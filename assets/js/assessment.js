@@ -171,7 +171,7 @@ var prepare_assessment_log = (assessment_log_id = "") => {
                             </div>
                         </td>
                         <td>
-                            <input data-item="marks" data-student_id="${e.item_id}" data-student_rid="${e.id}" data-student_name="${e.name}" type="number" min="0" max="100" class="form-control text-center" id="marks[${e.item_id}]" name="marks[${e.item_id}]">
+                            <input data-item="marks" data-student_id="${e.item_id}" data-student_rid="${e.id}" data-student_name="${e.name}" type="number" min="0" max="100" class="form-control font-18 text-center" id="marks[${e.item_id}]" name="marks[${e.item_id}]">
                         </td>
                     </tr>`;
                 });

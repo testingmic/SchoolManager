@@ -677,7 +677,9 @@ class Terminal_reports extends Myschoolgh {
         $sba_percentage_lower['Exams'] = 100;
 
         $footer_table = "<div class='text-right mt-3'>";
-        $footer_table .= "<button onclick='return save_terminal_report()' class='btn btn-outline-success'>Save Class Results</button>";
+        $footer_table .= "<button onclick='return save_terminal_report()' class='btn p-3 font-18 btn-outline-success'>
+            <i class='fa fa-save'></i> Save Class Results
+        </button>";
         $footer_table .= "</div>";
 
         $footer_table .= "<div class='d-flex justify-content-between border-top border-primary mt-3'>";

@@ -36,7 +36,7 @@ if(!$createAssessmentTest) {
     // include the scripts
     $response->scripts = ["assets/js/assessment.js", "assets/js/upload.js"];
 
-    $classFilter = $isTutor ? "AND item_id IN ".$myClass->inList($defaultUser->class_ids) : null;
+    $classFilter = $isTutor && !empty($defaultUser->class_ids) ? "AND item_id IN ".$myClass->inList($defaultUser->class_ids) : null;
     $classes_list = $myClass->pushQuery("name, id, item_id", "classes", "client_id='{$clientId}' AND status='1' {$classFilter}");
 
     // file upload parameter
@@ -135,7 +135,7 @@ if(!$createAssessmentTest) {
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group text-right mt-2 pt-4">
+                                    <div class="form-group text-right mt-2">
                                         <button onclick="return prepare_assessment_log('.$assessment_log_id.')" data-function="save" type="button-submit" class="btn btn-outline-success">
                                         <i class="fa fa-download"></i> Load Students
                                         </button>

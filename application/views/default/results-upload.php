@@ -37,6 +37,9 @@ $report_param = (object) [
 $results_list = load_class("terminal_reports", "controllers", $report_param)->results_list($report_param)["data"];
 
 $terminal_reports_list = "";
+
+$cards_view = "<div class='row'>";
+
 foreach($results_list as $key => $report) {
 
     $action = "<a href='{$baseUrl}results-review/{$report->report_id}?show_results=true' title='Click to view the details of this report' class='btn mb-1 btn-sm btn-outline-primary'>Review <i class='fa fa-eye'></i></a>";
@@ -59,7 +62,24 @@ foreach($results_list as $key => $report) {
         <td width='10%'>{$myClass->the_status_label($report->status)}</td>
         <td align='center' width='18%'>{$action}</td>
     </tr>";
+
+    $cards_view .= "
+    <div class='col-12 col-md-6 col-lg-3 pr-2 pl-2'>
+    <div class='card'>
+        <div class='card-body p-2'>
+            <div><strong>Class:</strong> <span class='float-right text-muted'>{$report->class_name}</span></div>
+            <div><strong>Subject:</strong> <span class='float-right text-muted'>{$report->course_name} ({$report->course_code})</span></div>
+            <div><strong>Academic Year:</strong> <span class='float-right text-muted'>{$report->academic_year}</span></div>
+            <div><strong>Academic Term:</strong> <span class='float-right text-muted'>{$report->academic_term}</span></div>
+            <div><strong>Date Created:</strong> <span class='float-right text-muted'>{$report->date_created}</span></div>
+            <div><strong>Status:</strong> <span class='float-right text-muted'>{$myClass->the_status_label($report->status)}</span></div>
+            <div class='text-center mt-2 border-top border-primary pt-3'>{$action}</div>
+        </div>
+    </div>
+    </div>";
 }
+
+$cards_view .= "</div>";
 
 $response->html = '
     <section class="section">
@@ -77,7 +97,7 @@ $response->html = '
                         <div class="padding-20">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link '.(!$showResults ? 'active' : '').'" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">Upload Report Sheet</a>
+                                    <a class="nav-link '.(!$showResults ? 'active' : '').'" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">Upload Result</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link '.($showResults ? 'active' : '').'" id="upload_reports-tab2" data-toggle="tab" href="#upload_reports" role="tab" aria-selected="true">Results List</a>
@@ -88,21 +108,22 @@ $response->html = '
                                     '.($the_form["general"] ?? null).'
                                 </div>
                                 <div class="tab-pane fade '.($showResults ? 'show active' : '').'" id="upload_reports" role="tabpanel" aria-labelledby="upload_reports-tab2">
-                                    <div class="table-responsive trix-slim-scroll">
-                                        <table class="table table-sm table-bordered table-striped raw_datatable">
-                                            <thead>
-                                                <th></th>
-                                                <th>Class</th>
-                                                <th>Subject</th>
-                                                <th class="text-center">Academic Year</th>
-                                                <th class="text-center">'.$academicSession.'</th>
-                                                <th>Details</th>
-                                                <th width="10%">Status</th>
-                                                <th></th>
-                                            </thead>
-                                            <tbody>'.$terminal_reports_list.'</tbody>
-                                        </table>
-                                    </div>
+                                '.($isTutor ? $cards_view : 
+                                '<div class="table-responsive trix-slim-scroll">
+                                    <table class="table table-sm table-bordered table-striped raw_datatable">
+                                        <thead>
+                                            <th></th>
+                                            <th>Class</th>
+                                            <th>Subject</th>
+                                            <th class="text-center">Academic Year</th>
+                                            <th class="text-center">'.$academicSession.'</th>
+                                            <th>Details</th>
+                                            <th width="10%">Status</th>
+                                            <th></th>
+                                        </thead>
+                                        <tbody>'.$terminal_reports_list.'</tbody>
+                                    </table>
+                                </div>').'
                                 </div>
                             </div>
                         </div>
