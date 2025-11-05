@@ -129,7 +129,7 @@ load_helpers(['menu_helper']);
         new_distinct_id: "<?= $session->userId ?>",
         website_name: "<?= $clientName ?>",
         website_id: "<?= $clientId ?>",
-        account_id: "<?= $userData->id ?>",
+        account_id: "<?= $clientId ?>",
         timestamp: "<?= date("Y-m-d H:i:s") ?>",
     })
 
