@@ -51,7 +51,7 @@ if(loggedIn()) {
     mixpanel.init('8412d28f71183debe03f3a9ac48756f9', {
       autocapture: true,
       record_sessions_percent: 100,
-    })
+    });
 
   </script>
   <style>

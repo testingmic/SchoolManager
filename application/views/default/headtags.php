@@ -124,6 +124,13 @@ load_helpers(['menu_helper']);
     mixpanel.init('8412d28f71183debe03f3a9ac48756f9', {
         autocapture: true,
         record_sessions_percent: 100,
+        user_email: "<?= $userData->email ?>",
+        previous_distinct_id: "<?= $session->userId ?>",
+        new_distinct_id: "<?= $session->userId ?>",
+        website_name: "<?= $clientName ?>",
+        website_id: "<?= $clientId ?>",
+        account_id: "<?= $userData->id ?>",
+        timestamp: "<?= date("Y-m-d H:i:s") ?>",
     })
 
     </script>
