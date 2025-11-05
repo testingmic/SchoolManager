@@ -114,20 +114,19 @@ load_helpers(['menu_helper']);
             academicSession = "<?= $academicSession; ?>",
             myPrefs = <?= json_encode($userData->client->client_preferences) ?>;
     </script>
-    <?= '';//$myClass->google_analytics_code ?>
-    
-        <style>
-            <?php if(!$isActiveAccount) { ?>
+    <?= $myClass->google_analytics_code ?>
+    <style>
+        <?php if(!$isActiveAccount) { ?>
+        .main-content {
+            padding-left: 30px;
+        }
+        <?php } ?>
+        <?php if(!$isAdminAccountant) { ?>
             .main-content {
-                padding-left: 30px;
+                margin-bottom: 100px;
             }
-            <?php } ?>
-            <?php if(!$isAdminAccountant) { ?>
-                .main-content {
-                    margin-bottom: 100px;
-                }
-            <?php } ?>
-        </style>
+        <?php } ?>
+    </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-50 to-indigo-100">
 	<div class="loader"></div>
