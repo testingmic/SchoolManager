@@ -203,11 +203,13 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-server"></i><span>Fees Setup</span></a>
         <ul class="dropdown-menu">
             <?php if($accessObject->hasAccess("view", "fees_category")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-category">Fees Category</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>fees-category">Fees Category</a></li>
             <?php } ?>
             <?php if($accessObject->hasAccess("allocation", "fees")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>term_bills">Manage <?= $academicSession; ?> Bills</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>term_bills">Manage <?= $academicSession; ?> Bills</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>fees-discount-policies">Discount Policies</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>fees-student-discounts">Student Discounts</a></li>
             <?php } ?>
         </ul>
     </li>
@@ -216,7 +218,7 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-door-open"></i><span>Payment & History</span></a>
         <ul class="dropdown-menu">
             <?php if($accessObject->hasAccess("receive", "fees") || $accessObject->hasAccess("receive", "fees")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Pay Term Fees</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Collect Fees</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>arrears/apay">Arrears Payment</a></li>
             <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List Payment History</a></li>

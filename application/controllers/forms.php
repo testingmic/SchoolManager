@@ -5114,23 +5114,25 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function payroll_category_form($clientId, $baseUrl) {
+    public function payroll_category_form($clientId, $baseUrl, $previewMode = false, $idata = null) {
         return '
         <form method="POST" action="'.$baseUrl.'api/payroll/saveallowance" class="ajax-data-form" id="ajax-data-form-content">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
+            <div class="'.($previewMode ? '' : 'modal-dialog').'" role="document">
+                <div class="'.($previewMode ? 'card' : 'modal-content').'">
+                    <div class="'.($previewMode ? 'card-header pb-0' : 'modal-header').'">
                         <h5 class="modal-title">Allowance / Deduction Types</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        '.($previewMode ? '' : '
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        ').'
                     </div>
-                    <div class="modal-body">
+                    <div class="'.($previewMode ? 'card-body' : 'modal-body').'">
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="name" class="font-weight-bold">Name <span class="required">*</span></label>
-                                    <input type="text" maxlength="100" placeholder="Type name" name="name" id="name" class="form-control">
+                                    <input type="text" maxlength="100" placeholder="Type name" name="name" id="name" class="form-control" value="'.($idata->name ?? null).'">
                                 </div>
                             </div>
                             <div class="col-md-12">
@@ -5138,8 +5140,8 @@ class Forms extends Myschoolgh {
                                     <label for="allowance_type" class="font-weight-bold">Type <span class="required">*</span></label>
                                     <select name="allowance_type" data-width="100%" id="allowance_type" class="form-control selectpicker">
                                         <option value="">Please select type</option>
-                                        <option value="Allowance">Allowance</option>
-                                        <option value="Deduction">Deduction</option>
+                                        <option value="Allowance" '.(!empty($idata) && $idata->type == 'Allowance' ? 'selected' : null).'>Allowance</option>
+                                        <option value="Deduction" '.(!empty($idata) && $idata->type == 'Deduction' ? 'selected' : null).'>Deduction</option>
                                     </select>
                                 </div>
                             </div>
@@ -5148,64 +5150,64 @@ class Forms extends Myschoolgh {
                                     <label for="is_statutory" class="font-weight-bold">Is Statutory</label>
                                     <select name="is_statutory" data-width="100%" id="is_statutory" class="form-control selectpicker">
                                         <option value="">Please select</option>
-                                        <option value="No">No</option>
-                                        <option value="Yes">Yes</option>
+                                        <option value="No" '.(!empty($idata) && $idata->is_statutory == 'No' ? 'selected' : null).'>No</option>
+                                        <option value="Yes" '.(!empty($idata) && $idata->is_statutory == 'Yes' ? 'selected' : null).'>Yes</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-12 hidden" data-item_type="allowance">
+                            <div class="col-md-12 '.(!empty($idata) && $idata->type == 'Allowance' ? '' : 'hidden').'" data-item_type="allowance">
                                 <div class="form-group">
                                     <div style="padding-left: 2.5rem;" class="custom-control cursor col-lg-12 custom-switch switch-primary">
-                                        <input type="checkbox" value="1" name="subject_to_paye" id="subject_to_paye" class="custom-control-input cursor">
+                                        <input '.(!empty($idata) && $idata->subject_to_paye == '1' ? 'checked' : null).' type="checkbox" value="1" name="subject_to_paye" id="subject_to_paye" class="custom-control-input cursor">
                                         <label class="custom-control-label cursor font-weight-bold" for="subject_to_paye">Subject to PAYE Tax</label>
                                     </div>
                                     <div class="text-muted text-italic">Should this earning be included in taxable income?</div>
                                 </div>
                             </div>
-                            <div class="col-md-12 hidden" data-item_type="allowance">
+                            <div class="col-md-12 '.(!empty($idata) && $idata->type == 'Allowance' ? '' : 'hidden').'" data-item_type="allowance">
                                 <div class="form-group">
                                     <div style="padding-left: 2.5rem;" class="custom-control cursor col-lg-12 custom-switch switch-primary">
-                                        <input type="checkbox" value="1" name="subject_to_ssnit" id="subject_to_ssnit" class="custom-control-input cursor">
+                                        <input '.(!empty($idata) && $idata->subject_to_ssnit == '1' ? 'checked' : null).' type="checkbox" value="1" name="subject_to_ssnit" id="subject_to_ssnit" class="custom-control-input cursor">
                                         <label class="custom-control-label cursor font-weight-bold" for="subject_to_ssnit">Subject to SSNIT/Pension</label>
                                     </div>
                                     <div class="text-muted text-italic">Should this earning be used for pension calculations?</div>
                                 </div>
                             </div>
-                            <div class="col-md-12 hidden" data-item_type="deduction">
+                            <div class="col-md-12 '.(!empty($idata) && $idata->type == 'Deduction' ? '' : 'hidden').'" data-item_type="deduction">
                                 <div class="form-group">
                                     <div style="padding-left: 2.5rem;" class="custom-control cursor col-lg-12 custom-switch switch-primary">
-                                        <input type="checkbox" value="1" name="pre_tax_deduction" id="pre_tax_deduction" class="custom-control-input cursor">
+                                        <input '.(!empty($idata) && $idata->pre_tax_deduction == '1' ? 'checked' : null).' type="checkbox" value="1" name="pre_tax_deduction" id="pre_tax_deduction" class="custom-control-input cursor">
                                         <label class="custom-control-label cursor font-weight-bold" for="pre_tax_deduction">Pre Tax Deduction</label>
                                     </div>
                                     <div class="text-muted text-italic">Deducted before tax calculation?</div>
                                 </div>
                             </div>
-                            <div class="col-md-12 hidden" data-item_type="deduction">
+                            <div class="col-md-12 '.(!empty($idata) && $idata->type == 'Deduction' ? '' : 'hidden').'" data-item_type="deduction">
                                 <div class="form-group">
                                     <label for="calculation_method" class="font-weight-bold">Calculation Settings</label>
                                     <select name="calculation_method" data-width="100%" id="calculation_method" class="form-control selectpicker">
                                         <option value="">Please select</option>
-                                        <option value="fixed_amount">Fixed Amount</option>
-                                        <option value="percentage_on_gross_total">Percentage on Gross Total</option>
+                                        <option value="fixed_amount" '.(!empty($idata) && $idata->calculation_method == 'fixed_amount' ? 'selected' : null).'>Fixed Amount</option>
+                                        <option value="percentage_on_gross_total" '.(!empty($idata) && $idata->calculation_method == 'percentage_on_gross_total' ? 'selected' : null).'>Percentage on Gross Total</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-12 hidden" data-item_type="deduction">
+                            <div class="col-md-12 '.(!empty($idata) && $idata->type == 'Deduction' ? '' : 'hidden').'" data-item_type="deduction">
                                 <div class="form-group">
                                     <label for="calculation_value" class="font-weight-bold">Calculation Value</label>
-                                    <input type="number" placeholder="Value" name="calculation_value" id="calculation_value" class="form-control">
+                                    <input value="'.($idata->calculation_value ?? null).'" type="number" placeholder="Value" name="calculation_value" id="calculation_value" class="form-control">
                                     <div class="text-muted text-italic">The value to be used for the calculation.</div>
                                 </div>
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="description" class="font-weight-bold">Description</label>
-                                    <textarea placeholder="" maxlength="255" name="description" id="description" rows="5" class="form-control"></textarea>
+                                    <textarea placeholder="" maxlength="255" name="description" id="description" rows="5" class="form-control">'.($idata->description ?? null).'</textarea>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer p-0">
-                            <input type="hidden" name="allowance_id">
+                            <input value="'.($idata->id ?? 0).'" type="hidden" name="allowance_id">
                             <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
                             <button data-form_id="ajax-data-form-content" type="button-submit" class="btn btn-primary">Save changes</button>
                         </div>

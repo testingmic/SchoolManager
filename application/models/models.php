@@ -99,7 +99,7 @@ class Models {
     ];
 
     public $payroll_frequency_list = [
-        "Weekly", "Bi-Weekly", "Monthly"
+       "Monthly", "Bi-Weekly", "Weekly"
     ];
 
     public $date_range;

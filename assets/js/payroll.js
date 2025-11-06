@@ -111,9 +111,11 @@ var save_payroll_settings = () => {
         auto_calculate_ssnit: $(`input[name="auto_calculate_ssnit"]`).prop('checked'),
         auto_calculate_tier_2: $(`input[name="auto_calculate_tier_2"]`).prop('checked'),
         payroll_frequency: $(`select[name="payroll_frequency"]`).val(),
+        auto_generate_payslip: $(`input[name="auto_generate_payslip"]`).prop('checked'),
         payment_day: $(`input[name="payment_day"]`).val(),
+        setting_name: "payroll_settings",
     };
-    $.post(`${baseUrl}api/payroll/savepayrollsettings`, payload).then((response) => {
+    $.post(`${baseUrl}api/settings/savesettings`, payload).then((response) => {
         notify(response?.data?.result || 'Error processing request.', responseCode(response.code));
     });
 }

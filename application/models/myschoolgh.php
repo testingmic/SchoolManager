@@ -111,11 +111,12 @@ class Myschoolgh extends Models {
 		if(empty($this->db)) return true;
 
 		// prepare and execute the statement
-		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `pre_tax_deduction` VARCHAR(255) DEFAULT 'No';");
-		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `calculation_method` VARCHAR(35) DEFAULT 'fixed_amount';");
-		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `calculation_value` VARCHAR(35) DEFAULT 0;");
-		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `subject_to_paye` VARCHAR(35) DEFAULT 'No';");
-		$fix[] = ("ALTER TABLE `payslips_allowance_types` ADD COLUMN `subject_to_ssnit` VARCHAR(35) DEFAULT 'No';");
+		$fix[] = ("CREATE TABLE settings (
+			id INT AUTO_INCREMENT PRIMARY KEY,
+			client_id VARCHAR(255) NOT NULL,
+			setting_name VARCHAR(255) NOT NULL,
+			setting_value TEXT NOT NULL
+		);");
 
 		foreach($fix as $stmt) {
 			try {
@@ -816,7 +817,6 @@ class Myschoolgh extends Models {
 			return $query_style === "OBJ" ? $stmt->fetchAll(PDO::FETCH_OBJ) : $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 		} catch(PDOException $e) {
-			print $e->getMessage();
 			return [];
 		}
 
