@@ -171,6 +171,14 @@ class Library extends Myschoolgh {
 			// if the user is a parent
 			if($params->userData->user_type == "parent") {
 				unset($params->user_role);
+
+				if(empty($params->userData->wards_list)) {
+					return [
+						"code" => 200,
+						"data" => []
+					];
+				}
+
 				$user_id = array_merge($user_id, array_column($params->userData->wards_list, "student_guid"));
 			}
 

@@ -240,14 +240,14 @@ class Terminal_reports extends Myschoolgh {
             
         if(!empty($check)) {
             if($check[0]->status === "Pending") {
-                return ["code" => 200, "data" => "There is an existing record, trying to upload a new set of data will replace the existing one."];
+                return ["code" => 200, "data" => "There is an existing record, an update will replace it."];
             } elseif($check[0]->status === "Approved") {
                 return ["code" => 400, "data" => "Sorry! This result has already been approved hence cannot be updated."];
             } elseif($check[0]->status === "Submitted") {
                 return ["code" => 400, "data" => "Sorry! This result has been submitted pending approval hence cannot be updated."];
             }
         } else {
-            return ["code" => 200, "data" => "Upload the Class Results via the <strong>CSV Uploader</strong> or Manually input the data by clicking on the <strong>Manual Upload</strong> button."];
+            return ["code" => 200, "data" => "Upload the Class Results via the <strong>CSV Uploader</strong> or Manually input the data."];
         }
     }
 
@@ -557,24 +557,30 @@ class Terminal_reports extends Myschoolgh {
         $preset_dataset = !empty($params->r_csv_data) && !empty($params->preset_dataset) ? $params->preset_dataset : [];
         $remarks_dataset = !empty($params->r_csv_data) && !empty($params->remarks_dataset) ? $params->remarks_dataset : [];
 
+        $mobileViewer = [];
+
         // set the files
         foreach($complete_csv_data as $key => $result) {
             
             if(empty($result[2]) && empty($result[3])) continue;
 
+            if(!isset($mobileViewer[$key])) {
+                $mobileViewer[$key] = "";
+            }
+
             $report_table .= "<tr data-student_row_id='{$key}'>";
 
-            $mobile_view .= "<div class='col-12 col-md-6 col-lg-4 mb-2 pr-2 pl-2' data-student_row_id='{$key}'>";
+            $appendMobileView = "<div class='col-12 col-md-6 col-lg-4 mb-2 pr-2 pl-2' data-student_row_id='{$key}'>";
 
             // set the name as the header
-            $mobile_view .= "<div class='card'>";
+            $appendMobileView .= "<div class='card'>";
             
-            $mobile_view .= "<div class='card-header pb-0 flex-column'>";
-            $mobile_view .= "<div><h5 class='text-primary mb-0 pb-0'>".strtoupper($result[0])."</h5></div>";
-            $mobile_view .= "<div class='text-muted'>".$result[1]."</div>";
-            $mobile_view .= "</div>";
+            $appendMobileView .= "<div class='card-header pb-0 flex-column'>";
+            $appendMobileView .= "<div><h5 class='text-primary mb-0 pb-0'>".strtoupper($result[0])."</h5></div>";
+            $appendMobileView .= "<div class='text-muted'>".$result[1]."</div>";
+            $appendMobileView .= "</div>";
 
-            $mobile_view .= "<div class='card-body p-2'>";
+            $appendMobileView .= "<div class='card-body p-2'>";
             
 
             foreach($result as $kkey => $kvalue) {
@@ -608,16 +614,16 @@ class Terminal_reports extends Myschoolgh {
                         name='{$column}' min='0' max='1000' type='number' value='{$kvalue}' {$readOnly}>
                     </td>";
 
-                    $mobile_view .= "<div class='d-flex justify-content-between items-center mb-2'>";
-                    $mobile_view .= "<div>".ucwords($iName)."</div>";
-                    $mobile_view .= "<div>
+                    $appendMobileView .= "<div class='d-flex justify-content-between items-center mb-2'>";
+                    $appendMobileView .= "<div>".ucwords($iName)."</div>";
+                    $appendMobileView .= "<div>
                     <input style='min-width:100px;' ".($columns["columns"][$file_headers[$kkey]] == "100" ? 
                         "disabled='disabled' data-input_total_id='{$key}'" : 
                         "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." 
                         class='form-control pl-0 pr-0 font-18 text-center' data-max_percentage='{$columns["columns"][$file_headers[$kkey]]['percentage']}' 
                         name='{$column}' min='0' max='1000' type='number' value='{$kvalue}' {$readOnly}>
                     </div>";
-                    $mobile_view .= "</div>";
+                    $appendMobileView .= "</div>";
 
                 } elseif($file_headers[$kkey] == "TEACHER REMARKS") {
 
@@ -625,7 +631,7 @@ class Terminal_reports extends Myschoolgh {
                 
                     $report_table .= "<td><input placeholder='Enter your remarks' style='min-width:300px' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'></td>";
                 
-                    $mobile_view .= "<input placeholder='Enter your remarks' style='width:100%' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'>";
+                    $appendMobileView .= "<input placeholder='Enter your remarks' style='width:100%' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'>";
                 
                 } elseif($file_headers[$kkey] == "TEACHER ID") {
                     $report_table .= "<td><span style='font-weight-bold font-17'>".(empty($kvalue) ? $params->userData->unique_id : $kvalue)."</span></td>";                    
@@ -633,7 +639,7 @@ class Terminal_reports extends Myschoolgh {
                     $data_key = "data-".strtolower(str_ireplace(" ", "_", $file_headers[$kkey]))."='{$kvalue}'";
                     $report_table .= "<td class='text-left'><span data-student_row_id='{$key}' {$data_key}>{$kvalue}</span></td>";
                     
-                    $mobile_view .= "<div class='text-left'><span data-student_row_id='{$key}' {$data_key}></span></div>";
+                    $appendMobileView .= "<div class='text-left'><span data-student_row_id='{$key}' {$data_key}></span></div>";
 
                 } else {
                     $theValue = $sba_percentage_lower[strtolower($file_headers[$kkey])] ?? '';
@@ -652,23 +658,27 @@ class Terminal_reports extends Myschoolgh {
                         class='form-control text-center' value='{$kvalue}'>
                         </div></td>";
 
-                    $mobile_view .= "<div class='d-flex justify-content-between items-center mb-2'>";
-                    $mobile_view .= "<div>".ucwords(str_ireplace("_", " ", $file_headers[$kkey]))."</div>";
-                    $mobile_view .= "<div><input style='width:80px; font-size:18px;' type='number' data-max_percentage='{$theValue}'
+                    $appendMobileView .= "<div class='d-flex justify-content-between items-center mb-2'>";
+                    $appendMobileView .= "<div>".ucwords(str_ireplace("_", " ", $file_headers[$kkey]))."</div>";
+                    $appendMobileView .= "<div><input style='width:80px; font-size:18px;' type='number' data-max_percentage='{$theValue}'
                     data-input_method='{$iname}' data-input_type='marks' data-input_row_id='{$key}' 
                     class='form-control text-center' value='{$kvalue}'></div>";
-                    $mobile_view .= "</div>";
+                    $appendMobileView .= "</div>";
 
                 }
 
             }
 
-            $mobile_view .= "</div>";
-            $mobile_view .= "</div>";
+            $appendMobileView .= "</div>";
+            $appendMobileView .= "</div>";
 
-            $mobile_view .= "</div>";
+            $appendMobileView .= "</div>";
 
             $report_table .= "</tr>";
+            
+            $mobile_view .= $appendMobileView;
+
+            $mobileViewer[$key] .= $appendMobileView;
         }
         $report_table .= "</tbody>";
         $report_table .= "</table>";
@@ -677,15 +687,18 @@ class Terminal_reports extends Myschoolgh {
         $sba_percentage_lower['Exams'] = 100;
 
         $footer_table = "<div class='text-right mt-3'>";
-        $footer_table .= "<button onclick='return save_terminal_report()' class='btn p-3 font-18 btn-outline-success'>
+        $footer_table .= "<button onclick='return save_terminal_report()' class='btn p-3 font-16 btn-outline-success'>
             <i class='fa fa-save'></i> Save Class Results
         </button>";
         $footer_table .= "</div>";
+
+        $notices = "";
 
         $footer_table .= "<div class='d-flex justify-content-between border-top border-primary mt-3'>";
         $footer_table .= "<div class='text-left mt-3'>";
         foreach($sba_percentage_lower as $key => $value) {
             $footer_table .= "<span class='badge badge-success mr-2 mb-1 font-16'>".ucwords(str_ireplace("_", " ", $key)).": {$value}%</span>";
+            $notices .= "<span class='badge badge-success mr-2 mb-1 font-16'>".ucwords(str_ireplace("_", " ", $key)).": {$value}%</span>";
         }
         $footer_table .= "</div>";
         $footer_table .= "</div>";
@@ -699,7 +712,7 @@ class Terminal_reports extends Myschoolgh {
         // save the information in a session
         $this->session->set("terminal_report_{$params->class_id}_{$params->course_id}", ["headers" => $headers, "students" => $complete_csv_data]);
 
-        return ["data" => ["table_view" => $report_table, "mobile_view" => $mobile_view]];
+        return ["data" => ["table_view" => $report_table, "mobile_view" => $mobile_view, 'mobileViewer' => $mobileViewer, 'notices' => $notices]];
 
     }
 

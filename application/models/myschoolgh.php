@@ -216,7 +216,7 @@ class Myschoolgh extends Models {
         $content = [
             "students" => [
                 "right" => [
-                    "student_add" => ["Add Student", "fa-plus", "btn-warning"],
+                    "student_add" => ["Add Student", "fa-plus", "btn-success"],
                     "fees-history" => ["Fees Payment History", "fa-list", "btn-dark"],
                     "fees-allocation" => ["Fees Allocation", "fa-money-bill", "btn-primary"],
                 ]

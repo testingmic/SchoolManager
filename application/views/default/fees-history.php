@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $accessObject, $defaultUser, $defaultAcademics, $defaultCurrency, $isAdminAccountant;
+global $myClass, $accessObject, $defaultUser, $defaultAcademics, $defaultCurrency, $isAdminAccountant, $isWardParent, $isParent;
 
 // initial variables
 $appName = $myClass->appName;
@@ -78,7 +78,11 @@ if($feesReport) {
             AND b.status = '1' AND b.reversed = '0'
         ) AS amount_paid,
         (
-            SELECT SUM(arrears_total) FROM users_arrears WHERE client_id='{$clientId}' LIMIT {$myClass->extreme_maximum}
+            SELECT SUM(arrears_total) 
+            FROM users_arrears 
+            WHERE client_id='{$clientId}' 
+            ".(!empty($defaultUser->wards_list_ids) ? " AND student_id IN {$this->inList($defaultUser->wards_list_ids)}" : null)."
+            LIMIT {$myClass->extreme_maximum}
         ) AS total_arrears", 
         "fees_payments a LEFT JOIN users u ON u.item_id = a.student_id", 
         "a.client_id = '{$clientId}' AND a.status = '1' AND a.exempted = '0' AND u.status='1'
@@ -92,7 +96,7 @@ if($feesReport) {
     // set the variables
     $amount_due = $payment_summary[0]->amount_due ?? 0;
     $amount_paid = $payment_summary[0]->amount_paid ?? 0;
-    $total_arrears = $payment_summary[0]->total_arrears ?? 0;
+    $total_arrears = $isParent && empty($defaultUser->wards_list_ids) ? 0 : ($payment_summary[0]->total_arrears ?? 0);
     $total_balance = $payment_summary[0]->balance ?? 0;
 
     $response->page_programming["left"] = [
@@ -278,7 +282,7 @@ $response->html = '
         </div>
         
         '.($feesReport || $isWardParent ?
-        '<div class="col-xl-3 col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
+        '<div class="'.($isWardParent ? 'col-xl-4 col-lg-4' : 'col-xl-3 col-lg-3').' col-md-6 hover:scale-105 transition-all duration-300">
             <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-blue">
                 <div class="card-body pr-2 pl-3 card-type-3">
                     <div class="row">
@@ -296,7 +300,7 @@ $response->html = '
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-3 col-md-6 '.(empty($arrears_paid) && $isWardParent ? 'hidden' : '').' hover:scale-105 transition-all duration-300">
+        <div class="'.($isWardParent ? 'col-xl-4 col-lg-4' : 'col-xl-3 col-lg-3').' col-md-6 '.(empty($arrears_paid) && $isWardParent ? 'hidden' : '').' hover:scale-105 transition-all duration-300">
             <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-success">
                 <div class="card-body pr-2 pl-3 card-type-3">
                     <div class="row">
@@ -314,7 +318,7 @@ $response->html = '
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-3 col-md-6 '.($isWardParent ? 'hidden' : '').' hover:scale-105 transition-all duration-300">
+        <div class="'.($isWardParent ? 'col-xl-4 col-lg-4' : 'col-xl-3 col-lg-3').' col-md-6 '.($isWardParent ? 'hidden' : '').' hover:scale-105 transition-all duration-300">
             <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-danger">
                 <div class="card-body pr-2 pl-3 card-type-3">
                     <div class="row">
@@ -332,7 +336,7 @@ $response->html = '
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-3 col-md-6 hover:scale-105 transition-all duration-300">
+        <div class="'.($isWardParent ? 'col-xl-4 col-lg-4' : 'col-xl-3 col-lg-3').' col-md-6 hover:scale-105 transition-all duration-300">
             <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-warning">
                 <div class="card-body pr-2 pl-2 card-type-3">
                     <div class="row">

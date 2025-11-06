@@ -206,8 +206,10 @@ class Exeats extends Myschoolgh {
             $result['summary']['pickup_by'][$each->pickup_by] = ($result['summary']['pickup_by'][$each->pickup_by] ?? 0) + 1;
             $result['summary']['status'][$each->status]++;
 
-            // set the gender count
-            $result['summary']['gender'][$each->gender]++;
+            if(!empty($each->gender)) {
+                // set the gender count
+                $result['summary']['gender'][$each->gender]++;
+            }
             
             $result['class'][$each->class_name]['summary'][$each->status]++;
             $result['class'][$each->class_name]['summary']['Total']++;
