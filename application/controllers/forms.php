@@ -2233,7 +2233,7 @@ class Forms extends Myschoolgh {
                         </div>
                         <div class="col-lg-8 col-md-8">
                             <div class="form-group">
-                                <label for="alergy">Alergies</label>
+                                <label for="alergy">Allergies</label>
                                 <input type="text" value="'.($userData->alergy ?? null).'" name="alergy" id="alergy" class="form-control">
                             </div>
                         </div>
@@ -2326,7 +2326,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="blood_group">Blood Broup</label>
+                        <label for="blood_group">Blood Group</label>
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
                             <option value="">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
@@ -2620,7 +2620,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="blood_group">Blood Broup</label>
+                        <label for="blood_group">Blood Group</label>
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
                             <option value="">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
@@ -3183,7 +3183,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="blood_group">Blood Broup</label>
+                        <label for="blood_group">Blood Group</label>
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
                             <option value="">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
@@ -3874,7 +3874,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="blood_group">Blood Broup</label>
+                        <label for="blood_group">Blood Group</label>
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
                             <option value="">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
@@ -4725,7 +4725,7 @@ class Forms extends Myschoolgh {
         // append the form and display
         $the_form["general"] = "
             <div class='row' id='terminal_reports'>
-                <div class='col-lg-3 mb-2'>
+                <div class='col-lg-4 mb-2'>
                     <select data-width='100%' class='form-control selectpicker' name='class_id' id='class_id'>
                         <option value=''>Select the Class</option>";
                         foreach($classes_list as $class) {
@@ -4738,36 +4738,36 @@ class Forms extends Myschoolgh {
                             <option value=''>Select the Subject</option>
                         </select>
                     </div>
-                    <div class='col-lg-3 mb-2'>
+                    <div class='col-lg-3 mb-2 hidden' data-item_option='file_upload'>
                         <select data-width='100%' class='form-control selectpicker' name='upload_type' id='upload_type'>
                             <option value='download'>Download CSV File</option>
                             <!--<option value='online'>Input the Data Online</option>-->
                         </select>
                     </div>
-                    <div class='col-lg-2' id='download_button' data-view_port='desktop'>
+                    <div class='col-lg-2' data-item_option='file_upload' id='download_button' data-view_port='desktop'>
                         <button onclick='return download_report_csv()' disabled type='download_csv' class='btn btn-block btn-outline-primary'>Download Sample</button>
                     </div>
                     <div class='col-lg-12 mt-1 text-center' id='notification'></div>
                     <div class='col-lg-12 text-center'>
                         <div class='d-flex justify-content-center border-top mt-1 pt-3 gap-4'>
-                            <div class='hidden' data-option_id='upload_file' data-view_port='desktop'>
+                            <div class='hidden' data-item_option='file_upload' data-option_id='upload_file' data-view_port='desktop'>
                                 <div class='form-group'>
                                     <input type='file' name='upload_report_file' accept='.csv' class='form-control'>
                                 </div>
                             </div>
-                            <div class='hidden' data-option_id='upload_file' data-view_port='desktop'>
+                            <div class='hidden' data-item_option='file_upload' data-option_id='upload_file' data-view_port='desktop'>
                                 <div class='form-group'>
                                     <button onclick='return upload_csv_file();' class='btn btn-block btn-primary'><i class='fa fa-upload'></i> Click to Upload</button>
                                 </div>
                             </div>
                             <div class='hidden' data-option_id='upload_file'>
-                                <div class='form-group'>
+                                <div class='form-group mb-0'>
                                     <button onclick='return manual_report_upload();' class='btn btn-block btn-outline-success'><i class='fa fa-download'></i> Manual Upload</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class='col-lg-12 mt-4' id='summary_report_sheet_content'></div>
+                    <div class='col-lg-12 mt-2' id='summary_report_sheet_content'></div>
                 </div>";
 
 

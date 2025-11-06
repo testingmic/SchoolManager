@@ -646,7 +646,7 @@ if(!empty($user_id)) {
                                             <td class="p-2">'.$data->previous_school_remarks.'</td>
                                         </tr>
                                     </table>
-                                    <div class="mt-4"><h5>ALERGIES</h5></div>
+                                    <div class="mt-4"><h5>Allergies</h5></div>
                                     <table width="100%" class="table-bordered">
                                         <tr>
                                             <td class="p-2">'.(!empty($data->alergy) ? $data->alergy : "NIL").'</td>

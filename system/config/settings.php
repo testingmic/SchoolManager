@@ -19,6 +19,10 @@ function version() {
     return "1.5.6";
 }
 
+function is_localhost() {
+	return in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1', 'localhost']);
+}
+
 function loggedIn() {
     global $session;
     return ($session->userLoggedIn && $session->userId) ? true : false;

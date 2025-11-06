@@ -114,6 +114,7 @@ load_helpers(['menu_helper']);
             academicSession = "<?= $academicSession; ?>",
             myPrefs = <?= json_encode($userData->client->client_preferences) ?>;
     </script>
+    <?php if(!is_localhost()) { ?>
     <?= $myClass->google_analytics_code ?>
     <!-- Paste this right before your closing </head> tag -->
     <script type="text/javascript">
@@ -132,8 +133,9 @@ load_helpers(['menu_helper']);
         account_id: "<?= $clientId ?>",
         timestamp: "<?= date("Y-m-d H:i:s") ?>",
     })
-
     </script>
+    <?php } ?>
+    
     <style>
         <?php if(!$isActiveAccount) { ?>
         .main-content {

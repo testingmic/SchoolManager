@@ -2053,7 +2053,7 @@ class Forms extends Myschoolgh {
                         </div>
                         <div class="col-lg-8 col-md-8">
                             <div class="form-group">
-                                <label for="alergy">Alergies</label>
+                                <label for="alergy">Allergies</label>
                                 <input type="text" value="'.($userData->alergy ?? null).'" name="alergy" id="alergy" class="form-control">
                             </div>
                         </div>
@@ -2125,7 +2125,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="blood_group">Blood Broup</label>
+                        <label for="blood_group">Blood Group</label>
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
                             <option value="">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
@@ -2406,7 +2406,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="blood_group">Blood Broup</label>
+                        <label for="blood_group">Blood Group</label>
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
                             <option value="">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
@@ -2908,7 +2908,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="blood_group">Blood Broup</label>
+                        <label for="blood_group">Blood Group</label>
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
                             <option value="">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
@@ -3541,7 +3541,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="blood_group">Blood Broup</label>
+                        <label for="blood_group">Blood Group</label>
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
                             <option value="">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
