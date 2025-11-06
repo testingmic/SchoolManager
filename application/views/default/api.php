@@ -124,6 +124,30 @@ if(($inner_url == "payment") && (in_array($outer_url, ["pay", "verify", "epay_va
     $skipProcessing = true;
 }
 
+/**
+ * Process the Admission Request
+ * 
+ * @param $params
+ * 
+ * @return JSON
+ */
+if((($inner_url == "websites") || ($inner_url == "enquiry")) && (in_array($outer_url, ["admission"]))) {
+    // end query if the client id was not parsed
+    if(!isset($params->clientId)) {
+        // return error message
+        $response->result = "The Client ID is required.";
+        echo json_encode($response);
+        exit;
+    }
+
+    /** Load the Admission Request */
+    $officeObject = load_class("frontoffice", "controllers");
+    $response = $officeObject->admission($params);
+
+    echo json_encode($response);
+    exit;
+}
+
 /** If the value of $skipProcessing is TRUE */
 if(!$skipProcessing) {
 

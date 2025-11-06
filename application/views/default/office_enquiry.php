@@ -82,13 +82,15 @@ if(!$accessObject->hasAccess("view", "admission_enquiry")) {
     
             $action = "<button title='View Record Details' onclick='return load(\"office_enquiry/{$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></button>";
             
+            $each->source = $each->source == 'website' ? "<span class='badge badge-primary'>Website</span>" : $each->source;
+
             $results_list .= "<tr data-row_id=\"{$each->id}\">";
             $results_list .= "<td>".($key+1)."</td>";
             $results_list .= "<td><span class='user_name' onclick='return load(\"office_enquiry/{$each->item_id}\");'>{$each->content->fullname}</span></td>";
             $results_list .= "<td>{$each->content->phone_number}</td>";
             $results_list .= "<td>{$each->source}</td>";
             $results_list .= "<td>{$each->content->date}</td>";
-            $results_list .= "<td>{$each->content->followup}</td>";
+            $results_list .= "<td>".($each->content->followup ?? 'N/A')."</td>";
             $results_list .= "<td>".$myClass->the_status_label($each->state)."</td>";
             $results_list .= "<td class='text-center'>{$action}</td>";
             $results_list .= "</tr>";
@@ -110,80 +112,105 @@ if(!$accessObject->hasAccess("view", "admission_enquiry")) {
         $status = ($data->state == 'Pending') ? 'primary' : ($data->state == 'Won' ? 'success' : ($data->state === 'Passive' ? 'warning' : 'danger'));
         $state = $data->state;
 
+        $wardInfo = $data->content->wardInformation ?? [];
+
+        $childInfo = "";
+        if(!empty($wardInfo)) {
+            foreach($wardInfo as $key => $each) {
+                $childInfo .= "<div class='d-flex justify-content-between mb-1'>";
+                $childInfo .= "<div class='font-14'>".ucwords($key)."</div>";
+                $childInfo .= "<div class='font-14'><strong>".$each."</strong></div>";
+                $childInfo .= "</div>";
+            }
+        }
+
         // set the application data
         $request_data = '
         <div class="col-md-5">
-            <div class="card stick_to_top">
-                <div class="card-body">
+            <div class="stick_to_top">
+                <div class="card">
+                    <div class="card-body">
 
-                    <div class="font-17 text-uppercase mb-2">
-                        <i class="fa fa-user"></i> 
-                        <span class="user_name">'.$data->content->fullname.'</span>
-                    </div>
-                    <div class="font-14 mb-2">
-                        <i class="fa fa-envelope"></i> 
-                        <span>'.$data->content->email.'</span>
-                    </div>
-                    <div class="font-14 border-bottom pb-2 mb-2">
-                        <i class="fa fa-phone"></i> 
-                        <span>'.$data->content->phone_number.'</span>
-                    </div>
-                    <div class="font-14 border-bottom pb-2 mb-2">
-                        <i class="fa fa-map"></i> 
-                        <strong>'.$data->content->address.'</strong>
-                    </div>
-                    <div class="font-14 border-bottom pb-2 mb-2">
-                        <i class="fa fa-calendar-check"></i> 
-                        <strong>'.$data->content->date.'</strong>
-                    </div>
-                    <div class="mb-2 border-bottom pb-2 mb-2">
-                        <div class="font-14">
-                            <strong>Source</strong>:
-                            '.$data->source.'
+                        <div class="font-17 text-uppercase mb-2">
+                            <i class="fa fa-user"></i> 
+                            <span class="user_name">'.$data->content->fullname.'</span>
                         </div>
-                    </div>
-                    <div class="mb-2 border-bottom pb-2 mb-2">
-                        <div class="font-14">
-                            <strong>Followup Date</strong> :
-                            '.date("jS F Y", strtotime($data->content->followup)).'
-                        </div>
-                    </div>
-                    <div class="mb-2 border-bottom pb-2 mb-2">
-                        <div class="font-14">'.$data->content->description.'</div>
-                    </div>
-                    '.($accessObject->hasAccess("update", "admission_enquiry") ?
-                        '<div class="form-group mb-3">
-                            <label>Enquiry Status</label>
-                            <select data-request_url="office_enquiry" data-request_id="'.$data->item_id.'" name="enquiry_status" id="enquiry_status" class="selectpicker" data-width="100%">
-                                <option '.($data->state === 'Pending' ? 'selected' : null).' value="Pending">Pending</option>
-                                <option '.($data->state === 'Passive' ? 'selected' : null).' value="Passive">Passive</option>
-                                <option '.($data->state === 'Dead' ? 'selected' : null).' value="Dead">Dead</option>
-                                <option '.($data->state === 'Won' ? 'selected' : null).' value="Won">Won</option>
-                                <option '.($data->state === 'Lost' ? 'selected' : null).' value="Lost">Lost</option>
-                            </select>
-                        </div>' : "<strong>Status: </strong><span class='badge badge-{$status}'>{$state}</span>"
-                    ).'
-                    <div class="font-15 mt-3 pb-2 mb-2">
-                        <div>
-                            <i class="fa fa-user"></i>
-                            <span onclick="return load(\'staff/'.$data->created_by.'/documents\')" class="user_name">
-                            '.$data->name.'
-                            </span>
-                        </div>
-                        <div>
-                            <i class="fa fa-phone"></i> 
-                            '.$data->phone_number.'
-                        </div>
-                        <div>
+                        <div class="font-14 mb-2">
                             <i class="fa fa-envelope"></i> 
-                            '.$data->email.'
+                            <span>'.$data->content->email.'</span>
                         </div>
-                        <div>
+                        <div class="font-14 border-bottom pb-2 mb-2">
+                            <i class="fa fa-phone"></i> 
+                            <span>'.$data->content->phone_number.'</span>
+                        </div>
+                        <div class="font-14 border-bottom pb-2 mb-2">
+                            <i class="fa fa-map"></i> 
+                            <strong>'.$data->content->address.'</strong>
+                        </div>
+                        <div class="font-14 border-bottom pb-2 mb-2">
                             <i class="fa fa-calendar-check"></i> 
-                            '.$data->date_created.'
+                            <strong>'.$data->content->date.'</strong>
+                        </div>
+                        <div class="mb-2 border-bottom pb-2 mb-2">
+                            <div class="font-14">
+                                <strong>Source</strong>:
+                                '.$data->source.'
+                            </div>
+                        </div>
+                        <div class="mb-2 border-bottom pb-2 mb-2">
+                            <div class="font-14">
+                                <strong>Followup Date</strong> :
+                                '.(!empty($data->content->followup) ? date("jS F Y", strtotime($data->content->followup)) : 'N/A').'
+                            </div>
+                        </div>
+                        <div class="mb-2 border-bottom pb-2 mb-2">
+                            <div class="font-14">'.(!empty($data->content->description) ? $data->content->description : 'N/A').'</div>
+                        </div>
+                        '.($accessObject->hasAccess("update", "admission_enquiry") ?
+                            '<div class="form-group mb-3">
+                                <label>Enquiry Status</label>
+                                <select data-request_url="office_enquiry" data-request_id="'.$data->item_id.'" name="enquiry_status" id="enquiry_status" class="selectpicker" data-width="100%">
+                                    <option '.($data->state === 'Pending' ? 'selected' : null).' value="Pending">Pending</option>
+                                    <option '.($data->state === 'Passive' ? 'selected' : null).' value="Passive">Passive</option>
+                                    <option '.($data->state === 'Dead' ? 'selected' : null).' value="Dead">Dead</option>
+                                    <option '.($data->state === 'Won' ? 'selected' : null).' value="Won">Won</option>
+                                    <option '.($data->state === 'Lost' ? 'selected' : null).' value="Lost">Lost</option>
+                                </select>
+                            </div>' : "<strong>Status: </strong><span class='badge badge-{$status}'>{$state}</span>"
+                        ).'
+                        <div class="font-15 mt-3 pb-2 mb-2">
+                            <div>
+                                <i class="fa fa-user"></i>
+                                <span onclick="return load(\'staff/'.$data->created_by.'/documents\')" class="user_name">
+                                '.($data->content->name ?? 'N/A').'
+                                </span>
+                            </div>
+                            <div>
+                                <i class="fa fa-phone"></i> 
+                                '.($data->content->phone_number ?? 'N/A').'
+                            </div>
+                            <div>
+                                <i class="fa fa-envelope"></i> 
+                                '.($data->content->email ?? 'N/A').'
+                            </div>
+                            <div>
+                                <i class="fa fa-calendar-check"></i> 
+                                '.($data->date_created ?? 'N/A').'
+                            </div>
                         </div>
                     </div>
                 </div>
+                '.(!empty($wardInfo) ? '
+                <div class="card">
+                    <div class="card-header mb-0 pb-1">
+                        <h5 class="card-title">Child Information</h5>
+                    </div>
+                    <div class="card-body pt-2 pb-2">
+                        <div>
+                        '.$childInfo.'
+                        </div>
+                    </div>
+                </div>' : null).'
             </div>
         </div>
         <div class="col-md-7">

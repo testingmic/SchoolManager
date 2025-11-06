@@ -756,7 +756,7 @@ var attendanceReport = (_attendance) => {
 }
 
 var salaryReport = (_salary) => {
-    if (_salary.salary_list !== undefined) {
+    if (typeof _salary?.salary_list !== 'undefined') {
         let _labels = new Array(),
             net_salary = new Array(),
             gross_salary = new Array();
@@ -835,24 +835,24 @@ var salaryReport = (_salary) => {
 
     let deductions_totals = new Array(),
         allowances_totals = new Array();
-    if (_salary.chart.comparison !== undefined) {
-        if (_salary.chart.comparison.deductions !== undefined) {
+    if (typeof _salary.chart.comparison !== 'undefined') {
+        if (typeof _salary.chart.comparison.deductions !== 'undefined') {
             deductions_totals = _salary.chart.comparison.deductions;
         }
     }
 
-    if (_salary.chart.comparison !== undefined) {
-        if (_salary.chart.comparison.allowances !== undefined) {
+    if (typeof _salary.chart.comparison !== 'undefined') {
+        if (typeof _salary.chart.comparison.allowances !== 'undefined') {
             allowances_totals = _salary.chart.comparison.allowances;
         }
     }
 
-    if(_salary.grouping.Deduction !== undefined) {
+    if(typeof _salary.grouping.Deduction !== 'undefined') {
         $.each(_salary.grouping.Deduction, function(i, e) {
             table_html += `<tr>`;
             table_html += `<td>${e}</td>`;
             $.each(deductions_list, function(ii, ee) {
-                let amount = ((deductions_list[ii][e] !== undefined) && (deductions_list[ii][e].amount !== undefined)) ? format_currency(deductions_list[ii][e].amount) : 0;
+                let amount = ((typeof deductions_list[ii][e] !== 'undefined') && (typeof deductions_list[ii][e].amount !== 'undefined')) ? format_currency(deductions_list[ii][e].amount) : 0;
                 table_html += `<td>${myPrefs.labels.currency}${amount}</td>`;
             });
             table_html += `<td align="center"><strong>${myPrefs.labels.currency}${format_currency(summary_total.list.Deduction[e])}</strong></td>`;
@@ -871,7 +871,7 @@ var salaryReport = (_salary) => {
 
     table_html += `</tbody></table>`;
 
-    table_html += `<table class="table table-bordered"><thead><tr style="background-color:#03a9f4;">
+    table_html += `<table class="table table-bordered w-full mb-4"><thead><tr style="background-color:#03a9f4;">
         <th width="15%" style="color:#fff;">Allowances</th>`;
     $.each(allowances_list, function(i, e) {
         table_html += `<th style="color:#fff;">${i}</th>`;
@@ -883,7 +883,7 @@ var salaryReport = (_salary) => {
         table_html += `<tr>`;
         table_html += `<td >${e}</td>`;
         $.each(allowances_list, function(ii, ee) {
-            let amount = (allowances_list[ii][e].amount !== undefined) ? format_currency(allowances_list[ii][e].amount) : 0;
+            let amount = (typeof allowances_list[ii][e]?.amount !== 'undefined') ? format_currency(allowances_list[ii][e]?.amount) : 0;
             table_html += `<td>${myPrefs.labels.currency}${amount}</td>`;
         });
         table_html += `<td align="center"><strong>${myPrefs.labels.currency}${format_currency(summary_total.list.Allowance[e])}</strong></td>`;

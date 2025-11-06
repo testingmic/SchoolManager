@@ -139,7 +139,6 @@ class Frontoffice extends Myschoolgh {
 
 		}
 
-		// insert the record into the database
 		try {
 
 			// set the item id
@@ -186,6 +185,88 @@ class Frontoffice extends Myschoolgh {
 
 	}
 
+	/**
+	 * Process the Admission Request
+	 * 
+	 * @param stdClass $params
+	 * 
+	 * @return Array
+	 */
+	public function admission(stdClass $params) {
+
+		$section = "admission_enquiry";
+
+		$clientInfo = $this->clients_list($params->clientId);
+		if(empty($clientInfo)) {
+			return [
+				'code' => 400,
+				'data' => 'Sorry! An invalid client id was parsed.'
+			];
+		}
+		$clientInfo = $clientInfo[0];
+
+		// set the item id
+		$item_id = random_string("alnum", RANDOM_STRING);
+
+		$classList = [
+			'creche' => 'Creche',
+		];
+		for($i = 1; $i <= 6; $i++) {
+			$classList['p'.$i] = "Class {$i}";
+			$classList['class'.$i] = "Class {$i}";
+			$classList['class '.$i] = "Class {$i}";
+		}
+
+		// add the junior high classes
+		for($i = 1; $i <= 3; $i++) {
+			$classList['jh'.$i] = "Junior High {$i}";
+			$classList['jhs '.$i] = "Junior High {$i}";
+
+			$classList['nursery'.$i] = "Nursery {$i}";
+			$classList['nursery '.$i] = "Nursery {$i}";
+			
+			$classList['kg'.$i] = "Kindergarten {$i}";
+			$classList['kg'.$i] = "Kindergarten {$i}";
+
+			$classList['kindergarten'.$i] = "Kindergarten {$i}";
+			$classList['kindergarten '.$i] = "Kindergarten {$i}";
+		}
+
+		/** Prepare the data to be inserted */
+		$data = [
+			'fullname' => $params->parentName,
+			'phone_number' => $params->phone ?? null,
+			'email' => $params->email ?? null,
+			'address' => $params->address ?? null,
+			'date' => date("Y-m-d"),
+			'clientId' => $params->clientId,
+			'description' => $params->message ?? 'This is an admission enquiry from the website for my child ' . $params->childFirstName . ' ' . $params->childLastName . '.',
+			'wardInformation' => [
+				'childFirstName' => $params->childFirstName,
+				'childLastName' => $params->childLastName,
+				'childDob' => $params->childDob,
+				'childGender' => $params->childGender,
+				'applyingFor' => !empty($params->applyingFor) ? $classList[strtolower($params->applyingFor)] : 'Unknown',
+				'parentName' => $params->parentName,
+				'relationship' => !empty($params->relationship) ? $params->relationship : 'Parent',
+				'phone' => $params->phone ?? null,
+				'email' => $params->email ?? null,
+			]
+		];
+
+		// insert the request
+		$stmt = $this->db->prepare("INSERT INTO frontoffice SET client_id = ?, item_id = ?, created_by = ?, section = ?, source = ?, content = ?");
+
+		// execute the statement
+		$stmt->execute([
+			$params->clientId, $item_id, 0, $section, 'website', json_encode($data)
+		]);
+
+		return [
+			'code' => 200,
+			'data' => 'Admission request processed successfully.'
+		];
+	}
 
     /**
      * Update the status of a leave application
