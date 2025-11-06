@@ -111,15 +111,11 @@ class Myschoolgh extends Models {
 		if(empty($this->db)) return true;
 
 		// prepare and execute the statement
-		$fix[] = ("CREATE TABLE settings (
-			id INT AUTO_INCREMENT PRIMARY KEY,
-			client_id VARCHAR(255) NOT NULL,
-			setting_name VARCHAR(255) NOT NULL,
-			setting_value TEXT NOT NULL
-		);");
+		$fix[] = "";
 
 		foreach($fix as $stmt) {
 			try {
+				if(empty($stmt)) continue;
 				$query = $this->db->prepare($stmt);
 				$query->execute();
 			} catch(PDOException $e) {
