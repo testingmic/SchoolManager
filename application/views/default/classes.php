@@ -27,6 +27,9 @@ $classes_param = (object) [
 ];
 $item_list = load_class("classes", "controllers", $classes_param)->list($classes_param);
 
+// set the parent menu
+$response->parent_menu = "classes";
+
 $hasDelete = $accessObject->hasAccess("delete", "class");
 $hasUpdate = $accessObject->hasAccess("update", "class");
 $hasAdd = $accessObject->hasAccess("add", "class");

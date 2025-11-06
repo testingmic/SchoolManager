@@ -28,6 +28,9 @@ if(!in_array("payroll", $clientFeatures)) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "payroll";
+
 // access permissions check
 if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
     $response->html = page_not_found("permission_denied");

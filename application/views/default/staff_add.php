@@ -26,6 +26,9 @@ if(!$isPayableStaff) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "staffs";
+
 // execute the client limit query
 $myClass->clients_accounts_limit($clientId);
 

@@ -19,6 +19,8 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "Accounting Reports";
 $response->title = $pageTitle;
 
+// set the parent menu
+$response->parent_menu = "accounting";
 
 // confirm that the user has the required permissions
 if(!$accessObject->hasAccess("reports", "accounting")) {

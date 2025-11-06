@@ -23,6 +23,9 @@ $department_param = (object) [
     "clientId" => $session->clientId
 ];
 
+// set the parent menu
+$response->parent_menu = "classes";
+
 $department_list = load_class("sections", "controllers")->list($department_param);
 
 $hasDelete = $accessObject->hasAccess("delete", "section");

@@ -30,6 +30,9 @@ if(!$expensePermission) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "accounting";
+
 // scripts to load into the page
 $response->scripts = ["assets/js/accounting.js", "assets/js/upload.js"];
 

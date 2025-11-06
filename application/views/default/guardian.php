@@ -24,6 +24,9 @@ $response->scripts = [
     "assets/js/index.js"
 ];
 
+// set the parent menu
+$response->parent_menu = "guardians";
+
 // set the url
 $url_link = $SITEURL[2] ?? null;
 

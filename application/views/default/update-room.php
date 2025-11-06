@@ -28,6 +28,9 @@ $hasUpdate = $accessObject->hasAccess("update", "class");
 
 $item_id = $SITEURL[1] ?? null;
 
+// set the parent menu
+$response->parent_menu = "timetable";
+
 // ensure the the id has been parsed
 if(empty($item_id) || !$hasUpdate) {
     $response->html = page_not_found();

@@ -33,6 +33,9 @@ $param = (object) [
     "userId" => $defaultUser->user_id
 ];
 
+// set the parent menu
+$response->parent_menu = "staffs";
+
 // append the report id if not empty
 if(!empty($report_id)) {
     $param->report_id = $report_id;

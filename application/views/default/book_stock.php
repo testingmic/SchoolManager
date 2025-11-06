@@ -27,6 +27,9 @@ if(!in_array("library", $clientFeatures)) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "library";
+
 // confirm if the user has the required permissions
 if(!$hasAdd) {
     $response->html = page_not_found("permission_denied");

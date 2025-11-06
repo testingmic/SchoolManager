@@ -31,6 +31,9 @@ $params = (object) [
     "client_data" => $defaultUser->client
 ];
 
+// set the parent menu
+$response->parent_menu = "library";
+
 $item_list = load_class("library", "controllers", $params)->list($params);
 
 $hasAdd = $accessObject->hasAccess("add", "library");

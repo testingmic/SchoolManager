@@ -43,6 +43,9 @@ $response->scripts = ["assets/js/accounting.js", "assets/js/upload.js", "assets/
 // date range filter
 $date_range = $filter->date_range ?? date("Y-m-01").":".date("Y-m-d", strtotime("sunday this week"));
 
+// set the parent menu
+$response->parent_menu = "accounting";
+
 // get the list of all classes
 $params = (object)[
     "route" => "expense",

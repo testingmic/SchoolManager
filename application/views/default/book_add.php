@@ -28,6 +28,9 @@ if(!in_array("library", $clientFeatures)) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "library";
+
 $params = (object) [
     "clientId" => $clientId
 ];

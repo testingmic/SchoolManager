@@ -1,6 +1,6 @@
 <?php function communication_menu() { global $baseUrl, $accessObject; ?>
     <?php if($accessObject->hasAccess("manage", "communication")) { ?>
-        <li class="dropdown">
+        <li class="dropdown" data-parent_menu="communication">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails & SMS</span></a>
             <ul class="dropdown-menu">
                 <?php if($accessObject->hasAccess("templates", "communication")) { ?>
@@ -19,7 +19,7 @@
 <?php function exeats_menu() { global $baseUrl, $clientFeatures, $accessObject; ?>
     <?php if(in_array("exeats", $clientFeatures)) { ?>
         <li class="menu-header text-black">Exeats Management</li>
-        <li class="dropdown">
+        <li class="dropdown" data-parent_menu="exeats-management">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Manage Exeats</span></a>
             <ul class="dropdown-menu">
                 <?php if($accessObject->hasAccess("manage", "exeats")) { ?>
@@ -31,7 +31,7 @@
     <?php } ?>
 <?php } ?>
 <?php function general_menu($isAdmin = false) { global $baseUrl, $accessObject, $clientFeatures, $academicSession, $isReadOnly; ?>
-    <li class="dropdown">
+    <li class="dropdown" data-parent_menu="students">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>Students</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>students">Students List</a></li>
@@ -41,7 +41,7 @@
         </ul>
     </li>
     <?php if($accessObject->hasAccess("view", "guardian") || $accessObject->hasAccess("view", "delegates")) { ?>
-    <li class="dropdown">
+    <li class="dropdown" data-parent_menu="guardians">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-clock"></i><span>Guardians</span></a>
         <ul class="dropdown-menu">
             <?php if($accessObject->hasAccess("view", "guardian")) { ?>
@@ -53,7 +53,7 @@
         </ul>
     </li>
     <?php } ?>
-    <li class="dropdown">
+    <li class="dropdown" data-parent_menu="staffs">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>Staff</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>staffs">Staff List</a></li>
@@ -67,7 +67,7 @@
     </li>   
     <?php if($isAdmin) { ?>
     <?php if(in_array("attendance", $clientFeatures)) { ?>
-    <li class="dropdown">
+    <li class="dropdown" data-parent_menu="attendance">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
@@ -113,7 +113,7 @@
     <?php } ?>
     <?php if($accessObject->hasAccess("view", "class")) { ?>
     <li class="menu-header text-black">Academics</li>
-    <li class="dropdown">
+    <li class="dropdown" data-parent_menu="classes">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Class & Departments</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>classes">List Classes</a></li>
@@ -123,7 +123,7 @@
     </li>
     <?php } ?>
     <?php if($isAdmin) { ?>
-        <li class="dropdown">
+        <li class="dropdown" data-parent_menu="courses">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Subjects Manager</span></a>
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Subjects</a></li>
@@ -134,7 +134,7 @@
             </ul>
         </li>
         <?php if(in_array("e_learning", $clientFeatures)) { ?>
-            <li class="dropdown">
+            <li class="dropdown" data-parent_menu="e-learning">
                 <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-open"></i><span>E-Learning</span></a>
                 <ul class="dropdown-menu">
                     <li><a class="nav-link" href="<?= $baseUrl ?>e-learning">E-Books / Videos</a></li>
@@ -147,7 +147,7 @@
     <?php } ?>
     <?php if($isAdmin) { ?>
         <?php if(in_array("timetable", $clientFeatures)) { ?>
-        <li class="dropdown">
+        <li class="dropdown" data-parent_menu="timetable">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-clock"></i><span>Manage Timetable</span></a>
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>timetable">Timetable</a></li>
@@ -158,7 +158,7 @@
         </li>
         <?php } ?>
         <?php if(in_array("class_assessment", $clientFeatures)) { ?>
-            <li class="dropdown">
+            <li class="dropdown" data-parent_menu="assessments">
                 <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Class Assessment</span></a>
                 <ul class="dropdown-menu">
                     <li><a class="nav-link" href="<?= $baseUrl ?>assessments">List Assessments</a></li>
@@ -171,7 +171,7 @@
             </li>
         <?php } ?>
         <?php if(in_array("reports_promotion", $clientFeatures)) { ?>
-        <li class="dropdown">
+        <li class="dropdown" data-parent_menu="reports-upload">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-project-diagram"></i><span>Reports / Promotion</span></a>
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>results-upload">Upload / Manage Results</a></li>
@@ -184,7 +184,7 @@
         <?php } ?>
     <?php } ?>
     <?php if(in_array("library", $clientFeatures)) { ?>
-        <li class="dropdown">
+        <li class="dropdown" data-parent_menu="library">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Collection</a></li>
@@ -199,7 +199,7 @@
 
     <?php if($accessObject->hasAccess("view", "fees")) { ?>
     <li class="menu-header text-black">Finance & Accounting</li>
-    <li class="dropdown">
+    <li class="dropdown" data-parent_menu="fees-setup">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-server"></i><span>Fees Setup</span></a>
         <ul class="dropdown-menu">
             <?php if($accessObject->hasAccess("view", "fees_category")) { ?>
@@ -208,13 +208,13 @@
             <?php if($accessObject->hasAccess("allocation", "fees")) { ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>term_bills">Manage <?= $academicSession; ?> Bills</a></li>
-                <li><a class="nav-link" href="<?= $baseUrl ?>fees-discount-policies">Discount Policies</a></li>
-                <li><a class="nav-link" href="<?= $baseUrl ?>fees-student-discounts">Student Discounts</a></li>
+                <!-- <li><a class="nav-link" href="<?= $baseUrl ?>fees-discount-policies">Discount Policies</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>fees-student-discounts">Student Discounts</a></li> -->
             <?php } ?>
         </ul>
     </li>
     
-    <li class="dropdown">
+    <li class="dropdown" data-parent_menu="fees-payment">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-door-open"></i><span>Payment & History</span></a>
         <ul class="dropdown-menu">
             <?php if($accessObject->hasAccess("receive", "fees") || $accessObject->hasAccess("receive", "fees")) { ?>
@@ -232,7 +232,7 @@
         </ul>
     </li>
     <?php } ?>
-    <li class="dropdown">
+    <li class="dropdown" data-parent_menu="accounting">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-archway"></i><span>Accounting</span></a>
         <ul class="dropdown-menu">
             <?php if($accessObject->hasAccess("accounts", "accounting")) { ?>
@@ -257,7 +257,7 @@
     </li>
     <li class="menu-header text-black">Human Resource</li>
     <?php if($accessObject->hasAccess("view", "id_cards")) { ?>
-        <li class="dropdown">
+        <li class="dropdown" data-parent_menu="id-cards">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-qrcode"></i><span>ID Cards Setup</span></a>
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>card_generated">Generated Cards</a></li>
@@ -269,7 +269,7 @@
     <?php } ?>
     <?php if($accessObject->hasAccess("view", "payslip")) { ?>
         <?php if(in_array("payroll", $clientFeatures)) { ?>
-            <li class="dropdown">
+            <li class="dropdown" data-parent_menu="payroll">
                 <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
                 <ul class="dropdown-menu">
                     <li><a class="nav-link" href="<?= $baseUrl ?>payroll-category">Payroll Setup</a></li>
@@ -286,7 +286,7 @@
         <?php if($accessObject->hasAccess("view", "admission_enquiry") || 
             $accessObject->hasAccess("view", "visitor_book") || $accessObject->hasAccess("view", "phone_call_log") ||
             $accessObject->hasAccess("view", "postal_dispatch") || $accessObject->hasAccess("view", "postal_receive")) { ?>
-            <li class="dropdown">
+            <li class="dropdown" data-parent_menu="front-office">
                 <a href="#" class="nav-link has-dropdown"><i class="fas fa-database"></i><span>Front Office</span></a>
                 <ul class="dropdown-menu">
                     <?php if($accessObject->hasAccess("view", "admission_enquiry")) { ?>
@@ -319,7 +319,7 @@
         <?php } ?>
     <?php } ?>
     <?php if(in_array("bus_manager", $clientFeatures)) { ?>
-        <li class="dropdown">
+        <li class="dropdown" data-parent_menu="shuttle-service">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-bus-alt"></i><span>Shuttle Service</span></a>
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>buses">Manage Shuttles</a></li>
@@ -333,7 +333,7 @@
         </li>
     <?php } ?>
     <?php if($isAdmin && in_array("online_applications", $clientFeatures)) { ?>
-        <li class="dropdown">
+        <li class="dropdown" data-parent_menu="online-applications">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-friends"></i><span>Online Applications</span></a>
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>applications">Application List</a></li>
@@ -349,7 +349,7 @@
     <?= communication_menu() ?>
     <?php if(in_array("events", $clientFeatures)) { ?>
         <?php if($accessObject->hasAccess("update", "events")) { ?>
-        <li class="dropdown">
+        <li class="dropdown" data-parent_menu="events-management">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-calendar-check"></i><span> Events Management</span></a>
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>events">List Events</a></li>
@@ -435,7 +435,7 @@
     <li><a href="<?= $baseUrl ?>timetable-view" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
     <?php } ?>
     <?php if(in_array("library", $clientFeatures)) { ?>
-    <li class="dropdown">
+    <li class="dropdown" data-parent_menu="library">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Collection</a></li>
@@ -513,7 +513,7 @@
     <?php } ?>
     <li><a class="nav-link" href="<?= $baseUrl ?>delegates"><i class="fas fa-users"></i> Manage Delegates</a></li>
     <?php if(in_array("library", $clientFeatures)) { ?>
-    <li class="dropdown">
+    <li class="dropdown" data-parent_menu="library">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Collection</a></li>
@@ -588,7 +588,7 @@
         </li>
     <?php } ?>
     <?php if(in_array("library", $clientFeatures)) { ?>
-        <li class="dropdown">
+        <li class="dropdown" data-parent_menu="library">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Collection</a></li>
@@ -634,7 +634,7 @@
     </li>
     <?php } ?>
     <?php if(in_array("library", $clientFeatures)) { ?>
-    <li class="dropdown">
+    <li class="dropdown" data-parent_menu="library">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Collection</a></li>

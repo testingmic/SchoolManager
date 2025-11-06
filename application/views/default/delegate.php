@@ -20,6 +20,9 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "Delegate Information";
 $response->title = $pageTitle;
 
+// set the parent menu
+$response->parent_menu = "guardians";
+
 // end query if the user has no permissions
 if(!$accessObject->hasAccess("view", "delegates") && !$isWardParent) {
     // permission denied information

@@ -23,6 +23,9 @@ $filter = (object) array_map("xss_clean", $_POST);
 $pageTitle = "Postal Dispatch";
 $response->title = $pageTitle;
 
+// set the parent menu
+$response->parent_menu = "front-office";
+
 // end query if the user has no permissions
 if(!in_array("front_office", $clientFeatures)) {
     // permission denied information

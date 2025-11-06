@@ -22,6 +22,9 @@ $response->scripts = [
     "assets/js/index.js"
 ];
 
+// set the parent menu
+$response->parent_menu = "library";
+
 $params = (object)[
     "class_ids" => [],
     "clientId" => $clientId

@@ -38,6 +38,9 @@ if(in_array($defaultUser->user_type, ["student", "parent"])) {
     $params->class_id = $defaultUser->class_ids;
 }
 
+// set the parent menu
+$response->parent_menu = "timetable";
+
 // create a new object
 $timetableClass = load_class("timetable", "controllers", $params);
 

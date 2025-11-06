@@ -22,6 +22,9 @@ $response->scripts = [
     "assets/js/index.js"
 ];
 
+// set the parent menu
+$response->parent_menu = "classes";
+
 $the_form = load_class("forms", "controllers")->class_form($clientId, $baseUrl);
 
 $response->html = '

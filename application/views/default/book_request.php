@@ -27,6 +27,9 @@ if(!in_array("library", $clientFeatures)) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "library";
+
 $hasIssue = $accessObject->hasAccess("issue", "library");
 
 $tTitle = $hasIssue ? "Issued Books List" : "My Books List";

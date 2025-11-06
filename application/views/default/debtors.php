@@ -24,6 +24,9 @@ $amount = 0;
 $class_summary = [];
 $class_debtors_list = null;
 
+// set the parent menu
+$response->parent_menu = "fees-payment";
+
 // if the user has the required permissions
 if(!$accessObject->hasAccess("view", "fees")) {
     $response->html = page_not_found("permission_denied");

@@ -35,6 +35,9 @@ if(!$feesReport) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "fees-payment";
+
 // run the school academic terms
 $myClass->academic_terms();
 $session->reportPeriod = "this_week";

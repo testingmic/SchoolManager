@@ -20,6 +20,9 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "Staff Details";
 $response->title = $pageTitle;
 
+// set the parent menu
+$response->parent_menu = "staffs";
+
 // staff id
 $user_id = $SITEURL[1] ?? null;
 

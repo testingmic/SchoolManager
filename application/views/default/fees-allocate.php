@@ -30,6 +30,8 @@ $is_new_admission = (bool) (isset($_GET["is_new_admission"]) && ($_GET["is_new_a
 $canAllocate = $accessObject->hasAccess("allocation", "fees");
 $hasUpdate = $accessObject->hasAccess("update", "student");
 
+$response->parent_menu = "students";
+
 /** confirm that the user has the permission to receive payment */
 if(!$canAllocate) {
     $response->html = page_not_found("permission_denied");

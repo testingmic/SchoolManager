@@ -28,6 +28,9 @@ if(!in_array("class_assessment", $clientFeatures)) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "assessments";
+
 $response->scripts = [
     "assets/js/assignments.js",
     "assets/js/comments.js",

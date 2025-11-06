@@ -29,6 +29,9 @@ if(!in_array("class_assessment", $clientFeatures)) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "assessments";
+
 $response->scripts = ["assets/js/filters.js", "assets/js/lessons.js"];
 
 // if the class_id is not empty

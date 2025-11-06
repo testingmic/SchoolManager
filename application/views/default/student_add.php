@@ -19,6 +19,9 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "New Admission";
 $response->title = $pageTitle;
 
+// set the parent menu
+$response->parent_menu = "students";
+
 // confirm if the user has the required permission
 if(!$accessObject->hasAccess("add", "student")) {
     $response->html = page_not_found("permission_denied");

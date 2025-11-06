@@ -24,6 +24,9 @@ $response->scripts = [
     "assets/js/index.js"
 ];
 
+// set the parent menu
+$response->parent_menu = "classes";
+
 // item id
 $item_id = $SITEURL[1] ?? null;
 

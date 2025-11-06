@@ -31,6 +31,9 @@ $pageTitle = "Issue Book";
 
 $response->title = $pageTitle;
 
+// set the parent menu
+$response->parent_menu = "library";
+
 if(!$hasIssue) {
     $response->html = page_not_found("permission_denied");
 } else {

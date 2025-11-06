@@ -21,6 +21,9 @@ $filter = (object) array_map("xss_clean", $_POST);
 $response->title = "Students List";
 $response->scripts = ["assets/js/filters.js"];
 
+// set the parent menu
+$response->parent_menu = "students";
+
 $clientId = $session->clientId;
 
 $student_param = (object) [

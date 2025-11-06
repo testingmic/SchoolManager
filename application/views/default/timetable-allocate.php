@@ -22,6 +22,9 @@ $response->title = $pageTitle;
 $response->scripts = [];
 $response->timer = 350;
 
+// set the parent menu
+$response->parent_menu = "timetable";
+
 // confirm that the user has the required permissions
 if(!$accessObject->hasAccess("allocate", "timetable")) {
     // show the error page

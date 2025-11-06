@@ -19,6 +19,9 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "Add Guardian";
 $response->title = $pageTitle;
 
+// set the parent menu
+$response->parent_menu = "guardians";
+
 // end query if the user has no permissions
 if(!$accessObject->hasAccess("add", "guardian")) {
     // unset the page additional information

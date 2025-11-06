@@ -26,6 +26,9 @@ $guardian_param = (object) [
     "client_data" => $defaultUser->client
 ];
 
+// set the parent menu
+$response->parent_menu = "guardians";
+
 $guardian_list = load_class("users", "controllers", $guardian_param)->list($guardian_param)["data"];
 
 $hasDelete = $accessObject->hasAccess("delete", "guardian");

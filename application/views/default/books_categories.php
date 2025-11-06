@@ -32,6 +32,9 @@ if(!in_array("library", $clientFeatures)) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "library";
+
 $item_list = load_class("library", "controllers", $params)->category_list($params);
 
 $hasAdd = $accessObject->hasAccess("add", "library");

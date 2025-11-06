@@ -30,6 +30,9 @@ if(!$accessObject->hasAccess("send", "communication")) {
 
 }
 
+// set the parent menu
+$response->parent_menu = "communication";
+
 // add the scripts to load
 $response->scripts = ["assets/js/communication.js"];
 

@@ -27,6 +27,9 @@ if(!$isPayableStaff) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "staffs";
+
 // include the scripts to load for the page
 $response->scripts = ["assets/js/filters.js"];
 

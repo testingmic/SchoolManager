@@ -1002,6 +1002,20 @@ textarea.custom_form-control {
     font-size: 12px!important;
 }
 
+.parent_menu_active_color > a:first-child  {
+    background: #6777ef !important;
+    color: #fff !important;
+}
+
+.side_menu_active_color,
+.side_menu_active_color a {
+    color: #6777ef !important;
+}
+
+li.active {
+    font-weight: normal !important;
+}
+
 /* Chrome, Safari, Edge, Opera */
 #summary_report_sheet_content input[type=number]::-webkit-inner-spin-button,
 #summary_report_sheet_content input[type=number]::-webkit-outer-spin-button {
@@ -1777,6 +1791,10 @@ body.dark .card {
 body.dark .main-sidebar .sidebar-menu li a,
 body.dark .card-body {
     color: #96a2b4;
+}
+
+.main-sidebar .sidebar-menu li a {
+    color: #000;
 }
 
 body.dark .bg-info,

@@ -37,6 +37,9 @@ $response->scripts = ["assets/js/communication.js", "assets/js/reminders.js"];
 $route = "reminder";
 $params = (object) ["clientId" => $clientId, "preferences" => $defaultUser->appPrefs];
 
+// set the parent menu
+$response->parent_menu = "fees-payment";
+
 // get the data
 $class_array_list = $myClass->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'");
         

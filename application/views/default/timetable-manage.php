@@ -30,6 +30,9 @@ $classes_param = (object) [
 ];
 $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
+// set the parent menu
+$response->parent_menu = "timetable";
+
 
 $class_id = null;
 $timetable_found = false;

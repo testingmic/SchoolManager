@@ -28,6 +28,9 @@ if(!in_array("library", $clientFeatures)) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "library";
+
 // item id
 $item_id = $SITEURL[1] ?? null;
 

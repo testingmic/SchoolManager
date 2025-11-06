@@ -27,6 +27,9 @@ $response->scripts = [
 // item id
 $item_id = $SITEURL[1] ?? null;
 
+// set the parent menu
+$response->parent_menu = "classes";
+
 // if the user id is not empty
 if(!empty($item_id)) {
 

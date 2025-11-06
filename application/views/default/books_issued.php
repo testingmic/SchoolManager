@@ -30,6 +30,9 @@ $pageTitle = $hasIssue ? "Issued Books List" : "My Books List";
 
 $response->title = $pageTitle;
 
+// set the parent menu
+$response->parent_menu = "library";
+
 // begin the request parameter
 $params = (object) ["clientId" => $session->clientId, "show_list" => true, "limit" => $myClass->global_limit, "userData" => $defaultUser, "client_data" => $defaultUser->client];
 $item_list = load_class("library", "controllers", $params)->issued_request_list($params);

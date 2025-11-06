@@ -20,6 +20,9 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $response->title = "Fees Payment History ";
 $response->scripts = ["assets/js/filters.js", "assets/js/accounting.js"];
 
+// set the parent menu
+$response->parent_menu = "fees-payment";
+
 $filter = (object) array_map("xss_clean", $_POST);
 
 $userId = $session->userId;

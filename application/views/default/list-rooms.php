@@ -31,6 +31,9 @@ $hasAdd = $accessObject->hasAccess("add", "class");
 $hasDelete = $accessObject->hasAccess("delete", "class");
 $hasUpdate = $accessObject->hasAccess("update", "class");
 
+// set the parent menu
+$response->parent_menu = "timetable";
+
 $count = 0;
 $rooms_list = "";
 foreach($item_list["data"] as $key => $each) {

@@ -26,6 +26,9 @@ if(!in_array("payroll", $clientFeatures)) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "payroll";
+
 $response->title = "Staff Payroll List ";
 $response->scripts = ["assets/js/filters.js"];
 

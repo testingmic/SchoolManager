@@ -20,6 +20,9 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "Fees Allocation";
 $response->title = $pageTitle;
 
+// set the parent menu
+$response->parent_menu = "fees-setup";
+
 // if the filter is set
 $filter = (object) array_map("xss_clean", $_POST);
 

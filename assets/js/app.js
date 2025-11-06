@@ -10,6 +10,8 @@ $.mainprogress = $(".main-progress-bar");
 $.pageoverlay = $(".pageoverlay");
 $.pageloader = $(".loader");
 
+var current_parent_menu = '';
+
 $.most_recent_page = $(`div[class="last_visited_page"]`).attr("value");
 $form_modal = $(`div[id="formsModal"]`);
 $replies_modal = $(`div[id="repliesModal"]`);
@@ -776,6 +778,8 @@ var loadPage = (loc, pushstate) => {
             $(`div[id="dictionary_query_results"], div[id="system_query_results"]`).html("");
 
             document.title = `${result.title} :: ${clientName}`;
+            
+            current_parent_menu = result?.parent_menu ?? '';
 
             init();
             initDataTables();
@@ -787,7 +791,8 @@ var loadPage = (loc, pushstate) => {
             $(`div[data-chart="class_fees_payment_chart_table"] div[class="dataTables_length"]`).remove();
             $(`div[data-chart="class_fees_payment_chart_table"] div[id="DataTables_Table_0_filter"]`).remove();
         },
-        complete: () => {
+        complete: (result) => {
+            current_parent_menu = result?.responseJSON?.parent_menu ?? '';
             var prev = window.history.state === null ? null : window.history.state.current
             if (pushstate !== false) window.history.pushState({ previous: prev, current: loc }, "", loc)
 
@@ -798,8 +803,8 @@ var loadPage = (loc, pushstate) => {
             } else {
                 $("#history-back").removeClass("disabled");
             }
-            $.pageoverlay.hide();
             setActiveNavLink();
+            $.pageoverlay.hide();
             $('body, html').scrollTop(0);
         },
         error: (err) => {
@@ -1096,9 +1101,17 @@ var setActiveNavLink = () => {
             if ($(el)[0].href == location) {
                 let parentDropdown = $(el).parent("li").parent("ul");
                 parentDropdown.css("display", "block");
-                $(el).parent("a").addClass("bg-gradient-to-r from-blue-600 to-blue-500 text-white")
-            } else {}
+                parentDropdown.parent("li").addClass("parent_menu_active_color");
+                $(el).parent('li').addClass("side_menu_active_color");
+            } else {
+                $(el).removeClass("side_menu_active_color");
+                $(el).parent('li').removeClass("side_menu_active_color parent_menu_active_color");
+            }
         });
+        if(current_parent_menu !== '') {
+            $("li[data-parent_menu='"+current_parent_menu+"']").addClass('parent_menu_active_color');
+            $("li[data-parent_menu='"+current_parent_menu+"'] > ul.dropdown-menu").css("display", "block");
+        }
     }
 }
 

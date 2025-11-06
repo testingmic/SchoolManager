@@ -27,6 +27,9 @@ if(!$accessObject->hasAccess("account_type_head", "accounting")) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "accounting";
+
 $response->scripts = [
     "assets/js/accounting.js"
 ];

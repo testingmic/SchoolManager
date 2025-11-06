@@ -32,6 +32,9 @@ $clientId = $session->clientId;
 
 $staff_list = "";
 
+// set the parent menu
+$response->parent_menu = "payroll";
+
 // access permissions check
 if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
     $response->html = page_not_found("permission_denied");
@@ -132,7 +135,9 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
             <div class="row">
                 <div class="col-12 col-sm-12 '.($isSingleRecord ? 'col-lg-6' : 'col-lg-8').'">
                     <div class="text-right mb-2">
-                        '.($isSingleRecord ? '' : '<a class="btn btn-outline-primary" onclick="return add_allowance();" href="#"><i class="fa fa-plus"></i> Add New</a>').'
+                        '.($isSingleRecord ? '' : '<a class="btn btn-outline-primary" onclick="return add_allowance();" href="#">
+                            <i class="fa fa-plus"></i> Add New Type Head
+                        </a>').'
                         '.($isSingleRecord ? '<a class="btn btn-outline-warning" href="'.$baseUrl.'payroll-category"><i class="fa fa-arrow-left"></i> Go Back</a>' : '').'
                     </div>
                 </div>

@@ -24,6 +24,9 @@ $response->title = $pageTitle;
 // if the user has the permission to allocate fees
 $receivePayment = $accessObject->hasAccess("receive", "fees");
 
+// set the parent menu
+$response->parent_menu = "fees-payment";
+
 /** confirm that the user has the permission to receive payment */
 if(!$receivePayment) {
     $response->html = page_not_found("permission_denied");

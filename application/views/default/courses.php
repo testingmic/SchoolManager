@@ -23,6 +23,9 @@ $clientId = $session->clientId;
 
 $filter = (object) array_map("xss_clean", $_POST);
 
+// set the parent menu
+$response->parent_menu = "courses";
+
 $courses_param = (object) [
     "clientId" => $clientId,
     "userId" => $session->userId,

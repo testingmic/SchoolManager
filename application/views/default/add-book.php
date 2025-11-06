@@ -24,6 +24,9 @@ $params = (object) [
     "clientId" => $clientId
 ];
 
+// set the parent menu
+$response->parent_menu = "library";
+
 $the_form = load_class("forms", "controllers")->library_book_form($params);
 
 $response->html = '

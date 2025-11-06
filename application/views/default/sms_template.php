@@ -32,6 +32,8 @@ if(!$accessObject->hasAccess("templates", "communication")) {
 // add the scripts to load
 $response->scripts = ["assets/js/communication.js"];
 
+// set the parent menu
+$response->parent_menu = "communication";
 
 // set the parameters
 $params = (object) [

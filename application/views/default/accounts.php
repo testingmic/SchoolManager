@@ -21,6 +21,9 @@ $pageTitle = "Simple Accounting - Accounts";
 $response->title = $pageTitle;
 $response->scripts = ["assets/js/accounting.js"];
 
+// set the parent menu
+$response->parent_menu = "accounting";
+
 // confirm that the user has the required permissions
 if(!$accessObject->hasAccess("accounts", "accounting")) {
     // unset the page additional information

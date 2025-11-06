@@ -22,6 +22,9 @@ $response->title = $pageTitle;
 // if the user has the permission to allocate fees
 $createAssessmentTest = $accessObject->hasAccess("add", "assignments");
 
+// set the parent menu
+$response->parent_menu = "assessments";
+
 /** confirm that the user has the permission to add assessment */
 if(!$createAssessmentTest) {
     $response->html = page_not_found("permission_denied");

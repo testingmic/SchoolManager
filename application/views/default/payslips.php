@@ -28,6 +28,9 @@ if(!in_array("payroll", $clientFeatures)) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "payroll";
+
 $userId = $session->userId;
 $clientId = $session->clientId;
 

@@ -26,6 +26,9 @@ if(!$accessObject->hasAccess("receive", "fees")) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "fees-payment";
+
 $filter = (object) array_map("xss_clean", $_POST);
 $pageTitle = "Previous Term Arrears Payment";
 $response->title = $pageTitle;

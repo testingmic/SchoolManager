@@ -19,6 +19,9 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "Timetable";
 $response->title = $pageTitle;
 
+// set the parent menu
+$response->parent_menu = "timetable";
+
 // confirm that the user has the required permissions
 if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $clientFeatures)) {
     // show the error page

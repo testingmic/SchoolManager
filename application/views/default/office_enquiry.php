@@ -27,6 +27,9 @@ if(!in_array("front_office", $clientFeatures)) {
     exit;
 }
 
+// set the parent menu
+$response->parent_menu = "front-office";
+
 // set the page tile
 $pageTitle = "Admission Enquiry";
 $response->title = $pageTitle;

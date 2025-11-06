@@ -25,6 +25,9 @@ $category_param = (object) [
     "limit" => 100
 ];
 
+// set the parent menu
+$response->parent_menu = "fees-setup";
+
 $feesObject = load_class("fees", "controllers", $category_param);
 $fees_category_array_list = $feesObject->category_list($category_param);
 

@@ -35,6 +35,9 @@ if(!in_array("front_office", $clientFeatures)) {
 $request_id = $SITEURL[1] ?? null;
 $clientId = $session->clientId;
 
+// set the parent menu
+$response->parent_menu = "front-office";
+
 // if the user id is not empty
 if(!$accessObject->hasAccess("view", "visitor_book")) {
     // parse error message
