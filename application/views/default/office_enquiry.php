@@ -153,13 +153,13 @@ if(!$accessObject->hasAccess("view", "admission_enquiry")) {
                         </div>
                         <div class="mb-2 border-bottom pb-2 mb-2">
                             <div class="font-14">
-                                <strong>Source</strong>:
+                                <strong class="text-success">Source</strong>:
                                 '.$data->source.'
                             </div>
                         </div>
                         <div class="mb-2 border-bottom pb-2 mb-2">
                             <div class="font-14">
-                                <strong>Followup Date</strong> :
+                                <strong class="text-success">Followup Date</strong> :
                                 '.(!empty($data->content->followup) ? date("jS F Y", strtotime($data->content->followup)) : 'N/A').'
                             </div>
                         </div>
@@ -168,7 +168,7 @@ if(!$accessObject->hasAccess("view", "admission_enquiry")) {
                         </div>
                         '.($accessObject->hasAccess("update", "admission_enquiry") ?
                             '<div class="form-group mb-3">
-                                <label>Enquiry Status</label>
+                                <label class="text-success">Enquiry Status</label>
                                 <select data-request_url="office_enquiry" data-request_id="'.$data->item_id.'" name="enquiry_status" id="enquiry_status" class="selectpicker" data-width="100%">
                                     <option '.($data->state === 'Pending' ? 'selected' : null).' value="Pending">Pending</option>
                                     <option '.($data->state === 'Passive' ? 'selected' : null).' value="Passive">Passive</option>

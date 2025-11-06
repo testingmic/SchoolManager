@@ -186,6 +186,17 @@ class Frontoffice extends Myschoolgh {
 	}
 
 	/**
+	 * Process the Admission Enquiry Request
+	 * 
+	 * @param stdClass $params
+	 * 
+	 * @return Array
+	 */
+	public function enquiry(stdClass $params) {
+		return $this->admission($params);
+	}
+
+	/**
 	 * Process the Admission Request
 	 * 
 	 * @param stdClass $params
@@ -195,6 +206,14 @@ class Frontoffice extends Myschoolgh {
 	public function admission(stdClass $params) {
 
 		$section = "admission_enquiry";
+
+		// confirm that a valid client id was parsed
+		if(empty($params->clientId)) {
+			return [
+				'code' => 400,
+				'data' => 'Sorry! An invalid record id or client id was parsed.'
+			];
+		}
 
 		$clientInfo = $this->clients_list($params->clientId);
 		if(empty($clientInfo)) {
@@ -232,6 +251,14 @@ class Frontoffice extends Myschoolgh {
 			$classList['kindergarten '.$i] = "Kindergarten {$i}";
 		}
 
+		// confirm that a valid parent name, child first name and child gender was parsed
+		if(empty($params->parentName) || empty($params->childFirstName) || empty($params->childGender)) {
+			return [
+				'code' => 400,
+				'data' => 'Sorry! An invalid parent name, child first name or child gender was parsed.'
+			];
+		}
+
 		/** Prepare the data to be inserted */
 		$data = [
 			'fullname' => $params->parentName,
@@ -254,6 +281,8 @@ class Frontoffice extends Myschoolgh {
 			]
 		];
 
+		return $data;
+
 		// insert the request
 		$stmt = $this->db->prepare("INSERT INTO frontoffice SET client_id = ?, item_id = ?, created_by = ?, section = ?, source = ?, content = ?");
 
@@ -264,8 +293,56 @@ class Frontoffice extends Myschoolgh {
 
 		return [
 			'code' => 200,
+			'result' => [
+				'record_id' => $item_id,
+			],
 			'data' => 'Admission request processed successfully.'
 		];
+	}
+
+	/**
+	 * Search for an admission request
+	 * 
+	 * @param stdClass $params
+	 * 
+	 * @return Array
+	 */
+	public function search(stdClass $params) {
+
+		try {
+
+			if(empty($params->record_id) || empty($params->clientId)) {
+				return [
+					'code' => 400,
+					'data' => 'Sorry! An invalid record id or client id was parsed.'
+				];
+			}
+
+			$stmt = $this->db->prepare("SELECT * FROM frontoffice WHERE client_id = ? AND item_id = ? LIMIT 1");
+			$stmt->execute([$params->clientId, $params->record_id]);
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+			if(empty($result)) {
+				return [
+					'code' => 400,
+					'data' => 'Sorry! An invalid record id was parsed.'
+				];
+			}
+
+			$result['content'] = json_decode($result['content'], true);
+
+			return [
+				'code' => 200,
+				'result' => $result
+			];
+
+		} catch(PDOException $e) {
+			return [
+				'code' => 400,
+				'data' => 'Sorry! There was an error while processing the request.'
+			];
+		}
+
 	}
 
     /**

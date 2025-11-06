@@ -131,18 +131,16 @@ if(($inner_url == "payment") && (in_array($outer_url, ["pay", "verify", "epay_va
  * 
  * @return JSON
  */
-if((($inner_url == "websites") || ($inner_url == "enquiry")) && (in_array($outer_url, ["admission"]))) {
-    // end query if the client id was not parsed
-    if(!isset($params->clientId)) {
-        // return error message
-        $response->result = "The Client ID is required.";
-        echo json_encode($response);
-        exit;
-    }
+$byPassChecks = (bool) ($inner_url == "websites" && $outer_url == "admission") || (
+    ($inner_url == "admission" && $outer_url == "search") ||
+    ($inner_url == "admission" && $outer_url == "enquiry")
+);
 
+// if the by pass checks are true
+if($byPassChecks) {
     /** Load the Admission Request */
     $officeObject = load_class("frontoffice", "controllers");
-    $response = $officeObject->admission($params);
+    $response = $officeObject->{$outer_url}($params);
 
     echo json_encode($response);
     exit;
