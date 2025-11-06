@@ -1,5 +1,10 @@
 var column_to_use = "tr",
-    data_to_use = "table_view";
+    data_to_use = "table_view",
+    questionsSet = [],
+    currentQuestion = 0,
+    questionNotices = '',
+    savedReportId = '',
+    studentNamesList = [];
 var remove_grading_mark = (grading_id) => {
     $(`div[class~="grade_item"][data-grading_id='${grading_id}']`).remove();
     let grades_count = $(`div[id="grading_system_list"] div[class~="grade_item"]`).length;
@@ -283,6 +288,37 @@ var download_report_csv = () => {
     });
 }
 
+var prepareDataForSave = () => {
+
+    let ss = {},
+        class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val(),
+        course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
+    
+    $.each($(`div[id="summary_report_sheet_content"] input[data-input_type="score"][name="examination"]`), function(i, e) {
+        let item = $(this),
+            row_id = item.attr("data-input_row_id"),
+            sba = $(`input[data-input_row_id="${row_id}"][name='school_based_assessment']`).val(),
+            marks = $(`input[data-input_row_id="${row_id}"][name='examination']`).val(),
+            name = $(`span[data-student_row_id="${row_id}"][data-student]`).attr("data-student"),
+            student_id = $(`span[data-student_row_id="${row_id}"][data-student_id]`).attr("data-student_id"),
+            remarks = $(`input[data-input_row_id="${row_id}"][data-input_method='remarks']`).val(),
+
+            classwork = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="classwork"]`)?.val() ?? 0,
+            homework = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="homework"]`)?.val() ?? 0,
+            test = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="test"]`)?.val() ?? 0,
+            project = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="project"]`)?.val() ?? 0,
+            midterm_exams = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="midterm_exams"]`)?.val() ?? 0;
+            
+        if(typeof name !== 'undefined') {
+            studentNamesList[student_id] = name;
+            ss[i] = `name=${name}|id=${student_id}|remarks=${remarks}|sba=${sba||0}|marks=${marks||0}|classwork=${classwork||0}|homework=${homework||0}|test=${test||0}|project=${project||0}|midterm_exams=${midterm_exams||0}`;
+        }
+    });
+
+    return {class_id, course_id, ss};
+    
+}
+
 var save_terminal_report = () => {
     swal({
         title: "Save Student Marks",
@@ -293,34 +329,8 @@ var save_terminal_report = () => {
     }).then((proceed) => {
         if (proceed) {
             $.pageoverlay.show();
-            let ss = {},
-                class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val(),
-                course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
-            $.each($(`div[id="summary_report_sheet_content"] input[data-input_type="score"][name="examination"]`), function(i, e) {
-                let item = $(this),
-                    row_id = item.attr("data-input_row_id"),
-                    sba = $(`input[data-input_row_id="${row_id}"][name='school_based_assessment']`).val(),
-                    marks = $(`input[data-input_row_id="${row_id}"][name='examination']`).val(),
-                    name = $(`span[data-student_row_id="${row_id}"][data-student]`).attr("data-student"),
-                    student_id = $(`span[data-student_row_id="${row_id}"][data-student_id]`).attr("data-student_id"),
-                    remarks = $(`input[data-input_row_id="${row_id}"][data-input_method='remarks']`).val(),
-
-                    classwork = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="classwork"]`)?.val() ?? 0,
-                    homework = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="homework"]`)?.val() ?? 0,
-                    test = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="test"]`)?.val() ?? 0,
-                    project = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="project"]`)?.val() ?? 0,
-                    midterm_exams = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="midterm_exams"]`)?.val() ?? 0;
-                    
-                if(typeof name !== 'undefined') {
-                    ss[i] = `name=${name}|id=${student_id}|remarks=${remarks}|sba=${sba||0}|marks=${marks||0}|classwork=${classwork||0}|homework=${homework||0}|test=${test||0}|project=${project||0}|midterm_exams=${midterm_exams||0}`;
-                }
-            });
-            let rs = {
-                class_id,
-                course_id,
-                ss
-            };
-            $.post(`${baseUrl}api/terminal_reports/save_report`, { rs }).then((response) => {
+            var data_set = prepareDataForSave();
+            $.post(`${baseUrl}api/terminal_reports/save_report`, { rs: data_set }).then((response) => {
                 let s_code = "error";
                 if (response.code === 200) {
                     s_code = "success";
@@ -426,16 +436,123 @@ var calculate_sba_score = () => {
     });
 }
 
+var append_question_navigation = (currentQuestion = 0, showNext = true) => {
+    return `
+    <div class='mt-2'>
+        <div class='d-flex justify-content-between'>
+            <div class='text-left'>
+                ${currentQuestion == 0 ? '&nbsp;' : 
+                `<button onclick='return review_question(${currentQuestion-1})' class='btn btn-outline-primary'>
+                    <i class='fa fa-arrow-left'></i> Previous
+                </button>`}
+            </div>
+            <div class='text-center'>
+                ${currentQuestion+1} of ${questionsSet.length}
+            </div>
+            <div class='text-right'>
+                ${showNext ? `<button onclick='return review_question(${currentQuestion+1})' class='btn btn-outline-primary'>
+                    Next <i class='fa fa-arrow-right'></i>
+                </button>` : '&nbsp;'}
+            </div>
+        </div>
+    </div>
+    <div class='text-center mt-3 border-top border-primary pt-3'>
+        <button onclick='return cancel_terminal_report()' class='btn btn-outline-danger'>
+            <i class='fa fa-save'></i> Cancel Upload
+        </button>
+    </div>
+    <div class='text-center mt-3 border-top border-primary pt-3'>
+        ${questionNotices}
+    </div>`;
+}
+
+var refresh_report_view = () => {
+    var class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val(),
+        course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
+    $.post(`${baseUrl}api/terminal_reports/manual_report_upload`, { class_id, course_id }).then((response) => {
+        let iresult = response.data.result;
+        questionsSet = iresult.mobileViewer;
+    });
+}
+
+var review_results_set = () => {
+    loadPage(`${baseUrl}results-review/${savedReportId}`);
+}
+
+var review_question = (question_id) => {
+    let htmlContent = questionsSet[question_id] ?? '';
+    var data_set = prepareDataForSave();
+    
+    if(!htmlContent.length) {
+        htmlContent = "";
+        htmlContent += `<div class='text-left'>
+            <span class='font-16 font-bold'>Student Details List</span>
+        </div>`;
+        let keys = Object.keys(studentNamesList);
+        let values = Object.values(studentNamesList);
+        $.each(keys, function(i, v) {
+            htmlContent += `
+            <div class='text-left'>
+                <span data-student_row_id='${v}'>${i+1}. ${values[i]}</span> 
+                <span class='float-right'><i class='fas fa-check-circle text-success'></i></span>
+            </div>`;
+        });
+        htmlContent += `
+        <div class='text-center mt-3 border-top border-primary pt-3'>
+            <button class='btn btn-outline-success' onclick='return review_results_set()'>Review Results</button>
+        </div>`
+    } else {
+        htmlContent += append_question_navigation(question_id, htmlContent.length);
+    }
+
+    $(`div[id='summary_report_sheet_content']`).html(htmlContent);
+    total_score_checker();
+    calculate_sba_score();
+    $.post(`${baseUrl}api/terminal_reports/save_report`, { rs: data_set }).then((response) => {
+        if(response.code == 200) {
+            savedReportId = response.data.additional.reportId;
+        }
+        refresh_report_view();
+    });
+}
+
+var cancel_terminal_report = () => {
+    $(`div[id='summary_report_sheet_content']`).html(``);
+    questionsSet = [];
+    questionNotices = '';
+    studentNamesList = [];
+    $(`div[id="terminal_reports"] select[name="class_id"]`).val('').change();
+}
+
 var manual_report_upload = () => {
     var class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val(),
         course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
+    $(`div[data-item_option='file_upload']`).addClass("hidden");
     $.post(`${baseUrl}api/terminal_reports/manual_report_upload`, { class_id, course_id }).then((response) => {
         if (response.code == 200) {
             calculate_screen_width();
             $(`div[id="terminal_reports"] input[name="upload_report_file"]`).val("");
-            $(`div[id='summary_report_sheet_content']`).html(response.data.result[data_to_use]);
+
+            let iresult = response.data.result;
+
+            if(data_to_use == "mobile_view") {
+
+                if(typeof iresult.mobileViewer !== 'undefined') {
+
+                    let htmlContent = iresult.mobileViewer[currentQuestion];
+                    questionsSet = iresult.mobileViewer;
+                    questionNotices = iresult.notices;
+                    htmlContent += append_question_navigation(currentQuestion);
+                    
+                    $(`div[id='summary_report_sheet_content']`).html(htmlContent);
+                }
+
+            } else {
+                $(`div[id='summary_report_sheet_content']`).html(iresult[data_to_use]);
+            }
             total_score_checker();
             calculate_sba_score();
+            $(`div[data-item_option='file_upload']`).addClass("hidden");
         } else {
             swal({
                 text: response.data.result,

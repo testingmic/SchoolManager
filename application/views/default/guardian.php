@@ -242,7 +242,7 @@ if(!empty($user_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(in_array($url_link, ["about", "view"]) || empty($url_link) ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab" aria-selected="true">Ward Information</a>
+                        <a class="nav-link '.(in_array($url_link, ["about", "view"]) || empty($url_link) ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab" aria-selected="true">Wards</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link '.($url_link === "delegates" ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#delegates" role="tab" aria-selected="true">Delegates</a>
@@ -251,7 +251,10 @@ if(!empty($user_id)) {
                     if($hasUpdate) {
                         $response->html .= '
                         <li class="nav-item">
-                            <a class="nav-link '.($url_link === "update" ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab" aria-selected="false">Update Record</a>
+                            <a class="nav-link '.($url_link === "update" ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab" aria-selected="false">
+                                <span class="!hidden md:!block">Update Record</span>
+                                <span class="!block md:!hidden">Update</span>
+                            </a>
                         </li>';
                     }
                     

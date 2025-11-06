@@ -4738,13 +4738,7 @@ class Forms extends Myschoolgh {
                             <option value=''>Select the Subject</option>
                         </select>
                     </div>
-                    <div class='col-lg-3 mb-2 hidden' data-item_option='file_upload'>
-                        <select data-width='100%' class='form-control selectpicker' name='upload_type' id='upload_type'>
-                            <option value='download'>Download CSV File</option>
-                            <!--<option value='online'>Input the Data Online</option>-->
-                        </select>
-                    </div>
-                    <div class='col-lg-2' data-item_option='file_upload' id='download_button' data-view_port='desktop'>
+                    <div class='col-lg-3' data-item_option='file_upload' id='download_button' data-view_port='desktop'>
                         <button onclick='return download_report_csv()' disabled type='download_csv' class='btn btn-block btn-outline-primary'>Download Sample</button>
                     </div>
                     <div class='col-lg-12 mt-1 text-center' id='notification'></div>
@@ -4756,11 +4750,12 @@ class Forms extends Myschoolgh {
                                 </div>
                             </div>
                             <div class='hidden' data-item_option='file_upload' data-option_id='upload_file' data-view_port='desktop'>
-                                <div class='form-group'>
+                                <div class='form-group hidden'>
                                     <button onclick='return upload_csv_file();' class='btn btn-block btn-primary'><i class='fa fa-upload'></i> Click to Upload</button>
                                 </div>
                             </div>
-                            <div class='hidden' data-option_id='upload_file'>
+                            <div class='hidden' data-option_id='upload_file' data-item_option='file_upload'>
+                                <div class='hidden'>OR</div>
                                 <div class='form-group mb-0'>
                                     <button onclick='return manual_report_upload();' class='btn btn-block btn-outline-success'><i class='fa fa-download'></i> Manual Upload</button>
                                 </div>

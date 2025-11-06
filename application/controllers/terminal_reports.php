@@ -247,7 +247,7 @@ class Terminal_reports extends Myschoolgh {
                 return ["code" => 400, "data" => "Sorry! This result has been submitted pending approval hence cannot be updated."];
             }
         } else {
-            return ["code" => 200, "data" => "Upload the Class Results via the <strong>CSV Uploader</strong> or Manually input the data."];
+            return ["code" => 200, "data" => "Upload the Results via the <strong>CSV Uploader</strong> or Manual input."];
         }
     }
 
@@ -558,6 +558,7 @@ class Terminal_reports extends Myschoolgh {
         $remarks_dataset = !empty($params->r_csv_data) && !empty($params->remarks_dataset) ? $params->remarks_dataset : [];
 
         $mobileViewer = [];
+        $studentNamesList = [];
 
         // set the files
         foreach($complete_csv_data as $key => $result) {
@@ -641,6 +642,10 @@ class Terminal_reports extends Myschoolgh {
                     
                     $appendMobileView .= "<div class='text-left'><span data-student_row_id='{$key}' {$data_key}></span></div>";
 
+                    if($file_headers[$kkey] == "STUDENT ID") {
+                        $studentNamesList[$kvalue] = $key;
+                    }
+
                 } else {
                     $theValue = $sba_percentage_lower[strtolower($file_headers[$kkey])] ?? '';
                     $kvalue = !empty($kvalue) ? $kvalue : '';
@@ -679,17 +684,27 @@ class Terminal_reports extends Myschoolgh {
             $mobile_view .= $appendMobileView;
 
             $mobileViewer[$key] .= $appendMobileView;
+
         }
+
         $report_table .= "</tbody>";
         $report_table .= "</table>";
         $report_table .= "</div>";
 
         $sba_percentage_lower['Exams'] = 100;
 
-        $footer_table = "<div class='text-right mt-3'>";
-        $footer_table .= "<button onclick='return save_terminal_report()' class='btn p-3 font-16 btn-outline-success'>
+        $footer_table = "<div class='d-flex justify-content-between border-top border-primary mt-3'>";
+        $footer_table .= "<div class='text-left mt-3'>";
+        $footer_table .= "<button onclick='return cancel_terminal_report()' class='btn p-2 font-16 btn-outline-danger'>
+            <i class='fa fa-save'></i> Cancel Upload
+        </button>";
+        $footer_table .= "</div>";
+        $footer_table .= "<div class='text-right mt-3'>";
+        $footer_table .= "
+        <button onclick='return save_terminal_report()' class='btn p-2 font-16 btn-outline-success'>
             <i class='fa fa-save'></i> Save Class Results
         </button>";
+        $footer_table .= "</div>";
         $footer_table .= "</div>";
 
         $notices = "";
@@ -712,7 +727,13 @@ class Terminal_reports extends Myschoolgh {
         // save the information in a session
         $this->session->set("terminal_report_{$params->class_id}_{$params->course_id}", ["headers" => $headers, "students" => $complete_csv_data]);
 
-        return ["data" => ["table_view" => $report_table, "mobile_view" => $mobile_view, 'mobileViewer' => $mobileViewer, 'notices' => $notices]];
+        return ["data" => [
+            "table_view" => $report_table, 
+            "mobile_view" => $mobile_view, 
+            "mobileViewer" => $mobileViewer, 
+            "notices" => $notices,
+            "studentNamesList" => $studentNamesList
+        ]];
 
     }
 
@@ -854,6 +875,9 @@ class Terminal_reports extends Myschoolgh {
                     $allowedColumns[] = strtolower(str_ireplace(" ", "_", $key));
                 }
             }
+
+            // print_r($report->ss);
+            // exit;
 
             // group the information in an array
             foreach($report->ss as $score) {

@@ -104,7 +104,6 @@ foreach($api_staff_list["data"] as $i => $each) {
         </div></td>";
     $staff_list .= "<td>".(!empty($each->position) ? ucwords(strtolower($each->position)) : 'N/A')."</td>";
     $staff_list .= "<td>{$each->gender}</td>";
-    $staff_list .= "<td>".format_date_to_show($each->date_of_birth)."</td>";
     $staff_list .= "<td>".format_date_to_show($each->enrollment_date)."</td>";
     $staff_list .= "<td>".(!empty($each->department_name) ? ucwords(strtolower($each->department_name)) : 'N/A')."</td>";
     $staff_list .= "<td class='text-center'>{$action}</td>";
@@ -172,10 +171,9 @@ $response->html = '
                                         <th>Staff Name</th>
                                         <th>Staff Role</th>
                                         <th>Gender</th>
-                                        <th>Date of Birth</th>
                                         <th>Date Employed</th>
                                         <th>Department</th>
-                                        <th width="13%" align="center"></th>
+                                        <th width="17%" align="center"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$staff_list.'</tbody>

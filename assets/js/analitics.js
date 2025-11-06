@@ -139,8 +139,8 @@ var transactionReport = (transaction, date_range) => {
                     total += parseFloat(ee.total_amount);
                     transaction_list += `<tr>`;
                     transaction_list += `<td>${ii+1}</td>`;
-                    transaction_list += `<td>${ee.name !== null ? ee.name.toUpperCase() : ee.account_type.toUpperCase()}</td>`;
-                    transaction_list += `<td class="font-15">${myPrefs.labels.currency} ${format_currency(ee.total_amount)}</td>`;
+                    transaction_list += `<td>${ee.name !== null ? ee?.name?.toUpperCase() : ee?.account_type?.toUpperCase()}</td>`;
+                    transaction_list += `<td class="font-15">${myPrefs.labels.currency} ${format_currency(ee?.total_amount)}</td>`;
                     transaction_list += `</tr>`;
                     summation[i] += parseFloat(ee.total_amount);
                 });
@@ -148,7 +148,7 @@ var transactionReport = (transaction, date_range) => {
                 <tr class="bg-secondary">
                     <td></td>
                     <td class="font-bold">TOTAL</td>
-                    <td class="font-18 font-bold">${myPrefs.labels.currency} ${format_currency(total)}</td>
+                    <td class="font-18 font-bold">${myPrefs?.labels?.currency} ${format_currency(total)}</td>
                 </tr>`;
             }
             transaction_list += `</tbody>`;
