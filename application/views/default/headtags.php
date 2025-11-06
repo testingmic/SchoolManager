@@ -126,13 +126,26 @@ load_helpers(['menu_helper']);
         autocapture: true,
         record_sessions_percent: 100,
         user_email: "<?= $userData->email ?>",
+        track_pageview: true,
+        mask_all_text: false,
+        mask_all_element_attributes:  false,
         previous_distinct_id: "<?= $session->userId ?>",
         new_distinct_id: "<?= $session->userId ?>",
         website_name: "<?= $clientName ?>",
         website_id: "<?= $clientId ?>",
+        persistence: 'localStorage',
         account_id: "<?= $clientId ?>",
         timestamp: "<?= date("Y-m-d H:i:s") ?>",
-    })
+    });
+
+    // Identify a user
+    mixpanel.identify('<?= $userData->email ?>');
+
+    // Set user properties
+    mixpanel.people.set({
+        '$email': '<?= $userData->email ?>',
+        '$name': '<?= $userData->name ?>',
+    });
     </script>
     <?php } ?>
     
