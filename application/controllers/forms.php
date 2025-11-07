@@ -2228,7 +2228,7 @@ class Forms extends Myschoolgh {
                         <div class="col-lg-4 col-md-4">
                             <div class="form-group">
                                 <label for="date_of_birth">Date of Birth</label>
-                                <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" class="form-control datepicker">
+                                <input type="date" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" data-mindate="'.date("Y-m-d", strtotime("-70 year")).'" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" class="form-control">
                             </div>
                         </div>
                         <div class="col-lg-8 col-md-8">
@@ -2585,7 +2585,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="date_of_birth">Date of Birth</label>
-                        <input type="text" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
+                        <input type="date" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control">
                     </div>
                 </div>
                 '.div_labels("CONTACT INFORMATION").'
@@ -3100,7 +3100,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="enrollment_date">Date Employed <span class="required">*</span></label>
-                        <input type="text" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control datepicker">
+                        <input type="date" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -3135,7 +3135,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="date_of_birth">Date of Birth <span class="required">*</span></label>
-                        <input type="text" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
+                        <input type="date" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -3834,7 +3834,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="date_of_birth">Date of Birth <span class="required">*</span></label>
-                        <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
+                        <input type="date" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">

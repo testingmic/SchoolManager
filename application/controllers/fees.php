@@ -3452,7 +3452,7 @@ class Fees extends Myschoolgh {
             $message = $params->message;
             
             // generate a pay url
-            $expiry_date = date("Y-m-d H:i", strtotime("+12 hours"));
+            $expiry_date = date("Y-m-d H:i", strtotime("+24 hours"));
  
             // confirm if the school has subscribed to electronic payments
             if(in_array("e_payments", $clientFeatures)) {
