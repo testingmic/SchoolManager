@@ -128,6 +128,7 @@ load_helpers(['menu_helper']);
         user_email: "<?= $userData->email ?>",
         track_pageview: true,
         mask_all_text: false,
+        mask_all_inputs: false,
         mask_all_element_attributes:  false,
         previous_distinct_id: "<?= $session->userId ?>",
         new_distinct_id: "<?= $session->userId ?>",
