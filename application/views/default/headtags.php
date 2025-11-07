@@ -136,6 +136,18 @@ load_helpers(['menu_helper']);
         persistence: 'localStorage',
         account_id: "<?= $clientId ?>",
         timestamp: "<?= date("Y-m-d H:i:s") ?>",
+        track_links: true,
+        track_forms: true,
+        autotrack: true,
+        property_blacklist: [],
+        debug: false,
+        secure_cookie: true,
+        ip: true,
+        record_block_class: 'mp-block',
+        record_mask_text_selector: '.mp-mask, input[type="password"]',
+        record_collect_fonts: true,
+        record_idle_timeout_ms: 20 * 60 * 1000,
+        record_max_ms: 1 * 60 * 60 * 1000
     });
 
     // Identify a user
