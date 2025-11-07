@@ -4,6 +4,7 @@ class Fees extends Myschoolgh {
 
     // allocation summary
     public $allocationSummary = [
+        'totalOutstanding' => 0,
         'totalDue' => 0,
         'totalPaid' => 0,
         'totalBalance' => 0
@@ -445,7 +446,7 @@ class Fees extends Myschoolgh {
     public function student_allocation_array(stdClass $params) {
         
         // global variables
-        global $isStudent, $isParent, $isWardParent, $defaultUser;
+        global $isParent, $defaultUser;
 
         // load fees allocation list for class
         $owning = false;
@@ -466,7 +467,6 @@ class Fees extends Myschoolgh {
             $showStudentData = (bool) !isset($params->show_student);
             $showPrintButton = (bool) isset($params->showPrintButton);
             $add_current_term = (bool) isset($params->currentTerm);
-            $showOutstanding = (bool) !empty($params->showOutstanding);
             $groupBy = (bool) isset($params->group_by_student) && ($params->group_by_student == "group_by");
 
             // set if the student is on scholarship
@@ -618,12 +618,15 @@ class Fees extends Myschoolgh {
         }
 
         $allocated = empty($student_allocation_array) ? false : $allocated;
+
+        $this->allocationSummary['totalOutstanding'] = $total_balance;
         
         if(isset($params->parse_owning)) {
             return [
-                "list" => $student_allocation_list,
                 "owning" => $owning,
-                "allocated" => $allocated
+                "allocated" => $allocated,
+                "list" => $student_allocation_list,
+                "totalOutstanding" => $total_balance,
             ];
         } else {
             return $student_allocation_list;
@@ -3357,12 +3360,16 @@ class Fees extends Myschoolgh {
             $emails_list = [];
             $student_ids = [];
             $contacts_list = [];
-            $sms_contacts_list = "";
 
             // return error if the student id is not an array
             if(!is_array($params->student_id)) {
                 return ["code" => 400, "data" => "Sorry! The student_id variable must be a valid array."];
             }
+
+            $messageContainer = [];
+
+            // get the total outstanding balance
+            $outBalances = $params->total_outstanding ?? [];
 
             // loop through the students 
             foreach($params->student_id as $student_id) {
@@ -3373,6 +3380,9 @@ class Fees extends Myschoolgh {
                 if(empty($student)) {
                     return ["code" => 400, "data" => "Sorry! An invalid student id was parsed"];
                 }
+
+                $studentContacts = [];
+
                 // get the guardian information
                 $guardian = $student[0]->guardian_id;
                 $student_ids[] = $student[0]->item_id;
@@ -3410,18 +3420,13 @@ class Fees extends Myschoolgh {
 
                             if(!empty($guard[0]->phone_number)) {
                                 $contacts_list[$each] = $guard[0]->phone_number;
-                                $sms_contacts_list .= $guard[0]->phone_number;
+                                $studentContacts[] = $guard[0]->phone_number;
 
                                 // append the payment url
-                                $pay_urls[$each] = [
+                                $pay_urls[$student_id] = [
                                     "short_url" => $short_url,
                                     "checkout_url" => $checkout_url
                                 ];
-
-                                // append the comma to the end of contact number loaded
-                                if($count < $key) {
-                                    $sms_contacts_list .= ",";
-                                }
                             }
                         }
                     }
@@ -3431,7 +3436,7 @@ class Fees extends Myschoolgh {
                 if(!empty($params->send_to_student) || empty($contacts_list)) {
                     if(!empty($student[0]->phone_number)) {
                         $contacts_list[$student_id] = $student[0]->phone_number;
-                        $sms_contacts_list .= "," . $student[0]->phone_number;
+                        $studentContacts[] = $student[0]->phone_number;
 
                         // append the payment url
                         $pay_urls[$student_id] = [
@@ -3441,27 +3446,34 @@ class Fees extends Myschoolgh {
                     }
                 }
 
+                $mainMessage = $params->message;
+                $mainMessage = str_ireplace(["{student_name}", "{fees_amount}"], [$student[0]->name, $outBalances[$student[0]->item_id] ?? 0], $mainMessage);
+
+                // confirm if the school has subscribed to electronic payments
+                if(in_array("e_payments", $clientFeatures)) {
+                    // append to the message
+                    $mainMessage .= " Pay: {$this->baseUrl}p/{$short_url}";
+                }
+
+                // append the message to the container
+                $messageContainer[$student[0]->item_id] = [
+                    'message' => trim($mainMessage),
+                    'contacts' => array_unique(array_filter($studentContacts))
+                ];
             }
 
             // if the contact list is empty
             if(empty($contacts_list)) {
                 return ["code" => 400, "data" => "Sorry! The contact list is empty."];
             }
-  
-            // append the message
-            $message = $params->message;
             
             // generate a pay url
             $expiry_date = date("Y-m-d H:i", strtotime("+24 hours"));
- 
-            // confirm if the school has subscribed to electronic payments
-            if(in_array("e_payments", $clientFeatures)) {
-                // append to the message
-                $message .= " Pay: {$this->baseUrl}p/{$short_url}";
-            }
+
+            $allMessages = implode("\n", array_column($messageContainer, 'message'));
             
             // calculate the message text count
-            $chars = strlen($message);
+            $chars = strlen($allMessages);
             $actual_recipients_array = array_values($contacts_list);
             $message_count = ceil($chars / $this->sms_text_count);
             
@@ -3473,31 +3485,26 @@ class Fees extends Myschoolgh {
             // return error if the balance is less than the message to send
             if($balance > $units) {
 
-                //execute post
-                $result = $this->send_mnotify_sms($actual_recipients_array, $message);
+                // loop through the message container
+                foreach($messageContainer as $value) {
 
-                // if the sms was successful
-                if(!empty($result)) {
-                    // reduce the SMS balance
-                    $this->db->query("UPDATE smsemail_balance SET sms_balance = (sms_balance - {$message_count}), sms_sent = (sms_sent + {$message_count}) WHERE client_id = '{$params->clientId}' LIMIT 1");
+                    //execute post
+                    $result = $this->send_mnotify_sms($value['contacts'], $value['message']);
+
+                    // if the sms was successful
+                    if(!empty($result)) {
+                        // reduce the SMS balance
+                        $this->db->query("UPDATE smsemail_balance SET sms_balance = (sms_balance - {$message_count}), sms_sent = (sms_sent + {$message_count}) WHERE client_id = '{$params->clientId}' LIMIT 1");
+                    }
                 }
             }
 
-            // confirm if the school has subscribed to electronic payments
-            if(in_array("e_payments", $clientFeatures)) {
-                // append to the message
-                $content = $params->message ." Pay: <a target='_blank' href=\"{{APPURL}}p/{$short_url}\">Click Here</a>";
-            } else {
-                // set the content to the raw message.
-                $content = $params->message;
-            }
-
             // loop through the guardian list
-            foreach($contacts_list as $key => $contact) {
+            foreach($messageContainer as $key => $value) {
 
                 // set the payment url and 
                 $stmt = $this->db->prepare("INSERT INTO payment_urls SET client_id = ?, user_id = ?, description = ?, short_url = ?, checkout_url = ?, expiry_date = ?");
-                $stmt->execute([$params->clientId, $key, $message, $pay_urls[$key]["short_url"], $pay_urls[$key]["checkout_url"], $expiry_date]);
+                $stmt->execute([$params->clientId, $key, $value['message'], $pay_urls[$key]["short_url"], $pay_urls[$key]["checkout_url"], $expiry_date]);
                 
                 // log a notification
                 $_item_id = random_string("alnum", RANDOM_STRING);
@@ -3507,7 +3514,7 @@ class Fees extends Myschoolgh {
                     INSERT users_notification SET date_created='{$this->current_timestamp}', item_id='{$_item_id}',
                         user_id='{$key}', subject='Fees Payment', client_id='{$params->clientId}',
                         notice_type='13', message='{$params->message}',
-                        content='{$content}', initiated_by='system', created_by='{$params->userId}'
+                        content='{$value['message']}', initiated_by='system', created_by='{$params->userId}'
                 ");
                 $notif->execute();
             }

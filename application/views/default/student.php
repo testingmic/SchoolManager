@@ -97,6 +97,8 @@ if(!empty($user_id)) {
         $student_fees_list = [];
         $amount = 0;
 
+        $totalOutstanding = 0;
+
         // set the url
         $payment_module_url = ($data->payment_module === "Monthly") ? "&payment_module={$data->payment_module}" : null;
 
@@ -117,6 +119,9 @@ if(!empty($user_id)) {
             $allocation_param->limit = 200;
             $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
             $fees_category_array = $feesObject->category_list($allocation_param)["data"] ?? [];
+
+            // add up the total outstanding
+            $totalOutstanding += $feesObject->allocationSummary['totalOutstanding'];
 
             // fees category
             foreach($fees_category_array as $category) {
@@ -264,6 +269,7 @@ if(!empty($user_id)) {
                         foreach($categories as $cat => $value) {
                             // add the sum
                             $total += $value;
+                            $totalOutstanding += $value;
                             $category_name = $students_fees_category_array[$cat]["name"] ?? null;
                             // display the category name and the value
                             $student_fees_arrears .= "<tr><td>{$category_name}</td><td>{$value}</td></tr>";
@@ -844,7 +850,7 @@ if(!empty($user_id)) {
             load_helpers(["fees_helper"]);
 
             // append the reminder form
-            $response->html .= fees_payment_reminder_form($data->name, $user_id);
+            $response->html .= fees_payment_reminder_form($data->name, $user_id, $totalOutstanding);
         }
 
         // if the user has permission to upload files

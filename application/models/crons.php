@@ -711,7 +711,6 @@ class Crons {
 		
 		// get the list of all recipients
 		$recipients_contact = array_column($recipients, "phone_number");
-		$recipients_join = implode(",", $recipients_contact);
 
 		//open connection
         $ch = curl_init();

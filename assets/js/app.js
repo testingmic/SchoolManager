@@ -1005,6 +1005,13 @@ var the_date_picker = () => {
     }
 }
 
+var copy_to_clipboard = (text) => {
+    let input = $(`textarea[id="student_fees_reminder"]`);
+    input.val(input.val() + ` ${text} `);
+    input.focus();
+    return false;
+}   
+
 var initPlugins = () => {
     
     if ($('.monthyear').length > 0) {

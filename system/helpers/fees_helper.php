@@ -137,7 +137,7 @@ function fees_allocation_form($info = null, $class_list = [], $category_listing 
  *
  * @return Array
  **/ 
-function fees_payment_reminder_form($student_name, $student_id) {
+function fees_payment_reminder_form($student_name, $student_id, $totalOutstanding = 0) {
 
     // global variable
     global $baseUrl, $myClass;
@@ -173,16 +173,22 @@ function fees_payment_reminder_form($student_name, $student_id) {
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label for="description">Do you wish to also send the bill via E-Mail?</label>
-                                        <select data-width="100%" class="selectpicker" name="send_via_email" id="send_via_email">
-                                            <option value="do_not_send">No! Do not Send Bill</option>
-                                            <option value="send">Yes! Send Bill via E-Mail</option>
-                                        </select>
+                                        <div>Use the following placeholder to send the bill to the parent:</div>
+                                        <div class="text-primary cursor-pointer" onclick="return copy_to_clipboard(\'{student_name}\')">{student_name}</div>
+                                        <div class="mb-1 text-primary cursor-pointer" onclick="return copy_to_clipboard(\'{fees_amount}\')">{fees_amount}</div>
+                                        <div class="border-top pt-2 border-primary">
+                                            <label for="description">Do you wish to also send the bill via E-Mail?</label>
+                                            <select data-width="100%" class="selectpicker" name="send_via_email" id="send_via_email">
+                                                <option value="do_not_send">No! Do not Send Bill</option>
+                                                <option value="send">Yes! Send Bill via E-Mail</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="modal-footer p-0">
                                 <input type="hidden" name="student_id[]" value="'.$student_id.'">
+                                <input type="hidden" readonly name="total_outstanding['.$student_id.']" value="'.$totalOutstanding.'">
                                 <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
                                 <button data-form_id="send_reminder" type="button-submit" class="btn btn-primary"><i class="fa fa-envelope"></i> Send Reminder</button>
                             </div>
