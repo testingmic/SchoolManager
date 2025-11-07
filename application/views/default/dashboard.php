@@ -1060,7 +1060,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     </div>
                                     <div class="card-wrap text-right">
                                         <h3 data-attendance_count="logs_count" class="font-light text-black mb-0">0</h3>
-                                        <span class="text-dark">Logs Counter</span>
+                                        <span class="text-dark">Days Logged</span>
                                     </div>
                                 </div>
                             </div>
@@ -1073,7 +1073,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     </div>
                                     <div class="card-wrap text-right">
                                         <h3 data-attendance_count="Term" class="font-light text-black mb-0">0</h3>
-                                        <span class="text-dark">'.$academicSession.'</span>
+                                        <span class="text-dark">Term Days</span>
                                     </div>
                                 </div>
                             </div>
