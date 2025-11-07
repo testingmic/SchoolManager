@@ -27,6 +27,30 @@ function filterWeekendDates(array $dates): array {
     }));
 }
 
+function default_mixpanel_init() {
+    return "
+    autocapture: true,
+    record_sessions_percent: 100,
+    track_pageview: true,
+    mask_all_text: false,
+    mask_all_inputs: false,
+    mask_all_element_attributes:  false,
+    persistence: 'localStorage',
+    timestamp: '".date("Y-m-d H:i:s")."',
+    track_links: true,
+    track_forms: true,
+    autotrack: true,
+    property_blacklist: [],
+    debug: false,
+    secure_cookie: true,
+    ip: true,
+    record_block_class: 'mp-block',
+    record_mask_text_selector: '.mp-mask, input[type=\"password\"]',
+    record_collect_fonts: true,
+    record_idle_timeout_ms: 20 * 60 * 1000,
+    record_max_ms: 1 * 60 * 60 * 1000";
+}
+
 /**
  * Render the course
  * 
