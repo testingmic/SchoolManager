@@ -93,7 +93,7 @@ $response->html = '
                         <div class="card-body">
                             <input disabled type="hidden" name="myemail_address" value="'.$defaultUser->email.'">
                             <div class="row">
-                                <div class="col-3">
+                                <div class="col-md-3">
                                     <label>Type:</label>
                                     <select data-route="'.$route.'" type="text" name="recipient_type" data-width="100%" class="form-control selectpicker custom_select">
                                         <option value="">Select Type</option>
@@ -102,7 +102,7 @@ $response->html = '
                                         <option value="class">Class</option>
                                     </select>
                                 </div>
-                                <div class="col-6 hidden" id="role_group_select_'.$route.'">
+                                <div class="col-md-5 hidden" id="role_group_select_'.$route.'">
                                     <div class="form-group mb-1">
                                         <label>Role <span class="required">*</span></label>
                                         <select data-selectors="'.$route.'" data-route="'.$route.'" name="role_group[]" class="form-control selectpicker" multiple="true" data-width="100%">
@@ -115,7 +115,7 @@ $response->html = '
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-4 hidden" id="individual_select_'.$route.'">
+                                <div class="col-md-4 hidden" id="individual_select_'.$route.'">
                                     <div class="form-group mb-1">
                                         <label>Role <span class="required">*</span></label>
                                         <select data-selectors="'.$route.'" data-route="'.$route.'" name="role_id" class="form-control selectpicker" data-width="100%">
