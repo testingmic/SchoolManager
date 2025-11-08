@@ -1005,8 +1005,8 @@ var the_date_picker = () => {
     }
 }
 
-var copy_to_clipboard = (text) => {
-    let input = $(`textarea[id="student_fees_reminder"]`);
+var set_placeholder_value = (text_id, text) => {
+    let input = $(`textarea[id="${text_id}"]`);
     input.val(input.val() + ` ${text} `);
     input.focus();
     return false;

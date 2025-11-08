@@ -139,7 +139,7 @@ $response->html = '
                                 <thead>
                                     <tr>
                                         <th width="10%">#</th>
-                                        <th width="70%">FULLNAME</th>
+                                        <th width="75%">FULLNAME</th>
                                         <td style="border:none;background:rgba(0,0,0,0.04)" align="center">
                                             <input disabled style="height:20px;width:20px;" id="select_all" type="checkbox" class="cursor">
                                         </td>
@@ -170,22 +170,16 @@ $response->html = '
                                 <label>Reminder Subject <span class="required">*</span></label>
                                 <input value="Fees Payment" type="text" name="reminder_subject" class="form-control">
                             </div>
-                            <div class="form-group">
-                                <label>Mode of Message <span class="required">*</span></label>
-                                <select data-width="100%" data-route="'.$route.'" multiple name="send_mode[]" class="form-control selectpicker">
-                                    <option selected value="sms">SMS</option>
-                                    <option selected value="email">Email</option>
-                                </select>
-                            </div>
                             <div class="form-group mb-1">
                                 <label>Message to Attached <span class="required">*</span></label>
-                                <textarea data-route="'.$route.'" maxlength="480" id="reminder_textarea" name="message" style="height:200px" class="form-control"></textarea>
+                                <textarea data-route="'.$route.'" maxlength="480" id="reminder_textarea" name="message" class="form-control"></textarea>
                                 <div class="text-right alert-success p-1"> 
                                     <span class="remaining_count p-1">'.$myClass->sms_text_count.' characters remaining</span>
                                     <span id="messages">0 message</span>
                                 </div>
                             </div>
                             <div class="mt-3">
+                                '.placeholder_text('reminder_textarea').'
                                 <div class="mb-xs">
                                     <div class="form-group">
                                         <div class="checkbox-replace">

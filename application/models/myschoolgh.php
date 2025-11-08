@@ -111,13 +111,13 @@ class Myschoolgh extends Models {
 		if(empty($this->db)) return true;
 
 		// prepare and execute the statement
-		$fix[] = "";
+		$fix[] = "TRUNCATE smsemail_send_list;";
 
 		foreach($fix as $stmt) {
 			try {
 				if(empty($stmt)) continue;
-				$query = $this->db->prepare($stmt);
-				$query->execute();
+				// $query = $this->db->prepare($stmt);
+				// $query->execute();
 			} catch(PDOException $e) {
 				// print $e->getMessage();
 			}

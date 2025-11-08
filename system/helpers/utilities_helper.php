@@ -27,6 +27,24 @@ function filterWeekendDates(array $dates): array {
     }));
 }
 
+/**
+ * Placeholder Text
+ * 
+ * @return string
+ */
+function placeholder_text($text_id = null) {
+    return '<div class="mb-2">
+    <div>Use the following placeholders while generating the message:</div>
+    <span class="text-primary cursor-pointer mr-3" onclick="return set_placeholder_value(\''.$text_id.'\', \'{student_name}\')">{student_name}</span>
+    <span class="mb-1 text-primary cursor-pointer" onclick="return set_placeholder_value(\''.$text_id.'\', \'{fees_balance}\')">{fees_balance}</span>
+    </div>';
+}
+
+/**
+ * Default Mixpanel Init
+ * 
+ * @return string
+ */
 function default_mixpanel_init() {
     return "
     autocapture: true,

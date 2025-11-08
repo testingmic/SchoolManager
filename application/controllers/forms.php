@@ -2181,7 +2181,7 @@ class Forms extends Myschoolgh {
                         <div class="col-lg-4 col-md-6">
                             <div class="form-group">
                                 <label for="enrollment_date">Enrollment Date <span class="required">*</span></label>
-                                <input type="text" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control datepicker">
+                                <input type="date" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control">
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-5">

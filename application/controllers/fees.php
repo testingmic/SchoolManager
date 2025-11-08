@@ -2659,8 +2659,8 @@ class Fees extends Myschoolgh {
                 (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
                 us.arrears_details, us.arrears_category, us.fees_category_log, us.arrears_total",
                 "users a LEFT JOIN users_arrears us ON us.student_id = a.item_id", "a.client_id='{$params->clientId}' AND a.user_type='student' AND a.status = '1'
-                ".(!empty($params->student_id) ? "AND a.item_id='{$params->student_id}'" : null)." 
-                ".(!empty($params->class_id) ? "AND a.class_id='{$params->class_id}'" : null)." 
+                ".(!empty($params->student_id) ? " AND a.item_id='{$params->student_id}'" : null)." 
+                ".(!empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : null)." 
                 LIMIT ".(!empty($params->student_id) ? 1 : $class_limit)
             );
 
@@ -3005,6 +3005,79 @@ class Fees extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {}
+
+    }
+
+    /**
+     * Refresh the Bill
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function outstanding_bill(stdClass $params) {
+
+        try {
+
+            global $defaultAcademics;
+
+            // set the academic year and term
+            $academic_year = $defaultAcademics->academic_year ?? $this->academic_year;
+            $academic_term = $defaultAcademics->academic_term ?? $this->academic_term;   
+
+            $payments = "(
+                SELECT CONCAT(
+                    COALESCE(SUM(b.amount_paid), '0'), '|',
+                    COALESCE(SUM(b.balance), '0')
+                )
+                FROM fees_payments b 
+                WHERE b.student_id = a.item_id AND b.academic_term = '{$academic_term}'
+                    AND b.academic_year = '{$academic_year}' AND b.exempted = '0'
+            ) AS payments_data";
+
+            // get the student bill
+            $students_list = $this->pushQuery("
+                a.class_id, a.item_id, a.name, a.image, a.unique_id, a.enrollment_date, a.gender, a.email, 
+                a.phone_number, us.arrears_details, us.arrears_total, {$payments}",
+                "users a LEFT JOIN users_arrears us ON us.student_id = a.item_id", 
+                "a.client_id='{$params->clientId}' AND a.user_type='student' AND a.status = '1'
+                ".(!empty($params->student_ids) ? " AND a.item_id IN ('".implode("','", $params->student_ids)."')" : null)." 
+                ".(!empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : null)." 
+                LIMIT ".(!empty($params->student_ids) ? count($params->student_ids) : 5000)
+            );
+
+            $students_array = [];
+
+            // loop through the students list
+            foreach($students_list as $student) {
+                
+                // split the record
+                $payments = explode("|", $student->payments_data);
+
+                // get the balance outstanding
+                $bill['debt'] = $payments[1];
+
+                // get the amount paid
+                $bill['amount_paid'] = $payments[0];
+
+                // get the term bill by adding the amount paid and the balance
+                $bill['term_bill'] = $bill['debt'] + $bill['amount_paid'];
+                unset($result->payments_data);
+
+                // get the student bill
+                $student->current_bill = $bill;
+                $student->totalArrears = $student->arrears_total + $bill['debt'];
+                $students_array[$student->item_id] = $student;
+            }
+
+            return [
+                'code' => 200,
+                'data' => $students_array
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
 
     }
 
@@ -3447,7 +3520,7 @@ class Fees extends Myschoolgh {
                 }
 
                 $mainMessage = $params->message;
-                $mainMessage = str_ireplace(["{student_name}", "{fees_amount}"], [$student[0]->name, $outBalances[$student[0]->item_id] ?? 0], $mainMessage);
+                $mainMessage = str_ireplace(["{student_name}", "{fees_balance}"], [$student[0]->name, $outBalances[$student[0]->item_id] ?? 0], $mainMessage);
 
                 // confirm if the school has subscribed to electronic payments
                 if(in_array("e_payments", $clientFeatures)) {

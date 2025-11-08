@@ -639,16 +639,15 @@ class Crons {
 
 					// if the message must be sent via sms.
 					if(in_array("sms", $send_mode)) {
-						// get the response of the request
-						$response = $this->mnotify_send($key, $value->message, $value->recipient_list, $value->sms_sender);						
+						foreach($value->recipient_list as $recipient) {
+							if(empty($recipient['phone_number'])) continue;
+							// get the response of the request
+							$this->mnotify_send($key, $recipient['message_text'], [$recipient], $value->sms_sender);		
+						}				
 					}
 
 					// save the  reponse
-					if(!empty($response)) {
-						$this->db->query("UPDATE smsemail_send_list SET sent_status='Delivered', sent_time=now() WHERE item_id='{$key}' LIMIT 1");
-					} else {
-						print "Sorry! The message could not be delivered to the purported users.\n";
-					}
+					$this->db->query("UPDATE smsemail_send_list SET sent_status='Delivered', sent_time=now() WHERE item_id='{$key}' LIMIT 1");
 				}
 
 			}
@@ -718,10 +717,15 @@ class Crons {
 		// set the field parameters
         $fields_string = [
             "key" => $this->mnotify_key,
-			"recipient" => $recipients_contact,
+			"recipient" => array_filter($recipients_contact),
 			"sender" => empty($sender) ? $this->sms_sender : $sender,
 			"message" => $message
         ];
+
+		// if the recipient list is empty, return true
+		if(empty($fields_string['recipient'])) {
+			return true;
+		}
 
 		// send the message
 		curl_setopt_array($ch, 

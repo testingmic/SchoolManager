@@ -240,8 +240,8 @@ class Communication extends Myschoolgh {
 
             global $defaultClientData;
 
-            // begin the transaction
-            $this->db->beginTransaction();
+            // set the send mode
+            $params->send_mode = ['sms']; // disable email for now
 
             // validate the recipient type
             if(!isset($params->send_mode)) {
@@ -288,19 +288,50 @@ class Communication extends Myschoolgh {
                 return ["code" => 400, "data" => "Sorry! No recipient found."];
             }
 
+            // parameter
+            $fees_param = (object) [
+                "userData" => $params->userData,
+                "clientId" => $params->clientId,
+                "client_data" => $defaultClientData,
+                "save_bill" => true
+            ];
+
+            // create new object
+            $feesObj = load_class("fees", "controllers", $fees_param);
+
+            // get the outstanding bill
+            $billing = $feesObj->outstanding_bill($params);
+
+            $entireMessage = "";
+            $studentMessages = [];
+            foreach($actual_recipients_array as $student) {
+                $bill = $billing['data'][$student->item_id];
+
+                // replace the placeholders with the actual values
+                $theMessage = str_ireplace(["{student_name}", "{fees_balance}"], [$bill->name, $bill->totalArrears], $params->message);
+
+                // append the message to the entire message
+                $entireMessage .= $theMessage;
+
+                // set the message to the student
+                $student->message_text = $theMessage;
+
+                // append the message to the student messages
+                $studentMessages[$student->item_id] = $student;
+            }
+
             // perform this action if the message type is sms
             if($isSMS) {
 
                 // calculate the message text count
-                $chars = strlen($params->message);
-                $message_count = ceil($chars / $this->sms_text_count);
+                $message_count = ceil(strlen($entireMessage) / $this->sms_text_count);
                 
                 // get the sms balance
                 $balance = $this->pushQuery("sms_balance", "smsemail_balance", "client_id='{$params->clientId}' LIMIT 1");
                 $balance = $balance[0]->sms_balance ?? 0;
 
                 // messages to send
-                $units = $message_count * count($actual_recipients_array);
+                $units = $message_count;
 
                 // return error if the balance is less than the message to send
                 if($units > $balance) {
@@ -356,18 +387,6 @@ class Communication extends Myschoolgh {
             // if the reminder must also be sent via email
             if($isEmail) {
 
-                // parameter
-                $fees_param = (object) [
-                    "userData" => $params->userData,
-                    "clientId" => $params->clientId,
-                    "client_data" => $defaultClientData,
-                    "save_bill" => true
-                ];
-
-
-                // create new object
-                $feesObj = load_class("fees", "controllers", $fees_param);
-
                 // generate the email list of the students
                 foreach($actual_recipients_array as $each) {
                     // send only when the email is not empty
@@ -382,9 +401,6 @@ class Communication extends Myschoolgh {
                 }
             }
 
-            // commit the prepared statements
-            $this->db->commit();
-
             // return the success response
             return [
                 "data" => "Reminders was successfully sent to the selected recipients.",
@@ -394,7 +410,6 @@ class Communication extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
-            $this->db->rollBack();
             return $this->unexpected_error;
         }
 

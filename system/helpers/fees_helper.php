@@ -173,9 +173,7 @@ function fees_payment_reminder_form($student_name, $student_id, $totalOutstandin
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <div>Use the following placeholder to send the bill to the parent:</div>
-                                        <div class="text-primary cursor-pointer" onclick="return copy_to_clipboard(\'{student_name}\')">{student_name}</div>
-                                        <div class="mb-1 text-primary cursor-pointer" onclick="return copy_to_clipboard(\'{fees_amount}\')">{fees_amount}</div>
+                                        '.placeholder_text('student_fees_reminder').'
                                         <div class="border-top pt-2 border-primary">
                                             <label for="description">Do you wish to also send the bill via E-Mail?</label>
                                             <select data-width="100%" class="selectpicker" name="send_via_email" id="send_via_email">
