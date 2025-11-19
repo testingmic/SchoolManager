@@ -185,7 +185,7 @@ class Account extends Myschoolgh {
     /**
      * Save the Grade Remarks List
      * 
-     * @param Array     $params->remarks_list
+     * @param object     $params
      * 
      * @return Array
      */
@@ -332,7 +332,7 @@ class Account extends Myschoolgh {
     /**
      * Modify Client Data
      * 
-     * @param Array     $params->data
+     * @param object     $params
      * 
      * @return Array
      */
@@ -943,7 +943,7 @@ class Account extends Myschoolgh {
      *
      * This method is used to review previous academic year and term.
      * 
-     * @param String    $params->academic_year
+     * @param object    $params
      * @param String    $params->academic_term
      *
      * @return Array
@@ -1004,16 +1004,18 @@ class Account extends Myschoolgh {
         global $defaultClientData;
         $client_data = $defaultClientData;
 
+        $totalSBAScore = (int)($params->report_columns["total_assessment_score"] ?? 100);
+
         // grading_sba calculation
         if(!empty($params->grading_sba) && is_array($params->grading_sba)) {
             $total_grade = 0;
             foreach($params->grading_sba as $key => $value) {
                 if(isset($value['percentage']) && preg_match("/^[0-9]+$/", $value['percentage']) && $value['sba_checkbox'] == 'true') {
-                    $total_grade += $value['percentage'];
+                    $total_grade += (int)$value['percentage'];
                 }
             }
-            if($total_grade !== 100) {
-                return ["code" => 400, "data" => "Sorry! The selected SBA Summation must be equal to 100%. The current value is {$total_grade}%."];
+            if($total_grade !== $totalSBAScore) {
+                return ["code" => 400, "data" => "Sorry! The selected SBA Summation must be equal to {$totalSBAScore}%. The current value is {$total_grade}%."];
             }
         }
 

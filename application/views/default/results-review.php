@@ -118,9 +118,14 @@ if(empty($result_id)) {
 
         // get the grading_sba
         $grading_sba = $defaultClientData->grading_sba ?? [];
-    
+        $overallSBA = $grading_sba['total_assessment_score'] ?? 100;
+
         // restructure the grading
         foreach($grading_sba as $key => $column) {
+            if($key == 'total_assessment_score') {
+                $overallSBA = $column;
+                continue;
+            }
             $simplified_sba[str_ireplace(" ", "_", strtolower($key))] = $column['percentage'];
         }
 

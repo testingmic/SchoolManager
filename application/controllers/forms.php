@@ -4545,8 +4545,17 @@ class Forms extends Myschoolgh {
                         </div>
                     </div>";
             }
+            $totalSBAScore = (int)($client_data->grading_structure->total_assessment_score ?? 100);
         $results_structure .= "
-                <div class='text-center text-danger'>The selected options should sum up to 100%.</div>
+                <div class='row mb-4 mt-3 border-top border-primary pt-3 border-bottom pb-3'>
+                    <div class='col-md-4'>
+                        <label><strong>TOTAL ASSESSMENT SCORE (%)</strong></label>
+                    </div>
+                    <div class='col-md-4'>
+                        <input type='number' min='0' value='{$totalSBAScore}' name='total_assessment_score' class='form-control text-center'>
+                    </div>
+                </div>
+                <div class='text-center text-danger'>The selected options should sum up to the total assessement score.</div>
             </div>
         </div>";
 

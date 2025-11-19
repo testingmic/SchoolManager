@@ -297,9 +297,16 @@ class Terminal_reports extends Myschoolgh {
 
         $grading_sba = $client_data->grading_sba ?? [];
 
+        $overallSBA = 0;
+
         // get the grading structure
         if(!empty($grading_sba)) {
             foreach($grading_sba as $keyName => $item) {
+                if($keyName == 'total_assessment_score') {
+                    $overallSBA = $item;
+                    continue;
+                }
+                if(!isset($item['percentage'])) continue;
                 if($item['sba_checkbox'] == 'true') {
                     $csv_file .= strtoupper("{$keyName} - {$item['percentage']}%,");
                 }
@@ -379,6 +386,8 @@ class Terminal_reports extends Myschoolgh {
             }
         }
 
+        $overallSBA = 0;
+
         // get the sba percentage
         $sbaPercentage = $client_data->grading_structure->columns->{"School Based Assessment"}->percentage ?? 0;
 
@@ -387,6 +396,10 @@ class Terminal_reports extends Myschoolgh {
             $csv_file .= strtoupper($student->name).",{$student->unique_id},{$course_name},";
             $totalSba = 0;
             foreach($grading_sba as $keyName => $item) {
+                if($keyName == 'total_assessment_score') {
+                    $overallSBA = $item;
+                    continue;
+                }
                 if($item['sba_checkbox'] == 'true') {
                     if (isset($sba_results_list[$student->item_id])) {
                         $getRecord = $sba_results_list[$student->item_id];
@@ -497,9 +510,16 @@ class Terminal_reports extends Myschoolgh {
         $sba_percentage = [];
         $sba_percentage_lower = [];
 
+        $overallSBA = 0;
+
         // get the grading structure
         if(!empty($grading_sba)) {
             foreach($grading_sba as $keyName => $item) {
+                if($keyName == 'total_assessment_score') {
+                    $overallSBA = $item;
+                    continue;
+                }
+                if(!isset($item['percentage'])) continue;
                 if($item['sba_checkbox'] == 'true') {
                     $headers[] = strtoupper($keyName);
                     $sba_percentage[$keyName] = $item['percentage'];
@@ -731,6 +751,7 @@ class Terminal_reports extends Myschoolgh {
             "table_view" => $report_table, 
             "mobile_view" => $mobile_view, 
             "mobileViewer" => $mobileViewer, 
+            "overallSBA" => (int)($overallSBA ?? 0),
             "notices" => $notices,
             "studentNamesList" => $studentNamesList
         ]];
@@ -869,8 +890,13 @@ class Terminal_reports extends Myschoolgh {
                 $percentage = $defaultClientData?->grading_structure?->columns?->Examination?->percentage ?? 0;
             }
 
+            $overallSBA = $defaultClientData?->grading_structure?->total_assessment_score ?? 100;
             $allowedColumns = ['sba', 'marks'];
             foreach($defaultClientData->grading_sba as $key => $value) {
+                if($key == 'total_assessment_score') {
+                    $overallSBA = $value;
+                    continue;
+                }
                 if($value['sba_checkbox'] == 'true') {
                     $allowedColumns[] = strtolower(str_ireplace(" ", "_", $key));
                 }
@@ -894,7 +920,7 @@ class Terminal_reports extends Myschoolgh {
                     }
                     if(!in_array($spl[0], ['name', 'id', 'remarks'])) {
                         if($spl[0] == 'marks' && $percentage) {
-                            $spl[1] = $spl[1] > 0 ? round(($spl[1] / 100) * $percentage) : 0;
+                            $spl[1] = $spl[1] > 0 ? round(($spl[1] / $overallSBA) * $percentage) : 0;
                         }
                         if(!in_array($spl[0], $allowedColumns)) {
                             continue;

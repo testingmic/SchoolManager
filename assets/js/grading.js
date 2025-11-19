@@ -4,7 +4,8 @@ var column_to_use = "tr",
     currentQuestion = 0,
     questionNotices = '',
     savedReportId = '',
-    studentNamesList = [];
+    studentNamesList = [],
+    overallSBA = 0;
 var remove_grading_mark = (grading_id) => {
     $(`div[class~="grade_item"][data-grading_id='${grading_id}']`).remove();
     let grades_count = $(`div[id="grading_system_list"] div[class~="grade_item"]`).length;
@@ -237,6 +238,8 @@ var save_grading_mark = () => {
         report_columns["show_teacher_name"] = $(`select[name="show_teacher_name"]`).val();
         report_columns["allow_submission"] = $(`select[name="allow_submission"]`).val();
         report_columns["teacher_comments"] = true;
+        report_columns["total_assessment_score"] = $(`input[name="total_assessment_score"]`).val();
+        grading_sba["total_assessment_score"] = $(`input[name="total_assessment_score"]`).val();
 
         swal({
             title: "Save Grades",
@@ -302,6 +305,7 @@ var prepareDataForSave = () => {
             name = $(`span[data-student_row_id="${row_id}"][data-student]`).attr("data-student"),
             student_id = $(`span[data-student_row_id="${row_id}"][data-student_id]`).attr("data-student_id"),
             remarks = $(`input[data-input_row_id="${row_id}"][data-input_method='remarks']`).val(),
+            groupwork = $(`input[data-input_row_id="${row_id}"][data-input_method="groupwork"]`).val(),
 
             classwork = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="classwork"]`)?.val() ?? 0,
             homework = $(`${column_to_use}[data-student_row_id="${row_id}"] input[data-input_method="homework"]`)?.val() ?? 0,
@@ -311,7 +315,7 @@ var prepareDataForSave = () => {
             
         if(typeof name !== 'undefined') {
             studentNamesList[student_id] = name;
-            ss[i] = `name=${name}|id=${student_id}|remarks=${remarks}|sba=${sba||0}|marks=${marks||0}|classwork=${classwork||0}|homework=${homework||0}|test=${test||0}|project=${project||0}|midterm_exams=${midterm_exams||0}`;
+            ss[i] = `name=${name}|id=${student_id}|remarks=${remarks}|sba=${sba||0}|marks=${marks||0}|classwork=${classwork||0}|homework=${homework||0}|test=${test||0}|project=${project||0}|midterm_exams=${midterm_exams||0}|groupwork=${groupwork||0}`;
         }
     });
 
@@ -431,8 +435,8 @@ var calculate_sba_score = () => {
         let sba_input = $(`input[name="school_based_assessment"][data-input_row_id="${row_id}"]`);
         let sba_percentage = sba_input.attr("data-max_percentage");
 
-        let sba_score = (row_score * sba_percentage) / 100;
-        sba_input.val(sba_score);
+        let sba_score = (row_score * sba_percentage) / overallSBA;
+        sba_input.val(Math.round(sba_score));
     });
 }
 
@@ -471,6 +475,7 @@ var refresh_report_view = () => {
         course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
     $.post(`${baseUrl}api/terminal_reports/manual_report_upload`, { class_id, course_id }).then((response) => {
         let iresult = response.data.result;
+        overallSBA = iresult.overallSBA;
         questionsSet = iresult.mobileViewer;
     });
 }
@@ -534,6 +539,7 @@ var manual_report_upload = () => {
             $(`div[id="terminal_reports"] input[name="upload_report_file"]`).val("");
 
             let iresult = response.data.result;
+            overallSBA = iresult.overallSBA;
 
             if(data_to_use == "mobile_view") {
 

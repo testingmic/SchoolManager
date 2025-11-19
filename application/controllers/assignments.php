@@ -316,7 +316,7 @@ class Assignments extends Myschoolgh {
         $assessment_array = [];
         $assignments_list = "";
 
-        $export_array = $this->append_groupwork_to_assessment ? ["Homework", "Classwork", "Quiz", "GroupWork"] : $this->assessment_group;
+        $export_array = $this->append_groupwork_to_assessment ? ["Classwork", "Quiz", "GroupWork", "Project"] : $this->assessment_group;
 
         if(isset($the_list["data"]) && is_array($the_list["data"])) {
             foreach($the_list["data"] as $key => $each) {
@@ -877,11 +877,11 @@ class Assignments extends Myschoolgh {
     /**
      * Close Assignment
      * 
-     * @param String        $params->assignment_id
+     * @param object        $params
      * 
      * @return Array
      */
-    public function close(stdClass $params) {
+    public function close($params = null) {
         
         try {
 
@@ -910,7 +910,7 @@ class Assignments extends Myschoolgh {
     /**
      * Reopen a closed Assignment
      * 
-     * @param String        $params->assignment_id
+     * @param object        $params->assignment_id
      * 
      * @return Array
      */
@@ -943,7 +943,7 @@ class Assignments extends Myschoolgh {
     /**
      * Publish an Assignment
      * 
-     * @param String        $params->assignment_id
+     * @param object        $params->assignment_id
      * 
      * @return Array
      */
@@ -978,7 +978,7 @@ class Assignments extends Myschoolgh {
      * 
      * Upload the assignment data
      * 
-     * @param String        $params->assignment_id
+     * @param object        $params->assignment_id
      * 
      * @return Array
      */
@@ -1182,9 +1182,9 @@ class Assignments extends Myschoolgh {
     /**
      * Display student assignment submission information
      * 
-     * @param String        $params->student_id
-     * @param String        $params->assignment_id
-     * @param String        $params->preview
+     * @param object        $params->student_id
+     * @param object        $params->assignment_id
+     * @param object        $params->preview
      */
     public function student_info(stdClass $params) {
 
@@ -1281,7 +1281,7 @@ class Assignments extends Myschoolgh {
     /**
      * Return the list of Assignment Questions
      * 
-     * @param String    $params->assignment_id
+     * @param object    $params->assignment_id
      * @param String    $params->clientId
      * 
      * @return Array
@@ -1542,7 +1542,7 @@ class Assignments extends Myschoolgh {
     /**
      * Modify an existing question details
      * 
-     * @param String        $params->question_id
+     * @param object        $params->question_id
      * @param String        $params->assignment_id
      * 
      * @return String
@@ -1759,7 +1759,7 @@ class Assignments extends Myschoolgh {
      * This method loads all the questions for the specified assignment id and then appends the user
      * answers to it
      * 
-     * @param String        $params->assignment_id
+     * @param object        $params->assignment_id
      * @param String        $params->show_correct_answer
      * @param String        $params->student_id
      * 
@@ -1943,7 +1943,7 @@ class Assignments extends Myschoolgh {
      * 
      * Once done, get the details of the next question to display on the page.
      * 
-     * @param String    $params->question_id
+     * @param object    $params->question_id
      * @param Array     $answers
      * 
      * @return Array
@@ -2143,7 +2143,7 @@ class Assignments extends Myschoolgh {
     /**
      * Save the Marks Obtained by Each Student
      * 
-     * @param Array $params->data           An array of the assessment log data
+     * @param object $params->data           An array of the assessment log data
      * @param Array $params->students_list  An array of the list of students with their marks
      * 
      * @return Array
@@ -2275,7 +2275,7 @@ class Assignments extends Myschoolgh {
     /**
      * This method exports the grade
      * 
-     * @param String    $params->course_id
+     * @param object    $params
      * @param String    $params->timetable_id
      * @param String    $params->class_id
      * @param String    $params->assignment_id
