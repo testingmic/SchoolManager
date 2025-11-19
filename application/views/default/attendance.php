@@ -103,7 +103,7 @@ if(!empty($clientId)) {
                     <div class="card card-statistic-1">
                         <i class="fas fa-user-check card-icon col-green"></i>
                         <div class="card-wrap">
-                            <div class="padding-20">
+                            <div class="stats-card">
                                 <div class="text-right">
                                     <h3 data-attendance_count="Present" class="font-light mb-0">0</h3>
                                     <span class="text-black">Days Present</span>
@@ -116,7 +116,7 @@ if(!empty($clientId)) {
                     <div class="card card-statistic-1">
                         <i class="fas fa-user-alt-slash card-icon col-red"></i>
                         <div class="card-wrap">
-                            <div class="padding-20">
+                            <div class="stats-card">
                                 <div class="text-right">
                                     <h3 data-attendance_count="Absent" class="font-light mb-0">0</h3>
                                     <span class="text-black">Days Absent</span>
@@ -129,7 +129,7 @@ if(!empty($clientId)) {
                     <div class="card card-statistic-1">
                         <i class="fas fa-user-edit card-icon col-blue"></i>
                         <div class="card-wrap">
-                            <div class="padding-20">
+                            <div class="stats-card">
                                 <div class="text-right">
                                     <h3 data-attendance_count="logs_count" class="font-light mb-0">0</h3>
                                     <span class="text-black">Logs Counter</span>
@@ -139,16 +139,16 @@ if(!empty($clientId)) {
                     </div>
                 </div>'
                 ).'
-                <div class="'.($isAdminAccountant ? 'col-lg-3' : 'col-lg-3').' col-md-3 col-sm-6">
+                <div class="'.($isAdminAccountant ? 'col-lg-3' : 'col-lg-3').' col-md-6 col-sm-6">
                     <div class="card">
                         <div class="card-wrap">
-                            <div class="padding-20 pt-2 quick_loader pb-1" style="height:100px">
+                            <div class="pt-2 quick_loader pb-1" style="height:100px">
                                 <div class="form-content-loader" style="display: flex; position: absolute">
                                     <div class="offline-content text-center">
                                         <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                     </div>
                                 </div>
-                                <div class="text-left">
+                                <div class="text-left stats-cards">
                                     <span class="text-black" data-section="chart_summary"></span>
                                 </div>
                             </div>

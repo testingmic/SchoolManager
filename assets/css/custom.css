@@ -784,6 +784,26 @@ textarea.form-control {
     height: 130px !important;
 }
 
+.stats-card {
+    padding: 20px;
+}
+
+.stats-cards {
+    padding-left: 20px;
+}
+
+@media(max-width: 768px) {
+    .stats-card {
+        padding: 10px;
+    }
+}
+
+@media(max-width: 450px) {
+    .stats-cards {
+        padding-left: 10px;
+    }
+}
+
 textarea.custom_form-control {
     height: 180px !important;
 }

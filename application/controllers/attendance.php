@@ -327,7 +327,7 @@ class Attendance extends Myschoolgh {
     /**
      * Generate Attedance Report
      * 
-     * @param Int $params->class_id
+     * @param object $params
      * @param String $params->month_year
      * @param String $params->user_type  : This is the user category to load the information
      * 
@@ -619,7 +619,7 @@ class Attendance extends Myschoolgh {
      * List all the users in the category set by the user type.
      * Get the attendance log for the requested date range and confirm if the student was present for the class.
      * 
-     * @param String $params->class_id
+     * @param object $params
      * @param String $params->date_range
      * 
      * @return Array
@@ -1353,7 +1353,7 @@ class Attendance extends Myschoolgh {
             $users_count["chart_summary"] = [
                 "Start Date" => $params->start_date,
                 "End Date" => $params->end_date,
-                "Days Interval" => count($days) . " days interval"
+                "Interval" => count($days) . " days"
             ];
         } else {
             // using the grouping format
@@ -1385,7 +1385,7 @@ class Attendance extends Myschoolgh {
             $users_count["chart_summary"] = [
                 "Start Date" => $params->start_date,
                 "End Date" => $params->end_date,
-                "Days Interval" => count(array_filter($exclusion)) . " active days"
+                "Interval" => count(array_filter($exclusion)) . " active days"
             ];
         }
 
