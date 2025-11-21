@@ -174,9 +174,6 @@ class Handler {
         // control
         if(in_array($endpoint, $samplePath)) {
 
-            // load the session class
-            $session = load_class('Session', 'libraries/Session');
-
             // Auth object
             $logObj = load_class("auth", "controllers");
 
@@ -188,7 +185,6 @@ class Handler {
                 $response["data"] = $logObj->logout($this->params);
             }
 
-            // if the user is logging in
             elseif(isset($this->params->username, $this->params->password) && !isset($this->params->firstname)) {
                 // remote login
                 $remote_login = (bool) isset($this->params->verify);
