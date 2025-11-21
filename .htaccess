@@ -1,32 +1,49 @@
 # Disable directory browsing
 Options All -Indexes
+
 # ----------------------------------------------------------------------
 # Rewrite engine
 # ----------------------------------------------------------------------
 <IfModule mod_rewrite.c>
 	Options +FollowSymlinks
 	RewriteEngine On
-	# Redirect Trailing Slashes...
+	
+	# Redirect Trailing Slashes (but NOT for POST requests)
+	RewriteCond %{REQUEST_METHOD} !=POST
 	RewriteCond %{REQUEST_FILENAME} !-d
 	RewriteCond %{REQUEST_URI} (.+)/$
 	RewriteRule ^ %1 [L,R=301]
+	
+	# Handle trailing slashes for POST requests internally (no redirect)
+	RewriteCond %{REQUEST_METHOD} =POST
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{REQUEST_URI} (.+)/$
+	RewriteRule ^(.+)/$ $1 [L]
+	
+	# Redirect www to non-www (HTTP only)
 	RewriteCond %{HTTPS} !=on
 	RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 	RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
+	
+	# Route all requests to index.php
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d
 	RewriteRule ^([\s\S]*)$ index.php/$1 [L,NC,QSA]
+	
 	# Ensure Authorization header is passed along
 	RewriteCond %{HTTP:Authorization} .
 	RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 </IfModule>
+
 <IfModule !mod_rewrite.c>
 	ErrorDocument 404 index.php
 </IfModule>
+
 <FilesMatch "\.ini$|^\.git|^composer">
     Order allow,deny
     Deny from all
 </FilesMatch>
+
 # Disable server signature start
 	ServerSignature Off
 # Disable server signature end
