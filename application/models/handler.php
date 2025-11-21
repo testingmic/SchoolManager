@@ -144,6 +144,10 @@ class Handler {
         if(is_array($data) && isset($data['raw_output'])) {
             $data = $data['raw_output'];
         }
+        
+        if(isset($params['mobileapp'])) {
+            $data['data'] = $data['data']['result'] ?? $data['data'];
+        }
 
         // print out the response
         echo json_encode($data);
