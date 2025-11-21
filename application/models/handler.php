@@ -181,11 +181,7 @@ class Handler {
             $logObj = load_class("auth", "controllers");
 
             // if the parameters were parsed
-            if($this->requestMethod !== "POST") {
-                $response["data"] = "Sorry! The method must be POST.";
-            }
-            // if the user is logging out
-            elseif($this->outer_url == "logout") { 
+            if($this->outer_url == "logout") { 
                 // append the user id and 
                 $this->params->userId = $this->userId;
                 // logout the user
