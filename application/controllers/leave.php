@@ -172,9 +172,9 @@ class Leave extends Myschoolgh {
         // count the number of days
         $days_count = $this->listDays($leave_from, $leave_to);
 
-        // return error if the leave days is more than 35 days
-        if(count($days_count) > 35) {
-            return ["code" => 400, "data" => "Sorry! The leave days must not exceed 35 days."];
+        // return error if the leave days is more than 60 days
+        if(count($days_count) > 60) {
+            return ["code" => 400, "data" => "Sorry! The leave days must not exceed 60 days."];
         }
 
         // error message
