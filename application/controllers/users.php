@@ -695,6 +695,10 @@ class Users extends Myschoolgh {
 					$result->client = $this->defaultClientData;
 				}
 
+				if($params->limit) {
+					$result->user_permissions = [];
+				}
+
 				// append to the results set to return
 				if($noKeyLoad) {
 					$data[] = $result;
