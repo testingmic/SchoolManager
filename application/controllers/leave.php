@@ -231,7 +231,9 @@ class Leave extends Myschoolgh {
                 ]
             ];
 
-        } catch(PDOException $e) {}
+        } catch(PDOException $e) {
+            return $e->getMessage();
+        }
 
     }
 
