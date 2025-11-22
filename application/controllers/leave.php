@@ -174,7 +174,7 @@ class Leave extends Myschoolgh {
         // get the leave type
         $getType = $this->pushQuery("*", "leave_types", "status='1' AND id='{$params->type_id}' LIMIT 20");
         if(empty($getType)) {
-            $getTypeByName = $this->pushQuery("*", "leave_types", "status='1' AND name='{$params->type_name}' LIMIT 20");
+            $getTypeByName = $this->pushQuery("*", "leave_types", "status='1' AND name='{$params->leave_type}' LIMIT 20");
             if(!empty($getTypeByName)) {
                 $getType = $getTypeByName[0];
                 $params->type_id = $getType->id;
