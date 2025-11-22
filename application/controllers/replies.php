@@ -203,6 +203,11 @@ class Replies extends Myschoolgh {
             return ["code" => 400, "data" => "Invalid request parsed"];
         }
 
+        // if the record id is empty and the enquiry id is not empty, then set the record id to the enquiry id
+        if(empty($params->record_id) && !empty($params->enquiry_id)) {
+            $params->record_id = $params->enquiry_id;
+        }
+
         // clean the description 
         $params->message = !empty($params->message) ? custom_clean(htmlspecialchars_decode($params->message)) : null;
         $params->message = htmlspecialchars($params->message);

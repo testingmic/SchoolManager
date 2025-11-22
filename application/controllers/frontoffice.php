@@ -99,8 +99,8 @@ class Frontoffice extends Myschoolgh {
 	 * 
 	 * Validate the information and insert the data into the database
 	 * 
-	 * @param Array 	$params->data
-	 * @param Strign 	$params->section
+	 * @param object 	$params
+	 * @param object 	$params->section
 	 * 
 	 * @return Array
 	 */
