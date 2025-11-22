@@ -21,21 +21,27 @@ class Notification extends Myschoolgh {
 	 */
 	public function list($params = null) {
 
+        global $isAdmin, $defaultUser;
+
 		$params->query = "1";
 
-        // if the user id parameter was not parsed
-		if(!isset($params->user_id)) {
-			// perform some checks
-			$params->user_id = !empty($params->user_id) ? $params->user_id : $params->userId;
-		}
+        // if the user is not admin, then set the user id to the default user id
+        $params->user_id = $defaultUser->user_id;
+
+        // if the notice id is not set, then set it to the notification id
+        $params->notice_id = isset($params->notice_id) ? $params->notice_id : null;
+        if(empty($params->notice_id) && !empty($params->notification_id)) {
+            $params->notice_id = $params->notification_id;
+        }
 
 		// if the field is null
-		$params->query .= (isset($params->notice_id) && !empty($params->notice_id)) ? (preg_match("/^[0-9]+$/", $params->notice_id) ? " AND a.id='{$params->notice_id}'" : " AND a.item_id='{$params->notice_id}'") : null;
-		$params->query .= (isset($params->status) && !empty($params->status)) ? " AND a.seen_status='{$params->status}'" : null;
-        $params->query .= (isset($params->user_id) && !empty($params->user_id)) ? " AND a.user_id='{$params->user_id}'" : null;
-        $params->query .= (isset($params->initiated_by) && !empty($params->initiated_by)) ? " AND a.initiated_by='{$params->initiated_by}'" : null;
-		$params->query .= (isset($params->date) && !empty($params->date)) ? " AND DATE(a.date_created) ='{$params->date_created}'" : null;
-        $params->query .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a") : null;
+		$params->query .= !empty($params->notice_id) ? (preg_match("/^[0-9]+$/", $params->notice_id) ? " AND a.id='{$params->notice_id}'" : " AND a.item_id='{$params->notice_id}'") : null;
+		$params->query .= !empty($params->status) ? " AND a.seen_status='{$params->status}'" : null;
+        $params->query .= !empty($params->user_id) ? " AND a.user_id='{$params->user_id}'" : null;
+        $params->query .= !empty($params->initiated_by) ? " AND a.initiated_by='{$params->initiated_by}'" : null;
+		$params->query .= !empty($params->date) ? " AND DATE(a.date_created) ='{$params->date_created}'" : null;
+        $params->query .= !empty($params->date_range) ? $this->dateRange($params->date_range, "a") : null;
+        $params->query .= !empty($params->seen_status) ? " AND a.seen_status='{$params->seen_status}'" : null;
 
 		// the number of rows to limit the query
 		$params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
@@ -67,6 +73,11 @@ class Notification extends Myschoolgh {
                 $result->status = $this->the_status_label($result->seen_status);
                 $result->time_to_ago = time_diff($result->date_created);
 
+                if(!empty($params->mobileapp)) {
+                    $result->message = strip_tags($result->message);
+                    $result->content = strip_tags($result->content);
+                }
+
                 // append to the list and return
                 $data[] = $result;
             }
@@ -81,6 +92,55 @@ class Notification extends Myschoolgh {
         }
 
 	}
+
+    /**
+     * Get the unread count of notifications
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function unread_count($params) {
+
+        $params->seen_status = "Unseen";
+
+        $notifications = $this->list($params);
+
+        return ["code" => 200, "data" => !empty($notifications["data"]) ? count($notifications["data"]) : 0];
+
+    }
+
+    /**
+     * Get the unread notifications
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function unread($params) {
+        
+        $params->seen_status = "Unseen";
+
+        return $this->list($params);
+
+    }
+
+    /**
+     * View a notification
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function view(stdClass $params) {
+        
+        $notification = $this->list($params);
+        if(empty($notification["data"])) {
+            return ["code" => 400, "data" => "Sorry! An invalid notification id was parsed."];
+        }
+        return ["code" => 200, "data" => $notification["data"][0]];
+
+    }
 
     /**
      * Add a new notification
@@ -119,8 +179,24 @@ class Notification extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
-            return;
+            return [
+                "code" => 400,
+                "data" => $e->getMessage()
+            ];
         }
+
+    }
+
+    /**
+     * Create a new notification
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function create(stdClass $params) {
+        
+        return $this->add($params);
 
     }
 
@@ -152,9 +228,45 @@ class Notification extends Myschoolgh {
             return true;
 
         } catch(PDOException $e) {
-            return [];
+            return [
+                "code" => 400,
+                "data" => $e->getMessage()
+            ];
         }
 
+    }
+
+    /**
+     * Mark all notifications as read
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function mark_all_as_read(stdClass $params) {
+        
+        $params->notification_id = "mark_all_as_read";
+        
+        return $this->mark_as_read($params);
+
+    }
+
+    /**
+     * Delete a notification
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function delete(stdClass $params) {
+        try {
+            $column = strlen($params->notification_id) > 10 ? "item_id" : "id";
+            $stmt = $this->db->prepare("DELETE FROM users_notification WHERE {$column} = ? AND client_id = ? AND user_id = ? LIMIT 1");
+            $stmt->execute([$params->notification_id, $params->clientId, $params->userId]);
+            return ["code" => 200, "data" => "Notification was successfully deleted"];
+        } catch(PDOException $e) {
+            return $e->getMessage();
+        }
     }
 
 }
