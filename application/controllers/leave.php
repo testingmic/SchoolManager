@@ -124,6 +124,12 @@ class Leave extends Myschoolgh {
      */
     public function create(stdClass $params) {
         
+        global $isAdmin, $defaultUser;
+
+        if(!$isAdmin) {
+            $params->user_id = $defaultUser->user_id;
+        }
+
         return $this->apply($params);
 
     }
