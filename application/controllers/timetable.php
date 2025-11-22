@@ -128,7 +128,7 @@ class Timetable extends Myschoolgh {
      * 
      * This method saves a timetable record
      * 
-     * @param String        $params->timetable_id
+     * @param object       $params
      * @param Int           $params->slots
      * @param Int           $params->days
      * @param Int           $params->duration
@@ -254,7 +254,7 @@ class Timetable extends Myschoolgh {
      * 
      * Save the parsed timetable id in session after checking if it exists
      * 
-     * @param String        $params->timetable_id
+     * @param object        $params
      * 
      * @return Array
      */
@@ -283,7 +283,7 @@ class Timetable extends Myschoolgh {
      * 
      * // TODO ::: Will later on fix the conflict issues
      * 
-     * @param String        $params->data["timetable_id"]
+     * @param object        $params
      * @param Int           $params->data["course_id"]
      * @param Int           $params->data["query"]
      * @param Int           $params->data["slot"]
@@ -419,7 +419,7 @@ class Timetable extends Myschoolgh {
      * 
      * Validate the allocation of a slot
      * 
-     * @param String        $params->data["timetable_id"]
+     * @param object        $params
      * @param String        $params->data["allocations"]
      * @param String        $params->data["slot"]
      * 
@@ -813,7 +813,7 @@ class Timetable extends Myschoolgh {
     /**
      * Get The List Of Timetables
      * 
-     * @param String    $params->clientId
+     * @param object    $params
      * @param String    $params->academic_year
      * @param String    $params->academic_term
      * 
@@ -866,7 +866,7 @@ class Timetable extends Myschoolgh {
     /**
      * Students Attendance
      * 
-     * @param String    $params->course_id
+     * @param object    $params
      * @param String    $params->class_id
      * @param String    $params->timetable_id
      * @param String    $params->limit
@@ -914,7 +914,7 @@ class Timetable extends Myschoolgh {
     /**
      * Log Student Attendance
      * 
-     * @param   Int         $params->student_id
+     * @param   object      $params
      * @param   String      $params->course_id
      * @param   String      $params->timetable_id
      * @param   String      $params->attendance
@@ -1081,7 +1081,7 @@ class Timetable extends Myschoolgh {
     /**
      * Log Student Attendance
      * 
-     * @param   Int         $params->student_id
+     * @param   object         $params
      * @param   String      $params->course_id
      * @param   String      $params->timetable_id
      * @param   String      $params->attendance
@@ -1254,7 +1254,7 @@ class Timetable extends Myschoolgh {
     /**
      * Save Student Grade
      * 
-     * @param   Int         $params->student_id
+     * @param   object      $params
      * @param   String      $params->course_id
      * @param   String      $params->timetable_id
      * @param   String      $params->attendance

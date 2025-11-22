@@ -265,7 +265,7 @@ class Departments extends Myschoolgh {
     /**
      * Assign Department to Students List
      * 
-     * @param Array     $params->data
+     * @param object $params
      * @param Array     $params->data["assign_fees"]
      * @param Array     $params->data["class_id"]
      * @param Array     $params->data["student_id"]

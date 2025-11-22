@@ -217,6 +217,16 @@ class Analitics extends Myschoolgh {
             $this->final_report["attendance_report"] = $this->attendance_report($params);
         }
 
+        // get the academic information
+        $this->final_report["academic_information"] = [
+            'academic_year' => $this->academic_year,
+            'academic_term' => $this->academic_term,
+            'term_starts' => $this->this_term_starts,
+            'term_ends' => $this->this_term_ends,
+            'last_term_starts' => $this->last_term_starts,
+            'last_term_ends' => $this->last_term_ends,
+        ];
+
         return $this->final_report;
         
     }
