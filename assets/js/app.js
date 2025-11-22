@@ -1026,10 +1026,13 @@ var initPlugins = () => {
     the_date_picker();
 
     if (('.daterange').length > 0) {
+        let minDate = $(`input[class~="daterange"]`).attr("data-mindate") == undefined ? $.today : $(`input[class~="daterange"]`).attr("data-mindate");
+        let maxDate = $(`input[class~="daterange"]`).attr("data-maxdate") == undefined ? $.today : $(`input[class~="daterange"]`).attr("data-maxdate");
         $('.daterange').daterangepicker({
             locale: { format: 'YYYY-MM-DD', separator: ':' },
             drops: 'down',
-            maxDate: $.today,
+            minTime: minDate,
+            maxTime: maxDate
         });
     }
 
