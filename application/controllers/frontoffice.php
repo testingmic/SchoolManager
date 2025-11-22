@@ -75,7 +75,7 @@ class Frontoffice extends Myschoolgh {
                     );
                 }
 
-				$result->status = $result->state;
+				// $result->status = $result->state;
 
                 // decode the attachments as well
                 $result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : null;
