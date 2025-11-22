@@ -204,8 +204,8 @@ class Replies extends Myschoolgh {
         }
 
         // if the record id is empty and the enquiry id is not empty, then set the record id to the enquiry id
-        if(empty($params->record_id) && !empty($params->enquiry_id)) {
-            $params->record_id = $params->enquiry_id;
+        if(empty($params->item_id) && !empty($params->enquiry_id)) {
+            $params->item_id = $params->enquiry_id;
         }
 
         // clean the description 
@@ -328,8 +328,8 @@ class Replies extends Myschoolgh {
         $params->_item_id = random_string("alnum", RANDOM_STRING);
 
         // if the record id is empty and the enquiry id is not empty, then set the record id to the enquiry id
-        if(empty($params->record_id) && !empty($params->enquiry_id)) {
-            $params->record_id = $params->enquiry_id;
+        if(empty($params->item_id) && !empty($params->enquiry_id)) {
+            $params->item_id = $params->enquiry_id;
         }
 
         /** The resource */
