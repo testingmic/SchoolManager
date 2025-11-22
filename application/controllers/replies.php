@@ -327,6 +327,11 @@ class Replies extends Myschoolgh {
         /** Create a random string */
         $params->_item_id = random_string("alnum", RANDOM_STRING);
 
+        // if the record id is empty and the enquiry id is not empty, then set the record id to the enquiry id
+        if(empty($params->record_id) && !empty($params->enquiry_id)) {
+            $params->record_id = $params->enquiry_id;
+        }
+
         /** The resource */
         $resource = $params->resource;
 
