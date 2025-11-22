@@ -66,6 +66,8 @@ class Leave extends Myschoolgh {
                     $result->reason = strip_tags($result->reason);
                 }
 
+                $result->leave_type = $result->type_name;
+
                 // set the leave date start and end
                 $result->leave_date_start = $result->leave_from;
                 $result->leave_date_end = $result->leave_to;
