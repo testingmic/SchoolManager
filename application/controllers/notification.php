@@ -125,7 +125,7 @@ class Notification extends Myschoolgh {
 
         $notifications = $this->list($params);
 
-        return ["code" => 200, "data" => !empty($notifications["data"]) ? count($notifications["data"]) : 0];
+        return ["code" => 200, "data" => !empty($notifications["data"]["notifications"]) ? count($notifications["data"]["notifications"]) : 0];
 
     }
 
@@ -157,7 +157,7 @@ class Notification extends Myschoolgh {
         if(empty($notification["data"])) {
             return ["code" => 400, "data" => "Sorry! An invalid notification id was parsed."];
         }
-        return ["code" => 200, "data" => $notification["data"][0]];
+        return ["code" => 200, "data" => $notification["data"]["notifications"][0]];
 
     }
 
