@@ -59,7 +59,8 @@ class Notification extends Myschoolgh {
             ");
             $stmt->execute();
 
-            $row = 0;
+            $unread_count = 0;
+            $total_count = 0;
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {                
                 // replace all placeholders
@@ -78,8 +79,24 @@ class Notification extends Myschoolgh {
                     $result->content = strip_tags($result->content);
                 }
 
+                if($result->seen_status == "Unseen") {
+                    $unread_count++;
+                }
+                $total_count++;
+
                 // append to the list and return
                 $data[] = $result;
+            }
+
+            if(!empty($params->mobileapp)) {
+                return [
+                    "data" => [
+                        "notifications" => $data,
+                        "unread_count" => $unread_count,
+                        "total_count" => $total_count
+                    ],
+                    "code" => 200
+                ];
             }
 
             // return the data
