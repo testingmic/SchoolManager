@@ -75,12 +75,11 @@ class Frontoffice extends Myschoolgh {
                     );
                 }
 
-				// $result->status = $result->state;
-
-                // decode the attachments as well
-                $result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : null;
-                $result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-6 col-md-6", false, false) : "";
-
+				if(empty($params->mobileapp)) {
+					// decode the attachments as well
+					$result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : null;
+					$result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-6 col-md-6", false, false) : "";
+				}
                 // convert the content into an object
                 $result->content = json_decode($result->content);
 

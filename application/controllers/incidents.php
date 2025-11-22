@@ -57,9 +57,10 @@ class Incidents extends Myschoolgh {
                     // convert the created by string into an object
                     $result->{$each} = (object) $this->stringToArray($result->$each, "|", ["user_id", "unique_id", "name", "phone_number", "email", "image","user_type"]);
                 }
-
-                // if attachment variable was parsed
-                $result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : null;
+                if(empty($params->mobileapp)) {
+                    // if attachment variable was parsed
+                    $result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : null;
+                }
 
                 // clean the description attached to the list
                 $result->description = htmlspecialchars_decode($result->description);
@@ -470,7 +471,7 @@ class Incidents extends Myschoolgh {
     /**
      * Mark the report as seen by the parent
      * 
-     * @param String $params->report_id
+     * @param object $params
      * 
      * @return Array
      */
@@ -516,7 +517,7 @@ class Incidents extends Myschoolgh {
      * 
      * Use this model to either insert or update an existing report log.
      * 
-     * @param String $params->class_id
+     * @param object $params
      * @param String $params->student_id
      * @param String $params->report_id
      * @param String $params->description

@@ -4,7 +4,7 @@ class Arrears extends Myschoolgh {
 
     
 
-    public function __construct(stdClass $params = null) {
+    public function __construct($params) {
         parent::__construct();
 
         // get the client data
@@ -19,7 +19,7 @@ class Arrears extends Myschoolgh {
     /**
      * List the fees arrears
      * 
-     * @param String        $params->clientId
+     * @param object        $params
      * @param String        $params->student_id
      * 
      * @return Array
@@ -187,8 +187,7 @@ class Arrears extends Myschoolgh {
     /**
      * Make payment for the fees
      * 
-     * @param String        $params->checkout_url
-     * @param Float         $params->amount
+     * @param object        $params
      * 
      * @return Array
      */
@@ -496,7 +495,7 @@ class Arrears extends Myschoolgh {
     /**
      * Add Fees Arrears
      * 
-     * @param Array         $params->data
+     * @param object        $params
      * 
      * @return Array
      */
@@ -674,7 +673,7 @@ class Arrears extends Myschoolgh {
     /**
      * Delete Fees Arrears Payment
      * 
-     * @param Array         $params->data
+     * @param object        $params
      * 
      * @return Array
      */
@@ -762,7 +761,7 @@ class Arrears extends Myschoolgh {
     }
 
     /**
-     * Confirm MoMo / Card Payment
+     * @param object        $params
      * 
      * @return Array
      */

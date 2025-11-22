@@ -170,7 +170,7 @@ class Assignments extends Myschoolgh {
                         }
 
                         // if attachment variable was parsed
-                        if($isAttachment) {
+                        if($isAttachment && empty($params->mobileapp)) {
                             if(!empty($params->remote)) {
                                 $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
                                 $result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : [];

@@ -124,7 +124,7 @@ class Courses extends Myschoolgh {
                 if(!$minified) {
                 
                     // if the files is set
-                    if(isset($params->full_attachments)) {
+                    if(isset($params->full_attachments) && empty($params->mobileapp)) {
                         $result->attachment = $filesObject->resource_attachments_list("courses_plan", $result->id);
                     }
 
