@@ -492,7 +492,7 @@ class Myschoolgh extends Models {
 	/**
 	 * Get the Grading System
 	 * 
-	 * @return Object
+	 * @return array
 	 */
 	final function grading_system($clientId, $academic_year, $academic_term) {
 
@@ -1401,14 +1401,14 @@ class Myschoolgh extends Models {
 
         $label = $status;
         
-        if(in_array($status, ["Pending", "Due Today", "Graduated", "Activated"])) {
+        if(in_array($status, ["Pending", "Due Today", "Graduated", "Activated", "Resolved"])) {
             $label = "<span class='badge badge-primary {$class}'>{$status}</span>";
         }
         elseif(in_array($status, ["Rejected", "Dismissed", "Reversed", "Transferred", "Cancelled", "Not Paid", 
 			"Unpaid", "Unseen", "Closed", "Overdue", "Expired", "Suspended", "Denied", "Withdrawn", "Lost", "Deleted"])) {
             $label = "<span class='badge badge-danger {$class}'>{$status}</span>";
         }
-        elseif(in_array($status, ["Reopen", "Waiting", "Draft", "Processing", "In Review", "Confirmed", "Graded", "Requested", "Propagation", "Passive"])) {
+        elseif(in_array($status, ["Reopen", "Waiting", "Draft", "Processing", "In Progress", "In Review", "Confirmed", "Graded", "Requested", "Propagation", "Passive"])) {
             $label = "<span class='badge badge-warning text-white {$class}'>{$status}</span>";
         }
         elseif(in_array($status, ["Exported", "Complete", "Answered", "Solved", "Enrolled", "Active", "Approved", "Paid", 
