@@ -244,7 +244,7 @@ class Notification extends Myschoolgh {
             }
 
             // return true for success
-            return true;
+            return ["code" => 200, "data" => "Notification was successfully marked as read"];
 
         } catch(PDOException $e) {
             return [
