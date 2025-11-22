@@ -299,7 +299,6 @@ class Incidents extends Myschoolgh {
                     ".(isset($params->reported_by) ? ", reported_by = '{$params->reported_by}'" : null)."
                     ".(isset($params->location) ? ", location = '{$params->location}'" : null)."
                     ".(isset($params->status) ? ", status = '{$params->status}'" : null)."
-                    ".(isset($params->user_id) ? ", user_id = '{$params->user_id}'" : null)."
                     ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
                 WHERE client_id = ? AND item_id = ? LIMIT 1
             ");
