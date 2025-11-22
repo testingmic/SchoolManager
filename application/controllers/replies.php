@@ -332,6 +332,11 @@ class Replies extends Myschoolgh {
             $params->item_id = $params->enquiry_id;
         }
 
+        // if the record id is empty and the enquiry id is not empty, then set the record id to the enquiry id
+        if(empty($params->item_id) && !empty($params->resource_id)) {
+            $params->item_id = $params->resource_id;
+        }
+
         /** The resource */
         $resource = $params->resource;
 
