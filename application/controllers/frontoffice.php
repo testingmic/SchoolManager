@@ -75,6 +75,8 @@ class Frontoffice extends Myschoolgh {
                     );
                 }
 
+				$result->status = $result->state;
+
                 // decode the attachments as well
                 $result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : null;
                 $result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-6 col-md-6", false, false) : "";
@@ -137,6 +139,10 @@ class Frontoffice extends Myschoolgh {
 				}
 			}
 
+		}
+
+		if(isset($params->data['number_of_person'])) {
+			$params->data['number_of_person'] = (int) $params->data['number_of_person'];
 		}
 
 		try {
@@ -359,7 +365,7 @@ class Frontoffice extends Myschoolgh {
             // check if the user has a pending leave application
             if(empty($this->pushQuery("id", "frontoffice", 
                 "client_id = '{$params->clientId}' AND item_id='{$params->request_id}' LIMIT 1"))) {
-                return ["code" => 400, "data" => "Sorry! An invalid leave id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid request id was parsed."];
             }
 
             // update the status
