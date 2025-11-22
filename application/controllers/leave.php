@@ -72,6 +72,39 @@ class Leave extends Myschoolgh {
 	}
 
     /**
+     * View a leave application
+     * 
+     * @param Object $params
+     * 
+     * @return Array
+     */
+    public function view(stdClass $params) {
+        try {
+            $leaveRecord = $this->list($params);
+            if(empty($leaveRecord["data"])) {
+                return ["code" => 400, "data" => "Sorry! An invalid leave id was parsed."];
+            }
+            $leaveRecord = $leaveRecord["data"][0];
+            return [ "code" => 200, "data" => $leaveRecord ];
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+    }
+
+    /**
+     * Create a leave application
+     * 
+     * @param Object $params
+     * 
+     * @return Array
+     */
+    public function create(stdClass $params) {
+        
+        return $this->apply($params);
+
+    }
+
+    /**
      * Process a leave application
      * 
      * @param Object $params
