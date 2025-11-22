@@ -84,6 +84,8 @@ class Notification extends Myschoolgh {
                 }
                 $total_count++;
 
+                $result->is_read = (bool)($result->seen_status == "Seen");
+
                 // append to the list and return
                 $data[] = $result;
             }
