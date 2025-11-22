@@ -172,11 +172,6 @@ class Leave extends Myschoolgh {
         // count the number of days
         $days_count = $this->listDays($leave_from, $leave_to);
 
-        // return error if the leave days is more than 60 days
-        if(count($days_count) > 60) {
-            return ["code" => 400, "data" => "Sorry! The leave days must not exceed 60 days."];
-        }
-
         // error message
         if(!$isAdmin && $defaultUser->user_id !== $params->user_id) {
             return ["code" => 400, "data" => "Sorry! An invalid user id was parsed"];
@@ -190,6 +185,11 @@ class Leave extends Myschoolgh {
                 $getType = $getTypeByName[0];
                 $params->type_id = $getType->id;
             }
+        }
+
+        // return error if the leave days is more than 60 days
+        if(count($days_count) > 90 && !in_array($params->type_id, [11])) {
+            return ["code" => 400, "data" => "Sorry! The leave days must not exceed 90 days."];
         }
 
         // confirm that a valid leave type was parsed
