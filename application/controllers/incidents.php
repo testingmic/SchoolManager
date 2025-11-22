@@ -391,7 +391,10 @@ class Incidents extends Myschoolgh {
             return $return;
 
         } catch(PDOException $e) {
-            return $this->unexpected_error;
+            return [
+                "code" => 400,
+                "data" => $e->getMessage()
+            ];
         } 
         
     }
