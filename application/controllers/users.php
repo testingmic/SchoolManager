@@ -695,7 +695,7 @@ class Users extends Myschoolgh {
 					$result->client = $this->defaultClientData;
 				}
 
-				if($params->limit && (int)$params->limit == 1) {
+				if($params->limit && (int)$params->limit !== 1) {
 					$result->user_permissions = [];
 				}
 
