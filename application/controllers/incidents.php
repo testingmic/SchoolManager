@@ -377,6 +377,8 @@ class Incidents extends Myschoolgh {
             // log the user activity
             $this->userLogs("incidents", $params->incident_id, null, "{$params->userData->name} added a new comment to the Incident.", $params->userId);
 
+            $this->db->query("UPDATE incidents SET date_updated = now(), status = 'In Progress' WHERE item_id = '{$params->incident_id}' AND client_id = '{$params->clientId}' LIMIT 1");
+
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Incident followup comment added successfully."];
             $q_param = (object) ["incident_type" => "followup", "incident_id" => $item_id, "limit" => 1, "clientId" => $params->clientId];
