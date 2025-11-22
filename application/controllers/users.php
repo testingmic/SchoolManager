@@ -1213,6 +1213,7 @@ class Users extends Myschoolgh {
 	/**
 	 * Append/Remove a student to the Guardian
 	 * 
+	 * @param object $params
 	 * @param String $params->user_id		This is a combination of the guardian id and the student id
 	 * @param String $params->todo			This is the action to perform (append / remove)
 	 * 
@@ -1305,6 +1306,7 @@ class Users extends Myschoolgh {
 	/**
 	 * Append/Remove a delegate to the Guardian
 	 * 
+	 * @param object $params
 	 * @param String $params->user_id		This is a combination of the guardian id and the delegate id
 	 * @param String $params->todo			This is the action to perform (append / remove)
 	 * 
@@ -1358,6 +1360,7 @@ class Users extends Myschoolgh {
 	/**
 	 * Append/Remove a Guardian attached to a ward
 	 * 
+	 * @param object $params
 	 * @param String $params->user_id		This is a combination of the guardian id and the student id
 	 * @param String $params->todo			This is the action to perform (append / remove)
 	 * 
@@ -2800,6 +2803,7 @@ class Users extends Myschoolgh {
 	/**
 	 * Load user permissions
 	 * 
+	 * @param object $params
 	 * @param String $params->user_id
 	 * 
 	 * @return Array
@@ -2845,6 +2849,7 @@ class Users extends Myschoolgh {
 	/**
 	 * Save the user permissions
 	 * 
+	 * @param object $params
 	 * @param String $params->user_id
 	 * @param String $params->access_level
 	 * @param Array $params->permissions_list
@@ -2934,6 +2939,7 @@ class Users extends Myschoolgh {
 	/**
 	 * Set the default student id
 	 * 
+	 * @param object $params
 	 * @param String $params->student_id
 	 * 
 	 * @return Array
@@ -3093,6 +3099,7 @@ class Users extends Myschoolgh {
 	/**
 	 * Bulk Update Students Record
 	 * 
+	 * @param object $params
 	 * @param Array		$params->dob
 	 * @param Array		$params->end
 	 * @param Array 	$params->img
@@ -3211,6 +3218,7 @@ class Users extends Myschoolgh {
 	/**
 	 * Change the status of a list of students
 	 * 
+	 * @param object $params
 	 * @param Array		$params->student_id
 	 * @param String		$params->user_status
 	 * @param String 	$params->description
@@ -3269,7 +3277,7 @@ class Users extends Myschoolgh {
 
 	/**
 	 * Generate User Content for Export
-	 * 
+	 * @param object $params
 	 * @param String	$params->user_id
 	 * @param String	$params->clientId
 	 * 

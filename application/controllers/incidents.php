@@ -16,6 +16,24 @@ class Incidents extends Myschoolgh {
      */
     public function list(stdClass $params) {
 
+        // global variables
+        global $defaultUser, $isStudent, $isParent;
+
+        // if the user is a student
+        if($isStudent) {
+            $params->user_id = $defaultUser->user_id;
+        }
+
+        // if the user is a parent and has no wards
+        elseif($isParent && empty($defaultUser->wards_list)) {
+            return [ "code" => 200, "data" => [] ];
+        }
+
+        // if the user is a parent and has wards
+        elseif($isParent && !empty($defaultUser->wards_list)) {
+            $params->user_id = $defaultUser->wards_list_ids;
+        }
+            
 
         $filter = "1";
 
@@ -29,7 +47,7 @@ class Incidents extends Myschoolgh {
         $filter .= !empty($params->created_by) ? " AND a.created_by='{$params->created_by}'" : null;
         $filter .= !empty($params->incident_type) ? " AND a.incident_type='{$params->incident_type}'" : null;
         $filter .= !empty($params->incident_date) ? " AND a.incident_date='{$params->incident_date}'" : null;
-        $filter .= !empty($params->user_id) ? " AND a.user_id='{$params->user_id}'" : null;
+        $filter .= !empty($params->user_id) ? " AND a.user_id IN {$this->inList($params->user_id)}" : null;
         $filter .= !empty($params->user_role) ? " AND a.user_role='{$params->user_role}'" : null;
         $filter .= !empty($params->client_id) ? " AND a.client_id='{$params->client_id}'" : null;
         $filter .= !empty($params->subject) ? " AND a.subject LIKE '%{$params->subject}%'" : null;
@@ -134,6 +152,12 @@ class Incidents extends Myschoolgh {
 
         try {
 
+            global $accessObject;
+
+            if(!$accessObject->hasAccess("add", "incident")) {
+                return ["code" => 400, "data" => "Sorry! You do not have the required permissions to perform this action."];
+            }
+
             // confirm that the request method is POST
             if($params->requestMethod !== 'POST') {
                 return ["code" => 400, "data" => "Sorry! An invalid request method was supplied."];
@@ -226,8 +250,14 @@ class Incidents extends Myschoolgh {
 
         try {
 
+            global $accessObject;
+
             if(empty($params->incident_id)) {
                 return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
+            }
+
+            if(!$accessObject->hasAccess("update", "incident")) {
+                return ["code" => 400, "data" => "Sorry! You do not have the required permissions to perform this action."];
             }
 
             // old record
@@ -313,19 +343,25 @@ class Incidents extends Myschoolgh {
      */
     public function add_followup(stdClass $params) {
 
-        // old record
-        $prevData = $this->pushQuery(
-            "a.*",
-            "incidents a", 
-            "a.item_id = '{$params->incident_id}' ".(!empty($params->user_id) ? "AND a.user_id = '{$params->user_id}'" : null)." AND a.client_id = '{$params->clientId}' AND a.deleted = '0' LIMIT 1"
-        );
-
-        // if empty then return
-        if(empty($prevData)) {
-            return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
-        }
-
         try {
+
+            global $accessObject;
+            
+            if(!$accessObject->hasAccess("update", "incident")) {
+                return ["code" => 400, "data" => "Sorry! You do not have the required permissions to perform this action."];
+            }
+
+            // old record
+            $prevData = $this->pushQuery(
+                "a.*",
+                "incidents a", 
+                "a.item_id = '{$params->incident_id}' AND a.client_id = '{$params->clientId}' AND a.deleted = '0' LIMIT 1"
+            );
+
+            // if empty then return
+            if(empty($prevData)) {
+                return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
+            }
 
             // generate a unique id
             $item_id = random_string("alnum", RANDOM_STRING);
@@ -335,7 +371,6 @@ class Incidents extends Myschoolgh {
                 INSERT INTO incidents SET client_id = ?, created_by = ?, incident_type = ?, item_id = ?
                 ".(!empty($params->incident_id) ? ", incident_id = '{$params->incident_id}'" : null)."
                 ".(!empty($params->status) ? ", status = '{$params->status}'" : null)."
-                ".(!empty($params->user_id) ? ", user_id = '{$params->user_id}'" : null)."
                 ".(!empty($params->comment) ? ", description = '".addslashes(nl2br($params->comment))."'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId, "followup", $item_id]);

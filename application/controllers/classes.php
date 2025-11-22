@@ -353,6 +353,7 @@ class Classes extends Myschoolgh {
     /**
      * Assign Students to a Class
      * 
+     * @param object $params
      * @param Array     $params->data
      * @param Array     $params->data["assign_fees"]
      * @param Array     $params->data["class_id"]
