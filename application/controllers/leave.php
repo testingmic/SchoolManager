@@ -126,8 +126,19 @@ class Leave extends Myschoolgh {
         
         global $isAdmin, $defaultUser;
 
+        // if the user is not admin, then set the user id to the default user id
         if(!$isAdmin) {
             $params->user_id = $defaultUser->user_id;
+        }
+
+        // if the user id is not set, then set it to the staff id
+        if(empty($params->user_id) && !empty($params->staff_id)) {
+            $params->user_id = $params->staff_id;
+        }
+
+        // if the leave from to is not set, then set it to the leave date start and end
+        if(empty($params->leave_from_to) && !empty($params->leave_date_start) && !empty($params->leave_date_end)) {
+            $params->leave_from_to = "{$params->leave_date_start}:{$params->leave_date_end}";
         }
 
         return $this->apply($params);
@@ -172,7 +183,7 @@ class Leave extends Myschoolgh {
         }
 
         // get the leave type
-        $getType = $this->pushQuery("*", "leave_types", "status='1' AND id='{$params->type_id}' LIMIT 20");
+        $getType = !empty($params->type_id) ? $this->pushQuery("*", "leave_types", "status='1' AND id='{$params->type_id}' LIMIT 20") : null;
         if(empty($getType)) {
             $getTypeByName = $this->pushQuery("*", "leave_types", "status='1' AND name='{$params->leave_type}' LIMIT 20");
             if(!empty($getTypeByName)) {
