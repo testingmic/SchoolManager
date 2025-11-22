@@ -7300,7 +7300,7 @@ class Forms extends Myschoolgh {
                 <div class='col-md-4'>
                     <div class='form-group'>
                         <label>Leave Date <span class='required'>*</span></label>
-                        <input type='text' name='leave_from_to' id='leave_from_to' value='' class='form-control daterange'>
+                        <input type='text' name='leave_from_to' data-maxdate='".date("Y-m-d", strtotime("+6 month"))."' data-mindate='".date("Y-m-d")."' id='leave_from_to' value='' class='form-control daterange'>
                     </div>
                 </div>
                 <div class='col-md-4'>
