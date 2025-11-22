@@ -15,9 +15,15 @@ class Leave extends Myschoolgh {
 	 */
 	public function list(stdClass $params) {
 
+        global $isAdmin, $defaultUser;
+
 		$params->query = "1";
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+        if(!$isAdmin) {
+            $params->user_id = $defaultUser->user_id;
+        }
 
         $params->query .= !empty($params->q) ? " AND a.name='{$params->q}'" : null;
         $params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
@@ -80,6 +86,14 @@ class Leave extends Myschoolgh {
      */
     public function view(stdClass $params) {
         try {
+
+            global $isAdmin, $defaultUser;
+
+            // if the user is not admin, then set the user id to the default user id
+            if(!$isAdmin) {
+                $params->user_id = $defaultUser->user_id;
+            }
+
             $leaveRecord = $this->list($params);
             if(empty($leaveRecord["data"])) {
                 return ["code" => 400, "data" => "Sorry! An invalid leave id was parsed."];
@@ -194,6 +208,11 @@ class Leave extends Myschoolgh {
     public function status(stdClass $params) {
 
         try {
+
+            global $isAdmin;
+            if(!$isAdmin) {
+                return ["code" => 403, "data" => "Sorry! You are not authorized to update the status of a leave application."];
+            }
 
             // check if the user has a pending leave application
             if(empty($this->pushQuery("id", "leave_requests", 
