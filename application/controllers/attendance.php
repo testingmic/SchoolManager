@@ -642,6 +642,9 @@ class Attendance extends Myschoolgh {
         $start_date = $explode[0];
         $end_date = $explode[1] ?? date("Y-m-d", strtotime("{$this_date} 0 day"));
 
+        // set the opening days
+        $clientPrefs->opening_days = !empty($clientPrefs->opening_days) ? $clientPrefs->opening_days : $this->default_opening_days;
+
         // confirm if the school operates on weekends
         $params->weekends = (bool)(in_array('Saturday', $clientPrefs->opening_days) || in_array('Sunday', $clientPrefs->opening_days));
 

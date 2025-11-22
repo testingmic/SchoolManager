@@ -415,6 +415,16 @@ class Timetable extends Myschoolgh {
     }
 
     /**
+     * Get the lessons for today
+     * 
+     */
+    public function today_lessons($params = null) {
+        global $defaultUser;
+        
+        return $this->teacher_timetable($defaultUser->user_id, $params->clientId, "today");
+    }
+
+    /**
      * Validate Allocation
      * 
      * Validate the allocation of a slot
