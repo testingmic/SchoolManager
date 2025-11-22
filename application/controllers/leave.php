@@ -171,8 +171,18 @@ class Leave extends Myschoolgh {
             return ["code" => 400, "data" => "Sorry! An invalid user id was parsed"];
         }
 
+        // get the leave type
+        $getType = $this->pushQuery("*", "leave_types", "status='1' AND id='{$params->type_id}' LIMIT 20");
+        if(empty($getType)) {
+            $getTypeByName = $this->pushQuery("*", "leave_types", "status='1' AND name='{$params->type_name}' LIMIT 20");
+            if(!empty($getTypeByName)) {
+                $getType = $getTypeByName[0];
+                $params->type_id = $getType->id;
+            }
+        }
+
         // confirm that a valid leave type was parsed
-        if(empty($this->pushQuery("*", "leave_types", "status='1' AND id='{$params->type_id}' LIMIT 20"))) {
+        if(empty($getType)) {
             return ["code" => 400, "data" => "Sorry! An invalid leave type was parsed."];   
         }
 
