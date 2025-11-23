@@ -186,7 +186,7 @@ class Classes extends Myschoolgh {
             }
 
             $classRecord = $classRecord["data"][0];
-            $classRecord->students_list = $this->pushQuery("id, item_id, name, gender, email, phone_number, image", "users", "class_id='{$classRecord->id}' AND client_id='{$params->clientId}' AND user_type='student' AND status='1'");
+            $classRecord->students_list = $this->pushQuery("id, item_id, unique_id, name, gender, email, phone_number, date_of_birth, image", "users", "class_id='{$classRecord->id}' AND client_id='{$params->clientId}' AND user_type='student' AND status='1'");
 
             return $classRecord;
 
