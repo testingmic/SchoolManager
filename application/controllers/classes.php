@@ -185,7 +185,10 @@ class Classes extends Myschoolgh {
                 return ["code" => 404, "data" => "Sorry! No record was found."];
             }
 
-            return $classRecord["data"][0];
+            $classRecord = $classRecord["data"][0];
+            $classRecord->students_list = $this->pushQuery("id, item_id, name, gender, email, phone_number, image", "users", "class_id='{$params->class_id}' AND client_id='{$params->clientId}' AND user_type='student' AND status='1'");
+
+            return $classRecord;
 
         } catch(PDOException $e) {
             return [
