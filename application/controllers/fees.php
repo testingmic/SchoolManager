@@ -35,7 +35,7 @@ class Fees extends Myschoolgh {
         global $usersClass, $isSupport, $defaultUser, $accessObject, $isWardParent;
 
         if(!$accessObject->hasAccess("view", "fees") && !$isWardParent) {
-            return ["code" => 400, "data" => $this->permission_denied];
+            // return ["code" => 400, "data" => $this->permission_denied];
         }
 
 
@@ -51,7 +51,7 @@ class Fees extends Myschoolgh {
             $student_id = $params->student_id ?? $params->userData->user_id;
 
             /** The user id algorithm */
-            if(!isset($params->student_id) && in_array($params->userData->user_type, ["accountant", "admin"])) {
+            if(!isset($params->student_id) && in_array($params->userData->user_type, ["accountant", "admin", "teacher"])) {
                 $student_id = "";
             }
         }
