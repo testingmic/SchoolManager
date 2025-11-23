@@ -166,6 +166,37 @@ class Classes extends Myschoolgh {
     }
 
     /**
+     * View a class record
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function view(stdClass $params) {
+
+        try {
+
+            if(empty($params->class_id)) {
+                return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
+            }
+
+            $classRecord = $this->list($params);
+            if(empty($classRecord["data"])) {
+                return ["code" => 404, "data" => "Sorry! No record was found."];
+            }
+
+            return $classRecord["data"][0];
+
+        } catch(PDOException $e) {
+            return [
+                "code" => 400,
+                "data" => $e->getMessage()
+            ];
+        }
+
+    }
+
+    /**
      * Add new class
      * 
      * @param stdClass $params
