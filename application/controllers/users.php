@@ -199,6 +199,11 @@ class Users extends Myschoolgh {
 
 			// if the quick list was parsed then set the minor dataset to true
 			$minorDataset = !empty($params->quick_list);
+
+			// if the mobile app was parsed and the limit is greater than 100 then set the limit to 100
+			if(!empty($params->mobileapp) && $params->limit > $this->mobile_app_limit) {
+				$params->limit = $this->mobile_app_limit;
+			}
 			
 			// prepare and execute the statement
 			$sql = $this->db->prepare("SELECT {$params->columns}, a.student_type, a.boarding_status
@@ -450,6 +455,11 @@ class Users extends Myschoolgh {
 
 		// the number of rows to limit the query
 		$params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+		// if the mobile app was parsed and the limit is greater than 100 then set the limit to 100
+		if(!empty($params->mobileapp) && $params->limit > $this->mobile_app_limit) {
+			$params->limit = $this->mobile_app_limit;
+		}
 
 		// make the request for the record from the model
 		try {
@@ -792,7 +802,12 @@ class Users extends Myschoolgh {
 				(SELECT name FROM sections WHERE sections.id = a.section LIMIT 1) AS section_name,
 				(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name
 				{$addQuery}";
-			
+
+			// if the mobile app was parsed and the limit is greater than 100 then set the limit to 100
+			if(!empty($params->mobileapp) && $params->limit > $this->mobile_app_limit) {
+				$params->limit = $this->mobile_app_limit;
+			}
+				
 			// prepare and execute the statement
 			$sql = $this->db->prepare("SELECT {$params->columns} FROM users a
 				LEFT JOIN country c ON c.id = a.country

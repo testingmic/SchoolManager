@@ -84,6 +84,28 @@ class Departments extends Myschoolgh {
     }
 
     /**
+     * View a department record
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function view(stdClass $params) {
+
+        if(empty($params->department_id)) {
+            return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
+        }
+
+        $departmentRecord = $this->list($params);
+        if(empty($departmentRecord["data"])) {
+            return ["code" => 404, "data" => "Sorry! No record was found."];
+        }
+
+        return $departmentRecord["data"][0];
+        
+    }
+
+    /**
      * Add new department record
      * 
      * @param stdClass $params
@@ -93,7 +115,12 @@ class Departments extends Myschoolgh {
     public function add(stdClass $params) {
 
         // global variable
-        global $defaultClientData;
+        global $defaultClientData, $accessObject;
+
+        // check permission
+        if(!$accessObject->hasAccess("add", "department")) {
+            return ["code" => 400, "data" => $this->permission_denied];
+        }
  
         // create a new department code
         if(isset($params->department_code) && !empty($params->department_code)) {
@@ -182,7 +209,12 @@ class Departments extends Myschoolgh {
         try {
 
             // get the default variable
-            global $defaultClientData;
+            global $defaultClientData, $accessObject;
+
+            // check permission
+            if(!$accessObject->hasAccess("update", "department")) {
+                return ["code" => 400, "data" => $this->permission_denied];
+            }
 
             // old record
             $prevData = $this->pushQuery("*", "departments", "id='{$params->department_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
