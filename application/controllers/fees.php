@@ -24,7 +24,7 @@ class Fees extends Myschoolgh {
 
 	/**
 	 * @method feesCollection
-	 * @param array $stdClass
+	 * @param object $params
 	 * @param array $stdClass->dataColumns 
 	 * @param array $stdClass->whereClause
 	 *
@@ -35,7 +35,7 @@ class Fees extends Myschoolgh {
         global $usersClass, $isSupport, $defaultUser, $accessObject, $isWardParent;
 
         if(!$accessObject->hasAccess("view", "fees") && !$isWardParent) {
-            // return ["code" => 400, "data" => $this->permission_denied];
+            return ["code" => 400, "data" => $this->permission_denied];
         }
 
 
@@ -51,7 +51,7 @@ class Fees extends Myschoolgh {
             $student_id = $params->student_id ?? $params->userData->user_id;
 
             /** The user id algorithm */
-            if(!isset($params->student_id) && in_array($params->userData->user_type, ["accountant", "admin", "teacher"])) {
+            if(!isset($params->student_id) && in_array($params->userData->user_type, ["accountant", "admin"])) {
                 $student_id = "";
             }
         }
@@ -153,6 +153,7 @@ class Fees extends Myschoolgh {
     /**
      * Search for a Payment Log
      * 
+     * @param object $params
      * @param String $stdClass->term
      * 
      * @return Array
@@ -189,6 +190,7 @@ class Fees extends Myschoolgh {
     /**
      * List Category List
      * 
+     * @param object $params
      * @param stdClass $params
      * 
      * @return Array
@@ -311,6 +313,7 @@ class Fees extends Myschoolgh {
     /**
      * List Students Fees Allocation
      * 
+     * @param object $params
      * @param stdClass $params
      * 
      * @return Array
@@ -443,7 +446,7 @@ class Fees extends Myschoolgh {
 
     /**
      * List the Student Fees Allocation Array
-     * 
+     * @param object $params
      * @param String $params->clientId
      * 
      * @return Array
@@ -641,7 +644,7 @@ class Fees extends Myschoolgh {
 
     /**
      * Load the Fees Payment Form
-     * 
+     * @param object $params
      * @param stdClass $params
      * 
      * @return Array
@@ -1065,6 +1068,7 @@ class Fees extends Myschoolgh {
     /** 
      * An annonymous function to update the student fees record 
      * 
+     * @param object $params
      * @param stdClass $params
      * 
      * @return Bool
@@ -1382,6 +1386,7 @@ class Fees extends Myschoolgh {
      * 
      * Verify if the the class fees allocation has been set the specified academic year and term
      * 
+     * @param object $params
 	 * @param String $params->student_id 	    This is the unique id of the student
 	 * @param String $params->category_id		This is the fees type (tuition, ict, pta, or any other)
 	 * @param String $params->academic_year	    This specifies the academic year to fetch the record
@@ -1411,6 +1416,7 @@ class Fees extends Myschoolgh {
 
 	/**
 	 * @method confirm_student_payment_record
+     * @param object $params
 	 * @param String $params->student_id 	    This is the unique id of the student
 	 * @param String $params->category_id		This is the fees type (tuition, ict, pta, or any other)
 	 * @param String $params->academic_year	    This specifies the academic year to fetch the record
@@ -1528,6 +1534,7 @@ class Fees extends Myschoolgh {
     /**
      * Get the Student Payment Summary
      * 
+     * @param object $params
      * @param String        $params->student_id
      * @param String        $params->academic_year
      * @param String        $params->academic_term
@@ -1586,7 +1593,7 @@ class Fees extends Myschoolgh {
 
     /**
      * Make payment for the fees
-     * 
+     * @param object $params
      * @param String        $params->checkout_url
      * @param Float         $params->amount
      * 
@@ -2141,6 +2148,7 @@ class Fees extends Myschoolgh {
     /**
      * Save Allowance
      * 
+     * @param object $params
      * @param String $params->description
      * @param String $params->category_id
      * @param String $params->name
@@ -2215,6 +2223,8 @@ class Fees extends Myschoolgh {
     /**
      * Fees Receipt
      * 
+     * @param object $params
+     * @param String $font_weight
      * @return Array
      */
     public function receipt(stdClass $params, $font_weight = "normal") {
@@ -2609,6 +2619,7 @@ class Fees extends Myschoolgh {
      * The result and values are pushed into the variable $student_bills_record_list to be used by the 
      * Terminal Reports Class during report generation.
      * 
+     * @param object $params
      * @param String        $params->student_id
      * @param String        $params->class_id
      * @param String        $params->academic_year
@@ -3016,7 +3027,7 @@ class Fees extends Myschoolgh {
     /**
      * Refresh the Bill
      * 
-     * @param stdClass $params
+     * @param object $params
      * 
      * @return Array
      */
@@ -3108,6 +3119,7 @@ class Fees extends Myschoolgh {
     /**
      * Quick Allocation of Fees
      * 
+     * @param object $params
      * @param Array     $params->category_id
      * @param String    $params->student_id
      * 
@@ -3632,6 +3644,7 @@ class Fees extends Myschoolgh {
     /**
      * Log the Init E-Payment Transaction Record
      * 
+     * @param object $params
      * @param Array $params->data
      * 
      * @return Array
@@ -3771,6 +3784,7 @@ class Fees extends Myschoolgh {
     /**
      * Check the payment request status from paystack
      * 
+     * @param object $params
      * @return Array
      */
     public function epay_validate(stdClass $params) {
