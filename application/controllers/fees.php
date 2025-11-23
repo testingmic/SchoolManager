@@ -3016,7 +3016,7 @@ class Fees extends Myschoolgh {
 
 
             return [
-                "student_bill" => $student_bill,
+                "student_bill" => !empty($params->no_image) ? null : $student_bill,
                 "breakdown" => $student_bills_record_list
             ];
 
