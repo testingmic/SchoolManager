@@ -29,7 +29,7 @@ class Arrears extends Myschoolgh {
         try {
 
             // global variable
-            global $accessObject;
+            global $accessObject, $isParent;
 
             // init parameters
             $params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
@@ -53,7 +53,7 @@ class Arrears extends Myschoolgh {
         
             // prepare and execute the statement
             $stmt = $this->db->prepare("SELECT 
-                    a.student_id, u.id as _student_id, u.name AS student_name, a.arrears_details, a.arrears_category, 
+                    a.id AS arrears_id, a.student_id, u.id as _student_id, u.name AS student_name, a.arrears_details, a.arrears_category, 
                     a.fees_category_log, a.arrears_total, c.id AS class_id, c.name AS class_name, u.user_status,
                     (
                         SELECT CONCAT(
@@ -180,6 +180,36 @@ class Arrears extends Myschoolgh {
             print $e->getMessage();exit;
             // return an unexpected error notice
             return $this->unexpected_error;
+        }
+    }
+
+    /**
+     * View a fees arrears record
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function view(stdClass $params) {
+        try {
+
+            if(empty($params->arrears_id)) {
+                return ["code" => 400, "data" => "Sorry! An invalid student id was supplied."];
+            }
+
+            $arrearsRecord = $this->list($params);
+            if(empty($arrearsRecord["data"])) {
+                return ["code" => 404, "data" => "Sorry! No record was found."];
+            }
+
+            $arrearsRecord = $arrearsRecord["data"][0];
+
+            return $arrearsRecord;
+        } catch(PDOException $e) {
+            return [
+                "code" => 400,
+                "data" => $e->getMessage()
+            ];
         }
     }
 
