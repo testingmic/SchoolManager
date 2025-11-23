@@ -31,6 +31,10 @@ class Arrears extends Myschoolgh {
             // global variable
             global $accessObject, $isParent;
 
+            if(!$accessObject->hasAccess("view", "fees") && !$isParent) {
+                return ["code" => 400, "data" => $this->permission_denied];
+            }
+
             // init parameters
             $params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
             $populate = false;
