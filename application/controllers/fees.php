@@ -32,7 +32,12 @@ class Fees extends Myschoolgh {
 	 **/
 	public function list(stdClass $params) {
 
-        global $usersClass, $isSupport, $defaultUser;
+        global $usersClass, $isSupport, $defaultUser, $accessObject, $isWardParent;
+
+        if(!$accessObject->hasAccess("view", "fees") && !$isWardParent) {
+            return ["code" => 400, "data" => $this->permission_denied];
+        }
+
 
         // set the limit parameter
         $params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
