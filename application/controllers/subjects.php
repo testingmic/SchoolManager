@@ -631,6 +631,10 @@ class Subjects extends Myschoolgh {
                 return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
             }
 
+            if(!empty($params->unit_title)) {
+                $params->name = trim($params->unit_title);
+            }
+
             // execute the statement
             $stmt = $this->db->prepare("
                 UPDATE courses_plan SET date_updated = '{$this->current_timestamp}'
@@ -703,6 +707,10 @@ class Subjects extends Myschoolgh {
             if(isset($params->unit_id)) {
                 $this->session->set("thisLast_UnitId", $params->unit_id);
             }
+            
+            $params->name = !empty($params->name) ? trim($params->name) : (
+                !empty($params->lesson_title) ? trim($params->lesson_title) : 'Sample Unit'
+            );
 
             // set the academic_term and the academic_year
             $params->academic_term = isset($params->academic_term) ? $params->academic_term : $defaultClientData->client_preferences->academics->academic_term;
@@ -799,6 +807,10 @@ class Subjects extends Myschoolgh {
             $filesObj = load_class("files", "controllers");
             $module = "course_lesson_{$prevData[0]->unit_id}";
             $attachments = $filesObj->prep_attachments($module, $params->userId, $prevData[0]->item_id, $initial_attachment);
+
+            if(!empty($params->lesson_title)) {
+                $params->name = trim($params->lesson_title);
+            }
 
             // execute the statement
             $stmt = $this->db->prepare("
