@@ -803,8 +803,6 @@ class Users extends Myschoolgh {
 				$data[] = $result;
 			}
 
-			$result['users'] = $data;
-
 			/** If the resource parameter was parsed then get the attendance log for the day */
 			if(!empty($params->resource) && ($params->resource === "attendance")) {
 				
@@ -819,14 +817,16 @@ class Users extends Myschoolgh {
 					"a.users_list, a.users_data, a.user_type, a.class_id", "users_attendance_log a", "a.log_date='{$selected_date}' {$query} LIMIT 1"
 				);
 
-				$result['attendance'] = [
-					'users_list' => !empty($check) ? json_decode($check[0]->users_data) : [],
-					'users_data' => !empty($check) ? json_decode($check[0]->users_data) : [],
-				];
+				$users_list = !empty($check) ? json_decode($check[0]->users_data, true) : [];
+
+				foreach($data as $key => $user) {
+					$data[$key]->status = $users_list[$user->user_id]['state'] ?? '';
+					$data[$key]->comments = $users_list[$user->user_id]['comments'] ?? '';
+				}
 			}
 
 			return [
-				"data" => $result,
+				"data" => $data,
 				"code" => 200
 			];
 
