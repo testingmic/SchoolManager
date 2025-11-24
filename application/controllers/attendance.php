@@ -47,7 +47,7 @@ class Attendance extends Myschoolgh {
         // validate the class id if parsed
         if(!empty($params->class_id)) {
 
-            $column = strlen($params->class_id) < 8 ? "item_id" : "id";
+            $column = strlen($params->class_id) > 8 ? "item_id" : "id";
 
             // run the query for the class details
             $classData = $this->pushQuery("id, name", "classes", "{$column} = '{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
@@ -56,7 +56,7 @@ class Attendance extends Myschoolgh {
             if(empty($classData)) {
                 return ["code" => 400, "data" => "Sorry! An invalid class id was supplied."];
             }
-            
+
             $params->class_id = (int) $classData[0]->id;
         }
 
