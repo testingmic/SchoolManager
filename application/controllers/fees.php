@@ -95,7 +95,7 @@ class Fees extends Myschoolgh {
         }
 
         if(!empty($params->q)) {
-            $filters .= " AND (u.name LIKE '%{$params->q}%' OR a.receipt_id LIKE '%{$params->q}%')";
+            // $filters .= " AND (u.name LIKE '%{$params->q}%' OR a.receipt_id LIKE '%{$params->q}%')";
         }
 
         $order_by = $params->order_by ?? "ORDER BY a.id DESC";
