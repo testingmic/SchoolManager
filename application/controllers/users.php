@@ -818,7 +818,7 @@ class Users extends Myschoolgh {
 				
 				/** Get the attendance log for the day */
 				$check = $this->pushQuery(
-					"a.users_list, a.users_data, a.user_type, a.class_id, a.finalize, a.date_finalized", "users_attendance_log a", "a.log_date='{$selected_date}' {$query} LIMIT 1"
+					"a.id, a.users_list, a.users_data, a.user_type, a.class_id, a.finalize, a.date_finalized", "users_attendance_log a", "a.log_date='{$selected_date}' {$query} LIMIT 1"
 				);
 
 				$users_list = !empty($check) ? json_decode($check[0]->users_data, true) : [];
