@@ -802,6 +802,7 @@ class Users extends Myschoolgh {
 
 			$data = [];
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
+				$result->id = (int) $result->id;
 				$data[] = $result;
 			}
 
@@ -834,7 +835,7 @@ class Users extends Myschoolgh {
 				"data" => [
 					'finalized' => !$canUpdate,
 					'record_exist' => !empty($check),
-					'record_id' => !empty($check) ? $check[0]->id : 0,
+					'record_id' => !empty($check) ? (int)$check[0]->id : 0,
 					'canFinalize' => $accessObject->hasAccess("finalize", "attendance"),
 					'finalizedDate' => !empty($check) ? $check[0]->date_finalized : null,
 					'users' => $data,
