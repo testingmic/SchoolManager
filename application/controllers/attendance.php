@@ -1328,6 +1328,9 @@ class Attendance extends Myschoolgh {
 
         }
 
+        $totalStudents = $this->pushQuery("COUNT(*) AS total", "users", "client_id='{$params->clientId}' AND user_type='student' AND status='1' AND user_status='Active'");
+        $totalStudents = !empty($totalStudents[0]->total) ? $totalStudents[0]->total : 0;
+
         // count the number of present and absent
         if($checkPresent) {
             // if the array is set
@@ -1353,6 +1356,7 @@ class Attendance extends Myschoolgh {
                 $itoday = date("jS M");
 
                 $users_count["today_attendance"] = [
+                    "totalStudents" => $totalStudents,
                     "Student" => $users_count["days_list"][$itoday]["Student"] ?? 0,
                     "Staff" => $users_count["days_list"][$itoday]["Staff"] ?? 0,
                 ];
@@ -1377,9 +1381,10 @@ class Attendance extends Myschoolgh {
                         $new_group[$role][] = $count;
                     }
                 }
-                
+
                 $itoday = date("jS M");
                 $users_count["today_attendance"] = [
+                    "totalStudents" => $totalStudents,
                     "Student" => $users_count["days_list"][$itoday]["Student"] ?? 0,
                     "Staff" => $users_count["days_list"][$itoday]["Staff"] ?? 0,
                 ];
