@@ -833,6 +833,7 @@ class Users extends Myschoolgh {
 			return [
 				"data" => [
 					'finalized' => !$canUpdate,
+					'record_exist' => !empty($check),
 					'canFinalize' => $accessObject->hasAccess("finalize", "attendance"),
 					'finalizedDate' => !empty($check) ? $check[0]->date_finalized : null,
 					'users' => $data,
