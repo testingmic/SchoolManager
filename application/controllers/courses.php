@@ -1,6 +1,6 @@
 <?php 
 
-class Courses extends Myschoolgh {
+class Subjects extends Myschoolgh {
 
     public function __construct($params = null)
     {
@@ -573,6 +573,10 @@ class Courses extends Myschoolgh {
             // validate the end date
             if(!empty($params->end_date) && !isvalid_date($params->end_date)) {
                 return ["code" => 400, "data" => "Sorry! The end date is invalid."];
+            }
+
+            if(!empty($params->unit_title)) {
+                $params->name = trim($params->unit_title);
             }
 
             // set the unit id
