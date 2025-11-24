@@ -1324,6 +1324,8 @@ class Attendance extends Myschoolgh {
 
             }
 
+            
+
         }
 
         // count the number of present and absent
@@ -1347,6 +1349,13 @@ class Attendance extends Myschoolgh {
                 $summary_set["Term"] = count($days);
                 $summary_set["Term_Period"] = $logged_count + ($summary_set["Not Logged"] ?? 0);
                 $users_count["summary"] = $summary_set;
+
+                $itoday = date("jS M");
+
+                $users_count["today_attendance"] = [
+                    "Student" => $users_count["days_list"][$itoday]["Student"] ?? 0,
+                    "Staff" => $users_count["days_list"][$itoday]["Staff"] ?? 0,
+                ];
             } else {
                 $users_count["summary"] = ["present" => 0, "absent" => 0];
             }
