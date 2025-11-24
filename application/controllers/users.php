@@ -803,8 +803,30 @@ class Users extends Myschoolgh {
 				$data[] = $result;
 			}
 
+			$result['users'] = $data;
+
+			/** If the resource parameter was parsed then get the attendance log for the day */
+			if(!empty($params->resource) && ($params->resource === "attendance")) {
+				
+				/** Set the query to get the attendance log for the day */
+				$query = !empty($params->class_id) ? " AND a.class_id = '{$params->class_id}'" : null;
+				$query .= !empty($params->user_type) ? " AND a.user_type = '{$params->user_type}'" : null;
+				
+				$selected_date = date("Y-m-d", strtotime($params->selected_date ?? date("Y-m-d")));
+				
+				/** Get the attendance log for the day */
+				$check = $this->pushQuery(
+					"a.users_list, a.users_data, a.user_type, a.class_id", "users_attendance_log a", "a.log_date='{$selected_date}' {$query} LIMIT 1"
+				);
+
+				$result['attendance'] = [
+					'users_list' => !empty($check) ? json_decode($check[0]->users_data) : [],
+					'users_data' => !empty($check) ? json_decode($check[0]->users_data) : [],
+				];
+			}
+
 			return [
-				"data" => $data,
+				"data" => $result,
 				"code" => 200
 			];
 
