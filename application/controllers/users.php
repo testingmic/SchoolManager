@@ -823,7 +823,7 @@ class Users extends Myschoolgh {
 
 				$users_list = !empty($check) ? json_decode($check[0]->users_data, true) : [];
 
-				$canUpdate = !empty($check) ? ((int)$check[0]->finalize !== 1) : false;
+				$canUpdate = !empty($check) ? ((int)$check[0]->finalize !== 1) : true;
 				foreach($data as $key => $user) {
 					$data[$key]->status = $users_list[$user->user_id]['state'] ?? '';
 					$data[$key]->comments = $users_list[$user->user_id]['comments'] ?? '';
