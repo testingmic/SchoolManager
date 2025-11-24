@@ -78,6 +78,11 @@ class Analitics extends Myschoolgh {
 
         $this->info_to_stream = $params->stream;
 
+        /** If the start and end date were parsed then set the period to custom */
+        if(!empty($params->start_date) && !empty($params->end_date)) {
+            $params->period = "{$params->start_date}:{$params->end_date}";
+        }
+
         /** Preformat date */
         if(in_array($params->period, array_keys($this->accepted_period))) {
 
