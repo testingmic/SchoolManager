@@ -475,8 +475,8 @@ class Users extends Myschoolgh {
 					a.scholarship_status,
 					(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name, a.username,
 					(SELECT name FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_name,
-					(SELECT name FROM departments WHERE departments.id = a.department LIMIT 1) AS department_name,
-					(SELECT name FROM sections WHERE sections.id = a.section LIMIT 1) AS section_name, a.user_status,
+					dept.name AS department_name,
+					se.name AS section_name, a.user_status,
 					(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name";
 
 				// exempt current user
@@ -508,7 +508,7 @@ class Users extends Myschoolgh {
 						return ["data" => $query];
 
 					} else {
-						$params->columns .= ", a.date_of_birth, a.guardian_id, (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name";
+						$params->columns .= ", a.date_of_birth, a.guardian_id, cl.name AS class_name";
 					}
 				}
 
@@ -766,6 +766,44 @@ class Users extends Myschoolgh {
 			return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];
 		}
 
+	}
+
+	/**
+	 * Minimal list of users
+	 * 
+	 * @return Array
+	 */
+	public function minimal(stdClass $params) {
+
+		try {
+
+			$params->query = " 1 ";
+			$params->query .= !empty($params->user_type) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
+			$params->query .= !empty($params->lookup) ? " AND ((a.name LIKE '%{$params->lookup}%') OR (a.unique_id LIKE '%{$params->lookup}%'))" : null;
+			$params->query .= !empty($params->class_id) ? " AND a.class_id = '{$params->class_id}'" : null;
+
+			/** Set the columns to load */
+			$params->columns = "a.item_id AS user_id, a.unique_id, a.firstname, a.lastname, a.othername, a.name";
+
+			/** Prepare and execute the statement */
+			$sql = $this->db->prepare("SELECT {$params->columns} FROM users a 
+			WHERE {$params->query} AND a.deleted = ? AND a.status = ? AND a.client_id='{$params->clientId}'
+			LIMIT 250");
+			$sql->execute([0, 1]);
+
+			$data = [];
+			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
+				$data[] = $result;
+			}
+
+			return [
+				"data" => $data,
+				"code" => 200
+			];
+
+		} catch(PDOException $e) {
+			return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];
+		}
 	}
 
 	/**
