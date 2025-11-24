@@ -477,6 +477,11 @@ class Fees extends Myschoolgh {
             return $student_allocation_array;
         }
 
+        $total_due = 0;
+        $total_paid = 0;
+        $total_balance = 0;
+        $total_exempted = 0;
+
         // if the result is not empty
         if(!empty($student_allocation_array)) {
 
@@ -628,7 +633,7 @@ class Fees extends Myschoolgh {
                 $student_allocation_list .= "<td></td>";
                 $student_allocation_list .= "<td>{$student->currency}".number_format($total_due, 2)."</td>";
                 $student_allocation_list .= "<td>{$student->currency}".number_format($total_paid, 2)."</td>";
-                $student_allocation_list .= "<td>{$student->currency}".number_format($total_balance, 2)."</td>";
+                $student_allocation_list .= "<td>{$student->currency}".number_format(($total_balance ?? 0), 2)."</td>";
                 $student_allocation_list .= "<td></td>";
                 $student_allocation_list .= "</tr>";
             }
@@ -2354,7 +2359,7 @@ class Fees extends Myschoolgh {
                                         <div class="invoice-title">
                                             <h2 style="margin-top:5px;margin-bottom:5px;">'.(!$isPDF ? "Official Receipt" : "Payment History").'</h2>
                                             <span style="font-size:16px;"><strong>Date & Time:</strong> '.date("d-m-Y h:iA").'</span>
-                                            <div><strong>Receipt ID:</strong> <strong>'.$data[0]->receipt_id.'</strong></div>
+                                            <div><strong>Receipt ID:</strong> <strong>'.(!empty($data[0]->receipt_id) ? $data[0]->receipt_id : "N/A").'</strong></div>
                                             <div><strong>Payment Method:</strong> <strong>'.(!empty($data[0]->payment_method) ? ucwords($data[0]->payment_method) : "Cash").'</strong></div>
                                         </div>
                                     </td>
