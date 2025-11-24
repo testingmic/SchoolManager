@@ -784,10 +784,18 @@ class Users extends Myschoolgh {
 			$params->query .= !empty($params->lookup) ? " AND ((a.name LIKE '%{$params->lookup}%') OR (a.unique_id LIKE '%{$params->lookup}%'))" : null;
 			$params->query .= !empty($params->q) ? " AND ((a.name LIKE '%{$params->q}%') OR (a.unique_id LIKE '%{$params->q}%'))" : null;
 
+			$column = "id";
 			// get the id equivalent of the class id
 			if(!empty($params->class_id) && !preg_match("/^[0-9]+$/", $params->class_id)) {
-				$params->class_id = (int) $this->pushQuery("id", "classes", "item_id='{$params->class_id}' LIMIT 1")[0]->id ?? null;
+				$column = "item_id";
 			}
+			$class = $this->pushQuery("id, name", "classes", "{$column} = '{$params->class_id}' LIMIT 1")[0] ?? null;
+			if(empty($class)) {
+				return ["code" => 400, "data" => "Sorry! The class was not found."];
+			}
+
+			$params->class_id = (int) $class->id;
+			$params->class_name = $class->name;
 
 			$params->query .= !empty($params->class_id) ? " AND a.class_id = '{$params->class_id}'" : null;
 
@@ -835,6 +843,7 @@ class Users extends Myschoolgh {
 				"data" => [
 					'finalized' => !$canUpdate,
 					'record_exist' => !empty($check),
+					'class_name' => $params->class_name,
 					'record_id' => !empty($check) ? (int)$check[0]->id : 0,
 					'canFinalize' => $accessObject->hasAccess("finalize", "attendance"),
 					'finalizedDate' => !empty($check) ? $check[0]->date_finalized : null,
