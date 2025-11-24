@@ -803,6 +803,8 @@ class Users extends Myschoolgh {
 				$data[] = $result;
 			}
 
+			$canUpdate = true;
+
 			/** If the resource parameter was parsed then get the attendance log for the day */
 			if(!empty($params->resource) && ($params->resource === "attendance")) {
 				
@@ -814,20 +816,24 @@ class Users extends Myschoolgh {
 				
 				/** Get the attendance log for the day */
 				$check = $this->pushQuery(
-					"a.users_list, a.users_data, a.user_type, a.class_id, a.finalize", "users_attendance_log a", "a.log_date='{$selected_date}' {$query} LIMIT 1"
+					"a.users_list, a.users_data, a.user_type, a.class_id, a.finalize, a.date_finalized", "users_attendance_log a", "a.log_date='{$selected_date}' {$query} LIMIT 1"
 				);
 
 				$users_list = !empty($check) ? json_decode($check[0]->users_data, true) : [];
 
+				$canUpdate = !empty($check) ? ((int)$check[0]->finalize !== 1) : false;
 				foreach($data as $key => $user) {
-					$data[$key]->can_update = !($check[0]->finalize == 1);
 					$data[$key]->status = $users_list[$user->user_id]['state'] ?? '';
 					$data[$key]->comments = $users_list[$user->user_id]['comments'] ?? '';
 				}
 			}
 
 			return [
-				"data" => $data,
+				"data" => [
+					'finalized' => $canUpdate,
+					'finalizedDate' => !empty($check) ? $check[0]->date_finalized : null,
+					'users' => $data,
+				],
 				"code" => 200
 			];
 
