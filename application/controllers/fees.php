@@ -32,7 +32,7 @@ class Fees extends Myschoolgh {
 	 **/
 	public function list(stdClass $params) {
 
-        global $usersClass, $isSupport, $defaultUser, $accessObject, $isWardParent;
+        global $usersClass, $isSupport, $defaultUser, $accessObject, $isWardParent, $isAdminAccountant;
 
         if(!$accessObject->hasAccess("view", "fees") && !$isWardParent) {
             return ["code" => 400, "data" => $this->permission_denied];
@@ -56,9 +56,14 @@ class Fees extends Myschoolgh {
             }
         }
 
+        // if the user is an admin accountant and the student id was parsed
+        if($isAdminAccountant && (!empty($params->studentId) || !empty($params->student_id))) {
+            $student_id = !empty($params->studentId) ? $params->studentId : $params->student_id;
+        }
+
+        // if the user is a parent and the user has no wards
         if(in_array($defaultUser->user_type, ["parent"]) && empty($defaultUser->wards_list_ids)) {
-            // if the user is a parent
-            return [];
+            return ["code" => 200, "data" => []];
         }
 
         $filters = "a.status='1'";
@@ -89,6 +94,10 @@ class Fees extends Myschoolgh {
             return $filters;
         }
 
+        if(!empty($params->q)) {
+            $filters .= " AND (u.name LIKE '%{$params->q}%' OR a.receipt_id LIKE '%{$params->q}%')";
+        }
+
         $order_by = $params->order_by ?? "ORDER BY a.id DESC";
 
 		try {
@@ -114,7 +123,7 @@ class Fees extends Myschoolgh {
 
             // run the query
 			$stmt = $this->db->prepare("
-				SELECT a.*, fc.name AS category_name, {$add_query}
+				SELECT a.*, fc.name AS category_name, u.name AS student_name {$add_query}
                     (SELECT b.name FROM departments b WHERE b.id = a.department_id LIMIT 1) AS department_name,
                     (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type,'|', COALESCE(b.phone_number,'NULL'),'|',b.email) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
@@ -122,7 +131,9 @@ class Fees extends Myschoolgh {
                 FROM fees_collection a
                 LEFT JOIN users u ON u.item_id = a.student_id
                 LEFT JOIN fees_category fc ON fc.id = a.category_id
-				WHERE {$filters} ".(!empty($params->clientId) ? " AND a.client_id = '{$params->clientId}'" : null)." {$group_by} {$order_by} LIMIT {$params->limit}
+				WHERE {$filters} ".(!empty($params->clientId) ? " AND a.client_id = '{$params->clientId}'" : null)." 
+                    {$group_by} {$order_by} 
+                    LIMIT {$params->limit}
             ");
 			$stmt->execute();
             

@@ -115,7 +115,7 @@ $fees_count = 0;
 if(!$isWardParent) {
 
     // loop through the fees list
-    foreach($item_list["data"] as $key => $fees) {
+    foreach(($item_list["data"] ?? []) as $key => $fees) {
 
         // increment the values
         $fees_count += 1;
@@ -183,7 +183,7 @@ if($isWardParent) {
         $simplified_fees_history = "";
 
         // loop through the fees list
-        foreach($item_list["data"] as $key => $fees) {
+        foreach(($item_list["data"] ?? []) as $key => $fees) {
             
             $fees_count += 1;
             $fees_paid += $fees->category_id !== "Arrears" ? $fees->amount : 0;
