@@ -1377,6 +1377,12 @@ class Attendance extends Myschoolgh {
                         $new_group[$role][] = $count;
                     }
                 }
+                
+                $itoday = date("jS M");
+                $users_count["today_attendance"] = [
+                    "Student" => $users_count["days_list"][$itoday]["Student"] ?? 0,
+                    "Staff" => $users_count["days_list"][$itoday]["Staff"] ?? 0,
+                ];
             }
 
             $fresh_group = [];
