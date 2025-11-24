@@ -780,6 +780,7 @@ class Users extends Myschoolgh {
 			$params->query = " 1 ";
 			$params->query .= !empty($params->user_type) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
 			$params->query .= !empty($params->lookup) ? " AND ((a.name LIKE '%{$params->lookup}%') OR (a.unique_id LIKE '%{$params->lookup}%'))" : null;
+			$params->query .= !empty($params->q) ? " AND ((a.name LIKE '%{$params->q}%') OR (a.unique_id LIKE '%{$params->q}%'))" : null;
 
 			// get the id equivalent of the class id
 			if(!empty($params->class_id) && !preg_match("/^[0-9]+$/", $params->class_id)) {
