@@ -575,6 +575,10 @@ class Subjects extends Myschoolgh {
                 return ["code" => 400, "data" => "Sorry! The end date is invalid."];
             }
 
+            if(!empty($params->unit_title)) {
+                $params->name = trim($params->unit_title);
+            }
+
             // set the unit id
             $params->unit_id = empty($params->unit_id) ? random_string("alnum", RANDOM_STRING) : $params->unit_id;
 
