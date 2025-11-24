@@ -276,6 +276,11 @@ class Subjects extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 
+                if($type == "unit") {
+                    $result->unit_title = $result->name;
+                } else {
+                    $result->lesson_title = $result->name;
+                }
                 // if not a minified request
                 if(!$isMinified) {
 
