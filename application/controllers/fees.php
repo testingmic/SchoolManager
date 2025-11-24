@@ -132,8 +132,7 @@ class Fees extends Myschoolgh {
                 LEFT JOIN users u ON u.item_id = a.student_id
                 LEFT JOIN fees_category fc ON fc.id = a.category_id
 				WHERE {$filters} ".(!empty($params->clientId) ? " AND a.client_id = '{$params->clientId}'" : null)." 
-                    {$group_by} {$order_by} 
-                    LIMIT {$params->limit}
+                    {$group_by} {$order_by} LIMIT {$params->limit}
             ");
 			$stmt->execute();
             
