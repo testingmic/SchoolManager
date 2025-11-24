@@ -579,6 +579,14 @@ class Subjects extends Myschoolgh {
                 $params->name = trim($params->unit_title);
             }
 
+            if(empty($params->name)) {
+                return ["code" => 400, "data" => "Sorry! The unit name is required."];
+            }
+
+            if(empty($params->start_date) && empty($params->end_date)) {
+                return ["code" => 400, "data" => "Sorry! The start date or end date is required."];
+            }
+
             // set the unit id
             $params->unit_id = empty($params->unit_id) ? random_string("alnum", RANDOM_STRING) : $params->unit_id;
 
@@ -718,8 +726,16 @@ class Subjects extends Myschoolgh {
             }
             
             $params->name = !empty($params->name) ? trim($params->name) : (
-                !empty($params->lesson_title) ? trim($params->lesson_title) : 'Sample Unit'
+                !empty($params->lesson_title) ? trim($params->lesson_title) : null
             );
+
+            if(empty($params->name)) {
+                return ["code" => 400, "data" => "Sorry! The lesson name is required."];
+            }
+
+            if(empty($params->start_date) && empty($params->end_date)) {
+                return ["code" => 400, "data" => "Sorry! The start date or end date is required."];
+            }
 
             // set the academic_term and the academic_year
             $params->academic_term = isset($params->academic_term) ? $params->academic_term : $defaultClientData->client_preferences->academics->academic_term;
