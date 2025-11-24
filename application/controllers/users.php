@@ -790,7 +790,7 @@ class Users extends Myschoolgh {
 			$params->query .= !empty($params->class_id) ? " AND a.class_id = '{$params->class_id}'" : null;
 
 			/** Set the columns to load */
-			$params->columns = "a.item_id AS user_id, a.unique_id, a.firstname, a.lastname, a.othername, a.name";
+			$params->columns = "a.id, a.item_id AS user_id, a.unique_id, a.firstname, a.lastname, a.othername, a.name";
 
 			/** Prepare and execute the statement */
 			$sql = $this->db->prepare("SELECT {$params->columns} FROM users a 
