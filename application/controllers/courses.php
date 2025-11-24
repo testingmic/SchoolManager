@@ -124,7 +124,7 @@ class Courses extends Myschoolgh {
                 if(!$minified) {
                 
                     // if the files is set
-                    if(isset($params->full_attachments) && empty($params->mobileapp)) {
+                    if(isset($params->full_attachments)) {
                         $result->attachment = $filesObject->resource_attachments_list("courses_plan", $result->id);
                     }
 
@@ -276,6 +276,11 @@ class Courses extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 
+                if($type == "unit") {
+                    $result->unit_title = $result->name;
+                } else {
+                    $result->lesson_title = $result->name;
+                }
                 // if not a minified request
                 if(!$isMinified) {
 
@@ -631,6 +636,10 @@ class Courses extends Myschoolgh {
                 return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
             }
 
+            if(!empty($params->unit_title)) {
+                $params->name = trim($params->unit_title);
+            }
+
             // execute the statement
             $stmt = $this->db->prepare("
                 UPDATE courses_plan SET date_updated = '{$this->current_timestamp}'
@@ -703,6 +712,10 @@ class Courses extends Myschoolgh {
             if(isset($params->unit_id)) {
                 $this->session->set("thisLast_UnitId", $params->unit_id);
             }
+            
+            $params->name = !empty($params->name) ? trim($params->name) : (
+                !empty($params->lesson_title) ? trim($params->lesson_title) : 'Sample Unit'
+            );
 
             // set the academic_term and the academic_year
             $params->academic_term = isset($params->academic_term) ? $params->academic_term : $defaultClientData->client_preferences->academics->academic_term;
@@ -799,6 +812,10 @@ class Courses extends Myschoolgh {
             $filesObj = load_class("files", "controllers");
             $module = "course_lesson_{$prevData[0]->unit_id}";
             $attachments = $filesObj->prep_attachments($module, $params->userId, $prevData[0]->item_id, $initial_attachment);
+
+            if(!empty($params->lesson_title)) {
+                $params->name = trim($params->lesson_title);
+            }
 
             // execute the statement
             $stmt = $this->db->prepare("
