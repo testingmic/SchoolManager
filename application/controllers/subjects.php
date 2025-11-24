@@ -618,7 +618,7 @@ class Subjects extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Unit successfully created.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}course/{$params->course_id}/lessons?unit_id={$unit_id}"];
+			$return["additional"] = !empty($params->course_id) ? ["clear" => true, "href" => "{$this->baseUrl}course/{$params->course_id}/lessons?unit_id={$unit_id}"] : [];
 
 			// return the output
             return $return;
@@ -640,8 +640,10 @@ class Subjects extends Myschoolgh {
 
         try {
 
+            $column = preg_match("/^[0-9]+$/", $params->unit_id) ? "id" : "item_id";
+
             // old record
-            $prevData = $this->pushQuery("*", "courses_plan", "id='{$params->unit_id}' AND course_id='{$params->course_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+            $prevData = $this->pushQuery("*", "courses_plan", "{$column}='{$params->unit_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
 
             // if empty then return
             if(empty($prevData)) {
@@ -652,6 +654,8 @@ class Subjects extends Myschoolgh {
                 $params->name = trim($params->unit_title);
             }
 
+            $params->unit_id = (int) $prevData[0]->id;
+
             // execute the statement
             $stmt = $this->db->prepare("
                 UPDATE courses_plan SET date_updated = '{$this->current_timestamp}'
@@ -661,15 +665,17 @@ class Subjects extends Myschoolgh {
                 ".(!empty($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(!empty($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(!empty($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
-                WHERE client_id = ? AND course_id = ? AND id = ? LIMIT 1
+                WHERE client_id = ? AND id = ? LIMIT 1
             ");
-            $stmt->execute([$params->clientId, $params->course_id, $params->unit_id]);
+            $stmt->execute([$params->clientId, $params->unit_id]);
 
             // set the last unit id
             $this->session->set("thisLast_UnitId", $params->unit_id);
 
             // update the course date
-            $this->db->query("UPDATE courses SET date_updated='{$this->current_timestamp}' WHERE id='{$params->course_id}' LIMIT 1");
+            if(!empty($params->course_id)) {
+                $this->db->query("UPDATE courses SET date_updated='{$this->current_timestamp}' WHERE id='{$params->course_id}' LIMIT 1");
+            }
             
             // log the user activity
             $this->userLogs("courses_plan", $params->unit_id, $prevData[0], "{$params->userData->name} Updated Course Unit: {$params->name}", $params->userId);
@@ -694,7 +700,7 @@ class Subjects extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Unit successfully updated.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["href" => "{$this->baseUrl}course/{$params->course_id}/lessons?unit_id={$params->unit_id}"];
+			$return["additional"] = !empty($params->course_id) ? ["href" => "{$this->baseUrl}course/{$params->course_id}/lessons?unit_id={$params->unit_id}"] : [];
 
 			// return the output
             return $return;
@@ -761,7 +767,9 @@ class Subjects extends Myschoolgh {
             $filesObj = load_class("files", "controllers");
 
             // update the course date
-            $this->db->query("UPDATE courses SET date_updated='{$this->current_timestamp}', lessons_count=(lessons_count+1) WHERE id='{$params->course_id}' LIMIT 1");
+            if(!empty($params->course_id)) {
+                $this->db->query("UPDATE courses SET date_updated='{$this->current_timestamp}', lessons_count=(lessons_count+1) WHERE id='{$params->course_id}' LIMIT 1");
+            }
 
             // attachments
             $attachments = $filesObj->prep_attachments("course_lesson_{$params->unit_id}", $params->userId, $item_id);
@@ -777,7 +785,7 @@ class Subjects extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Lesson successfully created.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}course/{$params->course_id}/lessons?unit_id={$params->unit_id}"];
+			$return["additional"] = !empty($params->course_id) ? ["clear" => true, "href" => "{$this->baseUrl}course/{$params->course_id}/lessons?unit_id={$params->unit_id}"] : [];
 
 			// return the output
             return $return;
@@ -799,17 +807,21 @@ class Subjects extends Myschoolgh {
 
         try {
 
+            $column = preg_match("/^[0-9]+$/", $params->lesson_id) ? "id" : "item_id";
+
             // old record
             $prevData = $this->pushQuery(
                 "a.*, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment",
                 "courses_plan a", 
-                "a.id='{$params->lesson_id}' AND a.course_id='{$params->course_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1"
+                "a.{$column}='{$params->lesson_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1"
             );
 
             // if empty then return
             if(empty($prevData)) {
                 return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
             }
+
+            $params->lesson_id = (int) $prevData[0]->id;
 
             // initialize
             $initial_attachment = [];
@@ -840,16 +852,16 @@ class Subjects extends Myschoolgh {
             // execute the statement
             $stmt = $this->db->prepare("
                 UPDATE courses_plan SET date_updated = '{$this->current_timestamp}'
-                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
-                ".(isset($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
-                ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
-                ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
-                ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
-                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
-                ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
-                WHERE client_id = ? AND course_id = ? AND id = ? LIMIT 1
+                ".(!empty($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(!empty($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
+                ".(!empty($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                ".(!empty($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
+                ".(!empty($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
+                ".(!empty($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
+                ".(!empty($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
+                WHERE client_id = ? AND id = ? LIMIT 1
             ");
-            $stmt->execute([$params->clientId, $params->course_id, $params->lesson_id]);
+            $stmt->execute([$params->clientId, $params->lesson_id]);
 
             // update the course date
             $this->db->query("UPDATE courses SET date_updated='{$this->current_timestamp}' WHERE id='{$params->course_id}' LIMIT 1");
@@ -887,7 +899,7 @@ class Subjects extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Lesson successfully updated.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["href" => "{$this->baseUrl}course/{$params->course_id}/lessons?unit_id={$params->unit_id}"];
+			$return["additional"] = !empty($params->course_id) ? ["href" => "{$this->baseUrl}course/{$params->course_id}/lessons?unit_id={$params->unit_id}"] : [];
 
 			// return the output
             return $return;
