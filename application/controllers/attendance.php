@@ -47,7 +47,7 @@ class Attendance extends Myschoolgh {
         // validate the class id if parsed
         if(!empty($params->class_id)) {
 
-            $column = strlen($params->class_id) > 8 ? "item_id" : "id";
+            $column = strlen($params->class_id) > 10 && !preg_match("/^[0-9]+$/", $params->class_id) ? "item_id" : "id";
 
             // run the query for the class details
             $classData = $this->pushQuery("id, name", "classes", "{$column} = '{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
