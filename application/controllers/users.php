@@ -830,7 +830,7 @@ class Users extends Myschoolgh {
 
 			return [
 				"data" => [
-					'finalized' => $canUpdate,
+					'finalized' => !$canUpdate,
 					'finalizedDate' => !empty($check) ? $check[0]->date_finalized : null,
 					'users' => $data,
 				],
