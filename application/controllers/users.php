@@ -789,6 +789,7 @@ class Users extends Myschoolgh {
 			if(!empty($params->class_id) && !preg_match("/^[0-9]+$/", $params->class_id)) {
 				$column = "item_id";
 			}
+			
 			$class = $this->pushQuery("id, name", "classes", "{$column} = '{$params->class_id}' LIMIT 1")[0] ?? null;
 			if(empty($class)) {
 				return ["code" => 400, "data" => "Sorry! The class was not found."];
