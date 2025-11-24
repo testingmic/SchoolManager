@@ -51,6 +51,7 @@ class Departments extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
+                $result->id = (int) $result->id;
                 $result->description = clean_html($result->description);
 
                 // if the minified is true

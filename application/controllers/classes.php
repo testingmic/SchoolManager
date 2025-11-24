@@ -115,6 +115,8 @@ class Classes extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
+                $result->id = (int) $result->id;
+                
                 // loop through the information
                 foreach(["class_teacher_info", "class_assistant_info", "created_by_info"] as $each) {
                     // confirm that it is set

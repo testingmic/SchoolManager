@@ -48,6 +48,7 @@ class Sections extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
+                $result->id = (int) $result->id;
                 $result->description = clean_html($result->description);
                 
                 // loop through the information
@@ -253,7 +254,7 @@ class Sections extends Myschoolgh {
     /**
      * Assign Section to Students List
      * 
-     * @param Array     $params->data
+     * @param stdClass  $params
      * @param Array     $params->data["assign_fees"]
      * @param Array     $params->data["class_id"]
      * @param String    $params->data["section_id"]
