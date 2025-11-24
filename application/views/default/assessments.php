@@ -199,7 +199,7 @@ if(!empty($filter->class_id)) {
         "class_id" => $filter->class_id,
         "client_data" => $defaultClientData,
     ];
-    $courses_list = load_class("courses", "controllers", $courses_param)->list($courses_param)["data"];
+    $courses_list = load_class("subjects", "controllers", $courses_param)->list($courses_param)["data"];
 }
 
 

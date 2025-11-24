@@ -128,7 +128,7 @@ class Api {
         // there are some endpoints that are not yet updated to the new structure
         // this is to ensure that the user can still use the old endpoints
         $replaceInnerUrl = [
-            'subjects' => 'courses'
+            'courses' => 'subjects'
         ];
         $this->inner_url = $replaceInnerUrl[$this->inner_url] ?? $this->inner_url;
 

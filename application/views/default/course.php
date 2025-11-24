@@ -55,7 +55,7 @@ if(!empty($item_id)) {
         $item_param->bypass = true;
     }
 
-    $data = load_class("courses", "controllers", $item_param)->list($item_param);
+    $data = load_class("subjects", "controllers", $item_param)->list($item_param);
 
     // if no record was found
     if(empty($data["data"])) {

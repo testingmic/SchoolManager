@@ -165,7 +165,7 @@ class Resources extends Myschoolgh {
 			# append to the response
 			$return["additional"] = [
                 "clear" => true, 
-                "data" => load_class("courses", "controllers")->resources_list($params->clientId, $upload->course_id)
+                "data" => load_class("subjects", "controllers")->resources_list($params->clientId, $upload->course_id)
             ];
             
             return $return;
@@ -188,7 +188,7 @@ class Resources extends Myschoolgh {
             $params->minified = true;
             $params->attachments_only = true;
             
-            $list_courses = load_class("courses", "controllers")->list($params)["data"];
+            $list_courses = load_class("subjects", "controllers")->list($params)["data"];
             
             $resources_array = [];
             foreach($list_courses as $each) {

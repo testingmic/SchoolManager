@@ -62,7 +62,7 @@ if(!empty($course_id)) {
     ];
     
     // get the course information
-    $data = load_class("courses", "controllers", $item_param)->list($item_param);
+    $data = load_class("subjects", "controllers", $item_param)->list($item_param);
 
     // if no record was found
     if(empty($data["data"])) {
@@ -134,7 +134,7 @@ $_filter = $schoolDay ? "today" : "unspecified";
 $todayTimetableLessons = $timetableObj->teacher_timetable($_courses_ids, $clientId, $_filter, false, $_class_id);
 
 // confirm that there is a lesson for today
-$lessonsList = load_class("courses", "controllers")->list($_param)["data"] ?? [];
+$lessonsList = load_class("subjects", "controllers")->list($_param)["data"] ?? [];
 
 // check if the lesson is empty
 if(!empty($lessonsList) && is_array($lessonsList)) {

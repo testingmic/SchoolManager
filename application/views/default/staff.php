@@ -103,7 +103,7 @@ if(empty($user_id)) {
                 "academic_year" => $defaultAcademics->academic_year,
                 "academic_term" => $defaultAcademics->academic_term,
             ];
-            $courses_list = load_class("courses", "controllers")->list($courses_param);
+            $courses_list = load_class("subjects", "controllers")->list($courses_param);
 
             // Subjects List
             if(!empty($courses_list["data"])) {

@@ -5394,7 +5394,7 @@ class Forms extends Myschoolgh {
                 "academic_year" => $params->data->academic_year,
                 "academic_term" => $params->data->academic_term
             ];
-            $courses_list = load_class("courses", "controllers")->list($course_param)["data"];
+            $courses_list = load_class("subjects", "controllers")->list($course_param)["data"];
 
             // set the course and unit
             $course = $params->data->course_id;
@@ -5402,7 +5402,7 @@ class Forms extends Myschoolgh {
 
             // append the course id
             $course_param->course_id = $params->data->course_row_id;
-            $units_list = load_class("courses", "controllers")->course_unit_lessons_list($course_param);
+            $units_list = load_class("subjects", "controllers")->course_unit_lessons_list($course_param);
             
             // predefine the file attachments
             // get the attachment list

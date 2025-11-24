@@ -53,7 +53,7 @@ if(!empty($course_id)) {
     ];
     
     // get the course information
-    $data = load_class("courses", "controllers", $item_param)->list($item_param);
+    $data = load_class("subjects", "controllers", $item_param)->list($item_param);
 
     // if no record was found
     if(empty($data["data"])) {

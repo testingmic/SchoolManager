@@ -67,7 +67,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
             $params->minified = true;
             $params->userData = $defaultUser;
             $params->class_id = $data->class_id;
-            $courses_list = load_class("courses", "controllers", $params)->list($params)["data"];
+            $courses_list = load_class("subjects", "controllers", $params)->list($params)["data"];
 
             // load the class rooms available to be used
             $rooms_list = load_class("rooms", "controllers", $params)->list($params)["data"];

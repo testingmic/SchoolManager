@@ -231,7 +231,7 @@ if(!$isSupport) {
             ];
 
             // create new object
-            $courseObj = load_class("courses", "controllers", $params);
+            $courseObj = load_class("subjects", "controllers", $params);
             $course_info = $courseObj->list($params);
 
             // if data was found

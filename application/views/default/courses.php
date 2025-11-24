@@ -37,7 +37,7 @@ $courses_param = (object) [
     "academic_term" => $defaultAcademics->academic_term,
 ];
 
-$item_list = load_class("courses", "controllers")->list($courses_param);
+$item_list = load_class("subjects", "controllers")->list($courses_param);
 
 $hasDelete = $accessObject->hasAccess("delete", "course");
 $hasUpdate = $accessObject->hasAccess("update", "course");
