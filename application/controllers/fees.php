@@ -58,7 +58,7 @@ class Fees extends Myschoolgh {
 
         // if the user is an admin accountant and the student id was parsed
         if($isAdminAccountant && (!empty($params->studentId) || !empty($params->student_id))) {
-            $student_id = !empty($params->studentId) ? $params->studentId : $params->student_id;
+            // $student_id = !empty($params->studentId) ? $params->studentId : $params->student_id;
         }
 
         // if the user is a parent and the user has no wards
@@ -95,7 +95,7 @@ class Fees extends Myschoolgh {
         }
 
         if(!empty($params->q)) {
-            // $filters .= " AND (u.name LIKE '%{$params->q}%' OR a.receipt_id LIKE '%{$params->q}%')";
+            $filters .= " AND (u.name LIKE '%{$params->q}%' OR a.receipt_id LIKE '%{$params->q}%')";
         }
 
         $order_by = $params->order_by ?? "ORDER BY a.id DESC";
