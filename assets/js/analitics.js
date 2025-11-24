@@ -198,7 +198,7 @@ var summaryReporting = (t_summary, date_range) => {
                     <td class='text-center'>${formatMoney(e.amount_due)}</td>
                     <td class='text-center'>${formatMoney(e.actual_total_paid)}</td>
                     <td class='text-center'>${formatMoney(e.balance)}</td>
-                    <td class='text-center'>${percent}%</td>
+                    <td class='text-center'>${e.balance_percentage ?? 0}%</td>
                 </tr>`;
             } catch(error) { }
         });
