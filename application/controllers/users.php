@@ -777,6 +777,8 @@ class Users extends Myschoolgh {
 
 		try {
 
+			global $accessObject;
+
 			$params->query = " 1 ";
 			$params->query .= !empty($params->user_type) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
 			$params->query .= !empty($params->lookup) ? " AND ((a.name LIKE '%{$params->lookup}%') OR (a.unique_id LIKE '%{$params->lookup}%'))" : null;
@@ -831,6 +833,7 @@ class Users extends Myschoolgh {
 			return [
 				"data" => [
 					'finalized' => !$canUpdate,
+					'canFinalize' => $accessObject->hasAccess("finalize", "attendance"),
 					'finalizedDate' => !empty($check) ? $check[0]->date_finalized : null,
 					'users' => $data,
 				],
