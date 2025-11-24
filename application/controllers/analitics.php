@@ -399,6 +399,7 @@ class Analitics extends Myschoolgh {
                 foreach(['amount_due', 'amount_paid', 'actual_total_paid', 'actual_fees_paid', 'actual_arrears_paid', 'balance'] as $ii) {
                     $_c_result->{$ii} = !empty($_c_result->{$ii}) ? $_c_result->{$ii} : 0;
                 }
+                $_c_result->balance_percentage = $_c_result->balance > 0 ? round(($_c_result->balance / $_c_result->amount_due) * 100, 2) : 0;
             } else {
                 $_c_result = (object) [
                     "amount_due" => 0,
@@ -406,7 +407,8 @@ class Analitics extends Myschoolgh {
                     "actual_total_paid" => 0,
                     "actual_fees_paid" => 0,
                     "actual_arrears_paid" => 0,
-                    "balance" => 0
+                    "balance" => 0,
+                    "balance_percentage" => 0
                 ];
             }
 
