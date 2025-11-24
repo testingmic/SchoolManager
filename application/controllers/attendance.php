@@ -1356,7 +1356,7 @@ class Attendance extends Myschoolgh {
                 $itoday = date("jS M");
 
                 $users_count["today_attendance"] = [
-                    "totalStudents" => $totalStudents,
+                    "totalStudents" => (int)$totalStudents,
                     "Student" => $users_count["days_list"][$itoday]["Student"] ?? 0,
                     "Staff" => $users_count["days_list"][$itoday]["Staff"] ?? 0,
                 ];
@@ -1384,7 +1384,7 @@ class Attendance extends Myschoolgh {
 
                 $itoday = date("jS M");
                 $users_count["today_attendance"] = [
-                    "totalStudents" => $totalStudents,
+                    "totalStudents" => (int)$totalStudents,
                     "Student" => $users_count["days_list"][$itoday]["Student"] ?? 0,
                     "Staff" => $users_count["days_list"][$itoday]["Staff"] ?? 0,
                 ];
