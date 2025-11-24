@@ -58,7 +58,7 @@ class Fees extends Myschoolgh {
 
         // if the user is an admin accountant and the student id was parsed
         if($isAdminAccountant && (!empty($params->studentId) || !empty($params->student_id))) {
-            // $student_id = !empty($params->studentId) ? $params->studentId : $params->student_id;
+            $student_id = !empty($params->studentId) ? $params->studentId : $params->student_id;
         }
 
         // if the user is a parent and the user has no wards
@@ -123,7 +123,7 @@ class Fees extends Myschoolgh {
 
             // run the query
 			$stmt = $this->db->prepare("
-				SELECT a.*, fc.name AS category_name, u.name AS student_name {$add_query}
+				SELECT a.*, fc.name AS category_name, u.name AS student_name, {$add_query}
                     (SELECT b.name FROM departments b WHERE b.id = a.department_id LIMIT 1) AS department_name,
                     (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type,'|', COALESCE(b.phone_number,'NULL'),'|',b.email) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
