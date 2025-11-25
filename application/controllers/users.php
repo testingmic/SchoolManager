@@ -575,7 +575,7 @@ class Users extends Myschoolgh {
 			$users_group = [];
 
 			$parentKeys = [
-				'department_name', 'class_name', 'scholarship_status', 'fees_is_set', 'debt', 'arrears',
+				'department_name', 'class_name', 'scholarship_status', 'fees_is_set', 'debt', 'arrears', 'section_name',
 				'course_ids', 'class_ids', 'class_guid', 'class_id', 'guardian_id', 'payment_module', 'account_balance'
 			];
 
