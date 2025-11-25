@@ -111,8 +111,8 @@ $schools = $myClass->clients_list();
   </div>
   <div class="app-foottag">
     <div class="d-flex justify-content-between">
-        <div>&copy; Copyright <strong><a href="<?= $myClass->baseUrl ?>"><?= $myClass->appName ?></a></strong> &bull; All Rights Reserved</div>
-        <div>By: <strong><?= config_item("developer") ?></strong></div>
+      <div>&copy; Copyright &bull; All Rights Reserved</div>
+      <div><strong><?= config_item("developer") ?></strong></div>
     </div>
   </div>
   <script> var baseUrl = "<?= $baseUrl ?>"; </script>

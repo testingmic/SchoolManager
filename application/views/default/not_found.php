@@ -92,7 +92,7 @@ $baseUrl = $myClass->baseUrl;
   <div class="app-foottag">
     <div class="d-flex justify-content-between">
       <div>&copy; Copyright <strong><a href="<?= $myClass->baseUrl ?>"><?= $myClass->appName ?></a></strong> &bull; All Rights Reserved</div>
-      <div>By: <strong><?= config_item("developer") ?></strong></div>
+      <div><strong><?= config_item("developer") ?></strong></div>
     </div>
   </div>
   

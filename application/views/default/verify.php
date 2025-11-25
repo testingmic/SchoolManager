@@ -242,8 +242,8 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 10) ? xss_clean($_GE
   </div>
   <div class="app-foottag">
     <div class="d-flex justify-content-between">
-        <div>&copy; Copyright <strong><a href="<?= $myClass->baseUrl ?>"><?= $myClass->appName ?></a></strong> &bull; All Rights Reserved</div>
-        <div>By: <strong><?= config_item("developer") ?></strong></div>
+        <div>&copy; Copyright &bull; All Rights Reserved</div>
+        <div><strong><?= config_item("developer") ?></strong></div>
     </div>
   </div>
   <script src="<?= $baseUrl; ?>assets/js/app.min.js"></script>
