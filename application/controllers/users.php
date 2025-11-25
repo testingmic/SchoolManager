@@ -787,6 +787,7 @@ class Users extends Myschoolgh {
 			];
 
 		} catch(PDOException $e) {
+			print $e->getMessage(); exit;
 			return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];
 		}
 
