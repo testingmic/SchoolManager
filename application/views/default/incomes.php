@@ -38,7 +38,7 @@ $hasValidate = $accessObject->hasAccess("validate", "accounting");
 $hasModify = $accessObject->hasAccess("modify", "accounting");
 
 // date range filter
-$date_range = $filter->date_range ?? date("Y-m-01").":".date("Y-m-d", strtotime("sunday this week"));
+$date_range = $filter->date_range ?? date("Y-m-d", strtotime("-3 months")).":".date("Y-m-t");
 
 // set the parent menu
 $response->parent_menu = "accounting";

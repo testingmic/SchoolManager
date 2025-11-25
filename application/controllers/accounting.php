@@ -18,6 +18,7 @@ class Accounting extends Myschoolgh {
     /**
      * List Account Type Head
      * 
+     * @param object $params
      * @param stdClass $params
      * 
      * @return Array
@@ -70,6 +71,7 @@ class Accounting extends Myschoolgh {
     /**
      * Add Account Type Head
      * 
+     * @param object $params
      * @param String $params->account_type
      * @param String $params->name
      * @param String $params->description
@@ -121,6 +123,7 @@ class Accounting extends Myschoolgh {
     /**
      * Update existing Account Type Head
      * 
+     * @param object $params
      * @param String $params->account_type
      * @param String $params->name
      * @param String $params->description
@@ -229,6 +232,7 @@ class Accounting extends Myschoolgh {
     /**
      * Add Account
      * 
+     * @param object $params
      * @param String $params->account_number
      * @param String $params->account_name
      * @param String $params->description
@@ -283,6 +287,7 @@ class Accounting extends Myschoolgh {
     /**
      * Update Account
      * 
+     * @param object $params
      * @param String $params->account_number
      * @param String $params->account_name
      * @param String $params->description
@@ -332,7 +337,7 @@ class Accounting extends Myschoolgh {
     /**
      * List Account Type Head
      * 
-     * @param stdClass  $params
+     * @param object  $params
      * @param String    $params->q
      * @param String    $params->account_id
      * @param String    $params->account_type
@@ -559,7 +564,7 @@ class Accounting extends Myschoolgh {
     /**
      * Add Deposit Record
      * 
-     * @param String $params->transaction_type
+     * @param object $params
      * @param String $params->bank_id
      * @param String $params->account_number
      * @param Float  $params->amount
@@ -619,6 +624,7 @@ class Accounting extends Myschoolgh {
     /**
      * Add Deposit Record
      * 
+     * @param object $params
      * @param String $params->account_id
      * @param String $params->reference
      * @param String $params->description
@@ -700,6 +706,7 @@ class Accounting extends Myschoolgh {
     /**
      * Update Income Record
      * 
+     * @param object $params
      * @param String $params->account_id
      * @param String $params->reference
      * @param String $params->description
@@ -766,6 +773,7 @@ class Accounting extends Myschoolgh {
     /**
      * Add Expenditure Record
      * 
+     * @param object $params
      * @param String $params->account_id
      * @param String $params->reference
      * @param String $params->description
@@ -842,6 +850,7 @@ class Accounting extends Myschoolgh {
     /**
      * Update Expenditure Record
      * 
+     * @param object $params
      * @param String $params->account_id
      * @param String $params->reference
      * @param String $params->description
@@ -1123,6 +1132,7 @@ class Accounting extends Myschoolgh {
     /**
      * Account Statement Notes
      * 
+     * @param object $params
      * @param String    $params->q
      * @param String    $params->item_type
      * @param String    $params->account_id
@@ -1644,6 +1654,7 @@ class Accounting extends Myschoolgh {
     /**
      * Set The Default Account
      * 
+     * @param object $params
      * @param String $params->account_id
      * 
      * @return Array
