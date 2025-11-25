@@ -51,7 +51,7 @@ $param = (object) [
     "department_id" => $filter->department_id ?? null,
     "class_id" => $filter->class_id ?? null,
     "category_id" => $filter->category_id ?? null,
-    "group_by" => "GROUP BY a.payment_id"
+    // "group_by" => "GROUP BY a.payment_id"
 ];
 
 // if the student id is not empty
