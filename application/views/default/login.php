@@ -150,7 +150,7 @@ if (loggedIn()) {
               </div>
             </div>
             <div class="mt-3 mb-10 text-dark p-3 bg-white text-center  rounded-2xl">
-              Don't have an account? <a class="text-blue-600 hover:text-blue-800 transition-colors duration-200" href="https://www.cognitoforms.com/Speedwaev/MySchoolGH1MonthFreeTrial">Create One</a>
+              Don't have an account? <a class="text-blue-600 hover:text-blue-800 transition-colors duration-200" href="<?= $baseUrl ?>register">Create One</a>
             </div>
           </div>
         </div>
