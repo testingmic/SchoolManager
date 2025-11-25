@@ -40,6 +40,7 @@ $response->scripts = ["assets/js/accounting.js"];
 $params = (object)[
     "clientId" => $clientId,
     "userData" => $defaultUser,
+    "order_by" => "DESC",
     "academic_year" => $defaultAcademics->academic_year,
     "academic_term" => $defaultAcademics->academic_term,
     "client_data" => $defaultUser->client,
