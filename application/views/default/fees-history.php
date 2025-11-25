@@ -51,7 +51,7 @@ $param = (object) [
     "department_id" => $filter->department_id ?? null,
     "class_id" => $filter->class_id ?? null,
     "category_id" => $filter->category_id ?? null,
-    "group_by" => "GROUP BY a.payment_id"
+    // "group_by" => "GROUP BY a.payment_id"
 ];
 
 // if the student id is not empty
@@ -119,8 +119,8 @@ if(!$isWardParent) {
 
         // increment the values
         $fees_count += 1;
-        $fees_paid += $fees->category_id !== "Arrears" ? (float)$fees->amount : 0;
-        $arrears_paid += $fees->category_id == "Arrears" ? (float)$fees->amount : 0;
+        $fees_paid += $fees->category_id !== "Arrears" ? $fees->amount : 0;
+        $arrears_paid += $fees->category_id == "Arrears" ? $fees->amount : 0;
 
         // set the action button
         $action = "";
