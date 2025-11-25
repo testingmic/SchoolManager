@@ -2092,6 +2092,8 @@ class Users extends Myschoolgh {
 			"limit" => 1,
 			"full_details" => true,
 			"no_limit" => 1,
+			"append_wards" => !empty($params->append_wards),
+			"minified" => !empty($params->minified)
 		];
 
 		$record = $this->list($payload);
