@@ -92,7 +92,7 @@ class Arrears extends Myschoolgh {
                 // clean the student id
                 $result->student_info = (object) $this->stringToArray($result->student_info, "|", ["unique_id", "user_id", "name", "image", "phone_number", "guardian_id"]);
 
-                if(empty($params->mobileapp)) {
+                if(empty($params->mobileapp) || !empty($params->arrears_id)) {
                     // convert the created by string into an object
                     $result->arrears_details = json_decode($result->arrears_details, true);
                     $result->arrears_category = json_decode($result->arrears_category, true);
