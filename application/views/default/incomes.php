@@ -94,7 +94,7 @@ foreach($transactions_list as $key => $transaction) {
     $list_transactions .= "<td>{$transaction->account_name}</td>";
     $list_transactions .= "<td>
         {$transaction->account_type_name}
-        ".(strtolower($transaction->attach_to_object) == "bus" ? "
+        ".(!empty($transaction->attach_to_object) && strtolower($transaction->attach_to_object) == "bus" ? "
         <div class='text-primary'>
         <a href='{$baseUrl}student/{$transaction->assign_to_object}/payments'>
             ({$transaction->assign_to_object_name} - {$transaction->assign_to_object_unique_id})

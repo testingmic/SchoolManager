@@ -124,13 +124,15 @@ class Fees extends Myschoolgh {
             // run the query
 			$stmt = $this->db->prepare("
 				SELECT a.*, fc.name AS category_name, u.name AS student_name, {$add_query}
-                    (SELECT b.name FROM departments b WHERE b.id = a.department_id LIMIT 1) AS department_name,
-                    (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
+                    d.name AS department_name,
+                    c.name AS class_name,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type,'|', COALESCE(b.phone_number,'NULL'),'|',b.email) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.guardian_id,'NULL')) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info
                 FROM fees_collection a
                 LEFT JOIN users u ON u.item_id = a.student_id
                 LEFT JOIN fees_category fc ON fc.id = a.category_id
+                LEFT JOIN departments d ON d.id = a.department_id
+                LEFT JOIN classes c ON c.id = a.class_id
 				WHERE {$filters} ".(!empty($params->clientId) ? " AND a.client_id = '{$params->clientId}'" : null)." 
                     {$group_by} {$order_by} LIMIT {$params->limit}
             ");
