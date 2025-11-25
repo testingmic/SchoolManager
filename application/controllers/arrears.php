@@ -92,13 +92,22 @@ class Arrears extends Myschoolgh {
                 // clean the student id
                 $result->student_info = (object) $this->stringToArray($result->student_info, "|", ["unique_id", "user_id", "name", "image", "phone_number", "guardian_id"]);
 
-                // convert the created by string into an object
-                $result->arrears_details = json_decode($result->arrears_details, true);
-                $result->arrears_category = json_decode($result->arrears_category, true);
-                $result->fees_category_log = json_decode($result->fees_category_log, true);
+                if(empty($params->mobileapp)) {
+                    // convert the created by string into an object
+                    $result->arrears_details = json_decode($result->arrears_details, true);
+                    $result->arrears_category = json_decode($result->arrears_category, true);
+                    $result->fees_category_log = json_decode($result->fees_category_log, true);
+
+                    // get the fees category array
+                    $result->students_fees_category_array = filter_fees_category($result->fees_category_log);
+                }
+                else {
+                    $result->arrears_details = [];
+                    $result->arrears_category = [];
+                    $result->fees_category_log = [];
+                }
 
                 // clean the category
-                $result->students_fees_category_array = filter_fees_category($result->fees_category_log);
                 $result->debt = (float) $result->debt;
                 $result->arrears_total = (float) $result->arrears_total;
 
