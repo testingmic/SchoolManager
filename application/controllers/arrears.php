@@ -53,6 +53,7 @@ class Arrears extends Myschoolgh {
             $filters .= !empty($params->student_id) ? " AND a.student_id IN {$this->inList($params->student_id)}" : "";
             $filters .= !empty($params->clientId) ? " AND a.client_id IN {$this->inList($params->clientId)}" : "";
             $filters .= !empty($params->class_id) ? " AND c.id IN {$this->inList($params->class_id)}" : "";
+            $filters .= !empty($params->arrears_id) ? " AND a.id = {$params->arrears_id}" : "";
             $filters .= !empty($user_status) ? " AND u.user_status IN {$this->inList($user_status)}" : null;
         
             // prepare and execute the statement
@@ -89,6 +90,9 @@ class Arrears extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
+                // convert the arrears id to integer
+                $result->arrears_id =(int) $result->arrears_id;
+
                 // clean the student id
                 $result->student_info = (object) $this->stringToArray($result->student_info, "|", ["unique_id", "user_id", "name", "image", "phone_number", "guardian_id"]);
 
@@ -116,7 +120,7 @@ class Arrears extends Myschoolgh {
             }
 
             // format the data before submission
-            if($populate && !empty($data)) {
+            if($populate && !empty($data) && empty($params->mobileapp)) {
 
                 // modify arrears permission
                 $canModifyArrears = $accessObject->hasAccess("modify_arrears", "fees");
