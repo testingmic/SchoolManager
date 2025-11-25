@@ -2093,7 +2093,7 @@ class Users extends Myschoolgh {
 			"full_details" => true,
 			"no_limit" => 1,
 			// "append_wards" => !empty($params->append_wards),
-			// "minified" => !empty($params->minified)
+			"minified" => !empty($params->minified)
 		];
 
 		$record = $this->list($payload);
