@@ -119,8 +119,8 @@ if(!$isWardParent) {
 
         // increment the values
         $fees_count += 1;
-        $fees_paid += $fees->category_id !== "Arrears" ? $fees->amount_paid : 0;
-        $arrears_paid += $fees->category_id == "Arrears" ? $fees->amount_paid : 0;
+        $fees_paid += $fees->category_id !== "Arrears" ? $fees->amount : 0;
+        $arrears_paid += $fees->category_id == "Arrears" ? $fees->amount : 0;
 
         // set the action button
         $action = "";
