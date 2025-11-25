@@ -573,6 +573,16 @@ class Users extends Myschoolgh {
 			$key = 0;
 			$data = [];
 			$users_group = [];
+
+			$parentKeys = [
+				'department_name', 'class_name', 'scholarship_status', 'fees_is_set', 'debt', 'arrears',
+				'course_ids', 'class_ids', 'class_guid', 'class_id', 'guardian_id', 'payment_module'
+			];
+
+			$staffKeys = [
+				'scholarship_status', 'fees_is_set', 'debt', 'arrears',
+				'class_guid', 'class_id', 'guardian_id', 'payment_module'
+			];
 			
 			// loop through the results
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
@@ -628,6 +638,20 @@ class Users extends Myschoolgh {
 					$row++;
 					$result->row_id = $row;
 
+				}
+
+				// if the user type is a parent
+				if($result->user_type === "parent") {
+					foreach($parentKeys as $item) {
+						unset($result->{$item});
+					}
+				}
+
+				// if the user type is a staff
+				if(in_array($result->user_type, ['employee', 'accountant', 'admin', 'teacher'])) {
+					foreach($staffKeys as $item) {
+						unset($result->{$item});
+					}
 				}
 
 				// if the guardian id was parsed
