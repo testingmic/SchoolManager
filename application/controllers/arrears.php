@@ -102,9 +102,9 @@ class Arrears extends Myschoolgh {
                     $result->students_fees_category_array = filter_fees_category($result->fees_category_log);
                 }
                 else {
-                    $result->arrears_details = [];
-                    $result->arrears_category = [];
-                    $result->fees_category_log = [];
+                    unset($result->arrears_details);
+                    unset($result->arrears_category);
+                    unset($result->fees_category_log);
                 }
 
                 // clean the category
