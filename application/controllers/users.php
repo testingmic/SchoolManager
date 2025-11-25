@@ -472,10 +472,10 @@ class Users extends Myschoolgh {
 					a.id AS user_row_id, a.client_id, a.guardian_id, a.item_id AS user_id, a.name, a.preferences, a.description,
 					a.unique_id, a.email, a.image, a.phone_number, a.user_type, a.class_id, a.account_balance, a.changed_password,
 					a.gender, a.enrollment_date, a.residence, a.religion, a.date_of_birth, a.last_visited_page, a.fees_is_set,
-					a.scholarship_status,
+					a.scholarship_status, a.occupation, employer, a.alergy,
 					(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name, a.username,
 					(SELECT name FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_name,
-					dept.name AS department_name,
+					dept.name AS department_name, a.address,
 					se.name AS section_name, a.user_status,
 					(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name";
 
@@ -576,11 +576,11 @@ class Users extends Myschoolgh {
 
 			$parentKeys = [
 				'department_name', 'class_name', 'scholarship_status', 'fees_is_set', 'debt', 'arrears',
-				'course_ids', 'class_ids', 'class_guid', 'class_id', 'guardian_id', 'payment_module'
+				'course_ids', 'class_ids', 'class_guid', 'class_id', 'guardian_id', 'payment_module', 'account_balance'
 			];
 
 			$staffKeys = [
-				'scholarship_status', 'fees_is_set', 'debt', 'arrears',
+				'scholarship_status', 'fees_is_set', 'debt', 'arrears', 'employer', 'occupation',
 				'class_guid', 'class_id', 'guardian_id', 'payment_module'
 			];
 			
