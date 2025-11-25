@@ -196,7 +196,7 @@ var summaryReporting = (t_summary, date_range) => {
                 <tr>
                     <td>${i}</td>
                     <td class='text-center'>${formatMoney(e.amount_due)}</td>
-                    <td class='text-center'>${formatMoney(e.actual_total_paid)}</td>
+                    <td class='text-center'>${formatMoney(e.actual_fees_paid)}</td>
                     <td class='text-center'>${formatMoney(e.balance)}</td>
                     <td class='text-center'>${e.balance_percentage ?? 0}%</td>
                 </tr>`;
