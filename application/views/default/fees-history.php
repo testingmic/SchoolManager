@@ -122,6 +122,8 @@ if(!$isWardParent) {
         $fees_paid += $fees->category_id !== "Arrears" ? $fees->amount : 0;
         $arrears_paid += $fees->category_id == "Arrears" ? $fees->amount : 0;
 
+        $fees->amount_paid = $fees->amount_paid ?? $fees->amount;
+
         // set the action button
         $action = "";
         $action = "<a href='#' title='View Receipt' onclick='load(\"fees_view/{$fees->payment_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
