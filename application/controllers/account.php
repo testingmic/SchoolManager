@@ -98,6 +98,17 @@ class Account extends Myschoolgh {
     }
 
     /**
+     * Load the Client Data
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function profile($params = null) {
+        return $this->client_data($params->clientId);
+    }
+
+    /**
      * Transfer a Client Account
      * 
      * @param stdClass $params

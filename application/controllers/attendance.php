@@ -630,7 +630,7 @@ class Attendance extends Myschoolgh {
      */
     public function display_attendance(stdClass $params) {
         
-        global $isAdmin, $isTutor, $defaultClientData, $clientPrefs, $accessObject, $usersClass;
+        global $defaultClientData, $isTutor, $clientPrefs, $accessObject, $usersClass;
 
         // get the information
         $params->minified = "load_minimal_info";
@@ -646,6 +646,8 @@ class Attendance extends Myschoolgh {
         $start_date = $explode[0];
         $end_date = $explode[1] ?? date("Y-m-d", strtotime("{$this_date} 0 day"));
 
+        $clientPrefs = empty($clientPrefs) ? $defaultClientData->client_preferences : $clientPrefs;
+        
         // set the opening days
         $clientPrefs->opening_days = !empty($clientPrefs->opening_days) ? $clientPrefs->opening_days : $this->default_opening_days;
 

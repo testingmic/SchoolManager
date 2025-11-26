@@ -278,7 +278,7 @@ class Api {
     final function requestHandler(stdClass $params) {
         
         // global variable
-        global $defaultClientData, $isSupport, $defaultAcademics, $defaultUser;
+        global $defaultClientData, $clientPrefs, $isSupport, $defaultAcademics, $defaultUser;
 
         // preset the response
         $result = [];

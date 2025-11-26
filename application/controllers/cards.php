@@ -32,9 +32,10 @@ class Cards extends Myschoolgh {
             $query .= !empty($params->card_preview_id) ? " AND a.id = '{$params->card_preview_id}'" : "";
 
             // get the list of users based on the request 
-            $stmt = $this->db->prepare("SELECT a.*, b.name AS class_name 
+            $stmt = $this->db->prepare("SELECT a.*, b.name AS class_name, u.image
             FROM generated_cards a 
             LEFT JOIN classes b ON a.class_id = b.id 
+            LEFT JOIN users u ON u.unique_id = a.unique_id
             WHERE a.client_id='{$params->clientId}' {$query}");
 			$query = $stmt->execute();
 
@@ -231,7 +232,7 @@ class Cards extends Myschoolgh {
                     issue_date='{$issue_date}',
                     expiry_date='{$expiry_date}',
                     class_id='{$user->class_id}' 
-                    ".(!empty($user->gender) ? ", gender='{$user->gender}'" : "")."
+                    ".(!empty($user->gender) ? ", gender='{$user->gender}'" : ", gender='Unknown'")."
                     ".(!empty($user->enrollment_date) ? ", enrollment_date='{$user->enrollment_date}'" : "")."
                     ".(!empty($user->day_boarder) ? ", day_boarder='{$user->day_boarder}'" : "")."
                     ".(!empty($user->unique_id) ? ", unique_id='{$user->unique_id}'" : "")."

@@ -48,6 +48,7 @@ $SITEURL = run($isNotRemote, true, [], $argv ?? []);
 $academicSession = "Term";
 $defaultUser = (object) [];
 $defaultClientData = (object) [];
+$clientPrefs = (object) [];
 $myClass = load_class('myschoolgh', 'models');
 $noticeClass = load_class('notification', 'controllers');
 $accessObject = load_class('accesslevel', 'controllers');

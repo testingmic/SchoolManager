@@ -294,6 +294,8 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
         $type = $cardSettings->user_type == "student" ? "Student" : "Employee";
     }
 
+    $userImage = !empty($cardSettings->image) ? $cardSettings->image : "assets/img/avatar.png";
+
     $html = '
     <div class="card-preview" style="min-width: 300px;">
         <div class="card-preview-body">
@@ -315,7 +317,7 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                         </div>
                     </div>
                     <div style="width: 100px; float: left; height: 100px; background-color: #fff; padding: 5px; border-radius: 7px;">
-                        <img src="'.($defaultClientData->baseUrl ?? "").'assets/img/avatar.png" style="border-radius: 7px;" width="100%">
+                        <img src="'.($defaultClientData->baseUrl ?? "").''.$userImage.'" style="border-radius: 7px;min-height: 90px;" width="100%" height="100%">
                     </div>
                     <div style="margin-left: 30px;float: left; font-size: 13px;" data-item="front_card_details">
                         <div><strong>Gender:</strong></div>
