@@ -1553,8 +1553,8 @@ class Attendance extends Myschoolgh {
 
         return [
             "summary" => $summary,
-            "summaries" => $fresh_group,
             "attendanceRate" => $summation,
+            "summaries" => $fresh_group ?? [],
         ];
     }
 

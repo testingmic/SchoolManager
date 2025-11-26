@@ -720,7 +720,7 @@ class Auth extends Myschoolgh {
 
                         // send the email
                         $emailObject = load_class("emailing", "controllers");
-                        // $emailObject->send_email("Password Reset Request", $message, $params->email, $fullname);
+                        $emailObject->send_email("Password Reset Request", $message, $params->email, $fullname);
 
                         // send a notification to the user
                         $params = (object) [
@@ -855,11 +855,13 @@ class Auth extends Myschoolgh {
                     //FORM THE MESSAGE TO BE SENT TO THE USER
                     $message = 'Hi '.$fullname.'<br>You have successfully changed your password at '.$this->appName;
                     $message .= '<br><br>Ignore this message if your rightfully effected this change.<br>';
-                    $message .= '<br>If not,';
-                    $message .= '<a class="alert alert-success" href="'.$this->baseUrl.'forgot-password">Click Here</a> if you did not perform this act.';
+                    $message .= '<br>If not, ';
+                    $message .= '<a class="alert alert-success" href="'.$this->baseUrl.'forgot-password"> Click Here</a> if you did not perform this act.';
 
                     #send email to the user
                     $reciepient = ["recipients_list" => [["fullname" => $fullname, "email" => $email, "customer_id" => $user_id]]];
+                    $emailObject = load_class("emailing", "controllers");
+                    // $emailObject->send_email("Password Reset Confirmation", $message, $email, $fullname);
 
                     // commit all transactions
                     $this->db->commit();
@@ -886,6 +888,7 @@ class Auth extends Myschoolgh {
     /**
      * InApp Change User Password
      * 
+     * @param \stdClass $params
      * @param String $params->password      The current password
      * @param String $params->password_1    The new password to use
      * @param String $params->password_2    Confirmation of the new passwod
@@ -1256,6 +1259,7 @@ class Auth extends Myschoolgh {
     /**
      * Password Manager Control
      * 
+     * @param \stdClass $params
      * @param Array $params->data       This contains all the required data
      * 
      * @return Array
