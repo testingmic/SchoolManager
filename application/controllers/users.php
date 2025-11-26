@@ -814,15 +814,17 @@ class Users extends Myschoolgh {
 				$column = "item_id";
 			}
 			
-			$class = $this->pushQuery("id, name", "classes", "{$column} = '{$params->class_id}' LIMIT 1")[0] ?? null;
-			if(empty($class)) {
-				return ["code" => 400, "data" => "Sorry! The class was not found."];
+			if(!empty($params->class_id)) {
+				$class = $this->pushQuery("id, name", "classes", "{$column} = '{$params->class_id}' LIMIT 1")[0] ?? null;
+				if(empty($class)) {
+					return ["code" => 400, "data" => "Sorry! The class was not found."];
+				}
+
+				$params->class_id = (int) $class->id;
+				$params->class_name = $class->name;
+
+				$params->query .= !empty($params->class_id) ? " AND a.class_id = '{$params->class_id}'" : null;
 			}
-
-			$params->class_id = (int) $class->id;
-			$params->class_name = $class->name;
-
-			$params->query .= !empty($params->class_id) ? " AND a.class_id = '{$params->class_id}'" : null;
 
 			/** Set the columns to load */
 			$params->columns = "a.id, a.item_id AS user_id, a.unique_id, a.firstname, a.lastname, a.othername, a.name";
@@ -830,7 +832,7 @@ class Users extends Myschoolgh {
 			/** Prepare and execute the statement */
 			$sql = $this->db->prepare("SELECT {$params->columns} FROM users a 
 			WHERE {$params->query} AND a.deleted = ? AND a.status = ? AND a.client_id='{$params->clientId}'
-			LIMIT 250");
+			LIMIT 500");
 			$sql->execute([0, 1]);
 
 			$data = [];
@@ -862,6 +864,11 @@ class Users extends Myschoolgh {
 					$data[$key]->status = $users_list[$user->user_id]['state'] ?? '';
 					$data[$key]->comments = $users_list[$user->user_id]['comments'] ?? '';
 				}
+			}
+
+			// if the class id was not parsed and the resource was not parsed then return the data
+			if(empty($params->class_id) && empty($params->resource)) {
+				return [ "code" => 200, "data" => $data ];
 			}
 
 			return [
