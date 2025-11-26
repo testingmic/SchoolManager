@@ -829,9 +829,12 @@ class Users extends Myschoolgh {
 			/** Set the columns to load */
 			$params->columns = "a.id, a.item_id AS user_id, a.unique_id, a.firstname, a.lastname, a.othername, a.name";
 			$params->columns .= empty($params->user_type) ? ", a.user_type" : null;
+			$params->columns .= empty($params->class_id) ? ", cl.name AS class_name" : null;
 
 			/** Prepare and execute the statement */
-			$sql = $this->db->prepare("SELECT {$params->columns} FROM users a 
+			$sql = $this->db->prepare("SELECT {$params->columns} 
+			FROM users a 
+			".(empty($params->class_id) ? "LEFT JOIN classes cl ON cl.id = a.class_id" : null)."
 			WHERE {$params->query} AND a.deleted = ? AND a.status = ? AND a.client_id='{$params->clientId}'
 			LIMIT 500");
 			$sql->execute([0, 1]);
