@@ -286,7 +286,7 @@ class Api {
 
         $this->isRemote = $params->remote;
         $this->requestPayload = $params;
-        
+
         // get the client data
         $client_data = empty($defaultClientData->client_name) ? $this->myClass->client_data($this->clientId) : $defaultClientData;
         

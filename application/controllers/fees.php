@@ -1133,7 +1133,7 @@ class Fees extends Myschoolgh {
      */
     public function allocate_fees(stdClass $params) {
 
-        global $defaultUser, $accessObject;
+        global $defaultUser, $accessObject, $defaultUser;
 
         $params->currency = $defaultUser->client->client_preferences->labels->currency ?? null;
 
@@ -1181,7 +1181,7 @@ class Fees extends Myschoolgh {
 
                     // log the user activity
                 $this->userLogs("fees_allocation", $params->class_id, null, 
-                    "{$params->userData->name} updated the fee allocation for <strong>{$class_check[0]->category_name}</strong> to: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
+                    "{$defaultUser->name} updated the fee allocation for <strong>{$class_check[0]->category_name}</strong> to: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
 
             } else {
 

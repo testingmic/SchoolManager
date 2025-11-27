@@ -99,6 +99,9 @@ class Handler {
         $param = (object) $params;
         $param->remote = $remote;
 
+        // set the is preview mode to false
+        $param->isPreviewMode = false;
+
         if(!empty($session->userdata)) {
             $Api->userId = !empty($Api->userId) ? $Api->userId : ($session->userdata['userId'] ?? $this->userId);
             $Api->clientId = !empty($Api->clientId) ? $Api->clientId : ($session->userdata['clientId'] ?? $this->clientId);
@@ -106,8 +109,19 @@ class Handler {
             $Api->appendClient = $session->userdata['defaultClientData'] ?? false;
         }
 
+        // if the user is in preview mode
+        if(!empty($defaultUser->isPreviewMode)) {
+            $this->clientId = $session->previewClientId;
+            $Api->clientId = $session->previewClientId;
+
+            // set the client id to the preview client id
+            $param->clientId = $session->previewClientId;
+            $param->isPreviewMode = true;
+        }
+
         // run the request
         $ApiRequest = $Api->requestHandler($param, $this->requestMethod);
+
         // remove access token if in
         if(isset($params->access_token)) {
             unset($params->access_token);

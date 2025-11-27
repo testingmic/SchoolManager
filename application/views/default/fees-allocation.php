@@ -16,6 +16,11 @@ jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
+
+// if the user is in preview mode
+if(!empty($defaultUser->isPreviewMode)) {
+    $clientId = $session->previewClientId;
+}
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Fees Allocation";
 $response->title = $pageTitle;

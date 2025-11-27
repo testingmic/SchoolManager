@@ -31,6 +31,12 @@ if(!$isSupport) {
         "client_data" => $defaultUser->client
     ];
 
+    // if the user is in preview mode
+    if(!empty($defaultUser->isPreviewMode)) {
+        $param->clientId = $session->previewClientId;
+        $param->client_data = $defaultClientData;
+    }
+
     /** check if the file to download has been parsed */
     if((isset($_GET["file"]) && !empty($_GET["file"])) || (isset($_GET["file_id"], $_GET["file_uid"]))) {
         
@@ -325,10 +331,10 @@ if(!$isSupport) {
         $params->limit = 1;
         $orientation = "portrait";
         $params->full_details = true;
-        $params->client = $defaultUser->client;
+        $params->client = $param->client_data ?? $defaultUser->client;
         $params->userId = $defaultUser->user_id;
-        $params->clientId = $defaultUser->client_id;
-        $params->client_data = $defaultUser->client ?? null;
+        $params->clientId = $param->clientId ?? $defaultUser->client_id;
+        $params->client_data = $param->client_data ?? ($defaultUser->client ?? null);
 
         // set the class
         $file_name = "Incident_Log.pdf";
@@ -366,8 +372,8 @@ if(!$isSupport) {
             "student_id" => $getObject->student_id ?? null,
             "item_id" => $getObject->receipt_id ?? null,
             "class_id" => $getObject->class_id ?? null,
-            "client_data" => $defaultUser->client,
-            "clientId" => $defaultUser->client_id,
+            "client_data" => $param->client_data ?? $defaultUser->client,
+            "clientId" => $param->clientId ?? $defaultUser->client_id,
             "date_range" => $date_range,
             "userData" => $defaultUser,
         ];
@@ -409,8 +415,8 @@ if(!$isSupport) {
 
         // set the parameters
         $orientation = (isset($getObject->display) && ($getObject->display == "notes"))  ? "landscape" : "portrait";
-        $getObject->client_data = $defaultUser->client;
-        $getObject->clientId = $defaultUser->client_id;
+        $getObject->client_data = $param->client_data ?? $defaultUser->client;
+        $getObject->clientId = $param->clientId ?? $defaultUser->client_id;
 
         // set the file name
         $file_name = "Accounting_Report.pdf";
@@ -466,8 +472,8 @@ if(!$isSupport) {
         $item_param = (object) [
             "userData" => $defaultUser,
             "student_id" => $SITEURL[2] ?? null,
-            "clientId" => $defaultUser->client_id,
-            "client_data" => $defaultUser->client,
+            "clientId" => $param->clientId ?? $defaultUser->client_id,
+            "client_data" => $param->client_data ?? $defaultUser->client,
             "class_id" => $getObject->class_id ?? null,
             "current_bal" => $getObject->current_bal ?? null,
             "student_ids" => $getObject->student_ids ?? null,

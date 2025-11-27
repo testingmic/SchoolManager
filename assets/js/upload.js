@@ -74,7 +74,7 @@ async function ajax_file_upload(formdata) {
         success: function(response) {
             $(`input[class~="attachment_file_upload"]`).val("");
             if (response.code == 200) {
-                notify(`${response.data.additional.filename} successfully uploaded.`, 'success');
+                notify(`${response?.data?.additional?.filename} successfully uploaded.`, 'success');
                 load_ajax_file_uploads(response.data.result);
             } else {
                 notify(response.data.result);

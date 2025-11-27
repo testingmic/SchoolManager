@@ -714,12 +714,8 @@ class Incidents extends Myschoolgh {
                 <div>'.$params->client->client_address.'</div>
                 '.(!empty($params->client->client_email) ? "<div>{$params->client->client_email}</div>" : "").'
             </div>';
-        
-        // forms object
-        $formsObj = load_class("forms", "controllers");
 
         $start = 0;
-        $count = count($data);
 
         // loop through the incidents record
         foreach($data as $incident) {
@@ -729,17 +725,6 @@ class Incidents extends Myschoolgh {
 
             // wipe the message
             $message = isset($incident->description) ? $incident->description : null;
-
-            // load the file attachments
-            $attachments = "";
-            
-            // list the incident attachments
-            if(!empty($incident->attachment)) {
-                $attached = $incident->attachment;
-                if(!empty($attached)) {
-                    $attachments = $formsObj->list_attachments($attached->files, $params->userId, "width_250 float_left");
-                }
-            }
 
             // load the followup list
             $followups = $this->incident_log_followup_form($incident->item_id, $incident->user_id, $incident->followups);

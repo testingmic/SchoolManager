@@ -112,7 +112,6 @@ if(!empty($session->userId) && empty($argv)) {
         $accessObject->appPrefs = $clientPrefs;
         $defaultUser->appPrefs = $clientPrefs;
         $defaultUser->isPreviewMode = false;
-        //$defaultUser->appPrefs->isPreviewMode = false;
         
         // set additional parameters
         $isSupport = (bool) ($defaultUser->user_type == "support");
@@ -178,7 +177,7 @@ if(!empty($session->userId) && empty($argv)) {
     // set the isNotRemote variable
     $isNotRemote = false;
 
-    if($session->previewMode) {
+    if(!empty($session->previewMode)) {
         $isSupport = false;
         $isAdmin = true;
         $isTutorAdmin = true;
@@ -188,7 +187,6 @@ if(!empty($session->userId) && empty($argv)) {
 
         // set the preview mode
         $defaultUser->isPreviewMode = true;
-        // $defaultUser->appPrefs->isPreviewMode = true;
     }
     
 }

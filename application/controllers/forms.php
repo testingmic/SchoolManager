@@ -30,14 +30,13 @@ class Forms extends Myschoolgh {
     public function load(stdClass $params) {
 
         /** Access object */
-        global $accessObject, $usersClass;
+        global $accessObject, $usersClass, $defaultUser;
         
         /** Set parameters */
-        $this->thisUser = $params->userData;
-        $this->hasit->userId = $params->userData->user_id;
-        $this->hasit->userPermits = $params->userData->user_permissions;
+        $this->thisUser = $defaultUser;
+        $this->hasit->userId = $defaultUser->user_id;
+        $this->hasit->userPermits = $defaultUser->user_permissions ?? [];
         $this->userPrefs = (object) [];
-        $this_user_id = $params->userData->user_id;
 
         // set the user's default text edit if not already set
         $this->userPrefs->text_editor = "trix";
@@ -88,28 +87,22 @@ class Forms extends Myschoolgh {
                 /** If a second item was parsed then load the lesson unit information */
                 if(isset($item_id[1])) {
 
+                    $incidentObject = load_class("incidents", "controllers");
+
                     /** If view record */
                     if(in_array($the_form, ["incident_log_form_view", "incident_log_followup_form"])) {
-
                         /** If view record */
                         $params->view_record = true;
-
-                        // append some query
-                        $query = ", (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online,'|',user_type) FROM users WHERE users.item_id = a.assigned_to LIMIT 1) AS assigned_to_info,
-                            (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online,'|',user_type) FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_information,
-                            (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online,'|',user_type) FROM users WHERE users.item_id = a.user_id LIMIT 1) AS user_information";
                     }
+                    
+                    $params->incident_id = $item_id[1];
 
-                    $data = $this->pushQuery(
-                        "a.*, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment {$query}", 
-                        "incidents a", 
-                        "a.client_id='{$params->clientId}' AND a.item_id='{$item_id[1]}' AND a.user_id='{$item_id[0]}' AND a.incident_type='incident' LIMIT 1"
-                    );
+                    $data = $incidentObject->view($params);
 
                     if(empty($data)) {
                         return ["code" => 201, "data" => "An invalid id was parsed"];
                     }
-                    $params->data = $data[0];
+                    $params->data = $data;
                 }
                 
                 /** Append to parameters */
@@ -117,7 +110,7 @@ class Forms extends Myschoolgh {
                 
                 /** Load the function */
                 if($the_form == "incident_log_followup_form") {
-                    $result = $this->incident_log_followup_form($item_id[1], $params->clientId, $item_id[0]);
+                    $result = $this->incident_log_followup_form($item_id[1], $params->clientId, $item_id[0], false, $data->followups);
                 } else {
                     $resources = ["assets/js/upload_2.js"];
                     $result = $this->incident_log_form($params, $item_id[0]);
@@ -2028,7 +2021,7 @@ class Forms extends Myschoolgh {
         
         /** Initializing */
         $prev_date = null;
-        $html_content = "<div id='incident_log_followup_list' class='trix-slim-scroll drawer-content'>";
+        $html_content = "<div id='incident_log_followup_list' class='trix-slim-scroll mt-5'>";
         $followups_list = "";
 
         /** Load the followups for the incident */

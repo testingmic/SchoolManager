@@ -111,13 +111,13 @@ class Myschoolgh extends Models {
 		if(empty($this->db)) return true;
 
 		// prepare and execute the statement
-		$fix[] = "TRUNCATE smsemail_send_list;";
+		$fix[] = "ALTER TABLE `users` CHANGE `phone_number` `phone_number` VARCHAR(21) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;";
 
 		foreach($fix as $stmt) {
 			try {
 				if(empty($stmt)) continue;
-				// $query = $this->db->prepare($stmt);
-				// $query->execute();
+				$query = $this->db->prepare($stmt);
+				$query->execute();
 			} catch(PDOException $e) {
 				// print $e->getMessage();
 			}

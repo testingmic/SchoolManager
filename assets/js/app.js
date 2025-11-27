@@ -1388,7 +1388,7 @@ var delete_existing_file_attachment = async(record_id) => {
 var format_followup_thread = (data) => {
     return `
     <div class="col-md-12 p-0 grid-margin" id="comment-listing" data-reply-container="${data.item_id}">
-        <div class="card mb-4 rounded replies-item">
+        <div class="card mb-1 rounded replies-item">
             <div class="card-header pb-0 mb-0">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center">

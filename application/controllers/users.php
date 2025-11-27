@@ -1732,7 +1732,7 @@ class Users extends Myschoolgh {
 		$guardian = [];
 
 		/** Convert the email address to lowercase */
-		$params->email = strtolower($params->email);
+		$params->email = !empty($params->email) ? strtolower($params->email) : null;
 		
 		// insert the user information
 		try {
@@ -2016,7 +2016,7 @@ class Users extends Myschoolgh {
 	 */
 	public function generate_user_record(stdClass $params) {
 		// global variable
-		global $defaultClientData, $defaultCurrency, $academicSession, $defaultAcademics;
+		global $academicSession;
 
 		// get the student information
 		$userRecord = $this->pushQuery("
@@ -2164,7 +2164,7 @@ class Users extends Myschoolgh {
 	public function update(stdClass $params) {
 
 		// global variable
-		global $accessObject;
+		global $accessObject, $defaultUser;
 
 		// confirm that the user_id does not already exist
 		$i_params = (object) [
@@ -2458,7 +2458,7 @@ class Users extends Myschoolgh {
 			$redirect = ($params->user_type === "student") ? "student" : ($params->user_type === "parent" ? "guardian" : "staff");
 
 			// save the name change
-            if(isset($params->fullname) && ($prevData->name !== $params->fullname)) {
+            if(!empty($params->fullname) && ($prevData->name !== $params->fullname)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->name, "Name was changed from {$prevData->name}", $params->userId);
 
 				// set the value
@@ -2466,56 +2466,56 @@ class Users extends Myschoolgh {
             }
 
 			// save the email address
-            if(isset($params->email) && ($prevData->email !== $params->email)) {
+            if(!empty($params->email) && ($prevData->email !== $params->email)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->email, "Email Address was changed from {$prevData->email}", $params->userId);
 				// set the value
 				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 			
 			// save the postal address changes
-            if(isset($params->address) && ($prevData->address !== $params->address)) {
+            if(!empty($params->address) && ($prevData->address !== $params->address)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->address, "Postal Address has been changed.", $params->userId);
 				// set the value
 				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 
 			// save the date of birth change
-            if(isset($params->date_of_birth) && ($prevData->date_of_birth !== $params->date_of_birth)) {
+            if(!empty($params->date_of_birth) && ($prevData->date_of_birth !== $params->date_of_birth)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->date_of_birth, "Date of Birth has been changed to {$params->date_of_birth}", $params->userId);
 				// set the value
 				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 
 			// save the phone_number change
-            if(isset($params->description) && ($prevData->description !== $params->description)) {
+            if(!empty($params->description) && ($prevData->description !== $params->description)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->description, "User description was altered.", $params->userId);
 				// set the value
 				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 
 			// save the phone_number_2 change
-            if(isset($params->phone_2) && ($prevData->phone_number !== $params->phone_2)) {
+            if(!empty($params->phone_2) && ($prevData->phone_number !== $params->phone_2)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->phone_number_2, "Primary Contact was been changed from {$prevData->phone_number_2}", $params->userId);
 				// set the value
 				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 			
 			// save the occupation
-            if(isset($params->occupation) && ($prevData->occupation !== $params->occupation)) {
+            if(!empty($params->occupation) && ($prevData->occupation !== $params->occupation)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->occupation, "Occupation has been altered. {$prevData->occupation} => {$params->occupation}", $params->userId);
 				// set the value
 				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 			
 			// save the employer
-            if(isset($params->employer) && ($prevData->employer !== $params->employer)) {
+            if(!empty($params->employer) && ($prevData->employer !== $params->employer)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->employer, "Employer details has been altered. {$prevData->employer} => {$params->employer}", $params->userId);
 				// set the value
 				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 			
 			// save the position
-            if(isset($params->position) && ($prevData->position !== $params->position)) {
+            if(!empty($params->position) && ($prevData->position !== $params->position)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->position, "Position has been altered. {$prevData->position} => {$params->position}", $params->userId);
 				// set the value
 				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
@@ -2532,14 +2532,14 @@ class Users extends Myschoolgh {
 				global $noticeClass;
 				
 				// Insert the log
-				$this->userLogs("{$params->user_type}_account", $params->user_id, null, "<strong>{$params->userData->name}</strong> updated the account information of <strong>{$the_user[0]->name}</strong>", $params->userId);
+				$this->userLogs("{$params->user_type}_account", $params->user_id, null, "<strong>".($defaultUser->name ?? null)."</strong> updated the account information of <strong>{$the_user[0]->name}</strong>", $params->userId);
 				
 				// Notify the user that his/her account has been modified
 				$param = (object) [
 					'_item_id' => random_string("alnum", RANDOM_STRING),
 					'user_id' => $params->user_id,
 					'subject' => "Account Update",
-					'message' => "<strong>{$params->userData->name}</strong> updated your account information",
+					'message' => "<strong>".($defaultUser->name ?? null)."</strong> updated your account information",
 					'notice_type' => 9,
 					'userId' => $params->userId,
 					'initiated_by' => 'system'

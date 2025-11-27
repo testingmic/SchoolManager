@@ -16,6 +16,12 @@ jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
+
+// if the user is in preview mode
+if(!empty($defaultUser->isPreviewMode)) {
+    $clientId = $session->previewClientId;
+}
+
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Allocate Student Fees";
 $response->title = $pageTitle;
@@ -326,7 +332,7 @@ elseif(!empty($user_id)) {
                         </div>
                     </div>
                     <div class="col-12 col-md-7 col-lg-8">
-                        <div class="card">
+                        <div class="card p-2">
                             '.(!empty($allocationReviewList) ? '
                                 <div class="card-header text-uppercase">Fees Allocation Table</div>
                                     <div class="card-body" id="fees_allocation_table">
