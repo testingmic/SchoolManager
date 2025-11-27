@@ -441,7 +441,7 @@ $(`form[class="form_send_message"]`).on("submit", function(evt) {
 
             if(route === "sms") {
                 theFormData.delete("message");
-                let content = $(`textarea[name="message"]`).html();
+                let content = $(`textarea[name="message"]`).val();
                 theFormData.append("message", htmlEntities(content));
             } else {
                 if ($(`trix-editor[name="faketext"][id="ajax-form-content"]`).length) {
