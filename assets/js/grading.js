@@ -413,6 +413,20 @@ var load_report_csv_file_data = (formdata) => {
     });
 }
 
+var reset_sba_score = (row_id) => {
+    let row_score = 0;
+    $.each($(`input[data-input_row_id="${row_id}"][data-input_type='marks']`), function(i, e) {
+        let value = parseInt($(this).val());
+        row_score += isNaN(value) ? 0 : value;
+    });
+
+    let sba_input = $(`input[name="school_based_assessment"][data-input_row_id="${row_id}"]`);
+    let sba_percentage = sba_input.attr("data-max_percentage");
+
+    let sba_score = (row_score * sba_percentage) / overallSBA;
+    sba_input.val(Math.round(sba_score));
+}
+
 var calculate_sba_score = () => {
     $(`div[id="summary_report_sheet_content"] ${column_to_use}[data-student_row_id] input[data-input_type='marks']`).on("input", function() {
         let input = $(this);
@@ -426,17 +440,7 @@ var calculate_sba_score = () => {
             input.val(input_value);
         }
 
-        let row_score = 0;
-        $.each($(`input[data-input_row_id="${row_id}"][data-input_type='marks']`), function(i, e) {
-            let value = parseInt($(this).val());
-            row_score += isNaN(value) ? 0 : value;
-        });
-
-        let sba_input = $(`input[name="school_based_assessment"][data-input_row_id="${row_id}"]`);
-        let sba_percentage = sba_input.attr("data-max_percentage");
-
-        let sba_score = (row_score * sba_percentage) / overallSBA;
-        sba_input.val(Math.round(sba_score));
+        reset_sba_score(row_id);
     });
 }
 
@@ -540,6 +544,8 @@ var manual_report_upload = () => {
 
             let iresult = response.data.result;
             overallSBA = iresult.overallSBA;
+
+            window.sba_percentage_lower = iresult.sba_percentage_lower;
 
             if(data_to_use == "mobile_view") {
 

@@ -684,7 +684,8 @@ class Terminal_reports extends Myschoolgh {
                         </div></td>";
 
                     $appendMobileView .= "<div class='d-flex justify-content-between items-center mb-2'>";
-                    $appendMobileView .= "<div>".ucwords(str_ireplace("_", " ", $file_headers[$kkey]))."</div>";
+                    $appendMobileView .= "<div style='width:60%'>".ucwords(str_ireplace("_", " ", $file_headers[$kkey]))."  
+                        <i onclick='return raw_score_entry(\"{$key}\", \"{$iname}\")' class='fa fa-edit float-right cursor-pointer text-success font-12 mt-1'></i></div>";
                     $appendMobileView .= "<div><input style='width:80px; font-size:18px;' type='number' data-max_percentage='{$theValue}'
                     data-input_method='{$iname}' data-input_type='marks' data-input_row_id='{$key}' 
                     class='form-control text-center' value='{$kvalue}'></div>";
@@ -734,6 +735,7 @@ class Terminal_reports extends Myschoolgh {
         foreach($sba_percentage_lower as $key => $value) {
             $footer_table .= "<span class='badge badge-success mr-2 mb-1 font-16'>".ucwords(str_ireplace("_", " ", $key)).": {$value}%</span>";
             $notices .= "<span class='badge badge-success mr-2 mb-1 font-16'>".ucwords(str_ireplace("_", " ", $key)).": {$value}%</span>";
+            $sba_percentage_lower[$key] = (int)$value;
         }
         $footer_table .= "</div>";
         $footer_table .= "</div>";
@@ -753,6 +755,7 @@ class Terminal_reports extends Myschoolgh {
             "mobileViewer" => $mobileViewer, 
             "overallSBA" => (int)($overallSBA ?? 0),
             "notices" => $notices,
+            "sba_percentage_lower" => $sba_percentage_lower,
             "studentNamesList" => $studentNamesList
         ]];
 

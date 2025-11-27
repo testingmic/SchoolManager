@@ -1,3 +1,5 @@
+var currentModifiedRowId = 0,
+    currentModifiedRowData = {};
 var recalculate_score = (student_id, sba_percentage, examination) => {
     let score = 0;
     $.each($(`input[data-input_type_q="marks"][data-input_row_id="${student_id}"]`), function() {
@@ -182,4 +184,83 @@ var save_sba_score_cap = (result_id) => {
             });
         }
     });
+}
+
+var scoreCeiling = 60;
+var save_raw_score = (row_id, input_name) => {
+    let totalScore = 0;
+    let index = 0;
+    currentModifiedRowData[row_id][input_name] = {};
+    $(`div[id="viewOnlyModal"] input[type="number"]`).each(function() {
+        let input = $(this);
+        totalScore += parseInt(input.val());
+        currentModifiedRowData[row_id][input_name][index] = input.val();
+        index++;
+    });
+
+    let sba_percentage = window.sba_percentage_lower[input_name] ?? 0;
+    let sba_score = Math.round((totalScore / scoreCeiling) * sba_percentage);
+
+
+    $(`input[data-input_row_id="${row_id}"][data-input_method="${input_name}"]`).val(sba_score);
+    $(`div[id="viewOnlyModal"]`).modal('hide');
+
+    reset_sba_score(row_id);
+}
+
+var remove_row = (row_id) => {
+    $(`div[id="viewOnlyModal"] div[class~="modal-body"] div[data-input_row_id="${row_id}"]`).remove();
+}
+
+var add_new_row = () => {
+
+    let lastRowId = $(`div[id="viewOnlyModal"] div[class~="modal-body"] div[data-input_row_id]`).length - 1;
+    let newRowId = lastRowId + 1;
+    $(`div[id="viewOnlyModal"] div[class~="modal-body"]`).append(`
+        <div class="mb-2">
+            <div class="d-flex justify-content-between" data-input_row_id="${newRowId}">
+                <div>
+                    <input type="number" class="form-control" name="score_${newRowId}" data-input_row_id="${newRowId}" data-input_type="marks">
+                </div>
+                <div>
+                    <button class="btn btn-outline-danger" onclick="return remove_row(${newRowId})">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `);
+    $(`input[name="score_${newRowId}"]`).focus();
+}
+
+var raw_score_entry = (row_id, input_name) => {
+
+    if(typeof currentModifiedRowData[row_id] === 'undefined') {
+        currentModifiedRowData[row_id] = {};
+    } else {
+        currentModifiedRowData[row_id][input_name] = {};
+    }
+
+    currentModifiedRowId = row_id;
+    $(`div[id="viewOnlyModal"]`).modal('show');
+    $(`div[id="viewOnlyModal"] h5[class~="modal-title"]`).html(`Raw Score Entry - ${input_name}`);
+    $(`div[id="viewOnlyModal"] div[class~="modal-body"]`).html(`
+        <div class="mb-2">
+            <div class="d-flex justify-content-between" data-input_row_id="0">
+                <div>
+                    <input type="number" class="form-control" id="score_0" name="score_0" data-input_row_id="0" data-input_type="marks">
+                </div>
+                <div>
+                    <button class="btn btn-outline-primary" onclick="return add_new_row()">Add Row</button>
+                </div>
+            </div>
+        </div>
+    `);
+
+    $(`div[id="viewOnlyModal"] div[class~="modal-footer"]`).html(`
+        <div class="mb-2">
+            <button class="btn btn-outline-success" onclick="return save_raw_score(${row_id}, '${input_name}')">Save Score</button>
+            <button class="btn btn-light" data-dismiss="modal">Cancel</button>
+        </div>
+    `);
 }

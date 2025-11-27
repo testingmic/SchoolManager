@@ -123,6 +123,11 @@ if(!empty($session->userId) && empty($argv)) {
             $session->set("user_type", $defaultUser->user_type);
         }
 
+        // if the user is in preview mode
+        if(!empty($session->previewClientId) && !empty($session->previewMode)) {
+            $isSupport = true;
+        }
+
         // set new variables
         $isEmployee = (bool) ($defaultUser->user_type == "employee");
         $isTutor = (bool) in_array($defaultUser->user_type, ["teacher"]);
