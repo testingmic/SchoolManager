@@ -418,9 +418,9 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                 </div>
                 
                 <!-- Body Section -->
-                <div style="background-color: '.($cardSettings->front_color ?? "#1E40AF").'; color: '.($cardSettings->front_text_color ?? "#ffffff").'; padding: 12px; box-sizing: border-box;">
+                <div style="background-color: '.($cardSettings->front_color ?? "#1E40AF").'; color: '.($cardSettings->front_text_color ?? "#ffffff").'; padding: 10px; box-sizing: border-box;">
                     <!-- Name and ID Section -->
-                    <div style="text-align: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
+                    <div style="text-align: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
                         <div style="font-size: clamp(16px, 2vw, 18px); font-weight: bold; margin-bottom: 4px;">'.($useData ? htmlspecialchars($cardSettings->name) : "Emmanuel Obeng").'</div>
                         <div style="font-size: clamp(13px, 1.6vw, 15px); font-weight: bold;">'.($useData ? htmlspecialchars($cardSettings->unique_id) : "M000000001").'</div>
                     </div>
@@ -474,7 +474,7 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                 </div>
                 
                 <!-- Footer -->
-                <div style="text-align: center; padding: 8px 12px; background: #fff; font-size: 12px; border-top: 1px solid #e5e7eb; box-sizing: border-box;">
+                <div style="text-align: center; padding: 7px 1px; background: #fff; font-size: 12px; border-top: 1px solid #e5e7eb; box-sizing: border-box;">
                     Valid: '.date('M Y', strtotime($start)).' - '.date('M Y', strtotime($end)).'
                 </div>
             </div>
