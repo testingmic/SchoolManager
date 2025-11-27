@@ -541,7 +541,7 @@ if(!$isSupport) {
 
         // get the request content
         $requestContent = load_class("cards", "controllers")->preview($param);
-        $pages_content .= $requestContent["data"]["cards_list"];
+        $pages_content .= $requestContent["data"]["cards_list"] ?? "No cards found.";
 
         $fileType = array(0, 0, 375, 240); 
 

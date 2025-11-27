@@ -31,7 +31,7 @@ class Cards extends Myschoolgh {
             }
 
             // append some filters to apply to the query
-            $query = !empty($params->class_id) && $params->class_id !== "staff" ? " AND a.class_id IN ({$params->class_id})" : "";
+            $query = !empty($params->class_id) && ($params->class_id !== "staff") ? " AND a.class_id IN ({$params->class_id})" : "";
             $query .= !empty($params->user_type) ? " AND a.user_type IN ({$params->user_type})" : "";
             $query .= !empty($params->issue_date) ? " AND a.issue_date = '{$params->issue_date}'" : "";
             $query .= !empty($params->day_boarder) ? " AND a.day_boarder = '{$params->day_boarder}'" : "";
@@ -40,6 +40,11 @@ class Cards extends Myschoolgh {
             if(!empty($params->class_id) && ($params->class_id === "staff")) {
                 $query .= " AND a.user_type IN ('teacher', 'employee', 'accountant', 'admin')";
             }
+            
+            if(isset($params->client_data) && isset($params->client_data->client_id)) {
+                $params->clientId = $params->client_data->client_id;
+            }
+            
             // get the list of users based on the request 
             $stmt = $this->db->prepare("SELECT a.*, b.name AS class_name, u.image
             FROM generated_cards a 
