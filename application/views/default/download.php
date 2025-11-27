@@ -539,7 +539,7 @@ if(!$isSupport) {
         $requestContent = load_class("cards", "controllers")->preview($param);
         $pages_content .= $requestContent["data"]["cards_list"];
 
-        $fileType = array(0, 0, 600, 275); 
+        $fileType = array(0, 0, 390, 250); 
         // $dompdf->setPaper($customPaper); 
 
         if(isset($_GET["dw"])) {

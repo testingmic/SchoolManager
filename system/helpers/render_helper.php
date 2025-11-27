@@ -324,38 +324,52 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                         <div style="font-size: clamp(13px, 1.6vw, 15px); font-weight: bold;">'.($useData ? htmlspecialchars($cardSettings->unique_id) : "M000000001").'</div>
                     </div>
                     
-                    <!-- Content Grid: Image, Details, QR Code -->
-                    <div class="card-preview-content-grid" style="display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start;">
-                        <!-- Photo -->
-                        <div class="card-preview-image-box" style="width: 90px; height: 90px; background: #fff; padding: 4px; border-radius: 6px; flex-shrink: 0; box-sizing: border-box;">
-                            <img src="'.($defaultClientData->baseUrl ?? "").''.$userImage.'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; display: block;">
-                        </div>
-                        
-                        <!-- Details -->
-                        <div class="card-preview-details-wrapper" style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 12px; line-height: 1.4; box-sizing: border-box;" data-item="front_card_details">
-                            <div class="card-preview-detail-label" style="font-weight: bold; white-space: nowrap;">Gender:</div>
-                            <div class="card-preview-detail-value" style="word-break: break-word; overflow-wrap: break-word;">'.($useData ? htmlspecialchars($cardSettings->gender) : "Male").'</div>
+                    <!-- Content Table: Image, Details, QR Code -->
+                    <table style="width: 100%; border-collapse: collapse; border-spacing: 0;">
+                        <tr>
+                            <!-- Photo Column -->
+                            <td style="width: 90px; vertical-align: top; padding-right: 12px;">
+                                <div style="width: 90px; height: 90px; background: #fff; padding: 4px; border-radius: 6px; box-sizing: border-box;">
+                                    <img src="'.($defaultClientData->baseUrl ?? "").''.$userImage.'" style="width: 82px; height: 82px; object-fit: cover; border-radius: 4px; display: block;">
+                                </div>
+                            </td>
                             
-                            <div class="card-preview-detail-label" style="font-weight: bold; white-space: nowrap;">Date of Birth:</div>
-                            <div class="card-preview-detail-value" style="word-break: break-word; overflow-wrap: break-word; ">'.($useData ? (empty($cardSettings->date_of_birth) ? "N/A" : emptyForFalseDate($cardSettings->date_of_birth)) : "1990-01-01").'</div>
+                            <!-- Details Column -->
+                            <td style="vertical-align: top; padding: 0 12px;">
+                                <table style="width: 100%; border-collapse: collapse; border-spacing: 0; font-size: 12px; line-height: 1.4;" data-item="front_card_details">
+                                    <tr>
+                                        <td style="color: '.($cardSettings->front_text_color ?? "#ffffff").'; font-weight: bold; white-space: nowrap; padding-right: 12px; padding-bottom: 4px; vertical-align: top;">Gender:</td>
+                                        <td style="word-break: break-word; overflow-wrap: break-word; padding-bottom: 4px; vertical-align: top;">'.($useData ? htmlspecialchars($cardSettings->gender) : "Male").'</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color: '.($cardSettings->front_text_color ?? "#ffffff").'; font-weight: bold; white-space: nowrap; padding-right: 12px; padding-bottom: 4px; vertical-align: top;">Date of Birth:</td>
+                                        <td style="word-break: break-word; overflow-wrap: break-word; padding-bottom: 4px; vertical-align: top;">'.($useData ? (empty($cardSettings->date_of_birth) ? "N/A" : emptyForFalseDate($cardSettings->date_of_birth)) : "1990-01-01").'</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color: '.($cardSettings->front_text_color ?? "#ffffff").'; font-weight: bold; white-space: nowrap; padding-right: 12px; padding-bottom: 4px; vertical-align: top;">Admission:</td>
+                                        <td style="word-break: break-word; overflow-wrap: break-word; padding-bottom: 4px; vertical-align: top;">'.($useData ? (empty($cardSettings->enrollment_date) ? "N/A" : emptyForFalseDate($cardSettings->enrollment_date)) : "1990-01-01").'</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color: '.($cardSettings->front_text_color ?? "#ffffff").'; font-weight: bold; white-space: nowrap; padding-right: 12px; padding-bottom: 4px; vertical-align: top;">'.$type.' Type:</td>
+                                        <td style="word-break: break-word; overflow-wrap: break-word; padding-bottom: 4px; vertical-align: top;">'.($useData ? (empty($cardSettings->day_boarder) ? "Regular" : htmlspecialchars($cardSettings->day_boarder)) : "Regular").'</td>
+                                    </tr>
+                                    '.($useData && !empty($cardSettings->house) ? '
+                                    <tr>
+                                        <td style="color: '.($cardSettings->front_text_color ?? "#ffffff").'; font-weight: bold; white-space: nowrap; padding-right: 12px; padding-bottom: 4px; vertical-align: top;">House:</td>
+                                        <td style="word-break: break-word; overflow-wrap: break-word; padding-bottom: 4px; vertical-align: top;">'.htmlspecialchars($cardSettings->house).'</td>
+                                    </tr>
+                                    ' : '').'
+                                </table>
+                            </td>
                             
-                            <div class="card-preview-detail-label" style="font-weight: bold; white-space: nowrap;">Admission:</div>
-                            <div class="card-preview-detail-value" style="word-break: break-word; overflow-wrap: break-word;">'.($useData ? (empty($cardSettings->enrollment_date) ? "N/A" : emptyForFalseDate($cardSettings->enrollment_date)) : "1990-01-01").'</div>
-                            
-                            <div class="card-preview-detail-label" style="font-weight: bold; white-space: nowrap;">'.$type.' Type:</div>
-                            <div class="card-preview-detail-value" style="word-break: break-word; overflow-wrap: break-word;">'.($useData ? (empty($cardSettings->day_boarder) ? "Regular" : htmlspecialchars($cardSettings->day_boarder)) : "Regular").'</div>
-                            
-                            '.($useData && !empty($cardSettings->house) ? '
-                            <div class="card-preview-detail-label" style="font-weight: bold; white-space: nowrap;">House:</div>
-                            <div class="card-preview-detail-value" style="word-break: break-word; overflow-wrap: break-word;">'.htmlspecialchars($cardSettings->house).'</div>
-                            ' : '').'
-                        </div>
-                        
-                        <!-- QR Code -->
-                        <div class="card-preview-qr-box" style="width: 90px; height: 90px; background: #fff; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-sizing: border-box;">
-                            '.($useData ? '<img src="'.htmlspecialchars($cardSettings->qr_code).'" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px; display: block;">' : '<div style="font-size: 10px; color: #666; text-align: center; padding: 5px;">QR Code</div>').'
-                        </div>
-                    </div>
+                            <!-- QR Code Column -->
+                            <td style="width: 90px; vertical-align: top; padding-left: 12px;">
+                                <div style="width: 90px; height: 90px; background: #fff; padding: 4px; border-radius: 6px; box-sizing: border-box; text-align: center;">
+                                    '.($useData ? '<img src="'.htmlspecialchars($cardSettings->qr_code).'" style="width: 82px; height: 82px; object-fit: contain; border-radius: 4px; display: block;">' : '<div style="font-size: 10px; color: #666; text-align: center; padding: 5px; line-height: 80px;">QR Code</div>').'
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
                 
                 <!-- Footer -->
@@ -366,10 +380,10 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
         </div>
     </div>
     <div class="page_break"></div>
-    <div class="card-preview-container" style="width: 500px; box-sizing: border-box;">
+    <div class="card-preview-container" style="max-width: 470px; height: 265px; box-sizing: border-box;">
         <div class="card-preview-body" style="width: 100%; box-sizing: border-box;">
             <!-- Back of Card -->
-            <div class="card-preview-back" style="width: 100%; box-sizing: border-box; background-color: '.($cardSettings->back_color ?? "#DC2626").'; color: '.($cardSettings->back_text_color ?? "#ffffff").'; padding: 15px; border-radius: 10px; margin-top: 10px; min-height: 275px; border: solid 1px #ccc;">
+            <div class="card-preview-back" style="width: 100%; box-sizing: border-box; background-color: '.($cardSettings->back_color ?? "#DC2626").'; color: '.($cardSettings->back_text_color ?? "#ffffff").'; padding: 15px; border-radius: 10px; margin-top: 10px; min-height: 265px; border: solid 1px #ccc;">
                 <div style="box-sizing: border-box;">
                     <div style="text-align: center; font-size: clamp(16px, 2.2vw, 20px); padding: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 6px; margin-bottom: 15px; word-wrap: break-word; box-sizing: border-box;">
                         <div>'.htmlspecialchars($defaultClientData->client_name ?? "").'</div>
@@ -384,7 +398,7 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                 </div>
             </div>
         </div>
-    </div>';
+    </div>'.($cardSettings->page_break ? '<div class="page_break"></div>' : '').'';
 
     return $html;
 }

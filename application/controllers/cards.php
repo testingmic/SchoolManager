@@ -104,6 +104,8 @@ class Cards extends Myschoolgh {
 
         $curCount = 0;
 
+        $resultsCount = count($data);
+
         // get the first item in the array
         foreach($data as $key => $userData) {
 
@@ -130,13 +132,15 @@ class Cards extends Myschoolgh {
                     ]
                 ];
             }
+            $cardSettings->page_break = true;
+            if($isPDF && $resultsCount == $curCount) {
+                $cardSettings->page_break = false;
+            }
 
             $cards_list .= render_card_preview($cardSettings, $defaultClientData, true);
 
             
-            if($isPDF && $curCount == 3) {
-                $curCount = 0;
-            }
+            
 
         }
 
