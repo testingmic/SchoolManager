@@ -790,7 +790,7 @@ textarea.form-control {
 
 @media (min-width: 576px) {
     .modal-dialog {
-        max-width: 550px;
+        min-width: 550px;
         margin: 1.75rem auto;
     }
 }
