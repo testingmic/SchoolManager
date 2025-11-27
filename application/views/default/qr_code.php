@@ -247,6 +247,7 @@ if($logBusAttendance) {
 
                     <div class="mt-3 text-center mb-12 grid lg:grid-cols-2 gap-4">
                         <div>
+                            <div id="qr_code_data"></div>
                             <a id="goBack" href="<?= $goBackUrl ?>" class="bg-blue-400 hover:bg-blue-600 text-white px-4 py-4 rounded-lg flex items-center space-x-2 text-center transition-colors">
                                 <i class="fas fa-arrow-left"></i>
                                 <span>Go Back</span>
@@ -330,6 +331,7 @@ if($logBusAttendance) {
                         function onScanSuccess(decodedText) {
                             stopScanner();
                             let userType = null;
+                            $(`div[id="qr_code_data"]`).html(decodedText);
                             if(decodedText) {
                                 const match = decodedText.match(/(employeeId|studentId|parentId|delegateId|guardianId):\[([A-Za-z0-9]+)\]/);
                                 if (match) {
