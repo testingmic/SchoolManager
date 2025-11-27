@@ -651,6 +651,22 @@ var ajax_trigger_form_submit = () => {
         });
 
     });
+
+    if($(`select[id="idcard_download_type"]`).length) {
+        $(`select[id="idcard_download_type"]`).on("change", function() {
+            let value = $(this).val();
+            if(value !== "") {
+                $(`#preview_cards_button`).prop("disabled", false);
+            } else {
+                $(`#preview_cards_button`).prop("disabled", true);
+            }
+        });
+    }
+}
+
+var preview_cards = () => {
+    let value = $(`select[id="idcard_download_type"]`).val();
+    window.open(`${$.baseurl}/download/idcard/?class_id=${value}`, "_blank");
 }
 
 var page_programming = (array_content) => {

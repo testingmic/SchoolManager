@@ -82,6 +82,13 @@ foreach($list_cards["data"] as $key => $each) {
 
 }
 
+// get the list of all classes
+$classes = load_class("classes", "controllers")->list($params);
+$classes_listing = "";
+foreach($classes["data"] as $each) {
+    $classes_listing .= "<option value='{$each->id}'>{$each->name}</option>";
+}
+
 $response->html = '
     <section class="section">
         <div class="section-header">
@@ -94,13 +101,30 @@ $response->html = '
         </div>
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
-                <div class="text-right mb-3">
-                    <a class="btn btn-sm btn-outline-primary" onclick="return id_card_modal();" href="#">
-                        <i class="fa fa-plus"></i> Generate ID Cards
-                    </a>
-                    <a class="btn btn-sm btn-outline-success" target="_blank" href="'.$baseUrl.'download/idcard">
-                        <i class="fa fa-qrcode"></i> Preview Cards
-                    </a>
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-lg-4">
+                        <div class="width-200">
+                            <a class="btn btn-sm btn-block btn-outline-primary" onclick="return id_card_modal();" href="#">
+                                <i class="fa fa-plus"></i> Generate ID Cards
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-12 col-lg-8">
+                        <div class="d-flex justify-content-end mb-3 gap-2">
+                            <div class="width-300">
+                                <select id="idcard_download_type" class="form-control selectpicker" data-width="100%">
+                                    <option value="">Select Option</option>
+                                    <option value="staff">Preview All Staff Members</option>
+                                    '.$classes_listing.'
+                                </select>
+                            </div>
+                            <div class="width-200">
+                                <button disabled id="preview_cards_button" onclick="return preview_cards();" class="btn btn-sm btn-block btn-outline-success">
+                                    <i class="fa fa-qrcode"></i> Preview Cards
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="card">
                     <div class="card-body">

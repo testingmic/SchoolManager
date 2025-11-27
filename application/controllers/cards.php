@@ -67,7 +67,6 @@ class Cards extends Myschoolgh {
      */
     public function preview(stdClass $params) {
 
-        $params->limit = 9;
         // get the data
         $data = $this->list($params)['data'] ?? [];
 
@@ -146,9 +145,6 @@ class Cards extends Myschoolgh {
             }
 
             $cards_list .= render_card_preview($cardSettings, $defaultClientData, true);
-
-            
-            
 
         }
 
