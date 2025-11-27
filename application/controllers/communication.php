@@ -129,6 +129,7 @@ class Communication extends Myschoolgh {
     /**
      * Add a template
      * 
+     * @param Object    $params
      * @param String $params->name
      * @param String $params->type
      * @param String $params->message
@@ -177,6 +178,7 @@ class Communication extends Myschoolgh {
     /**
      * Update a template
      * 
+     * @param Object    $params
      * @param String $params->name
      * @param String $params->message
      * @param String $params->template_id
@@ -223,6 +225,7 @@ class Communication extends Myschoolgh {
     /**
      * Send an SMS or Email Message
      * 
+     * @param Object    $params
      * @param String    $params->reminder_subject
      * @param String    $params->message
      * @param Array     $params->send_mode
@@ -418,6 +421,7 @@ class Communication extends Myschoolgh {
     /**
      * Send an SMS or Email Message
      * 
+     * @param Object    $params
      * @param String    $params->campaign_name
      * @param String    $params->template_id
      * @param String    $params->message
@@ -636,6 +640,7 @@ class Communication extends Myschoolgh {
     /**
      * Verify Payment and Update the SMS Balance
      * 
+     * @param Object    $params
      * @return Array
      */
     public function verify_and_update(stdClass $params) {
@@ -724,6 +729,7 @@ class Communication extends Myschoolgh {
     /**
      * Log the information and set the information to return
      * 
+     * @param Object    $params
      * @return Array
      */
     public function log(stdClass $params) {
