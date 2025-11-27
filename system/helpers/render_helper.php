@@ -474,22 +474,22 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                 </div>
                 
                 <!-- Footer -->
-                <div class="card-preview-footer" style="text-align: center; padding: 8px 12px; background: #fff; font-size: 12px; border-top: 1px solid #e5e7eb; box-sizing: border-box;">
+                <div style="text-align: center; padding: 8px 12px; background: #fff; font-size: 12px; border-top: 1px solid #e5e7eb; box-sizing: border-box;">
                     Valid: '.date('M Y', strtotime($start)).' - '.date('M Y', strtotime($end)).'
                 </div>
             </div>
         </div>
     </div>
     <div class="page_break"></div>
-    <div style="max-width: 470px; height: 265px; box-sizing: border-box;">
+    <div style="max-width: 470px; height: 285px; box-sizing: border-box;">
         <div style="width: 100%; box-sizing: border-box;">
             <!-- Back of Card -->
-            <div style="width: 100%; box-sizing: border-box; background-color: '.($cardSettings->back_color ?? "#DC2626").'; color: '.($cardSettings->back_text_color ?? "#ffffff").'; padding: 15px; border-radius: 10px; margin-top: 10px; min-height: 265px; border: solid 1px #ccc;">
+            <div style="width: 100%; box-sizing: border-box; background-color: '.($cardSettings->back_color ?? "#DC2626").'; color: '.($cardSettings->back_text_color ?? "#ffffff").'; padding: 15px; border-radius: 10px; min-height: 285px; border: solid 1px #ccc;">
                 <div style="box-sizing: border-box;">
                     <div style="text-align: center; font-size: clamp(16px, 2.2vw, 20px); padding: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 6px; margin-bottom: 15px; word-wrap: break-word; box-sizing: border-box;">
                         <div>'.htmlspecialchars($defaultClientData->client_name ?? "").'</div>
                     </div>
-                    <div style="text-align: center; padding: 15px 0; font-size: clamp(13px, 1.8vw, 15px); line-height: 1.6; word-wrap: break-word; box-sizing: border-box;" data-item="back_found_message">
+                    <div style="text-align: center; padding: 30px 0; font-size: clamp(13px, 1.8vw, 15px); line-height: 1.6; word-wrap: break-word; box-sizing: border-box; width: 80%; margin: auto auto;">
                         '.htmlspecialchars($cardSettings->back_found_message ?? card_found_message($defaultClientData->client_name)).'
                     </div>
                     <div style="text-align: center; font-size: clamp(12px, 1.6vw, 14px); border-radius: 8px; padding: 12px; background: rgba(255, 255, 255, 0.1); word-wrap: break-word; box-sizing: border-box;">

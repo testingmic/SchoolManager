@@ -536,11 +536,14 @@ if(!$isSupport) {
             $param->{$key} = $_GET[$key] ?? null;
         }
 
+        // stylesheet
+        $pages_content = "<style>@page { margin: 0px; padding: 0px; } body { margin: 0px; padding: 0px; } .page_break { page-break-before: always; } div.page_break+div.page_break { page-break-before: always; }</style>";
+
+        // get the request content
         $requestContent = load_class("cards", "controllers")->preview($param);
         $pages_content .= $requestContent["data"]["cards_list"];
 
-        $fileType = array(0, 0, 390, 250); 
-        // $dompdf->setPaper($customPaper); 
+        $fileType = array(0, 0, 375, 240); 
 
         if(isset($_GET["dw"])) {
             print_r($pages_content);
