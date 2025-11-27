@@ -288,10 +288,12 @@ function image_to_base64($imagePath, $baseUrl = '') {
     if (strpos($imagePath, 'data:image') === 0) {
         return $imagePath;
     }
+
+    $initFullPath = $baseUrl . $imagePath;
     
     // If already base64 encoded (without data:image prefix), add prefix
-    if (strpos($imagePath, 'base64,') !== false) {
-        return $imagePath;
+    if (strpos($imagePath, 'base64,') !== false || strpos($initFullPath, 'localhost') !== false) {
+        return $initFullPath;
     }
     
     // Handle absolute URLs
@@ -397,7 +399,7 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
     // Convert images to base64 for dompdf
     $logoBase64 = image_to_base64($defaultClientData->client_logo ?? '', $baseUrl);
     $userImageBase64 = image_to_base64($userImage, $baseUrl);
-    $qrCodeBase64 = $useData && !empty($cardSettings->qr_code) ? image_to_base64($cardSettings->qr_code, $baseUrl) : '';
+    $qrCodeBase64 = $useData && !empty($cardSettings->qr_code) ? image_to_base64($cardSettings->qr_code) : '';
 
     $html = '
     <div style="width: 500px; box-sizing: border-box;">
