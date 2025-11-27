@@ -1127,7 +1127,7 @@ class Auth extends Myschoolgh {
                     "package" => "trial",
                     "activation_code" => $token,
                     "date_created" => date("Y-m-d h:iA"),
-                    "expiry" => date("Y-m-d h:iA", strtotime("+1 months"))
+                    "expiry" => date("Y-m-d h:iA", strtotime("+1 year"))
                 ],
                 "opening_days" => $this->default_opening_days,
                 "features_list" => array_keys($defaultFeatures)
