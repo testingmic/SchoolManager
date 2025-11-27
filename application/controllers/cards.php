@@ -26,6 +26,10 @@ class Cards extends Myschoolgh {
 
             $params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
 
+            if(empty($params->clientId)) {
+                return [];
+            }
+
             // append some filters to apply to the query
             $query = !empty($params->class_id) ? " AND a.class_id IN ({$params->class_id})" : "";
             $query .= !empty($params->user_type) ? " AND a.user_type IN ({$params->user_type})" : "";
@@ -65,7 +69,7 @@ class Cards extends Myschoolgh {
 
         $params->limit = 9;
         // get the data
-        $data = $this->list($params)['data'];
+        $data = $this->list($params)['data'] ?? [];
 
         if(empty($data)) {
             return ["code" => 400, "data" => "Sorry! No card found."];
@@ -73,6 +77,10 @@ class Cards extends Myschoolgh {
 
         $clientData = !empty($this->iclient) ? $this->iclient : $params->client_data;
         $defaultClientData = $clientData;
+
+        if(empty($defaultClientData)) {
+            return ["code" => 400, "data" => "Sorry! No client data found."];
+        }
 
         // set the base url for the client
         $defaultClientData->baseUrl = $this->baseUrl;

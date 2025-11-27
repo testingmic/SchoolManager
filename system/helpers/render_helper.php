@@ -277,6 +277,93 @@ function card_found_message($schoolName = null) {
 }
 
 /**
+ * Convert image to base64 data URI for dompdf
+ * 
+ * @param string $imagePath
+ * @param string $baseUrl
+ * @return string
+ */
+function image_to_base64($imagePath, $baseUrl = '') {
+    // If already a data URI, return as is
+    if (strpos($imagePath, 'data:image') === 0) {
+        return $imagePath;
+    }
+    
+    // If already base64 encoded (without data:image prefix), add prefix
+    if (strpos($imagePath, 'base64,') !== false) {
+        return $imagePath;
+    }
+    
+    // Handle absolute URLs
+    if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
+        $imageData = @file_get_contents($imagePath);
+        if ($imageData !== false) {
+            $imageInfo = @getimagesizefromstring($imageData);
+            if ($imageInfo !== false) {
+                $mimeType = $imageInfo['mime'];
+                return 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
+            }
+        }
+    }
+    
+    // Handle relative paths
+    $fullPath = $baseUrl . $imagePath;
+    
+    // Try as absolute URL first
+    if (filter_var($fullPath, FILTER_VALIDATE_URL)) {
+        $imageData = @file_get_contents($fullPath);
+        if ($imageData !== false) {
+            $imageInfo = @getimagesizefromstring($imageData);
+            if ($imageInfo !== false) {
+                $mimeType = $imageInfo['mime'];
+                return 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
+            }
+        }
+    }
+    
+    // Try as local file path (relative to document root)
+    $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? '';
+    $possiblePaths = [
+        $imagePath,
+        $docRoot . '/' . ltrim($imagePath, '/'),
+        dirname($_SERVER['SCRIPT_FILENAME'] ?? '') . '/' . ltrim($imagePath, '/'),
+    ];
+    
+    // Add baseUrl variations if provided
+    if (!empty($baseUrl)) {
+        // If baseUrl is a URL, try it
+        if (filter_var($baseUrl, FILTER_VALIDATE_URL)) {
+            $possiblePaths[] = rtrim($baseUrl, '/') . '/' . ltrim($imagePath, '/');
+        } else {
+            // If baseUrl is a path
+            $possiblePaths[] = rtrim($baseUrl, '/') . '/' . ltrim($imagePath, '/');
+            $possiblePaths[] = $docRoot . '/' . ltrim($baseUrl, '/') . '/' . ltrim($imagePath, '/');
+        }
+    }
+    
+    foreach ($possiblePaths as $path) {
+        // Skip if path contains http/https (already handled above)
+        if (strpos($path, 'http://') === 0 || strpos($path, 'https://') === 0) {
+            continue;
+        }
+        
+        if (file_exists($path) && is_readable($path)) {
+            $imageData = @file_get_contents($path);
+            if ($imageData !== false) {
+                $imageInfo = @getimagesizefromstring($imageData);
+                if ($imageInfo !== false) {
+                    $mimeType = $imageInfo['mime'];
+                    return 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
+                }
+            }
+        }
+    }
+    
+    // Fallback: return original path (dompdf might handle it)
+    return $imagePath;
+}
+
+/**
  * Render the card preview
  * 
  * @param object $cardSettings
@@ -295,19 +382,22 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
     }
 
     $userImage = !empty($cardSettings->image) ? $cardSettings->image : "assets/img/avatar.png";
-
-    if(!file_exists($userImage)) {
-        $userImage = "assets/img/avatar.png";
+    $baseUrl = $defaultClientData->baseUrl ?? "";
+    
+    // Get absolute path for file existence check
+    $basePath = $_SERVER['DOCUMENT_ROOT'] ?? '';
+    if (!empty($basePath) && !file_exists($userImage)) {
+        // Try with base path
+        $fullImagePath = $basePath . '/' . ltrim($userImage, '/');
+        if (!file_exists($fullImagePath)) {
+            $userImage = "assets/img/avatar.png";
+        }
     }
 
-    // $disableSSL = stream_context_create([
-    //     'ssl' => [
-    //         'verify_peer' => false,
-    //         'verify_peer_name' => false,
-    //     ],
-    // ]);
-
-    $qrCode = htmlspecialchars($cardSettings->qr_code);
+    // Convert images to base64 for dompdf
+    $logoBase64 = image_to_base64($defaultClientData->client_logo ?? '', $baseUrl);
+    $userImageBase64 = image_to_base64($userImage, $baseUrl);
+    $qrCodeBase64 = $useData && !empty($cardSettings->qr_code) ? image_to_base64($cardSettings->qr_code, $baseUrl) : '';
 
     $html = '
     <div style="width: 500px; box-sizing: border-box;">
@@ -317,7 +407,7 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                 <!-- Header -->
                 <div style="display: flex; align-items: center; padding: 8px 12px; background: #fff; border-bottom: 1px solid #e5e7eb; box-sizing: border-box; text-align: center;">
                     <div class="card-preview-logo-wrapper" style="flex-shrink: 0; margin-right: 12px;">
-                        <img src="'.($defaultClientData->baseUrl ?? "").''.$defaultClientData->client_logo.'" alt="Logo" style="max-width: 50px; max-height: 40px; width: auto; height: auto; object-fit: contain;">
+                        <img src="'.$logoBase64.'" alt="Logo" style="max-width: 50px; max-height: 40px; width: auto; height: auto; object-fit: contain;">
                     </div>
                     <div class="card-preview-title-wrapper" style="flex: 1; text-align: center;">
                         <div style="font-size: clamp(16px, 2.2vw, 20px); font-weight: bold; margin-bottom: 2px; word-wrap: break-word;">'.$defaultClientData->client_name.'</div>
@@ -339,7 +429,7 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                             <!-- Photo Column -->
                             <td style="width: 90px; vertical-align: top; padding-right: 12px;">
                                 <div style="width: 90px; height: 90px; background: #fff; padding: 4px; border-radius: 6px; box-sizing: border-box;">
-                                    <img src="'.($defaultClientData->baseUrl ?? "").''.$userImage.'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; display: block;">
+                                    <img src="'.$userImageBase64.'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; display: block;">
                                 </div>
                             </td>
                             
@@ -374,7 +464,7 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                             <!-- QR Code Column -->
                             <td style="width: 90px; vertical-align: top; padding-left: 12px;">
                                 <div style="width: 90px; height: 90px; background: #fff; padding: 4px; border-radius: 6px; box-sizing: border-box; text-align: center;">
-                                    '.($useData ? '<img src="'.$qrCode.'" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px; display: block;">' : '<div style="font-size: 10px; color: #666; text-align: center; padding: 5px; line-height: 80px;">QR Code</div>').'
+                                    '.($useData && !empty($qrCodeBase64) ? '<img src="'.$qrCodeBase64.'" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px; display: block;">' : '<div style="font-size: 10px; color: #666; text-align: center; padding: 5px; line-height: 80px;">QR Code</div>').'
                                 </div>
                             </td>
                         </tr>
@@ -407,7 +497,7 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                 </div>
             </div>
         </div>
-    </div>'.($cardSettings->page_break ? '<div class="page_break"></div>' : '').'';
+    </div>'.(!empty($cardSettings->page_break) ? '<div class="page_break"></div>' : '').'';
 
     return $html;
 }
