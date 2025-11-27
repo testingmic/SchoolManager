@@ -543,7 +543,7 @@ if(!$isSupport) {
         $requestContent = load_class("cards", "controllers")->preview($param);
         $pages_content .= $requestContent["data"]["cards_list"] ?? "No cards found.";
 
-        $fileType = array(0, 0, 375, 240); 
+        $fileType = array(0, 0, 375, 245); 
 
         if(isset($_GET["dw"])) {
             print_r($pages_content);
