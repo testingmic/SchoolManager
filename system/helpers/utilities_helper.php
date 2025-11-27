@@ -41,6 +41,19 @@ function placeholder_text($text_id = null) {
 }
 
 /**
+ * Empty for false date
+ * 
+ * @param string $date
+ * 
+ * @return string
+ */
+function emptyForFalseDate($date = null) {
+    if(empty($date)) return 'N/A';
+    if(in_array($date, ["1970-01-01", "01/01/1970"])) return 'N/A';
+    return $date;
+}
+
+/**
  * Default Mixpanel Init
  * 
  * @return string

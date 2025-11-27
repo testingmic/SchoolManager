@@ -207,7 +207,7 @@ class Cards extends Myschoolgh {
             $users = $this->pushQuery(
                 "id, name, gender, class_id, day_boarder, unique_id, date_of_birth, user_type, enrollment_date", 
                 "users", 
-                "client_id='{$params->clientId}' AND user_type IN ({$user_category}) {$query} AND user_status='active'"
+                "client_id='{$params->clientId}' AND user_type IN ({$user_category}) {$query} AND user_status='Active' AND status='1'"
             );
 
             // get the list of users that have already been generated

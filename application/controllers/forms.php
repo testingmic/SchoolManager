@@ -6525,7 +6525,7 @@ class Forms extends Myschoolgh {
     public function preview_card_form() {
 
         $html = '<div data-backdrop="static" data-keyboard="false" class="modal fade" id="previewCardModal">
-            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-dialog modal-md" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Preview Card</h5>

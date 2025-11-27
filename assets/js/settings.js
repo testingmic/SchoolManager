@@ -41,6 +41,7 @@ var card_preview = (card_preview_id) => {
                     <a href="${baseUrl}download/idcard/?card_preview_id=${card_preview_id}" target="_blank" class="btn btn-primary">Download ID Card</a>
                 </div>
             `);
+            $(`div[id="previewCardModal"]`).modal("show");
         }
     }).catch((error) => {
         console.log(error);

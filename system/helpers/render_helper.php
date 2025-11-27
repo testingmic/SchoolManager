@@ -296,67 +296,230 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
 
     $userImage = !empty($cardSettings->image) ? $cardSettings->image : "assets/img/avatar.png";
 
+    if(!file_exists($userImage)) {
+        $userImage = "assets/img/avatar.png";
+    }
+
     $html = '
-    <div class="card-preview" style="min-width: 300px;">
-        <div class="card-preview-body">
-            <div class="card-preview-front">
-                <div class="card-preview-front-header pb-0" style="width: 100%; padding-right: 10px; padding-left: 10px; padding-top: 5px;">
-                    <div style="float: left; width: 15%;">
-                        <img width="50" height="40" src="'.($defaultClientData->baseUrl ?? "").''.$defaultClientData->client_logo.'" alt="'.$defaultClientData->client_name.'">
+    <style>
+        .card-preview-container {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        .card-preview-front-header {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .card-preview-logo-wrapper {
+            flex-shrink: 0;
+            margin-right: 12px;
+        }
+        .card-preview-logo-wrapper img {
+            max-width: 50px;
+            max-height: 40px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+        .card-preview-title-wrapper {
+            flex: 1;
+            text-align: center;
+        }
+        .card-preview-body-section {
+            background-color: '.($cardSettings->front_color ?? "#1E40AF").';
+            color: '.($cardSettings->front_text_color ?? "#ffffff").';
+            padding: 12px;
+            box-sizing: border-box;
+        }
+        .card-preview-name-section {
+            text-align: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .card-preview-content-grid {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 12px;
+            align-items: start;
+        }
+        .card-preview-image-box {
+            width: 90px;
+            height: 90px;
+            background: #fff;
+            padding: 4px;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+        .card-preview-image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+            display: block;
+        }
+        .card-preview-details-wrapper {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 8px 12px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .card-preview-detail-label {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .card-preview-detail-value {
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        .card-preview-qr-box {
+            width: 90px;
+            height: 90px;
+            background: #fff;
+            padding: 4px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .card-preview-qr-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        .card-preview-footer {
+            text-align: center;
+            padding: 8px 12px;
+            background: #fff;
+            font-size: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .card-preview-back {
+            background-color: '.($cardSettings->back_color ?? "#DC2626").';
+            color: '.($cardSettings->back_text_color ?? "#ffffff").';
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        @media screen and (max-width: 768px) {
+            .card-preview-content-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .card-preview-image-box,
+            .card-preview-qr-box {
+                width: 80px;
+                height: 80px;
+                margin: 0 auto;
+            }
+            .card-preview-details-wrapper {
+                font-size: 11px;
+                gap: 6px 10px;
+            }
+            .card-preview-name-section {
+                font-size: 16px;
+            }
+        }
+        @media screen and (max-width: 480px) {
+            .card-preview-image-box,
+            .card-preview-qr-box {
+                width: 70px;
+                height: 70px;
+            }
+            .card-preview-details-wrapper {
+                font-size: 10px;
+                gap: 4px 8px;
+            }
+            .card-preview-name-section {
+                font-size: 14px;
+            }
+            .card-preview-body-section {
+                padding: 10px;
+            }
+        }
+    </style>
+    <div class="card-preview-container" style="width: 100%; max-width: 100%; box-sizing: border-box;">
+        <div class="card-preview-body" style="width: 100%; box-sizing: border-box;">
+            <!-- Front of Card -->
+            <div class="card-preview-front" style="width: 100%; box-sizing: border-box; background: #fff; border-radius: 8px; overflow: hidden;">
+                <!-- Header -->
+                <div class="card-preview-front-header" style="display: flex; align-items: center; padding: 8px 12px; background: #fff; border-bottom: 1px solid #e5e7eb; box-sizing: border-box;">
+                    <div class="card-preview-logo-wrapper" style="flex-shrink: 0; margin-right: 12px;">
+                        <img src="'.($defaultClientData->baseUrl ?? "").''.$defaultClientData->client_logo.'" alt="'.$defaultClientData->client_name.'" style="max-width: 50px; max-height: 40px; width: auto; height: auto; object-fit: contain;">
                     </div>
-                    <div class="text-center" style="float: left; width: 85%;">
-                        <div class="mb-0" style="font-size: 22px; margin-bottom: 0px; font-weight: bold;">'.$defaultClientData->client_name.'</div>
-                        <p class="mb-0" data-item="card_type" style="font-size: 15px; font-weight: bold;">'.$type.' Identification Card</p>
+                    <div class="card-preview-title-wrapper" style="flex: 1; text-align: center;">
+                        <div style="font-size: clamp(16px, 2.2vw, 20px); font-weight: bold; margin-bottom: 2px; word-wrap: break-word;">'.$defaultClientData->client_name.'</div>
+                        <p style="font-size: clamp(12px, 1.6vw, 14px); font-weight: bold; margin: 0; color: #666;" data-item="card_type">'.$type.' Identification Card</p>
                     </div>
                 </div>
-                <div class="card-preview-front-body" style="width:100%; float: left; background-color: '.($cardSettings->front_color ?? "#1E40AF").'; color: '.($cardSettings->front_text_color ?? "#ffffff").';">
-                    <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 10px;">
-                        '.($useData ? $cardSettings->name : "Emmanuel Obeng").'
-                        <div style="font-size: 15px; font-weight: bold;">
-                            '.($useData ? $cardSettings->unique_id : "M000000001").'
+                
+                <!-- Body Section -->
+                <div class="card-preview-body-section" style="background-color: '.($cardSettings->front_color ?? "#1E40AF").'; color: '.($cardSettings->front_text_color ?? "#ffffff").'; padding: 12px; box-sizing: border-box;">
+                    <!-- Name and ID Section -->
+                    <div class="card-preview-name-section" style="text-align: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
+                        <div style="font-size: clamp(16px, 2vw, 18px); font-weight: bold; margin-bottom: 4px;">'.($useData ? htmlspecialchars($cardSettings->name) : "Emmanuel Obeng").'</div>
+                        <div style="font-size: clamp(13px, 1.6vw, 15px); font-weight: bold;">'.($useData ? htmlspecialchars($cardSettings->unique_id) : "M000000001").'</div>
+                    </div>
+                    
+                    <!-- Content Grid: Image, Details, QR Code -->
+                    <div class="card-preview-content-grid" style="display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start;">
+                        <!-- Photo -->
+                        <div class="card-preview-image-box" style="width: 90px; height: 90px; background: #fff; padding: 4px; border-radius: 6px; flex-shrink: 0; box-sizing: border-box;">
+                            <img src="'.($defaultClientData->baseUrl ?? "").''.$userImage.'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; display: block;">
+                        </div>
+                        
+                        <!-- Details -->
+                        <div class="card-preview-details-wrapper" style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 12px; line-height: 1.4; box-sizing: border-box;" data-item="front_card_details">
+                            <div class="card-preview-detail-label" style="font-weight: bold; white-space: nowrap;">Gender:</div>
+                            <div class="card-preview-detail-value" style="word-break: break-word; overflow-wrap: break-word;">'.($useData ? htmlspecialchars($cardSettings->gender) : "Male").'</div>
+                            
+                            <div class="card-preview-detail-label" style="font-weight: bold; white-space: nowrap;">Date of Birth:</div>
+                            <div class="card-preview-detail-value" style="word-break: break-word; overflow-wrap: break-word; ">'.($useData ? (empty($cardSettings->date_of_birth) ? "N/A" : emptyForFalseDate($cardSettings->date_of_birth)) : "1990-01-01").'</div>
+                            
+                            <div class="card-preview-detail-label" style="font-weight: bold; white-space: nowrap;">Admission:</div>
+                            <div class="card-preview-detail-value" style="word-break: break-word; overflow-wrap: break-word;">'.($useData ? (empty($cardSettings->enrollment_date) ? "N/A" : emptyForFalseDate($cardSettings->enrollment_date)) : "1990-01-01").'</div>
+                            
+                            <div class="card-preview-detail-label" style="font-weight: bold; white-space: nowrap;">'.$type.' Type:</div>
+                            <div class="card-preview-detail-value" style="word-break: break-word; overflow-wrap: break-word;">'.($useData ? (empty($cardSettings->day_boarder) ? "Regular" : htmlspecialchars($cardSettings->day_boarder)) : "Regular").'</div>
+                            
+                            '.($useData && !empty($cardSettings->house) ? '
+                            <div class="card-preview-detail-label" style="font-weight: bold; white-space: nowrap;">House:</div>
+                            <div class="card-preview-detail-value" style="word-break: break-word; overflow-wrap: break-word;">'.htmlspecialchars($cardSettings->house).'</div>
+                            ' : '').'
+                        </div>
+                        
+                        <!-- QR Code -->
+                        <div class="card-preview-qr-box" style="width: 90px; height: 90px; background: #fff; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-sizing: border-box;">
+                            '.($useData ? '<img src="'.htmlspecialchars($cardSettings->qr_code).'" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px; display: block;">' : '<div style="font-size: 10px; color: #666; text-align: center; padding: 5px;">QR Code</div>').'
                         </div>
                     </div>
-                    <div style="width: 100px; float: left; height: 100px; background-color: #fff; padding: 5px; border-radius: 7px;">
-                        <img src="'.($defaultClientData->baseUrl ?? "").''.$userImage.'" style="border-radius: 7px;min-height: 90px;" width="100%" height="100%">
-                    </div>
-                    <div style="margin-left: 30px;float: left; font-size: 13px;" data-item="front_card_details">
-                        <div><strong>Gender:</strong></div>
-                        <div><strong>Date of Birth:</strong></div>
-                        <div><strong>Admission:</strong></div>
-                        <div><strong>'.$type.' Type:</strong></div>
-                        '.($useData && !empty($cardSettings->house) ? "<div><strong>House:</strong></div>" : "").'
-                    </div>
-                    <div style="margin-left: 30px;float: left; font-size: 13px;" data-item="front_card_details">
-                        <div>'.($useData ? $cardSettings->gender : "Male").'</div>
-                        <div>'.($useData ? (empty($cardSettings->date_of_birth) ? "N/A" : $cardSettings->date_of_birth) : "1990-01-01").'<br></div>
-                        <div>'.($useData ? (empty($cardSettings->enrollment_date) ? "N/A" : $cardSettings->enrollment_date) : "1990-01-01").'<br></div>
-                        <div>'.($useData ? (empty($cardSettings->day_boarder) ? "Regular" : $cardSettings->day_boarder) : "Regular").'<br></div>
-                        '.($useData && !empty($cardSettings->house) ? "<div>".$cardSettings->house."</div>" : "").'
-                    </div>
-                    <div style="width: 105px; text-align: center; font-size: 14px; float: right; background-color: #fff; color: #000; border-radius: 5px; height: 100px;">
-                        '.($useData ? '<img src="'.$cardSettings->qr_code.'" style="border-radius: 5px;" width="100%">' : "QR Code Here").'
-                    </div>
                 </div>
-                <div style="text-align: center; font-size: 13px; padding-top: 5px; font-weight: normal;width: 100%; float: left;">
+                
+                <!-- Footer -->
+                <div class="card-preview-footer" style="text-align: center; padding: 8px 12px; background: #fff; font-size: 12px; border-top: 1px solid #e5e7eb; box-sizing: border-box;">
                     Valid: '.date('M Y', strtotime($start)).' - '.date('M Y', strtotime($end)).'
                 </div>
             </div>
             
-            <div class="card-preview-back" style="background-color: '.($cardSettings->back_color ?? "#DC2626").'; color: '.($cardSettings->back_text_color ?? "#ffffff").';">
-                <div style="padding: 10px;">
-                    <div style="text-align: center; font-size: 20px; padding: 7px; min-height: 40px; line-height: 1.2; background: rgba(255, 255, 255, 0.1); width: 100%; float: left;">
-                        <div>'.($defaultClientData->client_name ?? "").'</div>
+            <!-- Back of Card -->
+            <div class="card-preview-back" style="width: 100%; box-sizing: border-box; background-color: '.($cardSettings->back_color ?? "#DC2626").'; color: '.($cardSettings->back_text_color ?? "#ffffff").'; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                <div style="box-sizing: border-box;">
+                    <div style="text-align: center; font-size: clamp(16px, 2.2vw, 20px); padding: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 6px; margin-bottom: 15px; word-wrap: break-word; box-sizing: border-box;">
+                        <div>'.htmlspecialchars($defaultClientData->client_name ?? "").'</div>
                     </div>
-                    <div style="text-align: center; width: 100%; padding-top: 25px; padding-bottom: 25px; font-size: 15px;float: left;">
-                        <div style="width: 90%; margin: 0 auto;" data-item="back_found_message">
-                            '.($cardSettings->back_found_message ?? card_found_message($defaultClientData->client_name)).'
-                        </div>
+                    <div style="text-align: center; padding: 15px 0; font-size: clamp(13px, 1.8vw, 15px); line-height: 1.6; word-wrap: break-word; box-sizing: border-box;" data-item="back_found_message">
+                        '.htmlspecialchars($cardSettings->back_found_message ?? card_found_message($defaultClientData->client_name)).'
                     </div>
-                    <div style="text-align: center; font-size: 13px; border-radius: 10px; padding: 10px; background: rgba(255, 255, 255, 0.1); font-weight: normal;width: 100%; float: left;">
-                        <div>If Found, Contact:</div>
-                        <div data-item="contact_numbers">'.($defaultClientData->client_contact ?? "").'</div>
+                    <div style="text-align: center; font-size: clamp(12px, 1.6vw, 14px); border-radius: 8px; padding: 12px; background: rgba(255, 255, 255, 0.1); word-wrap: break-word; box-sizing: border-box;">
+                        <div style="margin-bottom: 8px; font-weight: bold;">If Found, Contact:</div>
+                        <div data-item="contact_numbers">'.htmlspecialchars($defaultClientData->client_contact ?? "").'</div>
                     </div>
-                    
                 </div>
             </div>
         </div>

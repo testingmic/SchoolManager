@@ -67,12 +67,12 @@ foreach($list_cards["data"] as $key => $each) {
     $cards_listing .= "<tr data-row_id=\"{$each->id}\">";
     $cards_listing .= "<td>{$key}</td>";
     $cards_listing .= "<td>{$each->name}</td>";
-    $cards_listing .= "<td>{$each->unique_id}</td>";
+    $cards_listing .= "<td>".strtoupper($each->unique_id)."</td>";
     $cards_listing .= "<td>{$each->gender}</td>";
     $cards_listing .= "<td>".ucwords($each->user_type)."</td>";
     $cards_listing .= "<td>{$each->class_name}</td>";
-    $cards_listing .= "<td>{$each->issue_date}</td>";
-    $cards_listing .= "<td>{$each->expiry_date}</td>";
+    $cards_listing .= "<td>".emptyForFalseDate($each->issue_date)."</td>";
+    $cards_listing .= "<td>".emptyForFalseDate($each->expiry_date)."</td>";
     $cards_listing .= "<td class='text-center'>
         <button onclick='return card_preview({$each->id});' class='btn btn-sm btn-outline-success'>
             <i class='fa fa-eye'></i> Preview
@@ -116,7 +116,7 @@ $response->html = '
                                         <th>Level</th>
                                         <th>Issued On</th>
                                         <th>Expiry On</th>
-                                        <th align="center" width="10%"></th>
+                                        <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$cards_listing.'</tbody>
