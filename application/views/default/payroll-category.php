@@ -181,7 +181,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                         <select data-width="100%" name="payroll_frequency" class="form-control selectpicker">
                                             <option value="">Payroll Frequency</option>
                                             '.implode("", array_map(function($each) use ($settings) {
-                                                return "<option value=\"{$each}\" ".($settings['payroll_frequency'] == $each ? 'selected' : '').">{$each}</option>";
+                                                return "<option value=\"{$each}\" ".(($settings['payroll_frequency'] ?? '') == $each ? 'selected' : '').">{$each}</option>";
                                             }, $myClass->payroll_frequency_list)).'
                                         </select>
                                     </div>

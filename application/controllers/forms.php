@@ -5154,49 +5154,49 @@ class Forms extends Myschoolgh {
                                     <label for="is_statutory" class="font-weight-bold">Is Statutory</label>
                                     <select name="is_statutory" data-width="100%" id="is_statutory" class="form-control selectpicker">
                                         <option value="">Please select</option>
-                                        <option value="No" '.(!empty($idata) && $idata->is_statutory == 'No' ? 'selected' : null).'>No</option>
-                                        <option value="Yes" '.(!empty($idata) && $idata->is_statutory == 'Yes' ? 'selected' : null).'>Yes</option>
+                                        <option value="No" '.(!empty($idata) && !empty($idata->is_statutory) && $idata->is_statutory == 'No' ? 'selected' : null).'>No</option>
+                                        <option value="Yes" '.(!empty($idata) && !empty($idata->is_statutory) && $idata->is_statutory == 'Yes' ? 'selected' : null).'>Yes</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-12 '.(!empty($idata) && $idata->type == 'Allowance' ? '' : 'hidden').'" data-item_type="allowance">
+                            <div class="col-md-12 '.(!empty($idata) && !empty($idata->type) && $idata->type == 'Allowance' ? '' : 'hidden').'" data-item_type="allowance">
                                 <div class="form-group">
                                     <div style="padding-left: 2.5rem;" class="custom-control cursor col-lg-12 custom-switch switch-primary">
-                                        <input '.(!empty($idata) && $idata->subject_to_paye == '1' ? 'checked' : null).' type="checkbox" value="1" name="subject_to_paye" id="subject_to_paye" class="custom-control-input cursor">
+                                        <input '.(!empty($idata) && !empty($idata->subject_to_paye) && $idata->subject_to_paye == '1' ? 'checked' : null).' type="checkbox" value="1" name="subject_to_paye" id="subject_to_paye" class="custom-control-input cursor">
                                         <label class="custom-control-label cursor font-weight-bold" for="subject_to_paye">Subject to PAYE Tax</label>
                                     </div>
                                     <div class="text-muted text-italic">Should this earning be included in taxable income?</div>
                                 </div>
                             </div>
-                            <div class="col-md-12 '.(!empty($idata) && $idata->type == 'Allowance' ? '' : 'hidden').'" data-item_type="allowance">
+                            <div class="col-md-12 '.(!empty($idata) && !empty($idata->type) && $idata->type == 'Allowance' ? '' : 'hidden').'" data-item_type="allowance">
                                 <div class="form-group">
                                     <div style="padding-left: 2.5rem;" class="custom-control cursor col-lg-12 custom-switch switch-primary">
-                                        <input '.(!empty($idata) && $idata->subject_to_ssnit == '1' ? 'checked' : null).' type="checkbox" value="1" name="subject_to_ssnit" id="subject_to_ssnit" class="custom-control-input cursor">
+                                        <input '.(!empty($idata) && !empty($idata->subject_to_ssnit) && $idata->subject_to_ssnit == '1' ? 'checked' : null).' type="checkbox" value="1" name="subject_to_ssnit" id="subject_to_ssnit" class="custom-control-input cursor">
                                         <label class="custom-control-label cursor font-weight-bold" for="subject_to_ssnit">Subject to SSNIT/Pension</label>
                                     </div>
                                     <div class="text-muted text-italic">Should this earning be used for pension calculations?</div>
                                 </div>
                             </div>
-                            <div class="col-md-12 '.(!empty($idata) && $idata->type == 'Deduction' ? '' : 'hidden').'" data-item_type="deduction">
+                            <div class="col-md-12 '.(!empty($idata) && !empty($idata->type) && $idata->type == 'Deduction' ? '' : 'hidden').'" data-item_type="deduction">
                                 <div class="form-group">
                                     <div style="padding-left: 2.5rem;" class="custom-control cursor col-lg-12 custom-switch switch-primary">
-                                        <input '.(!empty($idata) && $idata->pre_tax_deduction == '1' ? 'checked' : null).' type="checkbox" value="1" name="pre_tax_deduction" id="pre_tax_deduction" class="custom-control-input cursor">
+                                        <input '.(!empty($idata) && !empty($idata->pre_tax_deduction) && $idata->pre_tax_deduction == '1' ? 'checked' : null).' type="checkbox" value="1" name="pre_tax_deduction" id="pre_tax_deduction" class="custom-control-input cursor">
                                         <label class="custom-control-label cursor font-weight-bold" for="pre_tax_deduction">Pre Tax Deduction</label>
                                     </div>
                                     <div class="text-muted text-italic">Deducted before tax calculation?</div>
                                 </div>
                             </div>
-                            <div class="col-md-12 '.(!empty($idata) && $idata->type == 'Deduction' ? '' : 'hidden').'" data-item_type="deduction">
+                            <div class="col-md-12 '.(!empty($idata) && !empty($idata->type) && $idata->type == 'Deduction' ? '' : 'hidden').'" data-item_type="deduction">
                                 <div class="form-group">
                                     <label for="calculation_method" class="font-weight-bold">Calculation Settings</label>
                                     <select name="calculation_method" data-width="100%" id="calculation_method" class="form-control selectpicker">
                                         <option value="">Please select</option>
-                                        <option value="fixed_amount" '.(!empty($idata) && $idata->calculation_method == 'fixed_amount' ? 'selected' : null).'>Fixed Amount</option>
-                                        <option value="percentage_on_gross_total" '.(!empty($idata) && $idata->calculation_method == 'percentage_on_gross_total' ? 'selected' : null).'>Percentage on Gross Total</option>
+                                        <option value="fixed_amount" '.(!empty($idata) && !empty($idata->calculation_method) && $idata->calculation_method == 'fixed_amount' ? 'selected' : null).'>Fixed Amount</option>
+                                        <option value="percentage_on_gross_total" '.(!empty($idata) && !empty($idata->calculation_method) && $idata->calculation_method == 'percentage_on_gross_total' ? 'selected' : null).'>Percentage on Gross Total</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-12 '.(!empty($idata) && $idata->type == 'Deduction' ? '' : 'hidden').'" data-item_type="deduction">
+                            <div class="col-md-12 '.(!empty($idata) && !empty($idata->type) && $idata->type == 'Deduction' ? '' : 'hidden').'" data-item_type="deduction">
                                 <div class="form-group">
                                     <label for="calculation_value" class="font-weight-bold">Calculation Value</label>
                                     <input value="'.($idata->calculation_value ?? null).'" type="number" placeholder="Value" name="calculation_value" id="calculation_value" class="form-control">
@@ -6466,7 +6466,7 @@ class Forms extends Myschoolgh {
                                         <label for="user_category">Select Category <span class="required">*</span></label>
                                         <select data-width="100%" class="form-control selectpicker" name="user_category" id="user_category">
                                             <option value="null">Please select group</option>';
-                                            foreach($permissions[$defaultUser->user_type] as $key => $value) {
+                                            foreach(($permissions[$defaultUser->user_type] ?? []) as $key => $value) {
                                                 $html .= "<option value=\"{$key}\">{$value}</option>";
                                             }
                                         $html .= '</select>
