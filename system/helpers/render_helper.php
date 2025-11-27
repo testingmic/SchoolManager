@@ -429,8 +429,8 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                     <table style="width: 100%; border-collapse: collapse; border-spacing: 0;">
                         <tr>
                             <!-- Photo Column -->
-                            <td style="width: 90px; vertical-align: top; padding-right: 12px;">
-                                <div style="width: 90px; height: 90px; background: #fff; padding: 4px; border-radius: 6px; box-sizing: border-box;">
+                            <td style="width: 110px; vertical-align: top; padding-right: 12px;">
+                                <div style="width: 110px; height: 110px; background: #fff; padding: 4px; border-radius: 6px; box-sizing: border-box;">
                                     <img src="'.$userImageBase64.'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; display: block;">
                                 </div>
                             </td>
@@ -465,7 +465,7 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                             
                             <!-- QR Code Column -->
                             <td style="width: 90px; vertical-align: top; padding-left: 12px;">
-                                <div style="width: 90px; height: 90px; background: #fff; padding: 4px; border-radius: 6px; box-sizing: border-box; text-align: center;">
+                                <div style="width: 110px; height: 110px; background: #fff; padding: 4px; border-radius: 6px; box-sizing: border-box; text-align: center;">
                                     '.($useData && !empty($qrCodeBase64) ? '<img src="'.$qrCodeBase64.'" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px; display: block;">' : '<div style="font-size: 10px; color: #666; text-align: center; padding: 5px; line-height: 80px;">QR Code</div>').'
                                 </div>
                             </td>

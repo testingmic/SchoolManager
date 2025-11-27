@@ -40,7 +40,7 @@ class Qr extends Myschoolgh {
         // set the options for the QR Code
         $options = new QROptions([
             'version'      => 7,
-            'scale'        => 8,
+            'scale'        => 10,
             'imageBase64'  => false,
             'outputType'   => QRCode::OUTPUT_IMAGE_PNG,
         ]);
