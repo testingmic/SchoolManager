@@ -61,7 +61,7 @@ var view_message = (type, message_id) => {
 
                 $.each(data.recipient_list, function(i, e) {
                     i++;
-                    let status = e.status == undefined ? "Pending" : e.status;
+                    let status = typeof e.status === 'undefined' ? "Delivered" : e.status;
                     recipient_list += `
                     <tr>
                         <td>${i}</td>
