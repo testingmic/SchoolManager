@@ -20,6 +20,7 @@ $orientation = "landscape";
 $pages_content .= "";
 
 $file_name = "Test Document";
+$fileType = "A4";
 
 // run this section if not a support user
 if(!$isSupport) {
@@ -528,18 +529,24 @@ if(!$isSupport) {
         $file_name = "ID_Card.pdf";
         $param->download_list = true;
 
-        // $orientation = "portrait";
+        $orientation = "l";
 
         // set the parameters
         foreach(['card_preview_id', 'class_id', 'user_type'] as $key) {
             $param->{$key} = $_GET[$key] ?? null;
         }
 
-        $pages_content = load_class("cards", "controllers")->preview($param);
-        $pages_content = $pages_content["data"]["cards_list"];
+        $requestContent = load_class("cards", "controllers")->preview($param);
+        $pages_content .= $requestContent["data"]["cards_list"];
 
-        print_r($pages_content);
-        exit;
+        $fileType = array(0, 0, 600, 275); 
+        // $dompdf->setPaper($customPaper); 
+
+        if(isset($_GET["dw"])) {
+            print_r($pages_content);
+            exit;
+        }
+
     }
 
 }
@@ -548,7 +555,7 @@ if(!$isSupport) {
 $dompdf->loadHtml($pages_content);
 
 // (Optional) Setup the paper size and orientation
-$dompdf->setPaper("A4", $orientation);
+$dompdf->setPaper($fileType, $orientation);
 
 // Render the HTML as PDF
 $dompdf->render();

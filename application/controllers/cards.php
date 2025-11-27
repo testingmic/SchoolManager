@@ -24,6 +24,8 @@ class Cards extends Myschoolgh {
         
         try {
 
+            $params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
+
             // append some filters to apply to the query
             $query = !empty($params->class_id) ? " AND a.class_id IN ({$params->class_id})" : "";
             $query .= !empty($params->user_type) ? " AND a.user_type IN ({$params->user_type})" : "";
@@ -36,7 +38,7 @@ class Cards extends Myschoolgh {
             FROM generated_cards a 
             LEFT JOIN classes b ON a.class_id = b.id 
             LEFT JOIN users u ON u.unique_id = a.unique_id
-            WHERE a.client_id='{$params->clientId}' {$query}");
+            WHERE a.client_id='{$params->clientId}' {$query} LIMIT {$params->limit}");
 			$query = $stmt->execute();
 
             $data = $stmt->fetchAll(PDO::FETCH_OBJ);
@@ -61,6 +63,7 @@ class Cards extends Myschoolgh {
      */
     public function preview(stdClass $params) {
 
+        $params->limit = 9;
         // get the data
         $data = $this->list($params)['data'];
 
@@ -73,6 +76,9 @@ class Cards extends Myschoolgh {
 
         // set the base url for the client
         $defaultClientData->baseUrl = $this->baseUrl;
+
+        // reset the card settings
+        $cardSettings = $clientData->client_preferences->id_card ?? (object)[];
 
         $cards_list = "
         <style>
@@ -91,8 +97,7 @@ class Cards extends Myschoolgh {
         .card-preview-front-body, .card-preview-back-body {
             padding: 10px;
         }
-        </style>
-        <table border='0' width='100%' style='border:solid 1px #dee2e6'>";
+        </style>";
 
         // boolean for download
         $isPDF = !empty($params->download_list);
@@ -103,17 +108,6 @@ class Cards extends Myschoolgh {
         foreach($data as $key => $userData) {
 
             $curCount += 1;
-            
-            if($isPDF && $curCount == 1) {
-                $cards_list .= "<tr>";
-            }
-
-            if($isPDF) {
-                $cards_list .= "<td style='padding:7px;border:solid 1px #dee2e6;'>";
-            }
-
-            // reset the card settings
-            $cardSettings = $clientData->client_preferences->id_card ?? (object)[];
 
             // get the type of the user
             $qr_code = $this->qr_code_renderer($userData->user_type, $userData->user_id, $userData->client_id, $userData->name, true);
@@ -139,18 +133,14 @@ class Cards extends Myschoolgh {
 
             $cards_list .= render_card_preview($cardSettings, $defaultClientData, true);
 
-            if($isPDF) {
-                $cards_list .= "</td>";
-            }
             
             if($isPDF && $curCount == 3) {
-                $cards_list .= "</tr>";
                 $curCount = 0;
             }
 
         }
 
-        $cards_list .= "</table>";
+        
 
         return [
             "code" => 200,
