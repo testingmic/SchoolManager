@@ -16,10 +16,10 @@ class Qr extends Myschoolgh {
     public function generate($option = []) {
 
         // set the directory root
-        $root_dir = ROOT_DIRECTORY . '/assets/uploads/qrcodes/' . (!empty($option['client_id']) ? md5($option['client_id'] . $option['text']) . '/' : '');
+        $root_dir = ROOT_DIRECTORY . '/assets/uploads/qrcodes/' . (!empty($option['client_id']) ? md5($option['client_id']) . '/' : '');
 
         // set the filename to use in the creation of the code
-        $filename = $root_dir . (!empty($option['filename']) ? $option['filename'] : 'qrcode.png');
+        $filename = $root_dir . (!empty($option['filename']) ? md5($option['filename']) . '.png' : 'qrcode.png');
 
         // create directory if not already existing
         if (!is_dir($root_dir)) {
@@ -40,7 +40,7 @@ class Qr extends Myschoolgh {
         // set the options for the QR Code
         $options = new QROptions([
             'version'      => 7,
-            'scale'        => 10,
+            'scale'        => 8,
             'imageBase64'  => false,
             'outputType'   => QRCode::OUTPUT_IMAGE_PNG,
         ]);

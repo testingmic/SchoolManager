@@ -300,13 +300,22 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
         $userImage = "assets/img/avatar.png";
     }
 
+    // $disableSSL = stream_context_create([
+    //     'ssl' => [
+    //         'verify_peer' => false,
+    //         'verify_peer_name' => false,
+    //     ],
+    // ]);
+
+    $qrCode = htmlspecialchars($cardSettings->qr_code);
+
     $html = '
-    <div class="card-preview-container" style="width: 500px; box-sizing: border-box;">
-        <div class="card-preview-body" style="width: 100%; box-sizing: border-box;">
+    <div style="width: 500px; box-sizing: border-box;">
+        <div style="width: 100%; box-sizing: border-box;">
             <!-- Front of Card -->
-            <div class="card-preview-front" style="width: 100%; box-sizing: border-box; background: #fff; border-radius: 8px; overflow: hidden;">
+            <div style="width: 100%; box-sizing: border-box; background: #fff; border-radius: 8px; overflow: hidden;">
                 <!-- Header -->
-                <div class="card-preview-front-header" style="display: flex; align-items: center; padding: 8px 12px; background: #fff; border-bottom: 1px solid #e5e7eb; box-sizing: border-box;">
+                <div style="display: flex; align-items: center; padding: 8px 12px; background: #fff; border-bottom: 1px solid #e5e7eb; box-sizing: border-box; text-align: center;">
                     <div class="card-preview-logo-wrapper" style="flex-shrink: 0; margin-right: 12px;">
                         <img src="'.($defaultClientData->baseUrl ?? "").''.$defaultClientData->client_logo.'" alt="Logo" style="max-width: 50px; max-height: 40px; width: auto; height: auto; object-fit: contain;">
                     </div>
@@ -317,9 +326,9 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                 </div>
                 
                 <!-- Body Section -->
-                <div class="card-preview-body-section" style="background-color: '.($cardSettings->front_color ?? "#1E40AF").'; color: '.($cardSettings->front_text_color ?? "#ffffff").'; padding: 12px; box-sizing: border-box;">
+                <div style="background-color: '.($cardSettings->front_color ?? "#1E40AF").'; color: '.($cardSettings->front_text_color ?? "#ffffff").'; padding: 12px; box-sizing: border-box;">
                     <!-- Name and ID Section -->
-                    <div class="card-preview-name-section" style="text-align: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
+                    <div style="text-align: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
                         <div style="font-size: clamp(16px, 2vw, 18px); font-weight: bold; margin-bottom: 4px;">'.($useData ? htmlspecialchars($cardSettings->name) : "Emmanuel Obeng").'</div>
                         <div style="font-size: clamp(13px, 1.6vw, 15px); font-weight: bold;">'.($useData ? htmlspecialchars($cardSettings->unique_id) : "M000000001").'</div>
                     </div>
@@ -330,7 +339,7 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                             <!-- Photo Column -->
                             <td style="width: 90px; vertical-align: top; padding-right: 12px;">
                                 <div style="width: 90px; height: 90px; background: #fff; padding: 4px; border-radius: 6px; box-sizing: border-box;">
-                                    <img src="'.($defaultClientData->baseUrl ?? "").''.$userImage.'" style="width: 82px; height: 82px; object-fit: cover; border-radius: 4px; display: block;">
+                                    <img src="'.($defaultClientData->baseUrl ?? "").''.$userImage.'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; display: block;">
                                 </div>
                             </td>
                             
@@ -365,7 +374,7 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                             <!-- QR Code Column -->
                             <td style="width: 90px; vertical-align: top; padding-left: 12px;">
                                 <div style="width: 90px; height: 90px; background: #fff; padding: 4px; border-radius: 6px; box-sizing: border-box; text-align: center;">
-                                    '.($useData ? '<img src="'.htmlspecialchars($cardSettings->qr_code).'" style="width: 82px; height: 82px; object-fit: contain; border-radius: 4px; display: block;">' : '<div style="font-size: 10px; color: #666; text-align: center; padding: 5px; line-height: 80px;">QR Code</div>').'
+                                    '.($useData ? '<img src="'.$qrCode.'" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px; display: block;">' : '<div style="font-size: 10px; color: #666; text-align: center; padding: 5px; line-height: 80px;">QR Code</div>').'
                                 </div>
                             </td>
                         </tr>
@@ -380,10 +389,10 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
         </div>
     </div>
     <div class="page_break"></div>
-    <div class="card-preview-container" style="max-width: 470px; height: 265px; box-sizing: border-box;">
-        <div class="card-preview-body" style="width: 100%; box-sizing: border-box;">
+    <div style="max-width: 470px; height: 265px; box-sizing: border-box;">
+        <div style="width: 100%; box-sizing: border-box;">
             <!-- Back of Card -->
-            <div class="card-preview-back" style="width: 100%; box-sizing: border-box; background-color: '.($cardSettings->back_color ?? "#DC2626").'; color: '.($cardSettings->back_text_color ?? "#ffffff").'; padding: 15px; border-radius: 10px; margin-top: 10px; min-height: 265px; border: solid 1px #ccc;">
+            <div style="width: 100%; box-sizing: border-box; background-color: '.($cardSettings->back_color ?? "#DC2626").'; color: '.($cardSettings->back_text_color ?? "#ffffff").'; padding: 15px; border-radius: 10px; margin-top: 10px; min-height: 265px; border: solid 1px #ccc;">
                 <div style="box-sizing: border-box;">
                     <div style="text-align: center; font-size: clamp(16px, 2.2vw, 20px); padding: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 6px; margin-bottom: 15px; word-wrap: break-word; box-sizing: border-box;">
                         <div>'.htmlspecialchars($defaultClientData->client_name ?? "").'</div>
@@ -393,7 +402,7 @@ function render_card_preview($cardSettings = null, $defaultClientData = null, $u
                     </div>
                     <div style="text-align: center; font-size: clamp(12px, 1.6vw, 14px); border-radius: 8px; padding: 12px; background: rgba(255, 255, 255, 0.1); word-wrap: break-word; box-sizing: border-box;">
                         <div style="margin-bottom: 8px; font-weight: bold;">If Found, Contact:</div>
-                        <div data-item="contact_numbers">'.htmlspecialchars($defaultClientData->client_contact ?? "").'</div>
+                        <div>'.htmlspecialchars($defaultClientData->client_contact ?? "").'</div>
                     </div>
                 </div>
             </div>
