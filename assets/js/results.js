@@ -186,26 +186,38 @@ var save_sba_score_cap = (result_id) => {
     });
 }
 
-var scoreCeiling = 60;
+var defaultCeiling = 60;
 var save_raw_score = (row_id, input_name) => {
     let totalScore = 0;
     let index = 0;
+    let scoreCeiling = parseInt($(`div[id="viewOnlyModal"] input[name="score_ceiling"]`).val());
+    scoreCeiling = isNaN(scoreCeiling) ? defaultCeiling : scoreCeiling;
+
     currentModifiedRowData[row_id][input_name] = {};
-    $(`div[id="viewOnlyModal"] input[type="number"]`).each(function() {
+    $(`div[id="viewOnlyModal"] input[type="number"][data-input_row_id]`).each(function() {
         let input = $(this);
         totalScore += parseInt(input.val());
-        currentModifiedRowData[row_id][input_name][index] = input.val();
+        currentModifiedRowData[row_id][input_name][index] = parseInt(input.val());
         index++;
     });
+
+    currentModifiedRowData[row_id][input_name]['score_ceiling'] = scoreCeiling;
 
     let sba_percentage = window.sba_percentage_lower[input_name] ?? 0;
     let sba_score = Math.round((totalScore / scoreCeiling) * sba_percentage);
 
+    if(totalScore > scoreCeiling) {
+        swal({
+            text: `SBA score: '${totalScore}' cannot be greater than score ceiling of: '${scoreCeiling}'.`,
+            icon: "error",
+        });
+        return false;
+    }
 
     $(`input[data-input_row_id="${row_id}"][data-input_method="${input_name}"]`).val(sba_score);
     $(`div[id="viewOnlyModal"]`).modal('hide');
 
-    reset_sba_score(row_id);
+    reset_sba_score(row_id, scoreCeiling);
 }
 
 var remove_row = (row_id) => {
@@ -233,18 +245,127 @@ var add_new_row = () => {
     $(`input[name="score_${newRowId}"]`).focus();
 }
 
+var preload_raw_score = (row_id, input_name) => {
+    const dataSet = currentModifiedRowData[row_id][input_name];
+    
+    // Get score_ceiling or use default
+    const scoreCeiling = dataSet.score_ceiling || defaultCeiling;
+    
+    // Get all score entries (numeric keys only, excluding score_ceiling)
+    const scoreEntries = Object.keys(dataSet)
+        .filter(key => key !== 'score_ceiling' && !isNaN(key))
+        .map(key => ({ index: parseInt(key), value: dataSet[key] }))
+        .sort((a, b) => a.index - b.index);
+    
+    // Build score rows HTML
+    let scoreRowsHtml = '';
+    
+    if (scoreEntries.length === 0) {
+        // If no entries exist, create one empty row
+        scoreRowsHtml = `
+            <div class="mb-2">
+                <div class="d-flex justify-content-between" data-input_row_id="0">
+                    <div>
+                        <input type="number" class="form-control" id="score_0" name="score_0" data-input_row_id="0" data-input_type="marks">
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-primary" onclick="return add_new_row()">Add Row</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        // Build rows from existing data
+        scoreEntries.forEach((entry, idx) => {
+            const rowId = entry.index;
+            const scoreValue = entry.value || '';
+            
+            if (idx === 0) {
+                // First row has "Add Row" button
+                scoreRowsHtml += `
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between" data-input_row_id="${rowId}">
+                            <div>
+                                <input type="number" class="form-control" id="score_${rowId}" name="score_${rowId}" data-input_row_id="${rowId}" data-input_type="marks" value="${scoreValue}">
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-primary" onclick="return add_new_row()">Add Row</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Additional rows have "Remove" button
+                scoreRowsHtml += `
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between" data-input_row_id="${rowId}">
+                            <div>
+                                <input type="number" class="form-control" name="score_${rowId}" data-input_row_id="${rowId}" data-input_type="marks" value="${scoreValue}">
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-danger" onclick="return remove_row(${rowId})">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    }
+    
+    // Show modal with preloaded data
+    $(`div[id="viewOnlyModal"]`).modal('show');
+    $(`div[id="viewOnlyModal"] h5[class~="modal-title"]`).html(`Raw Score Entry - ${input_name}`);
+    $(`div[id="viewOnlyModal"] div[class~="modal-body"]`).html(`
+        <div class="mb-2">
+            <div class="d-flex justify-content-between">
+                <div class="border-bottom pb-3 border-primary mb-2">
+                    <label for="score_ceiling">Score Ceiling</label>
+                    <input type="number" class="form-control" value="${scoreCeiling}" id="score_ceiling" name="score_ceiling">
+                </div>
+            </div>
+        </div>
+        ${scoreRowsHtml}
+    `);
+    
+    $(`div[id="viewOnlyModal"] div[class~="modal-footer"]`).html(`
+        <div class="mb-2 d-flex justify-content-between w-100">
+            <div>
+                <button class="btn btn-light" data-dismiss="modal">Cancel</button>
+            </div>
+            <div>
+                <button class="btn btn-outline-success" onclick="return save_raw_score(${row_id}, '${input_name}')">Save Score</button>
+            </div>
+        </div>
+    `);
+}
+
 var raw_score_entry = (row_id, input_name) => {
 
     if(typeof currentModifiedRowData[row_id] === 'undefined') {
         currentModifiedRowData[row_id] = {};
-    } else {
+    }
+
+    if(typeof currentModifiedRowData[row_id][input_name] !== 'undefined') {
+        return preload_raw_score(row_id, input_name);
+    }
+
+    if(typeof currentModifiedRowData[row_id][input_name] === 'undefined') {
         currentModifiedRowData[row_id][input_name] = {};
     }
 
-    currentModifiedRowId = row_id;
     $(`div[id="viewOnlyModal"]`).modal('show');
     $(`div[id="viewOnlyModal"] h5[class~="modal-title"]`).html(`Raw Score Entry - ${input_name}`);
     $(`div[id="viewOnlyModal"] div[class~="modal-body"]`).html(`
+        <div class="mb-2">
+            <div class="d-flex justify-content-between">
+                <div class="border-bottom pb-3 border-primary mb-2">
+                    <label for="score_ceiling">Score Ceiling</label>
+                    <input type="number" class="form-control" value="${defaultCeiling}" id="score_ceiling" name="score_ceiling">
+                </div>
+            </div>
+        </div>
         <div class="mb-2">
             <div class="d-flex justify-content-between" data-input_row_id="0">
                 <div>
@@ -258,9 +379,13 @@ var raw_score_entry = (row_id, input_name) => {
     `);
 
     $(`div[id="viewOnlyModal"] div[class~="modal-footer"]`).html(`
-        <div class="mb-2">
-            <button class="btn btn-outline-success" onclick="return save_raw_score(${row_id}, '${input_name}')">Save Score</button>
-            <button class="btn btn-light" data-dismiss="modal">Cancel</button>
+        <div class="mb-2 d-flex justify-content-between w-100">
+            <div>
+                <button class="btn btn-light" data-dismiss="modal">Cancel</button>
+            </div>
+            <div>
+                <button class="btn btn-outline-success" onclick="return save_raw_score(${row_id}, '${input_name}')">Save Score</button>
+            </div>
         </div>
     `);
 }

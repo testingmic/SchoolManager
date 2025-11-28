@@ -677,10 +677,11 @@ class Terminal_reports extends Myschoolgh {
                     }
 
                     $report_table .= "<td class=''>
-                        <div class='d-flex justify-content-around items-center'>
-                        <input style='width:80px; font-size:18px;' type='number' data-max_percentage='{$theValue}'
-                        data-input_method='{$iname}' data-input_type='marks' data-input_row_id='{$key}' 
-                        class='form-control text-center' value='{$kvalue}'>
+                        <div class='d-flex justify-content-around items-center align-items-md-baseline'>
+                            <input style='width:80px; font-size:18px;' type='number' data-max_percentage='{$theValue}'
+                            data-input_method='{$iname}' data-input_type='marks' data-input_row_id='{$key}' 
+                            class='form-control text-center mr-1' value='{$kvalue}'>
+                            <i onclick='return raw_score_entry(\"{$key}\", \"{$iname}\")' class='fa fa-edit float-right cursor-pointer text-success font-12 mt-1'></i>
                         </div></td>";
 
                     $appendMobileView .= "<div class='d-flex justify-content-between items-center mb-2'>";
@@ -803,6 +804,8 @@ class Terminal_reports extends Myschoolgh {
         // get the results list
         $item = $this->results_list($params);
 
+        // print_r($item);exit;
+
         // if the scores list is not empty then set the preset dataset
         if(!empty($item['data'])) {
             $scores = $item['data'][0]->scores_list;
@@ -923,7 +926,7 @@ class Terminal_reports extends Myschoolgh {
                     }
                     if(!in_array($spl[0], ['name', 'id', 'remarks'])) {
                         if($spl[0] == 'marks' && $percentage) {
-                            $spl[1] = $spl[1] > 0 ? round(($spl[1] / $overallSBA) * $percentage) : 0;
+                            $spl[1] = $spl[1] > 0 ? round(($spl[1] / 100) * $percentage) : 0;
                         }
                         if(!in_array($spl[0], $allowedColumns)) {
                             continue;
