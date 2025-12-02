@@ -20,7 +20,7 @@ $additional = (object) [
     "user" => $defaultUser,
     "client_data" => $defaultUser->client,
     "user_type" => $defaultUser->user_type,
-    "class_guid" => $defaultUser->class_guid,
+    "class_guid" => $defaultUser->class_guid ?? null,
     "wards_list" => $defaultUser->wards_list ?? [],
 ];
 $pageTitle = "Generate Report Cards";

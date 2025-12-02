@@ -38,7 +38,6 @@ class Fees extends Myschoolgh {
             return ["code" => 400, "data" => $this->permission_denied];
         }
 
-
         // set the limit parameter
         $params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
 
@@ -261,7 +260,7 @@ class Fees extends Myschoolgh {
         $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
 
         /** Init the user type */
-        $class_id = $params->userData->class_id;
+        $class_id = $params->userData->class_id ?? null;
 
         /** The user id algorithm */
         if(in_array($params->userData->user_type, ["accountant", "admin"])) {

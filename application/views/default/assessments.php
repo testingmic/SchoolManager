@@ -240,7 +240,7 @@ $response->html = '
                             continue;
                         }
 
-                        $response->html .= "<option ".(isset($filter->class_id) && (in_array($each->item_id, $filter->class_id)) ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";
+                        $response->html .= "<option ".(isset($filter->class_id) && (in_array($each->item_id, stringToArray($filter->class_id))) ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";
                     }
                     $response->html .= '
                 </select>
