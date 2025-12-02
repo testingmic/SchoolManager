@@ -47,7 +47,7 @@ if(!empty($clientId)) {
     // the default data to stream
     $data_stream = $isAdminAccountant ? "attendance_report,class_attendance_report" : "attendance_report";
     
-    $start_date = date("Y-m-d", strtotime("-3 weeks"));
+    $start_date = date("Y-m-d", strtotime("-1 month"));
     $end_date = date("Y-m-d");
 
     $hasNoRecords = $isWardParent && empty($defaultUser->wards_list);
