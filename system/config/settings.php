@@ -16,7 +16,7 @@ define('APPPATH', $application_folder.DIRECTORY_SEPARATOR);
 define('VIEWPATH', $application_folder.DIRECTORY_SEPARATOR);
 
 function version() {
-    return "1.7.22";
+    return "1.7.23";
 }
 
 function is_localhost() {
