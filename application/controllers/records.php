@@ -218,13 +218,13 @@ class Records extends Myschoolgh {
 
         // if in preview mode but the user is not a super admin user
         if($this->session->previewMode && empty($this->session->superAdminUser)) {
-            return [
-                "code" => 400, 
-                "data" => "Sorry! You will not be able to perform the delete action since you are in preview mode.",
-                "additional" => [
-                    "record_id" => $params->record_id, "clear" => true
-                ]
-            ];
+            // return [
+            //     "code" => 400, 
+            //     "data" => "Sorry! You will not be able to perform the delete action since you are in preview mode.",
+            //     "additional" => [
+            //         "record_id" => $params->record_id, "clear" => true
+            //     ]
+            // ];
         }
 
         // run the query

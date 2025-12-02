@@ -628,7 +628,7 @@ class Terminal_reports extends Myschoolgh {
                     $iName = $file_headers[$kkey] == 'SCHOOL BASED ASSESSMENT' ? 'SBA' : $file_headers[$kkey];
 
                     $report_table .= "<td>
-                    <input style='min-width:100px;' ".($columns["columns"][$file_headers[$kkey]] == "100" ? 
+                    <input style='width:80px;' ".($columns["columns"][$file_headers[$kkey]] == "100" ? 
                         "disabled='disabled' data-input_total_id='{$key}'" : 
                         "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." 
                         class='form-control pl-0 pr-0 font-18 text-center' data-max_percentage='{$columns["columns"][$file_headers[$kkey]]['percentage']}' 
@@ -638,7 +638,7 @@ class Terminal_reports extends Myschoolgh {
                     $appendMobileView .= "<div class='d-flex justify-content-between items-center mb-2'>";
                     $appendMobileView .= "<div>".ucwords($iName)."</div>";
                     $appendMobileView .= "<div>
-                    <input style='min-width:100px;' ".($columns["columns"][$file_headers[$kkey]] == "100" ? 
+                    <input style='width:80px;' ".($columns["columns"][$file_headers[$kkey]] == "100" ? 
                         "disabled='disabled' data-input_total_id='{$key}'" : 
                         "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." 
                         class='form-control pl-0 pr-0 font-18 text-center' data-max_percentage='{$columns["columns"][$file_headers[$kkey]]['percentage']}' 
@@ -650,15 +650,19 @@ class Terminal_reports extends Myschoolgh {
 
                     $kvalue = $remarks_dataset[$result[1]] ?? '';
                 
-                    $report_table .= "<td><input placeholder='Enter your remarks' style='min-width:300px' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'></td>";
+                    $report_table .= "<td><input placeholder=\"Teacher's remarks\" style='min-width:300px' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'></td>";
                 
-                    $appendMobileView .= "<input placeholder='Enter your remarks' style='width:100%' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'>";
+                    $appendMobileView .= "<input placeholder=\"Teacher's remarks\" style='width:100%' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'>";
                 
                 } elseif($file_headers[$kkey] == "TEACHER ID") {
                     $report_table .= "<td><span style='font-weight-bold font-17'>".(empty($kvalue) ? $params->userData->unique_id : $kvalue)."</span></td>";                    
                 } elseif(in_array($file_headers[$kkey], ['SUBJECT', 'STUDENT', 'STUDENT ID'])) {
                     $data_key = "data-".strtolower(str_ireplace(" ", "_", $file_headers[$kkey]))."='{$kvalue}'";
-                    $report_table .= "<td class='text-left'><span data-student_row_id='{$key}' {$data_key}>{$kvalue}</span></td>";
+                    
+                    $fullvalue = $kvalue;
+                    $ikvalue = $file_headers[$kkey] == "STUDENT ID" ? strtoupper(substr($kvalue, 0, 8) . "...") : strtoupper($kvalue);
+
+                    $report_table .= "<td class='text-left'><span title='{$fullvalue}' data-student_row_id='{$key}' {$data_key}>{$ikvalue}</span></td>";
                     
                     $appendMobileView .= "<div class='text-left'><span data-student_row_id='{$key}' {$data_key}></span></div>";
 
@@ -676,18 +680,25 @@ class Terminal_reports extends Myschoolgh {
                         $kvalue = empty($kvalue) ? '' : $kvalue;
                     }
 
-                    $report_table .= "<td class=''>
-                        <div class='d-flex justify-content-around items-center align-items-md-baseline'>
-                            <input style='width:80px; font-size:18px;' type='number' data-max_percentage='{$theValue}'
-                            data-input_method='{$iname}' data-input_type='marks' data-input_row_id='{$key}' 
-                            class='form-control text-center mr-1' value='{$kvalue}'>
-                            <i onclick='return raw_score_entry(\"{$key}\", \"{$iname}\")' class='fa fa-edit float-right cursor-pointer text-success font-12 mt-1'></i>
-                        </div></td>";
+                    $report_table .= "
+                        <td class='relative text-center'>
+                            <div class='d-flex justify-content-around mt-1 items-center align-items-md-baseline'>
+                                <input style='width:70px; font-size:18px;' type='number' data-max_percentage='{$theValue}'
+                                data-input_method='{$iname}' data-input_type='marks' data-input_row_id='{$key}' 
+                                class='form-control text-center mr-1' value='{$kvalue}'>
+                            </div>
+                            <span onclick='return raw_score_entry(\"{$key}\", \"{$iname}\")' title='Calculate the {$iname} score based on the percentage' class='edit-icon text-success cursor-pointer'>
+                                <i class='fa fa-edit'></i> Edit
+                            </span>
+                        </td>";
 
                     $appendMobileView .= "<div class='d-flex justify-content-between items-center mb-2'>";
                     $appendMobileView .= "<div style='width:60%'>".ucwords(str_ireplace("_", " ", $file_headers[$kkey]))."  
-                        <i onclick='return raw_score_entry(\"{$key}\", \"{$iname}\")' class='fa fa-edit float-right cursor-pointer text-success font-12 mt-1'></i></div>";
-                    $appendMobileView .= "<div><input style='width:80px; font-size:18px;' type='number' data-max_percentage='{$theValue}'
+                        <span onclick='return raw_score_entry(\"{$key}\", \"{$iname}\")' title='Calculate the {$iname} score based on the percentage' class='edit-icon text-success float-right cursor-pointer'>
+                            <i class='fa fa-edit'></i> Edit
+                        </span>
+                    </div>";
+                    $appendMobileView .= "<div><input style='width:70px; font-size:18px;' type='number' data-max_percentage='{$theValue}'
                     data-input_method='{$iname}' data-input_type='marks' data-input_row_id='{$key}' 
                     class='form-control text-center' value='{$kvalue}'></div>";
                     $appendMobileView .= "</div>";

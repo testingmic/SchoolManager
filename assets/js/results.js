@@ -339,6 +339,15 @@ var preload_raw_score = (row_id, input_name) => {
             </div>
         </div>
     `);
+
+    resize_modal();
+}
+
+var resize_modal = () => {
+    $(`div[id="viewOnlyModal"] div[class~="modal-dialog-top"]`).css("max-width", "500px");
+    setTimeout(() => {
+        $(`div[id="viewOnlyModal"] div[class~="modal-dialog-top"]`).css("max-width", "500px");
+    }, 500);
 }
 
 var raw_score_entry = (row_id, input_name) => {
@@ -388,4 +397,6 @@ var raw_score_entry = (row_id, input_name) => {
             </div>
         </div>
     `);
+
+    resize_modal();
 }

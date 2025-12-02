@@ -315,11 +315,11 @@ if(!$isSupport) {
         $count = count($data["data"]["sheets"]);
 
         // loop through the data
-        foreach($data["data"]["sheets"] as $key => $info) {
+        foreach(($data["data"]["sheets"] ?? []) as $key => $info) {
 
             $start++;
 
-            $pages_content .= $info["report"];
+            $pages_content .= $info["report"] ?? null;
             $pages_content .= $count !== $start ? "\n<div class=\"page_break\"></div>" : null;
         }
     }

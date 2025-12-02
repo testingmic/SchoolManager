@@ -1352,7 +1352,7 @@ class Attendance extends Myschoolgh {
                 }
 
                 // get days in the academic year and term
-                $days = $this->listDays($defaultAcademics->term_starts, $defaultAcademics->term_ends);
+                $days = filterWeekendDates($this->listDays($defaultAcademics->term_starts, $defaultAcademics->term_ends));
 
                 // set the summary information
                 $summary_set["Term"] = count($days);

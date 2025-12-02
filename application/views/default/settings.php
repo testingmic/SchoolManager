@@ -40,6 +40,8 @@ if(!$accessObject->hasAccess("manage", "settings")) {
     // set the url
     $url_link = $SITEURL[1] ?? null;
 
+    $response->array_stream['url_link'] = "settings/";
+
     $response->html = '
         <section class="section">
             <div class="section-header">
@@ -62,28 +64,28 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                             <div class="padding-20">
                                 <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                     <li class="nav-item">
-                                        <a class="nav-link '.(empty($url_link) || ($url_link == "_general") ? "active" : null).'" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General</a>
+                                        <a class="nav-link '.(empty($url_link) || ($url_link == "_general") ? "active" : null).'" onclick="return appendToUrl(\'_general\')"  id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link '.($url_link == "_calendar" ? "active" : null).'" id="academic_calendar-tab2" data-toggle="tab" href="#academic_calendar" role="tab" aria-selected="true">Academic Calendar</a>
+                                        <a class="nav-link '.($url_link == "_calendar" ? "active" : null).'" onclick="return appendToUrl(\'_calendar\')" id="academic_calendar-tab2" data-toggle="tab" href="#academic_calendar" role="tab" aria-selected="true">Academic Calendar</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Grading</a>
+                                        <a class="nav-link '.($url_link == "examination" ? "active" : null).'" id="examination-tab2" data-toggle="tab" onclick="return appendToUrl(\'examination\')" href="#examination" role="tab" aria-selected="true">Grading</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link '.($url_link == "_grading" ? "active" : null).'" id="results_structure-tab2" data-toggle="tab" href="#results_structure" role="tab" aria-selected="true">Result Settings</a>
+                                        <a class="nav-link '.($url_link == "_grading" ? "active" : null).'" onclick="return appendToUrl(\'_grading\')" id="results_structure-tab2" data-toggle="tab" href="#results_structure" role="tab" aria-selected="true">Result Settings</a>
                                     </li>
                                     <li class="nav-item hidden" hidden>
-                                        <a class="nav-link '.($url_link == "_remarks" ? "active" : null).'" id="_remarks-tab2" data-toggle="tab" href="#_remarks" role="tab" aria-selected="true">Remarks</a>
+                                        <a class="nav-link '.($url_link == "_remarks" ? "active" : null).'" onclick="return appendToUrl(\'_remarks\')" id="_remarks-tab2" data-toggle="tab" href="#_remarks" role="tab" aria-selected="true">Remarks</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link '.($url_link == "_student" ? "active" : null).'" id="import_students-tab2" data-toggle="tab" href="#import_students" role="tab" aria-selected="true">Import Student</a>
+                                        <a class="nav-link '.($url_link == "_student" ? "active" : null).'" onclick="return appendToUrl(\'_student\')" id="import_students-tab2" data-toggle="tab" href="#import_students" role="tab" aria-selected="true">Import Student</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link '.($url_link == "_staff" ? "active" : null).'" id="staff-tab2" data-toggle="tab" href="#staff" role="tab" aria-selected="true">Import Staff</a>
+                                        <a class="nav-link '.($url_link == "_staff" ? "active" : null).'" onclick="return appendToUrl(\'_staff\')" id="staff-tab2" data-toggle="tab" href="#staff" role="tab" aria-selected="true">Import Staff</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link '.($url_link == "_parent" ? "active" : null).'" id="parent-tab2" data-toggle="tab" href="#parent" role="tab" aria-selected="true">Import Parent</a>
+                                        <a class="nav-link '.($url_link == "_parent" ? "active" : null).'" onclick="return appendToUrl(\'_parent\')" id="parent-tab2" data-toggle="tab" href="#parent" role="tab" aria-selected="true">Import Parent</a>
                                     </li>
                                 </ul>
                                 <div class="tab-content tab-bordered" id="myTab3Content">
@@ -93,7 +95,7 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                     <div class="tab-pane fade '.($url_link == "_calendar" ? "show active" : null).'" id="academic_calendar" role="tabpanel" aria-labelledby="academic_calendar-tab2">
                                         '.($the_form["calendar"] ?? null).'
                                     </div>
-                                    <div class="tab-pane fade" id="examination" role="tabpanel" aria-labelledby="examination-tab2">
+                                    <div class="tab-pane fade '.($url_link == "examination" ? "show active" : null).'"" id="examination" role="tabpanel" aria-labelledby="examination-tab2">
                                         '.($the_form["examination"] ?? null).'
                                     </div>
                                     <div class="tab-pane fade '.($url_link == "_grading" ? "show active" : null).'" id="results_structure" role="tabpanel" aria-labelledby="results_structure-tab2">

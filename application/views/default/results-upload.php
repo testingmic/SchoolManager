@@ -25,8 +25,12 @@ $the_form = load_class("forms", "controllers")->terminal_reports($clientId);
 // add the scripts to load
 $response->scripts = ["assets/js/grading.js", "assets/js/results.js"];
 
+// set the url
+$url_link = $SITEURL[1] ?? null;
+
 // check if the user has the permission to view the results
 $showResults = isset($_GET["show_results"]) ? $_GET["show_results"] : false;
+$showResults = (bool)($url_link == "results");
 
 // get the list of all classes
 $report_param = (object) [
@@ -37,6 +41,8 @@ $report_param = (object) [
 $results_list = load_class("terminal_reports", "controllers", $report_param)->results_list($report_param)["data"];
 
 $terminal_reports_list = "";
+
+$response->array_stream['url_link'] = "results-upload/";
 
 $cards_view = "<div class='row'>";
 
@@ -50,8 +56,8 @@ foreach($results_list as $key => $report) {
     $terminal_reports_list .= "
     <tr>
         <td>".($key+1)."</td>
-        <td><span class='user_name' onclick='return load(\"class/{$report->class_id}\");'>".strtoupper($report->class_name)."</span></td>
-        <td><span class='user_name' onclick='return load(\"course/{$report->course_id}\");'>{$report->course_name} ({$report->course_code})</span></td>
+        <td width='12%'><span class='user_name' onclick='return load(\"class/{$report->class_id}\");'>".strtoupper($report->class_name)."</span></td>
+        <td width='15%'><span class='user_name' onclick='return load(\"course/{$report->course_id}\");'>{$report->course_name} ({$report->course_code})</span></td>
         <td width='15%' class='text-center'>{$report->academic_year}</td>
         <td width='15%' class='text-center'>{$report->academic_term}</td>
         <td width='16%'>
@@ -60,7 +66,7 @@ foreach($results_list as $key => $report) {
             {$report->date_created}
         </td>
         <td width='10%'>{$myClass->the_status_label($report->status)}</td>
-        <td align='center' width='18%'>{$action}</td>
+        <td align='center' width='16%'>{$action}</td>
     </tr>";
 
     $cards_view .= "
@@ -97,10 +103,10 @@ $response->html = '
                         <div class="padding-20">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link '.(!$showResults ? 'active' : '').'" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">Upload Result</a>
+                                    <a class="nav-link '.(!$showResults ? 'active' : '').'" onclick="return appendToUrl(\'upload\')" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">Upload Result</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link '.($showResults ? 'active' : '').'" id="upload_reports-tab2" data-toggle="tab" href="#upload_reports" role="tab" aria-selected="true">Results List</a>
+                                    <a class="nav-link '.($showResults ? 'active' : '').'" onclick="return appendToUrl(\'results\')" id="upload_reports-tab2" data-toggle="tab" href="#upload_reports" role="tab" aria-selected="true">Results List</a>
                                 </li>
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">

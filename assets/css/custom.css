@@ -780,6 +780,17 @@ table.dataTable.table-sm>thead>tr>th {
     text-decoration: underline;
 }
 
+.form-control, .input-group-text, .custom-select, .custom-file-label {
+    background-color: #fdfdff;
+    border-color: #c0c0c0;
+}
+
+.score-edit-icon {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
 textarea.form-control {
     height: 130px !important;
 }
