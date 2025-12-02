@@ -8,6 +8,81 @@ class Attendance extends Myschoolgh {
     }
 
     /**
+     * List Attendance Log
+     * 
+     * List the attendance log for the specified date range, user id, class id, user type, request, action, user ids, and date logged
+     * 
+     * @param StdClass $params
+     * @return Array
+     */
+    public function list(stdClass $params) {
+
+        try {
+
+            $query = "SELECT u.*, c.name AS class_name, u2.name AS created_by_name
+            FROM users_attendance_log u
+            LEFT JOIN classes c ON u.class_id = c.id
+            LEFT JOIN users u2 ON u.created_by = u2.item_id
+            WHERE u.client_id = '{$params->clientId}'";
+            $query .= !empty($params->start_date) && !empty($params->end_date) ? " AND u.log_date BETWEEN '{$params->start_date}' AND '{$params->end_date}'" : "";
+            $query .= !empty($params->user_id) ? " AND u.user_id = '{$params->user_id}'" : "";
+            $query .= !empty($params->class_id) ? " AND u.class_id = '{$params->class_id}'" : "";
+            $query .= !empty($params->user_type) ? " AND u.user_type = '{$params->user_type}'" : "";
+            $query .= !empty($params->user_ids) ? " AND u.user_id IN (".implode(",", $params->user_ids).")" : "";
+            $query .= !empty($params->finalize) ? " AND u.id = '{$params->finalize}'" : "";
+            $query .= " ORDER BY u.log_date DESC";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+
+            $data = $stmt->fetchAll(PDO::FETCH_OBJ);
+            
+            return ["code" => 200, "data" => $data];
+
+        } catch(PDOException $e) {
+            return ["code" => 201, "data" => []];
+        }
+
+    }
+
+    /**
+     * Finalize Attendance Log
+     * 
+     * Mark the attendance log as finalized
+     * 
+     * @param StdClass $params
+     * @return Array
+     */
+    public function mark_as_finalized(stdClass $params) {
+
+        try {
+
+            global $accessObject;
+
+            // confirm that the user has the permission to finalize attendance
+            if(!$accessObject->hasAccess("finalize", "attendance")) {
+                return ["code" => 400, "data" => "Sorry! You do not have the permission to finalize the attendance log."];
+            }
+
+            $getRecord = $this->list($params);
+            if(empty($getRecord['data'])) {
+                return ["code" => 400, "data" => "Sorry! An invalid record id was supplied."];
+            }
+
+            // execute the statement
+            $this->db->query("UPDATE users_attendance_log SET date_finalized = now(), finalize = '1', finalized_by='{$params->userId}' WHERE id='{$params->finalize}' LIMIT 1");
+
+            // set a new message
+            $data = "Attendance log for {$params->date} was successfully finalized.";
+
+            return ["code" => 200, "data" => $data];
+            
+        } catch(PDOException $e) {
+            return ["code" => 201, "data" => []];
+        }
+    }
+
+    /**
      * Log Attendance
      * 
      * Loop through the attendance array list and log the attendance for the specified date
@@ -104,7 +179,7 @@ class Attendance extends Myschoolgh {
         }
 
         // if the attendance parameter was parsed
-        if(isset($params->attendance)) {
+        if(!empty($params->attendance)) {
             
             // set a new user type
             $the_user_type = $params->user_type == "staff" ? ["teacher","employee","admin","accountant"] : [$params->user_type];
@@ -188,8 +263,8 @@ class Attendance extends Myschoolgh {
             if((int)$check[0]->finalize === 1 && empty($params->appendExisting)) {
 
                 // decode the json data
-                $check[0]->users_list = json_decode($check[0]->users_list, true);
-                $check[0]->users_data = json_decode($check[0]->users_data, true);
+                $check[0]->users_list = !empty($check[0]->users_list) ? json_decode($check[0]->users_list, true) : [];
+                $check[0]->users_data = !empty($check[0]->users_data) ? json_decode($check[0]->users_data, true) : [];
 
                 return [
                     "code" => 200, 
@@ -219,7 +294,7 @@ class Attendance extends Myschoolgh {
             $info = "";
 
             // if the query was parsed
-            if(isset($params->finalize)) {
+            if(!empty($params->finalize)) {
                 
                 $info = "The record was finalized and cannot be changed again.";
 

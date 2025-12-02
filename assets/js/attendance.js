@@ -119,6 +119,29 @@ var finalize_AttendanceLog = (date, user_type = "", class_id = "", finalize) => 
     });
 }
 
+var mark_as_finalized = (attendance_id) => {
+    swal({
+        title: "Finalize Attendance Log",
+        text: "Are you sure you want to mark the attendance log as finalized? \n \
+        Note that you cannot change the information once it has been marked as finalized",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/attendance/mark_as_finalized`, { finalize: attendance_id }).then((response) => {
+                if (response.code == 200) {
+                    swal({ text: response.data.result, icon: "success", });
+                    $(`tr[data-row_id="${attendance_id}"]`).find(`button[class~="finalize"]`).addClass("hidden");
+                    $(`span[class~="finalized_status_${attendance_id}"]`).html("<span class='badge badge-success'>Finalized</span>");
+                }
+            }).catch(() => {
+                swal({ text: swalnotice.ajax_error, icon: "error", });
+            });
+        }
+    });
+}
+
 $(`select[id="attendance_category"]`).on("change", function() {
     let value = $(this).val();
     $(`div[id="attendance_log_summary"]`).html(``);

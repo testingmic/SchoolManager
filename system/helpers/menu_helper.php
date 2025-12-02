@@ -74,7 +74,10 @@
             <?php if(!$isReadOnly) { ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
             <?php } ?>
-            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
+            <?php if($accessObject->hasAccess("review", "attendance")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>attendance_log_history">Attendance Log History</a></li>
+            <?php } ?>
         </ul>
     </li>
     <?php } ?>
