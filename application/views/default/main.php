@@ -81,6 +81,7 @@ if(empty($urlParse['path']) || !empty($urlParse['path']) && strlen($urlParse['pa
         ?>
         <div class="main-content" id="pagecontent">
             <?= $myClass->async_notification(); ?>
+            <?= top_level_notification_engine($defaultUser, $defaultAcademics ?? [], $baseUrl, true); ?>
             
             <!-- Welcome Header Section -->
             <div class="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-3xl shadow-2xl mb-8">

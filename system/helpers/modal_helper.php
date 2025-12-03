@@ -553,9 +553,6 @@ function access_denied($state = null, $timer = null) {
  **/
 function notification_modal($title = null, $caption = null, $url_link = null) {
     
-    // global variable data
-    global $defaultClientData, $baseUrl;
-
     // return the content
     return '
         <div class="row">
@@ -612,8 +609,10 @@ function ajax_form_button() {
  * @return string
  */
 function add_new_item($item_id = null, $label = null) {
-	global $accessObject;
-	$buttons = "
+	
+    global $accessObject;
+	
+    $buttons = "
     <div class=\"btn-group dropdown d-inline\">
 		<button type=\"button\" class=\"btn btn-outline-info btn-icon-text dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">
 			Add New {$label}
