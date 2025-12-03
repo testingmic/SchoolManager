@@ -48,15 +48,6 @@
                         </a>
                     </li>
                 <?php } ?>
-                <?php  if(in_array($client_state, ["Activated", "Pending"])) { ?>
-                <li class="nav-item">
-                    <a onclick="return appendToUrl('students')" class="<?= $urlLink == 'students' ? 'active' : '' ?> nav-link border-0 px-6 py-3 text-gray-700 font-semibold text-sm transition-all duration-200 hover:shadow-md" 
-                       id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
-                        <i class="fas fa-users mr-2 text-teal-600"></i>
-                        <strong>Import Students</strong>
-                    </a>
-                </li>
-                <?php } ?>
                 <li class="nav-item">
                     <a onclick="return appendToUrl('complete')" class="<?= $urlLink == 'complete' ? 'active' : '' ?> nav-link border-0 px-6 py-3 text-gray-700 font-semibold text-sm transition-all duration-200 hover:shadow-md" 
                        id="complete-tab2" data-toggle="tab" href="#complete" role="tab" aria-selected="true">

@@ -24,7 +24,7 @@ class Auth extends Myschoolgh {
         LEFT JOIN classes cl ON cl.id = u.class_id
         LEFT JOIN clients_accounts c ON c.client_id = u.client_id
         WHERE (u.username = ? OR u.email = ? OR u.unique_id = ?) AND c.client_state != 'Deleted' 
-        AND u.user_status = ? ORDER BY u.id DESC LIMIT 1";
+        AND u.user_status IN ('Active', 'Pending') ORDER BY u.id DESC LIMIT 1";
 
     /**
      * Constructor
@@ -60,7 +60,7 @@ class Auth extends Myschoolgh {
 
             // make a query for the username
             $stmt = $this->db->prepare($this->loginQuery);
-            $stmt->execute([$params->username, $params->username, $params->username, 'Active']);
+            $stmt->execute([$params->username, $params->username, $params->username]);
 
             // count the number of rows found
             if($stmt->rowCount() == 1) {

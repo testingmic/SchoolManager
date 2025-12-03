@@ -262,7 +262,8 @@ if(!empty($client_id)) {
                             </div>
                             <div class="w-100 mt-2 border-top text-center pt-3">
                                 <a class="btn btn-dark" href="'.$baseUrl.'dashboard"><i class="fa fa-arrow-circle-left"></i> Go Back</a>
-                                '.($isSupport ? "<a class='btn btn-outline-success' href='{$baseUrl}dashboard?preview_mode=true&client_id={$data->client_id}'><i class='fa fa-eye'></i> Enter Preview Mode</a>" : null).'
+                                '.($isSupport ? "<a class='btn btn-outline-warning' href='{$baseUrl}dashboard?preview_mode=true&client_id={$data->client_id}'><i class='fa fa-eye'></i> Preview Mode</a>" : null).'
+                                '.($isSupport && $data->client_state == "Pending" ? "<a class='btn btn-outline-success' href='{$baseUrl}dashboard?preview_exit=true'><i class='fa fa-check'></i> Verify Account</a>" : null).'
                             </div>
 
                         </div>
@@ -351,6 +352,7 @@ if(!empty($client_id)) {
                                                             <td width="35%"><strong>STATUS</strong></td>
                                                             <td>
                                                                 <select '.$is_disabled.' data-width="100%" name="data[client_state]" class="form-control selectpicker">
+                                                                    <option '.($data->client_state == "Pending" ? "selected" : null).' value="Pending">Pending</option>
                                                                     <option '.($data->client_state == "Active" ? "selected" : null).' value="Active">Active</option>
                                                                     <option '.($data->client_state == "Suspended" ? "selected" : null).' value="Suspended">Suspended</option>
                                                                     <option '.($data->client_state == "Expired" ? "selected" : null).' value="Expired">Expired</option>

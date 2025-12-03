@@ -185,13 +185,14 @@ var play_sound = () => {
 }
 
 var logout = async() => {
+    localStorage.removeItem("mgh_access_token");
     await $.post(`${baseUrl}api/auth/logout`).then((resp) => {
         if (resp.code == 200) {
+            localStorage.removeItem("mgh_access_token");
             swal({
                 text: "You have successfully been logged out.",
                 icon: "success",
             });
-            localStorage.removeItem("mgh_access_token");
             setTimeout(() => {
                 window.location.href = `${baseUrl}`
             }, 1500)
