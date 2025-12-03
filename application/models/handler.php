@@ -359,8 +359,6 @@ class Handler {
         $bugs = false;
         $invalidToken = false;
 
-        print_r($endpoint);exit;
-
         // check if the endpoint is not the auth endpoint
         if(!in_array($endpoint, ["api/auth", "qr/lookup", "qr/logs", "qr/save", "auth/validate_token"])) {
 
