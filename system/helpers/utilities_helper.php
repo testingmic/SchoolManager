@@ -49,8 +49,9 @@ function placeholder_text($text_id = null) {
  */
 function emptyForFalseDate($date = null) {
     if(empty($date)) return 'N/A';
-    if(in_array($date, ["1970-01-01", "01/01/1970"])) return 'N/A';
-    return $date;
+    $convert = date("Y-m-d", strtotime($date));
+    if(in_array($convert, ["1970-01-01", "01/01/1970"])) return 'N/A';
+    return $convert;
 }
 
 /**

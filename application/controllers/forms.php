@@ -4473,7 +4473,7 @@ class Forms extends Myschoolgh {
 
         
         // set the max with
-        $max_width = "col-lg-10";
+        $max_width = "col-lg-11";
 
         // terminal reports columns list
         $default_columns_list[0] = "
