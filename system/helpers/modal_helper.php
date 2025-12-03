@@ -439,13 +439,13 @@ function changed_password($title = null, $timer = null) {
  */
 function academic_term_ended_notification($defaultAcademics, $baseUrl) {
     return '
-    <div class="flex p-3 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 mb-3 text-center font-19">
+    <div class="flex p-3 bg-red-50 dark:bg-red-200 rounded-xl border border-red-200 dark:border-red-800 mb-3 text-center font-19">
         <div class="flex-shrink-0 mr-3">
-            <svg class="w-10 h-7 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-10 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
             </svg>
         </div>
-        <p class="text-red-700 dark:text-red-300 w-100">
+        <p class="text-red-700 w-100">
             The current Academic Term ended on <strong>'.date("jS F, Y", strtotime($defaultAcademics->term_ends)).'</strong>.
             Click Here to <a href="'.$baseUrl.'schools/close_term"><strong>End the Academic Term</strong></a>. 
             <br><strong>DO NOT</strong> change the <strong>Academic Year</strong> or <strong>Term</strong>
@@ -471,7 +471,7 @@ function top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl
     // check if the term has ended
     if(!empty($defaultUser->appPrefs->termEnded) && !$previewOnly) {
         $html .= '
-        <div class="flex p-3 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 mb-3 text-center font-19">
+        <div class="flex p-3 bg-red-50 dark:bg-red-200 rounded-xl border border-red-200 dark:border-red-800 mb-3 text-center font-19">
             <div class="flex-shrink-0 mr-3">
                 <svg class="w-10 h-7 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>

@@ -47,11 +47,21 @@ if(!empty($client_id)) {
         "client_id='{$client_id}' LIMIT 1"
     );
 
-    // $testList = $myClass->pushQuery(
-    //     "*",
-    //     "users_messaging_list",
-    //     "template_type = 'verify_account'"
-    // );
+    $testList = $myClass->pushQuery(
+        "*",
+        "users_messaging_list",
+        "template_type = 'verify_account' AND client_id='{$client_id}'"
+    );
+
+    $verifyLink = null;
+    if(!empty($testList)) {
+        $messagePath = $testList[0]->message;
+
+        // Extract href content
+        if (preg_match('/href=[\'"]([^\'"]+)[\'"]/', $messagePath, $matches)) {
+            $verifyLink = $matches[1] ?? null;
+        }
+    }
 
     // error page
     // if no record was found
@@ -267,9 +277,9 @@ if(!empty($client_id)) {
                                 <div class="mt-2">'.($myClass->the_status_label($data->client_state)).'</div>
                             </div>
                             <div class="w-100 mt-2 border-top text-center pt-3">
-                                <a class="btn btn-dark" href="'.$baseUrl.'dashboard"><i class="fa fa-arrow-circle-left"></i> Go Back</a>
-                                '.($isSupport ? "<a class='btn btn-outline-warning' href='{$baseUrl}dashboard?preview_mode=true&client_id={$data->client_id}'><i class='fa fa-eye'></i> Preview Mode</a>" : null).'
-                                '.($isSupport && $data->client_state == "Pending" ? "<a class='btn btn-outline-success' href='{$baseUrl}dashboard?preview_exit=true'><i class='fa fa-check'></i> Verify Account</a>" : null).'
+                                <a class="btn btn-dark mb-1" href="'.$baseUrl.'dashboard"><i class="fa fa-arrow-circle-left"></i> Go Back</a>
+                                '.($isSupport ? "<a class='btn btn-outline-warning mb-1' href='{$baseUrl}dashboard?preview_mode=true&client_id={$data->client_id}'><i class='fa fa-eye'></i> Preview Mode</a>" : null).'
+                                '.($isSupport && $data->client_state == "Pending" ? "<a class='btn btn-outline-success mb-1' target='_blank' href='{$verifyLink}'><i class='fa fa-check'></i> Verify Account</a>" : null).'
                             </div>
 
                         </div>
