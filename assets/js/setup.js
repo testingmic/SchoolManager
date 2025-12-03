@@ -5,7 +5,24 @@ function htmlEntities(str) {
     return String(str).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-var loadPage = (page) => {}
+var loadPage = (page) => {
+    $.ajax({
+        url: page,
+        data: $.form_data,
+        method: "POST",
+        dataType: "JSON",
+        beforeSend: () => {
+            $.mainprogress.show();
+        },
+        success: (result) => {
+            if (typeof result.redirect !== "undefined") {
+                let redirectUrl = $.baseurl + "/" + result.redirect;
+                window.location.href = redirectUrl
+                return false;
+            }
+        }
+    });
+}
 
 var responseCode = (code) => {
     if (code == 200 || code == 201) {

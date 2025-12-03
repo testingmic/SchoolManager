@@ -6,7 +6,7 @@ $page_title = "Dashboard";
 require "headtags.php";
 
 // global variable
-global $isActiveAccount, $clientData, $clientId, $isSchool;
+global $isActiveAccount, $clientData, $clientId, $isSchool, $isSupport;
 
 // set the current_url
 $set_current_url = $session->user_current_url;
@@ -81,7 +81,9 @@ if(empty($urlParse['path']) || !empty($urlParse['path']) && strlen($urlParse['pa
         ?>
         <div class="main-content" id="pagecontent">
             <?= $myClass->async_notification(); ?>
-            <?= top_level_notification_engine($defaultUser, $defaultAcademics ?? [], $baseUrl, true); ?>
+            <?php if($isSupport) { ?>
+                <?= top_level_notification_engine($defaultUser, $defaultAcademics ?? [], $baseUrl, true); ?>
+            <?php } ?>
             
             <!-- Welcome Header Section -->
             <div class="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-3xl shadow-2xl mb-8">
