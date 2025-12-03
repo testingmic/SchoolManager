@@ -570,7 +570,6 @@ class Users extends Myschoolgh {
 
 			// init
 			$row = 0;
-			$key = 0;
 			$data = [];
 			$users_group = [];
 

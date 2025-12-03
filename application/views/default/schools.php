@@ -47,6 +47,12 @@ if(!empty($client_id)) {
         "client_id='{$client_id}' LIMIT 1"
     );
 
+    // $testList = $myClass->pushQuery(
+    //     "*",
+    //     "users_messaging_list",
+    //     "template_type = 'verify_account'"
+    // );
+
     // error page
     // if no record was found
     if(empty($load_schools_list)) {

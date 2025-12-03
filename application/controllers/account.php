@@ -668,9 +668,11 @@ class Account extends Myschoolgh {
 
         // format
         $query = "";
+        $values = [];
         foreach($params->general as $key => $value) {
             $value = xss_clean($value);
-            $query .= "client_{$key}='{$value}',";
+            $query .= "client_{$key} = ?,";
+            $values[] = $value;
         }
 
         if(empty($query)) {
@@ -678,10 +680,13 @@ class Account extends Myschoolgh {
         }
         try {
 
+            $values[] = json_encode($preference);
+            $values[] = $params->clientId;
+
             // run the update of the account information
             $stmt = $this->db->prepare("UPDATE clients_accounts 
                 SET {$query} client_preferences	= ? ".(isset($image) ? ", client_logo='{$image}'" : "")." WHERE client_id = ? LIMIT 1");
-            $stmt->execute([json_encode($preference), $params->clientId]);
+            $stmt->execute($values);
 
             // log the user activity
             $this->userLogs("account", $params->clientId, $client_data, "{$params->userData->name} updated the Account Information", $params->userId);

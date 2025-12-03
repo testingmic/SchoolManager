@@ -61,7 +61,7 @@ if((count($support_array) > 1) || empty($ticket_id)) {
         $action = "{$baseUrl}support/ticket/{$ticket->id}";
 
         // list the support tickets
-        $support_tickets .= "<tr class=\"cursor clickable-row\" data-href=\"{$action}\" data-row_id=\"{$ticket->id}\">";
+        $support_tickets .= "<tr class=\"cursor\" data-href=\"{$action}\" data-row_id=\"{$ticket->id}\">";
         $support_tickets .= "<td>{$ticket->id}</td>";
         $support_tickets .= "<td class='font-15'>
             <a class=\"font-weight-bold\" href=\"{$action}\">{$ticket->subject}</a>
@@ -76,6 +76,7 @@ if((count($support_array) > 1) || empty($ticket_id)) {
         $support_tickets .= "<td>{$ticket->section}</td>";
         $support_tickets .= "<td>".$myClass->the_status_label($ticket->status)."</td>";
         $support_tickets .= "<td>".date("jS M Y h:iA", strtotime($ticket->date_updated))."</td>";
+        $support_tickets .= "<td class='text-center'><button onclick=\"return loadPage('{$action}')\" class=\"btn btn-sm btn-outline-primary\"><i class=\"fa fa-eye\"></i> View</button></td>";
         $support_tickets .= "</tr>";
     }
 }
@@ -143,6 +144,7 @@ $response->html = '
                                     <th width="17%">Section</th>
                                     <th width="10%">Status</th>
                                     <th width="17%">Last Updated</th>
+                                    <th width="10%" class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>'.$support_tickets.'</tbody>
@@ -206,7 +208,8 @@ $response->html = '
             </div>
             <div>
                 <!--'.(!$disabled ? '<button class="btn bg-teal"><i></i> Reply to Ticket</button>' : null).'-->
-                '.(!$disabled ? '<button onclick="return modify_ticket(\'close\',\''.$ticket_id.'\',\'ticket\')" class="btn btn-outline-danger">Close</button>' : null).'
+                '.(!$disabled ? '<button onclick="return modify_ticket(\'close\',\''.$ticket_id.'\',\'ticket\')" class="btn btn-outline-danger">Close Ticket</button>' : null).'
+                '.(!$disabled ? '<button onclick="return loadPage(\''.$baseUrl.'support\')" class="btn btn-outline-success"><i class="fa fa-arrow-left"></i> Go Back to Tickets</button>' : null).'
             </div>
             <div class="mt-4">
                 <div class="activities">
@@ -219,7 +222,7 @@ $response->html = '
                         <div class="activity-detail" style="width:100%">
                             <div>
                                 <div class="d-flex justify-content-between">
-                                    <div class="font-weight-bold text-primary">'.($data->user_info->name ?? "Unknown User").'</div>
+                                    <div class="font-weight-bold text-primary">'.($data->user_info->name ?? "User").'</div>
                                     <div>
                                         <span class="text-job font-13 text-primary">'.$data->date_created.'</span>
                                     </div>
@@ -253,7 +256,7 @@ $response->html = '
                             <div class="activity-detail" style="width:100%">
                                 <div class="mb-2">
                                     <div class="d-flex justify-content-between">
-                                        <div class="font-weight-bold text-primary">'.($reply->user_info->name ?? "Unknown User").'</div>
+                                        <div class="font-weight-bold text-primary">'.($reply->user_info->name ?? "User").'</div>
                                         <div>
                                             <span class="text-job font-13 text-primary">'.$reply->date_created.'</span>
                                         </div>

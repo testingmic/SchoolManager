@@ -137,11 +137,6 @@ load_helpers(['menu_helper']);
     <?php } ?>
     
     <style>
-        <?php if(!$isActiveAccount) { ?>
-        .main-content {
-            padding-left: 30px;
-        }
-        <?php } ?>
         <?php if(!$isAdminAccountant) { ?>
             .main-content {
                 margin-bottom: 100px;
@@ -199,12 +194,8 @@ load_helpers(['menu_helper']);
             <nav class="navbar navbar-expand-lg main-navbar fixed">
                 <div class="form-inline mr-auto">
                     <ul class="mb-3 navbar-nav mr-3">
-                        <?php if($isActiveAccount) { ?>
                         <li><a href="#" data-toggle="sidebar" title="Hide/Display the Side Menubar" class="nav-link mt-2 nav-link-lg collapse-btn"><i class="fas fa-bars"></i></a></li>
-                        <!-- <li><a href="#" class="nav-link nav-link-lg mt-2 fullscreen-btn" title="Maximize to Fullscreen Mode"><i class="fas fa-expand"></i></a></li> -->
                         <li><a href="#" class="nav-link nav-link-lg mt-2 hidden" id="history-refresh" title="Reload Page"><i class="fas fa-redo-alt"></i></a></li>
-                        <?php } ?>
-                        <?php if($isActiveAccount) { ?>
                         <li class="border-left text-white d-none d-md-block">
                             <?php if(!$isSupport) { ?>
                             <a class="nav-link text-white nav-link-lg mt-1">
@@ -212,9 +203,11 @@ load_helpers(['menu_helper']);
                                     <span><?= $clientPrefs->academics->academic_year ?></span> 
                                     <span>|</span>
                                     <span class=""><?= $clientPrefs->academics->academic_term ?> <?= $academicSession; ?></span>
-                                    <?= ($endPermission && isset($defaultUser->appPrefs) && !empty($defaultUser->appPrefs->termEnded) ? 
-                                        "<span class='badge badge-danger notification cursor' title='This academic year and term has been closed and forwarded to the next academic year and term.'>Term Ended</span>" : 
-                                        ($endPermission ? "<span class='badge badge-success'>Active</span>" : null)); ?>
+                                    <?php if($isActiveAccount) { ?>
+                                        <?= ($endPermission && isset($defaultUser->appPrefs) && !empty($defaultUser->appPrefs->termEnded) ? 
+                                            "<span class='badge badge-danger notification cursor' title='This academic year and term has been closed and forwarded to the next academic year and term.'>Term Ended</span>" : 
+                                            ($endPermission ? "<span class='badge badge-success'>Active</span>" : null)); ?>
+                                    <?php } ?>
                                     <br><span class="font-weight-light font-17"><?= $defaultUser->name; ?> / <?= ucwords($defaultUser->user_type); ?></span>
                                 </strong>
                             </a>
@@ -224,53 +217,55 @@ load_helpers(['menu_helper']);
                                 </a>
                             <?php } ?>
                         </li>
-                        <?php } ?>
                     </ul>
                 </div>
                 <ul class="navbar-nav navbar-right items-center">
-                <?php if($isActiveAccount) { ?>
-                    <li class="dropdown dropdown-list-toggle"><a title="Notifications List" href="#" data-toggle="dropdown" class="nav-link notification-toggle nav-link-lg"><i class="far fa-bell"></i></a>
-                        <div class="dropdown-menu dropdown-list dropdown-menu-right">
-                            <div class="dropdown-header">Notifications
-                                <div class="float-right mark_all_as_read">
-                                    <span onclick="return mark_all_notification_as_read()" class="underline text-blue">Mark All As Read</span>
+                    <?php if($isActiveAccount) { ?>
+
+                        <li class="dropdown dropdown-list-toggle"><a title="Notifications List" href="#" data-toggle="dropdown" class="nav-link notification-toggle nav-link-lg"><i class="far fa-bell"></i></a>
+                            <div class="dropdown-menu dropdown-list dropdown-menu-right">
+                                <div class="dropdown-header">Notifications
+                                    <div class="float-right mark_all_as_read">
+                                        <span onclick="return mark_all_notification_as_read()" class="underline text-blue">Mark All As Read</span>
+                                    </div>
+                                </div>
+                                <div id="notifications_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-icons"></div>
+                            </div>
+                        </li>
+
+                        <?php
+                        // show this section if the record is not empty
+                        if(!empty($_academic_check) && $isAdmin) {
+                        ?>
+                        <li hidden class="dropdown switch-academic_year dropdown-list-toggle"><a href="#" title="Switch Academic Year/Term" data-toggle="dropdown" class="nav-link academic_years-toggle nav-link-lg"><i class="far fa-calendar"></i></a>
+                            <div class="dropdown-menu dropdown-list dropdown-menu-right" style="width:250px">
+                                <div class="dropdown-header mb-0 pb-0">Academic Years List</div>
+                                <div class="dropdown-list-content pt-0 slim-scroll" style="overflow-y:auto">
+                                    <?php
+                                    // loop through the academic years and term
+                                    foreach($_academic_check as $_acc_years) {
+                                    ?>
+                                        <div class="p-2 pl-3 border">
+                                            <a href="#" onclick="return set_academic_year_term('<?= $_acc_years->academic_year; ?>','<?= $_acc_years->academic_term; ?>');" class="user_name">
+                                                <?= $_acc_years->academic_year; ?>: <?= $_acc_years->academic_term; ?> <?= $academicSession; ?>
+                                            </a>
+                                            <?= ("{$_acc_years->academic_year}_{$_acc_years->academic_term}" == "{$session->is_readonly_academic_year}_{$session->is_readonly_academic_term}") ? "<i class='fa text-success fa-check-circle'></i>" : null; ?>
+                                        </div>
+                                    <?php
+                                    }
+                                    ?>
+                                    <?php if(!empty($session->is_only_readable_app)) { ?>
+                                        <div class="exit_review" onclick="return set_academic_year_term('revert','revert');">EXIT REVIEW MODE</div>
+                                    <?php } ?>
                                 </div>
                             </div>
-                            <div id="notifications_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-icons"></div>
-                        </div>
-                    </li>
-                    <?php
-                    // show this section if the record is not empty
-                    if(!empty($_academic_check) && $isAdmin) {
-                    ?>
-                    <li hidden class="dropdown switch-academic_year dropdown-list-toggle"><a href="#" title="Switch Academic Year/Term" data-toggle="dropdown" class="nav-link academic_years-toggle nav-link-lg"><i class="far fa-calendar"></i></a>
-                        <div class="dropdown-menu dropdown-list dropdown-menu-right" style="width:250px">
-                            <div class="dropdown-header mb-0 pb-0">Academic Years List</div>
-                            <div class="dropdown-list-content pt-0 slim-scroll" style="overflow-y:auto">
-                                <?php
-                                // loop through the academic years and term
-                                foreach($_academic_check as $_acc_years) {
-                                ?>
-                                    <div class="p-2 pl-3 border">
-                                        <a href="#" onclick="return set_academic_year_term('<?= $_acc_years->academic_year; ?>','<?= $_acc_years->academic_term; ?>');" class="user_name">
-                                            <?= $_acc_years->academic_year; ?>: <?= $_acc_years->academic_term; ?> <?= $academicSession; ?>
-                                        </a>
-                                        <?= ("{$_acc_years->academic_year}_{$_acc_years->academic_term}" == "{$session->is_readonly_academic_year}_{$session->is_readonly_academic_term}") ? "<i class='fa text-success fa-check-circle'></i>" : null; ?>
-                                    </div>
-                                <?php
-                                }
-                                ?>
-                                <?php if(!empty($session->is_only_readable_app)) { ?>
-                                    <div class="exit_review" onclick="return set_academic_year_term('revert','revert');">EXIT REVIEW MODE</div>
-                                <?php } ?>
-                            </div>
-                        </div>
-                    </li>
-                    <?php } ?>
-                    <?php if($accessObject->hasAccess("manage", "settings") && !$isSupport) { ?>
-                        <li class="dropdown dropdown-list-toggle">
-                            <a title="Account Settings" href="<?= $baseUrl ?>settings" class="nav-link nav-link-lg"><i class="fa fa-cog"></i></a>
                         </li>
+                        <?php } ?>
+                        <?php if($accessObject->hasAccess("manage", "settings") && !$isSupport) { ?>
+                            <li class="dropdown dropdown-list-toggle">
+                                <a title="Account Settings" href="<?= $baseUrl ?>settings" class="nav-link nav-link-lg"><i class="fa fa-cog"></i></a>
+                            </li>
+                        <?php } ?>
                     <?php } ?>
                     <?php if($accessObject->hasAccess("support", "settings")) { ?>
                     <li class="dropdown dropdown-list-toggle">
@@ -280,7 +275,7 @@ load_helpers(['menu_helper']);
                     <li class="dropdown dropdown-list-toggle">
                         <a title="Knowledge Base List" href="<?= $baseUrl ?>knowledgebase" class="nav-link nav-link-lg"><i class="fa fa-book-open"></i></a>
                     </li>
-                <?php } ?>
+
                 <li class="dropdown">
                     <a href="#" data-toggle="dropdown"
                         class="nav-link dropdown-toggle nav-link-lg nav-link-user flex items-center">
@@ -339,7 +334,7 @@ load_helpers(['menu_helper']);
                     <strong><?= $session->is_readonly_academic_year; ?></strong>
                 </div>
             <?php } ?>
-            <?php if($isActiveAccount) { ?>
+            
             <div class="main-sidebar sidebar-style-2 sidebar-bg">
                 <aside id="sidebar-wrapper">
 
@@ -365,10 +360,12 @@ load_helpers(['menu_helper']);
                             $menu_function();
                         }
                         ?>
-                        <?php if($isSchool && in_array("live_chat", $clientFeatures)) { ?>
+                        <?php if(!$isActiveAccount) { ?>
+                        <li class="mb-5"><a href="<?= $baseUrl ?>support" class="nav-link"><i class="fas fa-user-cog"></i><span>Support Tickets</span></a></li>
+                        <?php } ?>
+                        <?php if($isSchool && in_array("live_chat", $clientFeatures) && $isActiveAccount) { ?>
                         <li class="mb-5"><a href="<?= $baseUrl ?>chat" class="nav-link"><i class="fas fa-envelope-open-text"></i><span>Live Chat</span></a></li>
                         <?php } ?>
                     </ul>
                 </aside>
             </div>
-            <?php } ?>

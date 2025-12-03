@@ -527,7 +527,7 @@ function access_denied($state = null, $timer = null) {
             <div class="col-lg-3 col-md-3"></div>
             <div class="col-lg-6 col-md-6 col-sm-12">
                 <div class="card">
-                    <div class="p-2 border-bottom border-3px text-center text-uppercase"><h4>'.$state.' Account</h4></div>
+                    <div class="p-2 border-bottom border-3px text-center text-uppercase"><h4>Account '.$state.'</h4></div>
                     <div class="card-body">
                         <div class="empty-state" data-height="400">
                             <div class="empty-state-icon bg-danger"><i class="fas fa-lock"></i></div>
@@ -535,6 +535,7 @@ function access_denied($state = null, $timer = null) {
                             <p class="lead">
                                 Sorry! You have been denied access to the system
                                 because your account has '.($state == "Suspended" ? "been {$state}" : $state).'
+                                Reach out to support on <a href="mailto:support@myschoolgh.com" class="font-bold">support@myschoolgh.com</a> or call <a href="tel:0550107770" class="font-bold">0550107770</a> to reactivate your account.
                             </p>
                             <button onclick="return loadPage(\''.$baseUrl.'support\');" class="btn anchor btn-warning mt-4">Visit Support Section</button>
                         </div>

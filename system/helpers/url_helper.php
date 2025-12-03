@@ -480,24 +480,10 @@ if ( ! function_exists('jump_to_main')) {
 				echo json_encode($response);
 				exit;
 			}
-		
-			// set the state
-			$state = $myClass->defaultClientData->client_state;
 
 			// if the account has been suspended or expired
-			if(in_array($state, ["Suspended", "Expired"])) {
-				$response = (object) [
-					"title" => "Account {$state}!",
-					"html" => access_denied($state)
-				];
-				echo json_encode($response);
-				exit;
-			}
-
-			// save the current url and attach to the user information
 			$stmt = $myschoolgh->prepare("UPDATE users SET last_visited_page = ?, last_seen = now() WHERE item_id = ? LIMIT 1");
-			return $stmt->execute([$current_url, $session->userId]);
-			
+			$stmt->execute([$current_url, $session->userId]);
 		}
 
 	}
