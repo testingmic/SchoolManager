@@ -235,7 +235,6 @@ class Crons {
 		print "Append the receipient to the email list\n";
 
 		print "You are about sending the email to the following recipients: \n";
-		print_r($recipient_list);
 		
 		$receipient = false;
 

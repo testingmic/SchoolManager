@@ -191,6 +191,7 @@ var logout = async() => {
                 text: "You have successfully been logged out.",
                 icon: "success",
             });
+            localStorage.removeItem("mgh_access_token");
             setTimeout(() => {
                 window.location.href = `${baseUrl}`
             }, 1500)

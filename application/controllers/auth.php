@@ -16,6 +16,21 @@ class Auth extends Myschoolgh {
 
     private $password_ErrorMessage;
 
+    // set the login query
+    private $loginQuery = "SELECT u.id, u.password, u.item_id AS user_id, 
+            u.access_level, u.username, u.client_id, u.status AS activated, u.email, u.user_type,
+            u.last_timetable_id, c.client_state, u.user_status, cl.item_id AS class_guid, u.firstname, u.lastname
+        FROM users u
+        LEFT JOIN classes cl ON cl.id = u.class_id
+        LEFT JOIN clients_accounts c ON c.client_id = u.client_id
+        WHERE (u.username = ? OR u.email = ? OR u.unique_id = ?) AND c.client_state != 'Deleted' 
+        AND u.user_status = ? ORDER BY u.id DESC LIMIT 1";
+
+    /**
+     * Constructor
+     * 
+     * @return void
+     */
     public function __construct() {
         parent::__construct();
 
@@ -37,31 +52,14 @@ class Auth extends Myschoolgh {
      */
     public function login(stdClass $params) {
 
-        global $session, $noticeClass;
-
         try {
-
-            // begin transaction
-            $this->db->beginTransaction();
 
             // trim the username and password
             $params->username = trim($params->username);
             $params->password = trim($params->password);
 
             // make a query for the username
-            $stmt = $this->db->prepare("
-                SELECT 
-                    u.id, u.password, u.item_id AS user_id, 
-                    u.access_level, u.username, u.client_id, 
-                    u.status AS activated, u.email, u.user_type,
-                    u.last_timetable_id, c.client_state, u.user_status,
-                    cl.item_id AS class_guid, u.firstname, u.lastname
-                FROM users u
-                LEFT JOIN classes cl ON cl.id = u.class_id
-                LEFT JOIN clients_accounts c ON c.client_id = u.client_id
-                WHERE (u.username = ? OR u.email = ? OR u.unique_id = ?) AND c.client_state != 'Deleted' 
-                AND u.user_status = ? ORDER BY u.id DESC LIMIT 1
-            ");
+            $stmt = $this->db->prepare($this->loginQuery);
             $stmt->execute([$params->username, $params->username, $params->username, 'Active']);
 
             // count the number of rows found
@@ -79,137 +77,7 @@ class Auth extends Myschoolgh {
                         // verify the password
                         if(password_verify($params->password, $results->password)) {
 
-                            // confirm if the user has permission to login
-                            if(in_array($results->user_status, $this->allowed_login_status)) {
-
-                                // last login trial
-                                $lastLogin = $this->pushQuery("attempts", "users_access_attempt", "username='{$results->username}' AND attempt_type='login' LIMIT 5");
-                                
-                                // if the last login information is not empty
-                                if(!empty($lastLogin)) {
-
-                                    // get the user record
-                                    $last_attempt = $lastLogin[0]->attempts;
-
-                                    // if the attempt is 4 or more then lodge a notification to the user
-                                    if($last_attempt >= 3) {
-
-                                        // form the notification parameters
-                                        $params = (object) [
-                                            '_item_id' => random_string("alnum", RANDOM_STRING),
-                                            'user_id' => $results->user_id,
-                                            'subject' => "Login Failures",
-                                            'username' => $results->username,
-                                            'remote' => false, 
-                                            'message' => "An attempt count of <strong>{$last_attempt}</strong> was made to access your Account. 
-                                                We recommend that you change your password to help secure it. Visit the profile section to effect the change.",
-                                            'content' => "An attempt count of <strong>{$last_attempt}</strong> was made to access your Account. 
-                                                    We recommend that you change your password to help secure it. Visit the <a href=\"{{APPURL}}profile\">profile section</a> to effect the change.",
-                                            'notice_type' => 3,
-                                            'clientId' => $results->client_id,
-                                            'userId' => $results->user_id,
-                                            'initiated_by' => 'system'
-                                        ];
-
-                                        // add a new notification
-                                        $noticeClass->add($params);
-                                    }
-                                }
-
-                                // clear the login attempt
-                                $this->clearAttempt($params->username);
-
-                                // set the status variable to true
-                                $this->status = true;
-
-                                // unset the password from the results
-                                unset($results->password);
-
-                                // set these sessions if not a remote call
-                                if(empty($params->remote)) {
-
-                                    // set the user sessions for the person to continue
-                                    $session->set("userLoggedIn", random_string('alnum', 50));
-                                    $session->set("userId", $results->user_id);
-                                    $session->set("userName", $params->username);
-                                    $session->set("clientId", $results->client_id);
-                                    $session->set("activated", $results->user_status);
-                                    $session->set("userRole", $results->access_level);
-                                    $session->set("user_type", $results->user_type);
-
-                                    // check the client state
-                                    if($results->client_state === "Pending") {
-                                        $session->set("initialAccount_Created", true);
-                                    }
-
-                                    // set the last timetable id in session
-                                    $session->set("last_TimetableId", $results->last_timetable_id);
-
-                                    // set additional session for student
-                                    if($results->user_type === "student") {
-                                        // set the student id
-                                        $session->set("student_id", $results->user_id);
-                                        // set the student class ids
-                                        $session->set("student_class_id", $results->class_guid);
-                                    }
-                                }
-                                
-                                // if a remote call was made for the access token
-                                if(!empty($params->remote)) {
-                                    
-                                    // get any active access token available or generate a new one if none exists
-                                    $access = $this->temporary_access($results);
-
-                                    // commit the transactions
-                                    $this->db->commit();
-                                    
-                                    // return the response
-                                    return $access;
-                                }
-
-                                // remove all temporary files uploaded before a logout
-                                $this->clear_temp_files($results->user_id);
-                                
-                                #update the table
-                                $ip = ip_address();
-                                $br = $this->browser."|".$this->platform;
-
-                                // update the last login for this user
-                                $stmt = $this->db->prepare("UPDATE users SET last_login='{$this->current_timestamp}', last_visited_page='{{APPURL}}dashboard', last_seen = '{$this->current_timestamp}' WHERE item_id=? LIMIT 55");
-                                $stmt->execute([$results->user_id]);
-
-                                // log the history record
-                                $stmt = $this->db->prepare("INSERT INTO users_login_history 
-                                    SET username='{$params->username}', client_id='{$results->client_id}', log_ipaddress='{$ip}', log_browser='{$br}', 
-                                    user_id='{$session->userId}', log_platform='{$this->agent}'
-                                ");
-                                $stmt->execute();
-
-                                // if the user is an admin or accountant
-                                if(in_array($results->user_type, ["admin", "accountant"])) {
-                                    // run simple cron activity
-                                    $this->execute_cron($results->client_id);
-                                }
-
-                                // if the user is an admin or accountant
-                                if(in_array($results->user_type, ["support"])) {
-                                    // run simple cron activity
-                                    $this->execute_support_cron();
-                                }
-
-                                // commit all transactions
-                                $this->db->commit();
-
-                                // response to return
-                                return [
-                                    "code" => 200,
-                                    "result" => "Login successful. Redirecting", 
-                                    "refresh" => 1000
-                                ];
-                            } else {
-                                //return the error message
-                                return ["code" => 201, "result" => "Sorry! You have been denied access to the system."];
-                            }
+                            return $this->handleLogin($results, $params);
 
                         } else {
                             // add user attempt
@@ -226,8 +94,7 @@ class Auth extends Myschoolgh {
                 }
             } else {
                 // add user attempt
-                //$this->addAttempt($params->username);
-                $this->db->commit();
+                $this->addAttempt($params->username);
                 return ["code" => 400, "result" => "Sorry! Invalid Username/Password."];
             }
 
@@ -240,9 +107,196 @@ class Auth extends Myschoolgh {
             }
 
         } catch(PDOException $e) {
-            $this->db->rollBack();
             return ["code" => 400, "result" => "Sorry! The Username/Password could not be validated"];
         }
+    }
+
+    /**
+     * Handle the login process
+     * 
+     * @param stdClass $results
+     * 
+     * @return Array
+     */
+    private function handleLogin($results, $params) {
+
+        global $session, $noticeClass;
+
+        // confirm if the user has permission to login
+        if(in_array($results->user_status, $this->allowed_login_status)) {
+
+            // last login trial
+            $lastLogin = $this->pushQuery("attempts", "users_access_attempt", "username='{$results->username}' AND attempt_type='login' LIMIT 5");
+            
+            // if the last login information is not empty
+            if(!empty($lastLogin)) {
+
+                // get the user record
+                $last_attempt = $lastLogin[0]->attempts;
+
+                // if the attempt is 4 or more then lodge a notification to the user
+                if($last_attempt >= 3) {
+
+                    // form the notification parameters
+                    $params = (object) [
+                        '_item_id' => random_string("alnum", RANDOM_STRING),
+                        'user_id' => $results->user_id,
+                        'subject' => "Login Failures",
+                        'username' => $results->username,
+                        'remote' => false, 
+                        'message' => "An attempt count of <strong>{$last_attempt}</strong> was made to access your Account. 
+                            We recommend that you change your password to help secure it. Visit the profile section to effect the change.",
+                        'content' => "An attempt count of <strong>{$last_attempt}</strong> was made to access your Account. 
+                                We recommend that you change your password to help secure it. Visit the <a href=\"{{APPURL}}profile\">profile section</a> to effect the change.",
+                        'notice_type' => 3,
+                        'clientId' => $results->client_id,
+                        'userId' => $results->user_id,
+                        'initiated_by' => 'system'
+                    ];
+
+                    // add a new notification
+                    $noticeClass->add($params);
+                }
+            }
+
+            // clear the login attempt
+            $this->clearAttempt($params->username);
+
+            // set the status variable to true
+            $this->status = true;
+
+            // unset the password from the results
+            unset($results->password);
+
+            // set these sessions if not a remote call
+            if(empty($params->remote)) {
+
+                // set the user sessions for the person to continue
+                $session->set("userLoggedIn", random_string('alnum', 50));
+                $session->set("userId", $results->user_id);
+                $session->set("userName", $params->username);
+                $session->set("clientId", $results->client_id);
+                $session->set("activated", $results->user_status);
+                $session->set("userRole", $results->access_level);
+                $session->set("user_type", $results->user_type);
+
+                // check the client state
+                if($results->client_state === "Pending") {
+                    $session->set("initialAccount_Created", true);
+                }
+
+                // set the last timetable id in session
+                $session->set("last_TimetableId", $results->last_timetable_id);
+
+                // set additional session for student
+                if($results->user_type === "student") {
+                    // set the student id
+                    $session->set("student_id", $results->user_id);
+                    // set the student class ids
+                    $session->set("student_class_id", $results->class_guid);
+                }
+            }
+            
+            // if a remote call was made for the access token
+            if(!empty($params->remote)) {
+                
+                // get any active access token available or generate a new one if none exists
+                $access = $this->temporary_access($results);
+                
+                // return the response
+                return $access;
+            }
+
+            // remove all temporary files uploaded before a logout
+            $this->clear_temp_files($results->user_id);
+            
+            #update the table
+            $ip = ip_address();
+            $br = $this->browser."|".$this->platform;
+
+            // update the last login for this user
+            $stmt = $this->db->prepare("UPDATE users SET last_login='{$this->current_timestamp}', last_visited_page='{{APPURL}}dashboard', last_seen = '{$this->current_timestamp}' WHERE item_id=? LIMIT 55");
+            $stmt->execute([$results->user_id]);
+
+            // log the history record
+            $stmt = $this->db->prepare("INSERT INTO users_login_history 
+                SET username='{$params->username}', client_id='{$results->client_id}', log_ipaddress='{$ip}', log_browser='{$br}', 
+                user_id='{$session->userId}', log_platform='{$this->agent}'
+            ");
+            $stmt->execute();
+
+            // if the user is an admin or accountant
+            if(in_array($results->user_type, ["admin", "accountant"])) {
+                // run simple cron activity
+                $this->execute_cron($results->client_id);
+            }
+
+            // if the user is an admin or accountant
+            if(in_array($results->user_type, ["support"])) {
+                // run simple cron activity
+                $this->execute_support_cron();
+            }
+
+            // response to return
+            return [
+                "code" => 200,
+                "result" => "Login successful. Redirecting", 
+                "access_token" => !empty($params->itoken) ? $params->itoken : $this->temporary_access($results)['access_token'],
+                "refresh" => 1000
+            ];
+
+        } else {
+            //return the error message
+            return ["code" => 201, "result" => "Sorry! You have been denied access to the system."];
+        }
+
+    }
+
+    /**
+     * Validate the access token
+     * 
+     * @param stdClass $params
+     * 
+     * @return array|object
+     */
+    public function validate_token(stdClass $params) {
+        // check if the request method is POST
+        if($params->requestMethod !== 'POST') {
+            return ["code" => 400, "result" => "Sorry! The request method is invalid."];
+        }
+
+        if(empty($params->itoken)) {
+            return ["code" => 400, "result" => "Sorry! The access token is required."];
+        }
+
+        // explode the access token
+        $accessToken = explode(":", base64_decode($params->itoken));
+
+        if(!isset($accessToken[0]) || !isset($accessToken[1])) {
+            return ["code" => 400, "result" => "Sorry! The access token is invalid."];
+        }
+
+        $apiValidate = new Api_validate();
+        $result = $apiValidate->verifyToken($accessToken[0], $accessToken[1]);
+
+        if(empty($result)) {
+            return ["code" => 400, "result" => "We could not validate the access token submitted in the request.", "reason" => "invalid_access_token"];
+        }
+
+        // make a query for the username
+        $stmt = $this->db->prepare($this->loginQuery);
+        $stmt->execute([$result->username, $result->username, $result->username, 'Active']);
+
+        if($stmt->rowCount() == 1) {
+            $results = $stmt->fetch(PDO::FETCH_OBJ);
+
+            $params->username = $result->username;
+
+            return $this->handleLogin($results, $params);
+        }
+        
+        return ["code" => 400, "result" => "We could not validate the access token submitted in the request.", "reason" => "invalid_access_token"];
+
     }
 
     /**
@@ -406,13 +460,10 @@ class Auth extends Myschoolgh {
 
         // create the temporary accesstoken
         $token = random_string("alnum", 32);
-        $expiry = date("Y-m-d H:i:s", strtotime("6 months"));
+        $expiry = date("Y-m-d H:i:s", strtotime("3 month"));
 
         // replace the string
         $expiry = str_replace(": ", "", $expiry);
-
-        // most recent query
-        $recent = $this->lastAccessKey($params->username);
 
         $userInfo = [
             'client_id' => $params->client_id,
@@ -426,19 +477,6 @@ class Auth extends Myschoolgh {
             
         ];
 
-        // if within the last 10 minutes
-        if($recent) {
-            $getList = $this->temporaryKeys($params->username);
-            return [
-                "status" => 200,
-                "result" => "The temporary access token could not be generated since the last generated one is within 30 minutes interval.",
-                "access_token" => $getList[0]["access_token"],
-                "expiry" => $getList[0]["expiry"],
-                "username" => $getList[0]["username"],
-                "user" => $userInfo
-            ];
-        }
-
         // access
         $access = [
             "status" => 200,
@@ -446,7 +484,7 @@ class Auth extends Myschoolgh {
             "access_token" => base64_encode("{$params->username}:{$token}"),
             "expiry" => $expiry,
             "user" => $userInfo,
-            "description" => "This access token will expiry after 1 month."
+            "description" => "This access token will expiry after 3 month."
         ];
         
         try {
@@ -458,9 +496,9 @@ class Auth extends Myschoolgh {
             $this->db->query("INSERT INTO users_api_keys 
                 SET user_id = '{$params->user_id}', username = '{$params->username}', 
                 access_token = '".password_hash($token, PASSWORD_DEFAULT)."', access_type = 'temp', 
-                expiry_date = '".date("Y-m-d", strtotime("+725 hours"))."', 
-                expiry_timestamp = '".date("Y-m-d H:i:s", strtotime("+725 hours"))."', 
-                requests_limit = '50000', access_key = '{$token}', client_id = '{$params->client_id}'
+                expiry_date = '".date("Y-m-d", strtotime("+3 month"))."', 
+                expiry_timestamp = '".date("Y-m-d H:i:s", strtotime("+3 month"))."', 
+                requests_limit = '5000000', access_key = '".password_hash($token, PASSWORD_DEFAULT)."', client_id = '{$params->client_id}'
             ");
 
         } catch(PDOException $e) {} 
@@ -469,65 +507,6 @@ class Auth extends Myschoolgh {
         return $access;
     }
 
-    /**
-     * Get the list of access tokens that are still active and can be used by the user
-     * 
-     * @param String $username      The username to use in loading record
-     * 
-     * @return Bool
-     */
-    private function temporaryKeys($username) {
-
-        try {
-            // run a query
-            $stmt = $this->db->prepare("SELECT username, access_key, expiry_timestamp FROM users_api_keys WHERE username = ? AND (TIMESTAMP(expiry_timestamp) > CURRENT_TIME()) ORDER BY id DESC LIMIT 25");
-            $stmt->execute([$username]);
-
-            // load the results
-            $data = [];
-
-            // loop through the record list
-            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-                // append to the array list
-                $data[] = [
-                    "username" => $result->username,
-                    "access_token" => base64_encode("{$result->username}:{$result->access_key}"),
-                    "access_type" => "temporary",
-                    "expiry" => $result->expiry_timestamp
-                ];
-            }
-
-            return $data;
-        } catch(PDOException $e) {} 
-    }
-
-    /**
-     * If the user's last key generated is within a 10 minutes span
-     * Then deny regeneration
-     * 
-     * @param String $username      The username to use in loading record
-     * 
-     * @return Bool
-     */
-    private function lastAccessKey($username) {
-
-        // run a query
-		$stmt = $this->db->prepare("SELECT date_generated FROM users_api_keys WHERE username = ? ORDER BY id DESC LIMIT 1");
-		$stmt->execute([$username]);
-
-        // load the results
-		$result = $stmt->fetch(PDO::FETCH_OBJ);
-
-		$lastUpdate = $result->date_generated ?? 0;
-        
-        // if the last update was parsed
-		if($lastUpdate) {
-			return (strtotime($lastUpdate) + (60 * 60 * 2)) >= time() ? true : false;
-		}
-
-		return false;
-	
-    }
 
     /**
      * Add an attempt to login to the system

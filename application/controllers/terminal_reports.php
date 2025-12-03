@@ -815,8 +815,6 @@ class Terminal_reports extends Myschoolgh {
         // get the results list
         $item = $this->results_list($params);
 
-        // print_r($item);exit;
-
         // if the scores list is not empty then set the preset dataset
         if(!empty($item['data'])) {
             $scores = $item['data'][0]->scores_list;
@@ -918,9 +916,6 @@ class Terminal_reports extends Myschoolgh {
                     $allowedColumns[] = strtolower(str_ireplace(" ", "_", $key));
                 }
             }
-
-            // print_r($report->ss);
-            // exit;
 
             // group the information in an array
             foreach($report->ss as $score) {

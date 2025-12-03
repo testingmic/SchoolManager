@@ -78,8 +78,6 @@ if(!empty($timetable_list)) {
         // draw the timetable to show
         $table = $timetableClass->draw($params);
 
-        // print_r($table);exit;
-
     } else {
         // once again set the $timetable_id == null even if a session has been set 
         $timetable_id = null;

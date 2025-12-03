@@ -858,8 +858,6 @@ class Fees extends Myschoolgh {
                         $owings_list .= "<span><strong>Cheque Number:</strong> {$last_payment["cheque_number"]}</span><br>";
                     }
                     
-                    // show the paid button
-                    // $owings_list .= "<p class='mt-3 mb-0 pb-0' id='print_receipt'><a href='{$this->baseUrl}receipt/{$last_payment["payment_uid"]}' class='btn btn-sm btn-outline-primary' target='_blank'><i class='fa fa-print'></i> Print Receipt</a></p>";
                 }
 
                 // if the student is exempted from paying for this fee
@@ -1511,8 +1509,6 @@ class Fees extends Myschoolgh {
             $payment_module = null;
             $showInfo = (bool) isset($params->clean_payment_info);
 
-            // print_r($stmt->fetchAll(PDO::FETCH_OBJ));
-            // exit;
             // // if clean_payment_info was parsed then query below
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {

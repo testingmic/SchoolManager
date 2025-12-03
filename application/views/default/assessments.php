@@ -100,8 +100,6 @@ else {
 
         foreach($item_list["data"] as $record) {
 
-            // print_r($record);
-
             $action = "<a title='View Assessment record' href='#' onclick='return load(\"assessment/{$record->item_id}/instructions\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i> View</a>";
         
             // manage questions button

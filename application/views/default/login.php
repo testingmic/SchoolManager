@@ -78,6 +78,7 @@ if (loggedIn()) {
   <?= $myClass->google_analytics_code ?>
   <?= $myClass->trackingSnippet() ?>
   <?php } ?>
+  <script>const baseUrl = "<?= $baseUrl ?>";</script>
 </head>
 
 <body class="bg">

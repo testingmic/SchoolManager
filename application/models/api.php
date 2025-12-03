@@ -291,13 +291,13 @@ class Api {
         $client_data = empty($defaultClientData->client_name) ? $this->myClass->client_data($this->clientId) : $defaultClientData;
         
         // set the default academics
-        $defaultAcademics = !empty($defaultAcademics) ? $defaultAcademics : $client_data->client_preferences->academics;
+        $defaultAcademics = !empty($defaultAcademics) ? $defaultAcademics : ($client_data?->client_preferences?->academics ?? null);
 
         // get the client data
-        $defaultClientData = !empty($defaultClientData->client_name) ? $defaultClientData : $client_data;
+        $defaultClientData = !empty($defaultClientData?->client_name) ? $defaultClientData : $client_data;
 
         // get the default user
-        $defaultUser = !empty($defaultUser->unique_id) ? $defaultUser : $this->userData;
+        $defaultUser = !empty($defaultUser?->unique_id) ? $defaultUser : $this->userData;
 
         // reassign the variable data
         $academics = $defaultAcademics ?? null;

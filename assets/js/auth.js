@@ -25,6 +25,7 @@ $(`form[id="auth-form"]`).on("submit", function(evt) {
     $(`div[class="form-content-loader"]`).css("display", "flex");
     $.post(`${form_action}`, form_data, function(response) {
         if (response.code == 200) {
+            $(`form[id="auth-form"] *`).prop("disabled", false);
             $(`div[class~="form-results"]`).html(`
                 <div class="flex items-center p-3 text-sm text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800" role="alert">
                     <svg class="shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -38,8 +39,10 @@ $(`form[id="auth-form"]`).on("submit", function(evt) {
             `);
             if ($(`input[name="recover"]`).length) {
                 $(`input[name="email"]`).val("");
-                $(`form[id="auth-form"] *`).prop("disabled", false);
             } else {
+                if(typeof response.data?.access_token !== 'undefined') {
+                    localStorage.setItem("mgh_access_token", response.data.access_token);
+                }
                 if ($(`link[name="current_url"]`).length) {
                     setTimeout(() => {
                         window.location.href = $(`link[name="current_url"]`).attr("value");
@@ -47,7 +50,6 @@ $(`form[id="auth-form"]`).on("submit", function(evt) {
                 }
                 if (typeof response.data?.clear !== 'undefined') {
                     $(`form[id="auth-form"] *`).val("");
-                    $(`form[id="auth-form"] *`).prop("disabled", false);
                     $(`form[id="auth-form"] input[name="plan"]`).val("basic");
                     $(`form[id="auth-form"] input[name="portal_registration"]`).val("true");
                 }
@@ -135,3 +137,23 @@ $(document).ready(function() {
         }
     });
 });
+
+// check if the access token is valid
+if(localStorage.getItem("mgh_access_token")) {
+    if($(`button[id="togglePassword"]`).length) {
+        $.post(`${baseUrl}api/auth/validate_token`, { 
+            itoken: localStorage.getItem("mgh_access_token"),
+            action: "validate_token"
+         }, function(response) {
+            if(response.code == 200) {
+                localStorage.setItem("mgh_access_token", response.data.access_token);
+                window.location.reload();
+            }
+        }).catch((error) => {
+            let data = error.responseJSON.data;
+            if(typeof data.reason !== 'undefined' && data.reason === "invalid_access_token") {
+                localStorage.removeItem("mgh_access_token");
+            }
+        });
+    }
+}

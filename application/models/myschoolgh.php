@@ -39,6 +39,8 @@ class Myschoolgh extends Models {
 	public $date_format;
 	public $dbConnected;
 
+	public $processedAlter = false;
+
     public $academic_term;
     public $academic_year;
 	public $iclient;
@@ -108,20 +110,23 @@ class Myschoolgh extends Models {
 	 */
 	public function alter_table() {
 		
-		if(empty($this->db)) return true;
-
+		/** Return true if the database connection is not established or the alter has been processed */
+		if(empty($this->db) || $this->processedAlter) return true;
+		
 		// prepare and execute the statement
-		$fix[] = "ALTER TABLE `users` CHANGE `phone_number` `phone_number` VARCHAR(21) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;";
+		$fix[] = "";
 
+		if(empty($fix)) return true;
 		foreach($fix as $stmt) {
 			try {
 				if(empty($stmt)) continue;
 				$query = $this->db->prepare($stmt);
 				$query->execute();
 			} catch(PDOException $e) {
-				// print $e->getMessage();
+				print $e->getMessage();
 			}
 		}
+		$this->processedAlter = true;
 	}
 
 	/**
@@ -1637,7 +1642,6 @@ class Myschoolgh extends Models {
         // get the last date created
         $last_time = $this->columnValue("date_created", $table, "ipaddress='{$this->ip_address}' {$where} ORDER BY id DESC");
 
-        // print_r($last_time);
         // confirm if not empty
         if(empty($last_time)) {
             return true;

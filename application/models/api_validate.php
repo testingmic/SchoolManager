@@ -85,11 +85,10 @@ class Api_validate {
 	 * @param String $userName
 	 * @param String $accessToken
 	 * 
-	 * @return Array
+	 * @return array|object
 	 */
-	private function verifyToken($username, $accessToken) {
+	public function verifyToken($username, $accessToken) {
 
-		/** Return error if database connection fails **/
 		try {
 			$stmt = $this->db->prepare("
 				SELECT 
@@ -101,7 +100,7 @@ class Api_validate {
 						FROM users_api_queries c
 						WHERE DATE(request_date) = CURDATE() LIMIT 1
 					) AS requests_count
-				FROM users_api_keys a WHERE a.username = '{$username}' AND a.status = ? AND (TIMESTAMP(a.expiry_timestamp) >= CURRENT_TIMESTAMP()) LIMIT {$this->maximum}
+				FROM users_api_keys a WHERE a.status = ? AND (TIMESTAMP(a.expiry_timestamp) >= CURRENT_TIMESTAMP()) LIMIT {$this->maximum}
 			");
 			$stmt->execute([1]);
 			

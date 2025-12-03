@@ -294,9 +294,6 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
     // create a new object
     $academi_calendar = load_class("files", "controllers")->list_attachments($files_param);
 
-    // $docs = load_class("files", "controllers")->resource_attachments_list("settings_calendar", $clientId);
-    // print_r($docs);exit;
-
     // set the academic calendar
     $response->array_stream['academic_calendar'] = $academi_calendar;
 

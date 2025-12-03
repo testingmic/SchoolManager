@@ -587,7 +587,6 @@ class Users extends Myschoolgh {
 			// loop through the results
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
 
-				// print_r($result); exit;
 				if(!empty($params->return_password)) {
 					$result->pass_word = $result->password;
 				}

@@ -95,6 +95,11 @@ class Handler {
         // set the default parameters
         $Api->default_params = $params;
 
+        if(in_array($this->outer_url, ["validate_token"])) {
+            $remote = true;
+            $params['mobileapp'] = true;
+        }
+
         // revert the params back into an array
         $param = (object) $params;
         $param->remote = $remote;
@@ -137,8 +142,13 @@ class Handler {
             $data = $ApiRequest["data"]["result"];
         }
 
+        // get the notification engine
+        $notificationEngine = top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl, true);
+
         // set the notification engine
-        $data['notification_engine'] = top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl, true);
+        if(!empty($notificationEngine)) {
+            $data['notification_engine'] = $notificationEngine;
+        }
 
         // set the response code
         if(isset($data['code']) && $param->remote) {
@@ -163,6 +173,10 @@ class Handler {
             $data['data'] = $data['data']['result'] ?? $data['data'];
         }
 
+        if(isset($data['data']['code'])) {
+            unset($data['data']['code']);
+        }
+
         // print out the response
         echo json_encode($data);
     }
@@ -179,7 +193,7 @@ class Handler {
         $endpoint = "{$this->inner_url}/{$this->outer_url}";
 
         // create a sample path
-        foreach(['auth', 'auth/logout', 'auth/login', 'devlog/transitioning', 'devlog/auth', 'auth/forgotten'] as $paths) {
+        foreach(['auth', 'auth/logout', 'auth/login', 'devlog/transitioning', 'devlog/auth', 'auth/forgotten', 'auth/validate_token'] as $paths) {
             $samplePath[] = "api/{$paths}";
             $samplePath[] = "{$paths}";
         }
@@ -203,6 +217,7 @@ class Handler {
                 $response["data"] = $logObj->logout($this->params);
             }
 
+            // if the username and password were parsed and the firstname was not parsed
             elseif(isset($this->params->username, $this->params->password) && !isset($this->params->firstname)) {
                 // remote login
                 $remote_login = (bool) isset($this->params->verify);
@@ -217,25 +232,30 @@ class Handler {
                 // Auth the user credentials
                 $response["data"] = $logObj->login($parameters);
             }
+
             // if the user is requesting a password reset
             elseif(isset($this->params->recover)) {
                 // request password reset
                 $response["data"] = $logObj->send_password_reset_token($this->params);
             }
+
             // if the user is resetting their password
             elseif(isset($this->params->reset_token, $this->params->password, $this->params->password_2)) {
                 // request password reset
                 $response["data"] = $logObj->reset_user_password($this->params);
             }
+            
             // if the user is creating a new portal account
             elseif(isset($this->params->portal_registration)) {
                 // request password reset
                 $response["data"] = $logObj->create($this->params);
             }
+            
             // if the user is still logged in
             elseif(!empty($this->params->onlineCheck)) {
                 $response["data"] = true;
             }
+            
             elseif(isset($this->params->school_id, $this->params->school_code)) {
 
                 // set the default response
@@ -258,13 +278,24 @@ class Handler {
                 }
             }
 
+            elseif(isset($this->params->itoken)) {
+                $this->params->requestMethod = $this->requestMethod;
+                // validate the token
+                $response["data"] = $logObj->validate_token($this->params);
+            }
+
             if(isset($response["data"]) && is_array($response["data"]) && isset($response["data"]["code"])) {
                 $response["code"] = $response["data"]["code"];
                 unset($response["data"]["code"]);
             }
 
+            // get the notification engine
+            $notificationEngine = top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl, true);
+
             // set the notification engine
-            $response["notification_engine"] = top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl, true);
+            if(!empty($notificationEngine)) {
+                $data['notification_engine'] = $notificationEngine;
+            }
 
             if(isset($response["data"]) && isset($response["code"])) {
                 header("HTTP/1.1 {$response["code"]} {$this->messages[$response["code"]]}");
@@ -328,8 +359,10 @@ class Handler {
         $bugs = false;
         $invalidToken = false;
 
+        print_r($endpoint);exit;
+
         // check if the endpoint is not the auth endpoint
-        if(!in_array($endpoint, ["api/auth", "qr/lookup", "qr/logs", "qr/save"])) {
+        if(!in_array($endpoint, ["api/auth", "qr/lookup", "qr/logs", "qr/save", "auth/validate_token"])) {
 
             // confirm that the access token parameter was parsed but did not pass the test
             // confirm if a valid api access key was parsed
@@ -410,9 +443,20 @@ class Handler {
             exit;
         }
 
-        // set the user id and client id
-        $this->userId = $defaultUser->user_id ?? ($defaultUser->userId ?? ($session->userdata['userId'] ?? null));
-        $this->clientId = $defaultUser->client_id ?? ($defaultUser->clientId ?? ($session->userdata['clientId'] ?? $params->client_id));
+        // if the default user is not empty
+        if(!empty($defaultUser)) {
+            // set the user id and client id
+            $this->userId = $defaultUser->user_id ?? ($defaultUser->userId ?? (
+                $session->userdata['userId'] ?? (
+                    $apiAccessValues->user_id ?? null
+                )
+            ));
+
+            // set the client id
+            $this->clientId = $defaultUser->client_id ?? ($defaultUser->clientId ?? ($session->userdata['clientId'] ?? (
+                $apiAccessValues->client_id ?? $params->client_id
+            )));
+        }
 
         /* Usage of the Api Class */
         $Api = load_class('api', 'models', 

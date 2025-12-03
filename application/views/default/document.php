@@ -76,8 +76,6 @@ if(!in_array("documents_manager", $clientFeatures) || empty($unique_id)) {
     $document_file = !empty($document->attachment) ? 
         document_file($document->attachment, $document->file_ref_id) : [];
 
-    // print_r($document_file);
-
     // set the document details
     $document_details = "
         <div class=\"mb-3\">

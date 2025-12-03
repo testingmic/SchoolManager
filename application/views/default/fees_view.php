@@ -45,9 +45,6 @@ if(!empty($item_id)) {
         $record = $data[0];
         $hasUpdate = true;
 
-        // print_r($data);
-        // exit;
-
         // if the request is to view the student information
         $updateItem = confirm_url_id(2, "update") ? true : false;
 
