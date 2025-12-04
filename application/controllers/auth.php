@@ -1189,14 +1189,32 @@ class Auth extends Myschoolgh {
             // create some few income account types for the client
             foreach(['Transport Fees', 'Book & Stationary Sales', 'Donations and Gifts'] as $item) {
                 $this->db->query("INSERT INTO accounts_type_head SET client_id = '{$client_id}', name='{$item}', is_system = 1, created_by = '{$user_id}',
-                    description='{$item} Income', type = 'Income', item_id = '".$this->rand_string()."'");
+                    description='{$item} Income', type = 'Income', item_id = '{$this->rand_string()}'");
             }
 
             // create some few expenseaccount types for the client
             foreach(['Repairs & Maintenance', 'Administrative and General Expenses', 'Utilities', 'Fuel', 'Teaching Materials', 'Food Services', 'Technology'] as $item) {
                 $this->db->query("INSERT INTO accounts_type_head SET client_id = '{$client_id}', name='{$item}', is_system = 0, created_by = '{$user_id}',
-                    description='{$item} Expenses', type = 'Expense', item_id = '".$this->rand_string()."'");
+                    description='{$item} Expenses', type = 'Expense', item_id = '{$this->rand_string()}'");
             }
+
+            $this->db->query("INSERT INTO payslips_allowance_types SET 
+                name = 'SSNIT', type = 'Deduction', is_statutory = 'Yes', 
+                calculation_method = 'percentage_on_gross_total', 
+                calculation_value = '5.5', pre_tax_deduction = 'Yes',
+                description = 'This is for snnit calculation.', client_id = '{$client_id}'");
+            
+            $this->db->query("INSERT INTO payslips_allowance_types SET 
+                name = 'TIER 2', type = 'Deduction', is_statutory = 'Yes', 
+                calculation_method = 'percentage_on_basic_salary', 
+                calculation_value = '5', pre_tax_deduction = 'Yes',
+                description = 'This is for TIER 2 calculation.', client_id = '{$client_id}'");
+
+            $this->db->query("INSERT INTO payslips_allowance_types SET 
+                name = 'PAYE', type = 'Deduction', is_statutory = 'Yes', 
+                calculation_method = 'percentage_on_basic_salary', 
+                calculation_value = '0', pre_tax_deduction = 'Yes',
+                description = 'This is for PAYE calculation.', client_id = '{$client_id}'");
 
             // generate a random string
             $random_string = $this->rand_string();
@@ -1259,7 +1277,7 @@ class Auth extends Myschoolgh {
             // reverse any transaction
             $this->db->rollBack();
             // return the error message
-            return ["code" => 201, "result" => "Sorry! An error occured while processing the request."];
+            return ["code" => 201, "result" => $e->getMessage()];
         }
 
     }
