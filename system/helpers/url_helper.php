@@ -394,8 +394,10 @@ if ( ! function_exists('create_slug')) {
 	 * @return	string|mixed
 	 */
 	function create_slug($str, $replace = '-', $ext=''){
-		$str = strtolower($str);     
-		
+		$str = !empty($str) ? strtolower($str) : null;     
+		if(empty($str)) {
+			return null;
+		}
 		//remove query string     
 		if(preg_match("#^http(s)?://[a-z0-9-_.]+\.[a-z]{2,4}#i",$str)){         
 			$parsed_url = parse_url($str);         
