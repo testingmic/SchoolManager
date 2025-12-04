@@ -1088,7 +1088,9 @@ class Accounting extends Myschoolgh {
                                     </td>
                                     <td  width='40%' style='padding:7px;border:solid 1px #dee2e6;'>
                                         <div>".$value->account_type_name."</div>
-                                        <div>".$value->description."</div>
+                                        <div>".(!empty($value->description) ? $value->description : (
+                                            !empty($value->reference) ? $value->reference : ''
+                                        ))."</div>
                                         <div>".$value->reference."</div>
                                     </td>
                                     <td align='right' style='padding:7px;border:solid 1px #dee2e6;'>".($value->item_type == "Expense" ? number_format($value->amount, 2) : null)."</td>
