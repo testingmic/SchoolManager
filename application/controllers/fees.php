@@ -2189,6 +2189,11 @@ class Fees extends Myschoolgh {
 
         // if the record was not found
         if(!$found) {
+
+            if(empty($params->name)) {
+                return ["code" => 400, "data" => "Sorry! The name cannot be empty."];
+            }
+
             // prepare and execute the statement
             $stmt = $this->db->prepare("INSERT INTO fees_category SET amount = ?, name = ?, 
                 description = ?, code = ?, client_id = ?, created_by = ?, boarding_fees = ?, frequency = ?");
