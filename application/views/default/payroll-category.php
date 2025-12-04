@@ -83,9 +83,11 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
         $action = "<a href='#' title='Click to update this category' onclick='return update_allowance(\"{$each->id}\")' class='btn btn-sm btn-outline-success'>
             <i class='fa fa-edit'></i>
         </a>";
-        $action .= "&nbsp;<a title='Click to delete this Allowance Category' href='#' onclick='return delete_record(\"{$each->id}\", \"allowance\");' class='btn btn-sm btn-outline-danger'>
-            <i class='fa fa-trash'></i>
-        </a>";
+        if($each->is_statutory == "No") {
+            $action .= "&nbsp;<a title='Click to delete this Allowance Category' href='#' onclick='return delete_record(\"{$each->id}\", \"allowance\");' class='btn btn-sm btn-outline-danger'>
+                <i class='fa fa-trash'></i>
+            </a>";
+        }
 
         $extras = "";
         if($each->type == "Allowance") {

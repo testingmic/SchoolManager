@@ -114,7 +114,7 @@ class Myschoolgh extends Models {
 		if(empty($this->db) || $this->processedAlter) return true;
 		
 		// prepare and execute the statement
-		$fix[] = "alter table accounts_type_head add column is_system tinyint(1) default 0";
+		$fix[] = "INSERT INTO `banks_list` (`id`, `bank_name`, `address`, `phone_number`, `website`, `email`, `logo`) VALUES (NULL, 'General Ledger', NULL, NULL, NULL, NULL, NULL);";
 
 		if(empty($fix)) return true;
 		foreach($fix as $stmt) {

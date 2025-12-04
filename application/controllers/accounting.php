@@ -97,9 +97,9 @@ class Accounting extends Myschoolgh {
 
             // insert the record
             $stmt = $this->db->prepare("INSERT INTO accounts_type_head SET client_id = ?, name = ?, type = ?,
-            description = ?, created_by = ?, item_id = ?, academic_year = ?, academic_term = ?");
+            description = ?, created_by = ?, item_id = ?, academic_year = ?, academic_term = ?, is_system = ?");
             $stmt->execute([$params->clientId, $params->name, $params->account_type, $params->description ?? null, 
-                $params->userId, $item_id, $params->academic_year, $params->academic_term]);
+                $params->userId, $item_id, $params->academic_year, $params->academic_term, $params->is_system ?? 0]);
 
             // log the user activity
             $this->userLogs("accounts_typehead", $item_id, null, "{$params->userData->name} added a new account type head", $params->userId);
@@ -153,6 +153,7 @@ class Accounting extends Myschoolgh {
             // insert the record
             $stmt = $this->db->prepare("UPDATE accounts_type_head SET name = ?, type = ?
                 ".(isset($params->description) ? ", description='{$params->description}'" : null)."
+                ".(isset($params->is_system) ? ", is_system='{$params->is_system}'" : null)."
             WHERE item_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? LIMIT 1");
             $stmt->execute([
                 $params->name, $params->account_type, $params->type_id, 

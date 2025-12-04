@@ -5129,7 +5129,7 @@ class Forms extends Myschoolgh {
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="name" class="font-weight-bold">Name <span class="required">*</span></label>
-                                    <input type="text" maxlength="100" placeholder="Type name" name="name" id="name" class="form-control" value="'.($idata->name ?? null).'">
+                                    <input type="text" '.(!empty($idata) && !empty($idata->is_statutory) && $idata->is_statutory == 'Yes' ? 'readonly' : null).' maxlength="100" placeholder="Type name" name="name" id="name" class="form-control" value="'.($idata->name ?? null).'">
                                 </div>
                             </div>
                             <div class="col-md-12">

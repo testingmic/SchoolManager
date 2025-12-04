@@ -994,6 +994,15 @@ class Auth extends Myschoolgh {
     }
 
     /**
+     * Generate a random string
+     * 
+     * @return String
+     */
+    public function rand_string() {
+        return random_string("alnum", RANDOM_STRING);
+    }
+
+    /**
      * Register a New School Account
      * 
      * Run tests for the email address that have been used to register for the account
@@ -1137,9 +1146,9 @@ class Auth extends Myschoolgh {
             $sms_stmt->execute([$client_id, 150]);
 
             // insert the academic terms information for the client
-            $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}', name='1st', description='1st Term'");
-            $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}', name='2nd', description='2nd Term'");
-            $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}', name='3rd', description='3rd Term'");
+            foreach(['1st', '2nd', '3rd'] as $term) {
+                $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}', name='{$term}', description='{$term} Term'");
+            }
             
             // insert the client details
             $client_stmt = $this->db->prepare("INSERT INTO clients_accounts SET 
@@ -1176,6 +1185,26 @@ class Auth extends Myschoolgh {
 
             // insert the school grading remarks record
             $this->db->query("INSERT INTO grading_remarks_list SET client_id = '{$client_id}'");
+
+            // create some few income account types for the client
+            foreach(['Transport Fees', 'Book & Stationary Sales', 'Donations and Gifts'] as $item) {
+                $this->db->query("INSERT INTO accounts_type_head SET client_id = '{$client_id}', name='{$item}', is_system = 1, created_by = '{$user_id}',
+                    description='{$item} Income', type = 'Income', item_id = '".$this->rand_string()."'");
+            }
+
+            // create some few expenseaccount types for the client
+            foreach(['Repairs & Maintenance', 'Administrative and General Expenses', 'Utilities', 'Fuel', 'Teaching Materials', 'Food Services', 'Technology'] as $item) {
+                $this->db->query("INSERT INTO accounts_type_head SET client_id = '{$client_id}', name='{$item}', is_system = 0, created_by = '{$user_id}',
+                    description='{$item} Expenses', type = 'Expense', item_id = '".$this->rand_string()."'");
+            }
+
+            // generate a random string
+            $random_string = $this->rand_string();
+
+            // insert the default general ledger account
+            $this->db->query("INSERT INTO accounts SET client_id = '{$client_id}', account_name = 'Default General Ledger', account_number = 'GL',
+                description = 'This is the general ledger account for the school.', opening_balance = 0, created_by = '{$user_id}', 
+                item_id = '{$random_string}', balance = 0, total_credit = 0, account_bank = 'General Ledger', default_account='1'");
 
             // send a message to the user email
             $message = "Thank you for registering your School: <strong>{$params->school_name}</strong> with {$this->appName}
