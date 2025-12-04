@@ -520,22 +520,22 @@ class Analitics extends Myschoolgh {
             ];
 
             if(!is_array($where_clause) && !empty($where_clause)) {
-                print "SELECT 
-                        COUNT(*) AS {$value_count},
-                        SUM(amount) AS {$amount_paid}
-                    FROM fees_collection a
-                    LEFT JOIN users u ON u.item_id = a.student_id
-                    WHERE {$where_clause}
-                \n\n";
-                $query = $this->db->prepare("SELECT 
-                        COUNT(*) AS {$value_count},
-                        SUM(amount) AS {$amount_paid}
-                    FROM fees_collection a
-                    LEFT JOIN users u ON u.item_id = a.student_id
-                    WHERE {$where_clause}
-                ");
-                $query->execute();
-                $q_result = $query->fetch(PDO::FETCH_OBJ);
+                try {
+                    $query = $this->db->prepare("SELECT 
+                            COUNT(*) AS {$value_count},
+                            SUM(amount) AS {$amount_paid}
+                        FROM fees_collection a
+                        LEFT JOIN users u ON u.item_id = a.student_id
+                        WHERE {$where_clause}
+                    ");
+                    $query->execute();
+                    $q_result = $query->fetch(PDO::FETCH_OBJ);
+                } catch(PDOException $e) {
+                    $q_result = (object) [
+                        $value_count => 0,
+                        $amount_paid => 0
+                    ];
+                }
             }
             
             // append the result values
