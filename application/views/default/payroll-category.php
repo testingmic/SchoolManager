@@ -97,7 +97,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
 
         if($each->type == "Deduction") {
             $method = str_ireplace("_", " ", $each->calculation_method);
-            $extras .= "<span class='badge badge-info p-1'>".ucwords($method)."</span>";
+            $extras .= "<span class='badge badge-info p-1 mr-2'>".ucwords($method)."</span>";
             $extras .= $each->pre_tax_deduction == "Yes" ? "<span class='badge badge-danger p-1'>Pre Tax Deduction</span>" : "";
         }
 
@@ -110,7 +110,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
             </div>
             <div class='mb-1'>{$extras}</div>
         </td>";
-        $staff_list .= "<td><span class='badge badge-{$color[$each->type]}'>{$each->type}</span></td>";
+        $staff_list .= "<td class='text-center'><span class='badge badge-{$color[$each->type]}'>{$each->type}</span></td>";
         $staff_list .= "<td>{$each->description}</td>";
         $staff_list .= $isSingleRecord ? '' : "<td class='text-center'>{$action}</td>";
         $staff_list .= "</tr>";
@@ -153,7 +153,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                         <tr>
                                             <th width="5%" class="text-center">#</th>
                                             <th>Name</th>
-                                            <th width="15%">Type</th>
+                                            <th class="text-center" width="15%">Type</th>
                                             <th>Description</th>
                                             '.($isSingleRecord ? '' : '<th width="15%" align="center"></th>').'
                                         </tr>

@@ -2179,7 +2179,7 @@ class Fees extends Myschoolgh {
             $found = true;
         }
 
-        $params->code = isset($params->code) ? strtoupper($params->code) : null;
+        $params->code = !empty($params->code) ? strtoupper($params->code) : null;
 
         if(!empty($params->frequency)) {
             if(!in_array($params->frequency, $this->fees_frequency_list)) {

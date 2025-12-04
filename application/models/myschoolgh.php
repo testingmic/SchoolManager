@@ -1693,8 +1693,8 @@ class Myschoolgh extends Models {
 	 */
 	final function academic_years($clientId = null) {
 		/** Set the Parameters */
-		$previous_year = 2020;
-		$next_years = date("Y") + 5;
+		$previous_year = 2024;
+		$next_years = date("Y") + 2;
 		
 		/** Loop through the list */
 		for($i = $previous_year; $i <= $next_years; $i++) {

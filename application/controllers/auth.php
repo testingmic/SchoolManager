@@ -1193,9 +1193,16 @@ class Auth extends Myschoolgh {
             }
 
             // create some few expenseaccount types for the client
-            foreach(['Repairs & Maintenance', 'Administrative and General Expenses', 'Utilities', 'Fuel', 'Teaching Materials', 'Food Services', 'Technology'] as $item) {
-                $this->db->query("INSERT INTO accounts_type_head SET client_id = '{$client_id}', name='{$item}', is_system = 0, created_by = '{$user_id}',
+            foreach(['Repairs & Maintenance', 'Administrative and General Expenses', 'Utilities', 'Fuel', 'Food Services'] as $item) {
+                $this->db->query("INSERT INTO accounts_type_head SET client_id = '{$client_id}', name='{$item}', is_system = 1, created_by = '{$user_id}',
                     description='{$item} Expenses', type = 'Expense', item_id = '{$this->rand_string()}'");
+            }
+
+            // create some few fees category for the client
+            foreach(['Tuition Fees', 'PTA Dues', 'Books', 'Uniform', 'Examination Fees'] as $item) {
+                $code = str_replace(" ", "", $item);
+                $this->db->query("INSERT INTO fees_category SET amount = 0, name = '{$item}', 
+                    description = '{$item} Fees', code = '{$code}', client_id = '{$client_id}', created_by = '{$user_id}', boarding_fees = 'No', frequency = 'Termly'");
             }
 
             $this->db->query("INSERT INTO payslips_allowance_types SET 
