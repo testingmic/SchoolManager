@@ -189,10 +189,11 @@ var update_account_type = (type_id) => {
         let account_head = $.array_stream["account_headtype_array"];
         if (account_head[type_id] !== undefined) {
             let type = account_head[type_id];
-            $(`div[id="accounts_form"] [class="card-header"]`).html("Update Account Type Head");
+            $(`div[id="accounts_form"] [class="card-header"]`).html("Update Chart of Account");
             $(`div[id="accounts_form"] input[name="name"]`).val(type.name);
             $(`div[id="accounts_form"] input[name="type_id"]`).val(type_id);
             $(`div[id="accounts_form"] select[name="account_type"]`).val(type.type).change();
+            $(`div[id="accounts_form"] input[name="is_system"]`).prop("checked", type.is_system).change();
             $(`div[id="accounts_form"] textarea[name="description"]`).val(type.description);
             $(`div[id="accounts_form"] form[class="ajax-data-form"]`).attr("action", `${baseUrl}api/accounting/update_accounttype`);
         }

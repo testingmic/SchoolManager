@@ -114,7 +114,7 @@ class Myschoolgh extends Models {
 		if(empty($this->db) || $this->processedAlter) return true;
 		
 		// prepare and execute the statement
-		$fix[] = "";
+		$fix[] = "alter table accounts_type_head add column is_system tinyint(1) default 0";
 
 		if(empty($fix)) return true;
 		foreach($fix as $stmt) {
@@ -123,7 +123,7 @@ class Myschoolgh extends Models {
 				$query = $this->db->prepare($stmt);
 				$query->execute();
 			} catch(PDOException $e) {
-				print $e->getMessage();
+				// print $e->getMessage();
 			}
 		}
 		$this->processedAlter = true;

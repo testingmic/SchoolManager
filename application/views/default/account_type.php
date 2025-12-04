@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $filter = (object) $_GET;
-$pageTitle = "Simple Accounting";
+$pageTitle = "Chart of Accounts";
 $response->title = $pageTitle;
 
 // end query if the user has no permissions
@@ -64,8 +64,12 @@ foreach($list_data as $key => $each) {
     // set the action button
     $action = "";
     if($hasUpdate) {
-        $action .= "&nbsp;<a title='Click to delete record' href='#' onclick='return update_account_type(\"{$each->item_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-        $action .= "&nbsp;<a href='#' title='Click to delete this Account Type Head' onclick='return delete_record(\"{$each->item_id}\", \"accounts_type\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        // update button
+        $action .= "&nbsp;<a title='Click to update record' href='#' onclick='return update_account_type(\"{$each->item_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        
+        if(!$each->is_system) {
+            $action .= "&nbsp;<a href='#' title='Click to delete this Account Type Head' onclick='return delete_record(\"{$each->item_id}\", \"accounts_type\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        }
     }
 
     // append to the rows
@@ -73,6 +77,7 @@ foreach($list_data as $key => $each) {
     $type_list .= "<td>".($key+1)."</td>";
     $type_list .= "<td>{$each->name}</td>";
     $type_list .= "<td><span class='badge badge-".($each->type == "Income" ? "success" : "danger")."'>".($each->type)."</span></td>";
+    $type_list .= "<td class='text-center'><span class='badge badge-".($each->is_system ? "success" : "danger")."'>".($each->is_system ? "Yes" : "No")."</span></td>";
     $type_list .= $hasUpdate ? "<td class='text-center'>{$action}</td>" : null;
     $type_list .= "</tr>";
 }
@@ -94,7 +99,7 @@ $response->html = '
             '.$the_form.'
             <div class="col-12 '.($hasUpdate ? "col-md-7 col-lg-8" : "col-md-12").'">
                 <div class="card">
-                    <div class="card-header"><i class="fa fa-list"></i> &nbsp; Account Type Head List</div>
+                    <div class="card-header"><i class="fa fa-list"></i> &nbsp; Chart of Accounts List</div>
                     <div class="card-body">
 
                         <div class="table-responsive">
@@ -104,6 +109,7 @@ $response->html = '
                                         <th width="5%" class="text-center">#</th>
                                         <th>Name</th>
                                         <th>Type</th>
+                                        <th class="text-center">System</th>
                                         '.($hasUpdate ? '<th width="15%" align="center"></th>' : null).'
                                     </tr>
                                 </thead>

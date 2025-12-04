@@ -5542,7 +5542,7 @@ class Forms extends Myschoolgh {
         $html = "";
         $html .= "<div id=\"accounts_form\" class=\"col-12 col-md-5 col-lg-4\">";
         $html .= "<div class=\"card\">";
-        $html .= "<div class=\"card-header\">".(empty($data) ? "Add Account Type Head" : "Update Account Type Head")."</div>";
+        $html .= "<div class=\"card-header\">".(empty($data) ? "Add Chart of Account" : "Update Chart of Account")."</div>";
         $html .= "<div class=\"card-body\">";
         $html .= "<form autocomplete=\"Off\" method=\"post\" action=\"{$this->baseUrl}api/accounting/".(!empty($data) ? "update_accounttype" : "add_accounttype")."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">";
         $html .= "<div class=\"form-group\">";
@@ -5558,6 +5558,12 @@ class Forms extends Myschoolgh {
         $html .= "<option ".(!empty($data) && $data->account_type == "Expense" ? "selected" : null)." value=\"Expense\">Expense</option>";
         $html .= "</select>";
         $html .= "</div>";
+        $html .= '<div class="form-group mb-3">
+            <div class="custom-control cursor custom-switch mb-2 switch-primary">
+                <input '.(!empty($data) && $data->is_system ? 'checked' : '').' type="checkbox" value="1" name="is_system" id="is_system" class="custom-control-input cursor">
+                <label class="custom-control-label  cursor" for="is_system">System Account</label>
+            </div>
+        </div>';
         $html .= "<div class=\"row\">";
         $html .= "<div class=\"col-md-6\" align=\"left\">";
         $html .= "<button class=\"btn btn-outline-danger\" onclick=\"return reset_account_form('api/accounting/add_accounttype')\" type=\"button\">Cancel</button>";
@@ -5797,7 +5803,7 @@ class Forms extends Myschoolgh {
                             <input type=\"hidden\" readonly value=\"".($data->item_id ?? null)."\" name=\"transaction_id\" class=\"form-control\">
                         </div>
                         <div class=\"form-group\">
-                            <label>Account Type Head <span class=\"required\">*</span></label>
+                            <label>".($params->route == "deposit" ? "Income Account" : "Expense Account")." <span class=\"required\">*</span></label>
                             <select data-width=\"100%\" name=\"account_type\" class=\"form-control selectpicker\">
                                 <option value=\"\">Select Account Type Head</option>";
                                 foreach($accounts_head_list as $type) {

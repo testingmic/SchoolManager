@@ -311,6 +311,7 @@ class Payroll extends Myschoolgh {
     /**
      * Load the Payslip of an Employee for a specific period
      * 
+     * @param stdClass $params
      * @param String $params->employee_id
      * @param String $params->month_id
      * @param String $params->year_id
@@ -549,6 +550,7 @@ class Payroll extends Myschoolgh {
     /**
      * Generate the PaySlip and Save the Record
      * 
+     * @param stdClass $params
      * @param String $params->employee_id
      * @param String $params->month_id
      * @param String $params->year_id
@@ -688,8 +690,8 @@ class Payroll extends Myschoolgh {
                         description = ?, academic_year = ?, academic_term = ?, balance = ?
                     ");
                     $stmt->execute([
-                        $item_id, $params->clientId, $account_id, "payroll", 'Expense', null, $net_salary, $params->userId, 
-                        date("Y-m-d"), $payment_mode, "Auto Generation of PaySlip - {$params->month_id} {$params->year_id} for <strong>{$data->name}</strong>",
+                        $item_id, $params->clientId, $account_id, "payroll", 'Expense', "PaySlip - {$params->month_id} {$params->year_id} for {$data->name}", 
+                        $net_salary, $params->userId, date("Y-m-d"), $payment_mode, "Auto Generation of PaySlip - {$params->month_id} {$params->year_id} for <strong>{$data->name}</strong>",
                         $this->academic_year ?? null, $this->academic_term ?? null, ($check[0]->balance - $net_salary)
                     ]);
 
@@ -979,6 +981,7 @@ class Payroll extends Myschoolgh {
     /**
      * Save Allowance
      * 
+     * @param stdClass $params
      * @param String $params->description
      * @param String $params->allowance_id
      * @param String $params->name

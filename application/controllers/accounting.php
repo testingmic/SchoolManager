@@ -935,7 +935,7 @@ class Accounting extends Myschoolgh {
             $html_content = "";
 
             // get the client logo content
-            if(!empty($params->client_data->client_logo)) {
+            if(!empty($params->client_data->client_logo) && strpos($this->baseUrl, 'localhost') == false) {
                 $type = pathinfo($params->client_data->client_logo, PATHINFO_EXTENSION);
                 $logo_data = file_get_contents($this->baseUrl . $params->client_data->client_logo);
                 $this->client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);

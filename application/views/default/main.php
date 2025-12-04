@@ -2,11 +2,12 @@
 // set the title
 $page_title = "Dashboard";
 
+global $isActiveAccount, $clientData, $clientId, $isSchool, $isSupport;
+
 // require the headtags
 require "headtags.php";
 
 // global variable
-global $isActiveAccount, $clientData, $clientId, $isSchool, $isSupport;
 
 // set the current_url
 $set_current_url = $session->user_current_url;

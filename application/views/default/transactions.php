@@ -73,7 +73,11 @@ foreach($transactions_list as $key => $transaction) {
         </strong>
     </td>";
     $list_transactions .= "<td>{$transaction->account_type_name}</td>";
-    $list_transactions .= "<td>".(!empty($transaction->attach_to_object) ? ucwords($transaction->attach_to_object) : "N/A")."</td>";
+    $list_transactions .= "<td>".(!empty($transaction->attach_to_object) ? ucwords($transaction->attach_to_object) : (
+        !empty($transaction->reference) ? $transaction->reference : (
+            !empty($transaction->description) ? $transaction->description : "N/A"
+        )
+    ))."</td>";
     $list_transactions .= "<td>".ucfirst($transaction->payment_medium)."</td>";
     $list_transactions .= "<td>".(!$isIncome ? number_format($transaction->amount, 2) : null)."</td>";
     $list_transactions .= "<td>".($isIncome ? number_format($transaction->amount, 2) : null)."</td>";

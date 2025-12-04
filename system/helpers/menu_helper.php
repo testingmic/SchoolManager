@@ -238,11 +238,8 @@
     <li class="dropdown" data-parent_menu="accounting">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-archway"></i><span>Accounting</span></a>
         <ul class="dropdown-menu">
-            <?php if($accessObject->hasAccess("accounts", "accounting")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>accounts">Accounts</a></li>
-            <?php } ?>
             <?php if($accessObject->hasAccess("account_type_head", "accounting")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>account_type">Account Type Head</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>account_type">Chart of Accounts</a></li>
             <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>incomes">Incomes</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>expenses">Expenses</a></li>
@@ -251,6 +248,9 @@
             <?php } ?>
             <?php if($accessObject->hasAccess("bank_withdrawal", "accounting")) { ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>bank_withdrawals">Bank Withdrawals</a></li>
+            <?php } ?>
+            <?php if($accessObject->hasAccess("accounts", "accounting")) { ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>accounts">Bank & Cash Accounts</a></li>
             <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>transactions">Transactions History</a></li>
             <?php if($accessObject->hasAccess("reports", "accounting")) { ?>

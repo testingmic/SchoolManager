@@ -86,7 +86,11 @@ foreach($transactions_list as $key => $transaction) {
         }
     }
 
-    $reference = !empty($transaction->attach_to_object) ? ucwords($transaction->attach_to_object) : "N/A";
+    $reference = !empty($transaction->attach_to_object) ? ucwords($transaction->attach_to_object) : (
+        !empty($transaction->reference) ? $transaction->reference : (
+            !empty($transaction->description) ? $transaction->description : "N/A"
+        )
+    );
 
     if(!empty($transaction->record_object) && $transaction->record_object !== 'null') {
         $reference = "<a class='text-primary' href='{$baseUrl}{$transaction->attach_to_object}/{$transaction->record_object}'>{$reference} Object</a>";
@@ -150,9 +154,9 @@ $response->html = '
                 </select>
             </div>
             <div class="col-xl-3 col-md-3 col-12 form-group">
-                <label>Filter by Type Head</label>
+                <label>Filter by Expense Account</label>
                 <select data-width="100%" class="form-control selectpicker" name="account_type">
-                    <option value="">Select Type Head</option>
+                    <option value="">Select Expense Account</option>
                     <option '.(isset($filter->account_type) && ($filter->account_type == "payroll") ? "selected" : "").' value="payroll">PAYROLL</option>';
                     foreach($myClass->pushQuery("item_id, name", "accounts_type_head", "status='1' AND client_id='{$clientId}'") as $each) {
                         $response->html .= "<option ".(isset($filter->account_type) && ($filter->account_type == $each->item_id) ? "selected" : "")." value=\"{$each->item_id}\">".strtoupper($each->name)."</option>";

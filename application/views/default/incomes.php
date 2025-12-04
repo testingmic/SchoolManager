@@ -83,7 +83,11 @@ foreach($transactions_list as $key => $transaction) {
         }
     }
 
-    $reference = !empty($transaction->attach_to_object) ? ucwords($transaction->attach_to_object) : "N/A";
+    $reference = !empty($transaction->attach_to_object) ? ucwords($transaction->attach_to_object) : (
+        !empty($transaction->reference) ? $transaction->reference : (
+            !empty($transaction->description) ? $transaction->description : "N/A"
+        )
+    );
 
     if(!empty($transaction->record_object) && $transaction->record_object !== 'null') {
         $reference = "<a class='text-primary' href='{$baseUrl}{$transaction->attach_to_object}/{$transaction->record_object}'>{$reference} Object</a>";

@@ -285,7 +285,7 @@ class Auth extends Myschoolgh {
 
         // make a query for the username
         $stmt = $this->db->prepare($this->loginQuery);
-        $stmt->execute([$result->username, $result->username, $result->username, 'Active']);
+        $stmt->execute([$result->username, $result->username, $result->username]);
 
         if($stmt->rowCount() == 1) {
             $results = $stmt->fetch(PDO::FETCH_OBJ);
