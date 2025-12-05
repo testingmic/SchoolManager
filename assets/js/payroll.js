@@ -339,7 +339,7 @@ var bulk_validate_payslip = () => {
                 <div class='row'>
                     <div class='col-lg-6'><strong>Basic Salary</strong>:</div> 
                     <div class='col-lg-6'>${each.salary.basic}</div>
-                    <div class='col-lg-6'><strong>Total Allowances</strong>:</div> 
+                    <div class='col-lg-6'><strong>Total Earnings</strong>:</div> 
                     <div class='col-lg-6'>${each.salary.allowances}</div>
                     <div class='col-lg-6'><strong>Less Deductions</strong>:</div> 
                     <div class='col-lg-6'>${each.salary.deductions}</div>

@@ -108,7 +108,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                     // set the summary data
                     $summary = "<div class='row'>";
                     $summary .= "<div class='col-lg-6'><strong>Basic Salary</strong>:</div> <div class='col-lg-6'>GH&cent;".number_format($each->basic_salary, 2)."</div>";
-                    $summary .= "<div class='col-lg-6'><strong>Total Allowances</strong>:</div> <div class='col-lg-6'>GH&cent;".number_format($each->total_allowance, 2)."</div>";
+                    $summary .= "<div class='col-lg-6'><strong>Total Earnings</strong>:</div> <div class='col-lg-6'>GH&cent;".number_format($each->total_allowance, 2)."</div>";
                     $summary .= "<div class='col-lg-6'><strong>Less Deductions</strong>:</div> <div class='col-lg-6'>GH&cent;".number_format($each->total_deductions, 2)."</div>";
                     $summary .= "<div class='col-lg-12'><hr class='mb-0 mt-0'></div><div class='col-lg-6'><strong>Net Salary:</strong></div> <div class='col-lg-6'><strong>GH&cent;".number_format($each->net_salary, 2)."</strong></div>";
                     $summary .= "</div>";

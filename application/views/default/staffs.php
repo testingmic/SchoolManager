@@ -59,7 +59,7 @@ $canChangePassword = $accessObject->hasAccess("change_password", "permissions");
 foreach($api_staff_list["data"] as $i => $each) {
     
     $counter++;
-    $userName = ucwords(strtolower($each->name));
+    $userName = !empty($each->name) ? ucwords(strtolower($each->name)) : "N/A";
     $action = "<span title='View staff record' onclick='return load(\"staff/{$each->user_id}/documents\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
 
     if($accessObject->hasAccess("update", $each->user_type)) {

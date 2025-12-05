@@ -243,7 +243,7 @@ class Payroll extends Myschoolgh {
                     /** Data to save */
                     $log = "
                     <p class='mb-0 pb-0'><strong>Basic Salary:</strong> {$the_user->basic_salary} => {$params->basic_salary}</p>
-                    <p class='mb-0 pb-0'><strong>Total Allowances:</strong> {$the_user->allowances} => {$t_allowances}</p>
+                    <p class='mb-0 pb-0'><strong>Total Earnings:</strong> {$the_user->allowances} => {$t_allowances}</p>
                     <p class='mb-0 pb-0'><strong>Gross Salary:</strong> {$the_user->gross_salary} => {$gross_salary}</p>
                     <p class='mb-0 pb-0'><strong>Total Deductions:</strong> {$the_user->deductions} => {$t_deductions}</p>
                     <p class='mb-0 pb-0'><strong>Net Allowances:</strong> {$the_user->net_allowance} => {$net_allowance}</p>
@@ -802,7 +802,7 @@ class Payroll extends Myschoolgh {
                 /** Data to save */
                 $log = "
                 <p class='mb-0 pb-0'><strong>Basic Salary:</strong> {$payslip->basic_salary} => {$params->basic_salary}</p>
-                <p class='mb-0 pb-0'><strong>Total Allowances:</strong> {$payslip->total_allowance} => {$t_allowances}</p>
+                <p class='mb-0 pb-0'><strong>Total Earnings:</strong> {$payslip->total_allowance} => {$t_allowances}</p>
                 <p class='mb-0 pb-0'><strong>Gross Salary:</strong> {$payslip->gross_salary} => {$gross_salary}</p>
                 <p class='mb-0 pb-0'><strong>Total Deductions:</strong> {$payslip->total_deductions} => {$t_deductions}</p>
                 <p class='mb-0 pb-0'><strong>Net Salary:</strong> {$payslip->net_salary} => {$net_salary}</p>";
@@ -957,9 +957,9 @@ class Payroll extends Myschoolgh {
                 if(!empty($allowances)) {
                     foreach($allowances as $eachAllowance) {
                         if($eachAllowance->type == 'Allowance') {
-                            $payload->allowances[] = $eachAllowance->amount;
+                            $payload->allowances[$eachAllowance->id] = $eachAllowance->amount;
                         } else {
-                            $payload->deductions[] = $eachAllowance->amount;
+                            $payload->deductions[$eachAllowance->id] = $eachAllowance->amount;
                         }
                     }
                 }
@@ -1009,6 +1009,12 @@ class Payroll extends Myschoolgh {
         }
 
         if(!$found) {
+
+            // if the name is reserved
+            if(in_array(strtoupper($params->name), ["SSNIT", "TIER 2", "PAYE"])) {
+                return ["code" => 400, "data" => "Sorry! The name {$params->name} is reserved and cannot be used."];
+            }
+
             $stmt = $this->db->prepare("INSERT INTO payslips_allowance_types 
                 SET default_amount = ?, name = ?, description = ?, type = ?, client_id = ?, is_statutory = ?,
                     pre_tax_deduction = ?, calculation_method = ?, calculation_value = ?,
@@ -1076,6 +1082,9 @@ class Payroll extends Myschoolgh {
 
         $allowancesQuery = $data->payslip_details["Allowance"] ?? [];
         $deductionsQuery = $data->payslip_details["Deduction"] ?? [];
+
+        $allowancesQuery = !empty($allowancesQuery) && is_array($allowancesQuery) ? $allowancesQuery : [];
+        $deductionsQuery = !empty($deductionsQuery) && is_array($deductionsQuery) ? $deductionsQuery : [];
 
         // get the client logo content
         if(!empty($client->client_logo)) {
@@ -1149,15 +1158,17 @@ class Payroll extends Myschoolgh {
                                     <td style='padding:10px;'><strong>Basic Salary</strong></td>
                                     <td align=\"right\">GH&cent;{$data->basic_salary}</td>
                                 </tr>";
-                                foreach($allowancesQuery as $eachAllowance) {
-                                    $result .= "<tr>
-                                        <td style='padding:10px;'>{$eachAllowance->allowance_type}</td>
-                                        <td align=\"right\">GH&cent;{$eachAllowance->amount}</td>
-                                    </tr>";
+                                if(!empty($allowancesQuery) && is_array($allowancesQuery)) {
+                                    foreach($allowancesQuery as $eachAllowance) {
+                                        $result .= "<tr>
+                                            <td style='padding:10px;'>{$eachAllowance->allowance_type}</td>
+                                            <td align=\"right\">GH&cent;{$eachAllowance->amount}</td>
+                                        </tr>";
+                                    }
                                 }
                                 $result .= "<tr>
                                     <td style='padding:10px;'><strong>Gross Salary</strong></td>
-                                    <td align=\"right\"><strong>GH&cent;".number_format(($data->basic_salary + array_sum(array_column($data->payslip_details["Allowance"], 'amount'))), 2)."</strong></td>
+                                    <td align=\"right\"><strong>GH&cent;".number_format(($data->basic_salary + array_sum(array_column(($data->payslip_details["Allowance"] ?? []), 'amount'))), 2)."</strong></td>
                                 </tr>
                             </table>
                         </div>
@@ -1170,11 +1181,13 @@ class Payroll extends Myschoolgh {
                                     <span style=\"font-size:16px\"><strong>DEDUCTIONS</strong></span>
                                     </td>
                                 </tr>";
-                                foreach($deductionsQuery as $eachAllowance) {
-                                    $result .= "<tr>
-                                        <td style='padding:10px;'>{$eachAllowance->allowance_type}</td>
-                                        <td style='padding:10px;' align=\"right\">GH&cent;{$eachAllowance->amount}</td>
-                                    </tr>";
+                                if(!empty($deductionsQuery) && is_array($allowancesQuery)) {
+                                    foreach($deductionsQuery as $eachAllowance) {
+                                        $result .= "<tr>
+                                            <td style='padding:10px;'>{$eachAllowance->allowance_type}</td>
+                                            <td style='padding:10px;' align=\"right\">GH&cent;{$eachAllowance->amount}</td>
+                                        </tr>";
+                                    }
                                 }
                                 $result .= "<tr>
                                     <td style='padding:10px;'><strong>Total Deductions</strong></td>

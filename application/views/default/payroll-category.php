@@ -57,6 +57,9 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
         $isSingleRecord = true;
     }
 
+    // auto create the default allowances
+    $myClass->auto_create_allowance($clientId);
+
     // get the allowance types
     $allowanceData = $myClass->pushQuery("*", "payslips_allowance_types", "client_id='{$clientId}' AND status='1' {$idWhere} ORDER BY type");
 
@@ -68,9 +71,10 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
     }
 
     $allowance_array_list = [];
+    $theObject = $isSingleRecord ? ($allowanceData[0] ?? (object) []) : (object) [];
 
     // load the form
-    $category_form = load_class("forms", "controllers")->payroll_category_form($clientId, $baseUrl, $isSingleRecord, $allowanceData[0] ?? (object) []);
+    $category_form = load_class("forms", "controllers")->payroll_category_form($clientId, $baseUrl, $isSingleRecord, $theObject);
     $settings = load_class("settings", "controllers")->getsettings((object) [
         "clientId" => $clientId, "setting_name" => "payroll_settings"
     ])["data"];
@@ -101,8 +105,10 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
             $extras .= $each->pre_tax_deduction == "Yes" ? "<span class='badge badge-danger p-1'>Pre Tax Deduction</span>" : "";
         }
 
+        $theType = $each->type == "Allowance" ? "Earnings" : "Deductions";
+
         $staff_list .= "<tr data-row_id=\"{$each->id}\">";
-        $staff_list .= "<td>".($key+1)."</td>";
+        $staff_list .= $isSingleRecord ? null : "<td>".($key+1)."</td>";
         $staff_list .= "<td>
             <strong>{$each->name}</strong>
             <div class='mb-1'>
@@ -110,8 +116,8 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
             </div>
             <div class='mb-1'>{$extras}</div>
         </td>";
-        $staff_list .= "<td class='text-center'><span class='badge badge-{$color[$each->type]}'>{$each->type}</span></td>";
-        $staff_list .= "<td>{$each->description}</td>";
+        $staff_list .= "<td class='text-center'><span class='badge badge-{$color[$each->type]}'>{$theType}</span></td>";
+        $staff_list .= $isSingleRecord ? '' : "<td>{$each->description}</td>";
         $staff_list .= $isSingleRecord ? '' : "<td class='text-center'>{$action}</td>";
         $staff_list .= "</tr>";
 
@@ -135,26 +141,26 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
             </div>
 
             <div class="row">
-                <div class="col-12 col-sm-12 '.($isSingleRecord ? 'col-lg-6' : 'col-lg-8').'">
+                <div class="col-12 col-sm-12 '.($isSingleRecord ? 'col-lg-5' : 'col-lg-8').'">
                     <div class="text-right mb-2">
                         '.($isSingleRecord ? '' : '<a class="btn btn-outline-primary" onclick="return add_allowance();" href="#">
                             <i class="fa fa-plus"></i> Add New Type Head
                         </a>').'
-                        '.($isSingleRecord ? '<a class="btn btn-outline-warning" href="'.$baseUrl.'payroll-category"><i class="fa fa-arrow-left"></i> Go Back</a>' : '').'
+                        '.($isSingleRecord ? '<a class="btn btn-outline-warning" href="'.$baseUrl.'payroll-category"><i class="fa fa-arrow-left"></i> Go Back to Setup</a>' : '').'
                     </div>
                 </div>
                 <div class="col-12 col-sm-12 col-lg-4"></div>
-                <div class="col-12 col-sm-12 '.($isSingleRecord ? 'col-lg-6' : 'col-lg-8').'">
+                <div class="col-12 col-sm-12 '.($isSingleRecord ? 'col-lg-5' : 'col-lg-8').'">
                     <div class="card">
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table data-empty="" class="table table-bordered table-sm table-striped raw_datatable">
                                     <thead>
                                         <tr>
-                                            <th width="5%" class="text-center">#</th>
+                                            '.($isSingleRecord ? '' : '<th width="5%" class="text-center">#</th>').'
                                             <th>Name</th>
                                             <th class="text-center" width="15%">Type</th>
-                                            <th>Description</th>
+                                            '.($isSingleRecord ? '' : '<th>Description</th>').'
                                             '.($isSingleRecord ? '' : '<th width="15%" align="center"></th>').'
                                         </tr>
                                     </thead>
@@ -200,7 +206,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
 
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="card-title">Tax Calculation Settings</h5>
+                            <h5 class="card-title">Tax & SSNIT Calculation Settings</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -234,7 +240,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
 
                 </div>
                 '.($isSingleRecord ? '
-                <div class="col-12 col-sm-12 col-lg-6">
+                <div class="col-12 col-sm-12 col-lg-7">
                     '.$category_form.'
                 </div>
                 ' : '').'

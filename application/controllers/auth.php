@@ -1209,7 +1209,7 @@ class Auth extends Myschoolgh {
                 name = 'SSNIT', type = 'Deduction', is_statutory = 'Yes', 
                 calculation_method = 'percentage_on_gross_total', 
                 calculation_value = '5.5', pre_tax_deduction = 'Yes',
-                description = 'This is for snnit calculation.', client_id = '{$client_id}'");
+                description = 'This is for SSNIT calculation.', client_id = '{$client_id}'");
             
             $this->db->query("INSERT INTO payslips_allowance_types SET 
                 name = 'TIER 2', type = 'Deduction', is_statutory = 'Yes', 

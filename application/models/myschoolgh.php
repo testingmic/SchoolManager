@@ -114,7 +114,7 @@ class Myschoolgh extends Models {
 		if(empty($this->db) || $this->processedAlter) return true;
 		
 		// prepare and execute the statement
-		$fix[] = "INSERT INTO `banks_list` (`id`, `bank_name`, `address`, `phone_number`, `website`, `email`, `logo`) VALUES (NULL, 'General Ledger', NULL, NULL, NULL, NULL, NULL);";
+		$fix[] = "";
 
 		if(empty($fix)) return true;
 		foreach($fix as $stmt) {
@@ -637,6 +637,52 @@ class Myschoolgh extends Models {
 			exit;
 			return [];
 		}
+	}
+
+	/**
+	 * Auto Create Allowance
+	 * 
+	 * @param String $clientId
+	 * 
+	 * @return void
+	 */
+	final function auto_create_allowance($clientId) {
+
+		// get the list of all default allowances
+		$defaultAllowances = $this->pushQuery("*", "payslips_allowance_types", "client_id='{$clientId}' AND status='1'");
+		
+		$item = [];
+		foreach($defaultAllowances as $eachAllowance) {
+			$item[] = trim(strtoupper($eachAllowance->name));
+		}
+
+		// if the SSNIT allowance is not in the list
+		if(!in_array("SSNIT", $item)) {
+			$this->db->query("INSERT INTO payslips_allowance_types SET 
+				name = 'SSNIT', type = 'Deduction', is_statutory = 'Yes', 
+				calculation_method = 'percentage_on_gross_total', 
+				calculation_value = '5.5', pre_tax_deduction = 'Yes',
+				description = 'This is for SSNIT calculation.', client_id = '{$clientId}'");
+		}
+		
+		// if the TIER 2 allowance is not in the list
+		if(!in_array("TIER 2", $item)) {
+			$this->db->query("INSERT INTO payslips_allowance_types SET 
+				name = 'TIER 2', type = 'Deduction', is_statutory = 'Yes', 
+				calculation_method = 'percentage_on_basic_salary', 
+				calculation_value = '5', pre_tax_deduction = 'Yes',
+				description = 'This is for TIER 2 calculation.', client_id = '{$clientId}'");
+		}
+
+		// if the PAYE allowance is not in the list
+		if(!in_array("PAYE", $item)) {
+			$this->db->query("INSERT INTO payslips_allowance_types SET 
+				name = 'PAYE', type = 'Deduction', is_statutory = 'Yes', 
+				calculation_method = 'percentage_on_basic_salary', 
+				calculation_value = '0', pre_tax_deduction = 'Yes',
+				description = 'This is for PAYE calculation.', client_id = '{$clientId}'");
+		}
+
 	}
 
 	/**

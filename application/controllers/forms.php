@@ -5137,7 +5137,7 @@ class Forms extends Myschoolgh {
                                     <label for="allowance_type" class="font-weight-bold">Type <span class="required">*</span></label>
                                     <select name="allowance_type" data-width="100%" id="allowance_type" class="form-control selectpicker">
                                         <option value="">Please select type</option>
-                                        <option value="Allowance" '.(!empty($idata) && $idata->type == 'Allowance' ? 'selected' : null).'>Allowance</option>
+                                        <option value="Allowance" '.(!empty($idata) && $idata->type == 'Allowance' ? 'selected' : null).'>Earnings</option>
                                         <option value="Deduction" '.(!empty($idata) && $idata->type == 'Deduction' ? 'selected' : null).'>Deduction</option>
                                     </select>
                                 </div>
@@ -5273,7 +5273,7 @@ class Forms extends Myschoolgh {
                                         </div>
                                     </div>
 
-                                    <div class="col-lg-4 text-right font-weight-bold">Total Allowances:</div>
+                                    <div class="col-lg-4 text-right font-weight-bold">Total Earnings:</div>
                                     <div class="col-lg-8">
                                         <div class="input-group mb-3">
                                             <div class="input-group-prepend">

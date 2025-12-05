@@ -129,7 +129,7 @@ class Records extends Myschoolgh {
             "allowance" => [
                 "table" => "payslips_allowance_types",
                 "update" => "status='0'",
-                "where" => "id='{$record_id}' AND status='1'",
+                "where" => "id='{$record_id}' AND status='1' AND is_statutory='No'",
                 "query" => "SELECT name FROM payslips_allowance_types WHERE id='{$record_id}' AND status ='1' {$whereClause} LIMIT 1"
             ],
             "timetable" => [

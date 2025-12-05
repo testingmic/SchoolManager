@@ -1228,7 +1228,7 @@ class Analitics extends Myschoolgh {
                 "total" => array_sum(array_column($summary, "basic_salary"))
             ];
             $result["summary"]["totals"]["total_allowance"] = [
-                "title" => "Total Allowances",
+                "title" => "Total Earnings",
                 "total" => array_sum($allowances_array)
             ];
             $result["summary"]["totals"]["gross_salary"] = [
