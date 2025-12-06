@@ -604,40 +604,84 @@ class Payroll extends Myschoolgh {
 
         try {
 
+            $taxCalculator = load_class("taxcalculator", "controllers");
+
             // Begin the transaction
             $this->db->beginTransaction();
         
+            $allowancesList = [];
+
             // process the employee allowances
             if(isset($params->allowances) && !empty($params->allowances)) {
                 // loop through the allowance list
                 foreach($params->allowances as $key => $value) {
+                    // get the full value 
+                    $ivalue = $params->icontainer[$key];
+
                     // check if the key is not null
                     if($key !== "null") {
                         // set the value
                         $allowances[] = [
+                            'allowance_name' => $ivalue->name,
                             'allowance_id' => (int) $key,
                             'allowance_amount' => $value,
-                            'allowance_type' => 'Allowance'
+                            'allowance_type' => 'Allowance',
+                            'calculated_percentage' => $ivalue->calculation_value
                         ];
                         $t_allowances += $value;
+                        $allowancesList[$ivalue->name] = $ivalue->calculation_value;
                     }
                 }
             }
 
+            $ideductionsList = [];
             // process the employee allowances
             if(isset($params->deductions) && !empty($params->deductions)) {
                 // loop through the allowance list
                 foreach($params->deductions as $key => $value) {
+                    // get the full value 
+                    $ivalue = $params->icontainer[$key];
+
                     // check if the key is not null
                     if($key !== "null") {
                         // set the value
                         $allowances[] = [
+                            'allowance_name' => $ivalue->name,
                             'allowance_id' => (int) $key,
                             'allowance_amount' => $value,
-                            'allowance_type' => 'Deduction'
+                            'allowance_type' => 'Deduction',
+                            'calculated_percentage' => $ivalue->calculation_value
                         ];
-                        $t_deductions += $value;
+                        if(!in_array($ivalue->name, ["SSNIT", "TIER 2", "PAYE"])) {
+                            $t_deductions += $value;
+                        }
+                        $ideductionsList[] = $ivalue;
                     }
+                }
+            }
+
+            $params->basic_salary = !empty($params->basic_salary) ? $params->basic_salary : 0;
+
+            $deductionsList = tax_ratings($ideductionsList)['deductions'];
+            $taxRatings = tax_ratings($ideductionsList)['taxes'];
+
+            /** Calculate the salary calculation */
+            $salaryCalculation = !empty($params->basic_salary) ? $taxCalculator->calculateWithPensions($params->basic_salary, 0, $allowancesList, $taxRatings) : [];
+
+            // loop through the allowances and calculate the employer contribution and the calculation percentage
+            foreach($allowances as $i => $v) {
+                if($v['allowance_name'] == 'SSNIT') {
+                    $allowances[$i]['allowance_amount'] = $salaryCalculation['pensions']['tier1']['employee_contribution'];
+                    $allowances[$i]['employer_contribution'] = $salaryCalculation['pensions']['tier1']['employer_contribution'];
+                    $t_deductions += $allowances[$i]['allowance_amount'];
+                }
+                if($v['allowance_name'] == 'TIER 2') {
+                    $allowances[$i]['allowance_amount'] = $salaryCalculation['pensions']['tier2']['contribution'];
+                    $t_deductions += $allowances[$i]['allowance_amount'];
+                }
+                if($v['allowance_name'] == 'PAYE') {
+                    $allowances[$i]['allowance_amount'] = $salaryCalculation['paye_tax'];
+                    $t_deductions += $allowances[$i]['allowance_amount'];
                 }
             }
 
@@ -811,22 +855,61 @@ class Payroll extends Myschoolgh {
                 $this->userLogs("payslip", $params->employee_id, $log, "<strong>{$params->userData->name}</strong> updated the payslip for: <strong>{$data->name}</strong> for the month: <strong>{$params->month_id} {$params->year_id}</strong>", $params->userId);
             }
 
+            $employerContributions = [];
+
             /* Loop through the list of user allowances */
             foreach($params->_allowances as $key => $eachAllowance) {
                 // if the allowance id is not empty
                 if($eachAllowance['allowance_id']) {
+                    
+                    // get the employer contribution
+                    $employer = $eachAllowance['employer_contribution'] ?? 0;
+                    $percentage = $eachAllowance['calculated_percentage'] ?? 0;
+
+                    if(!empty($employer)) {
+                        $employerContributions[$params->employee_id][] = [
+                            'payslip_id' => $payslip_id,
+                            'payslip_year' => $params->year_id,
+                            'payslip_month' => $params->month_id, 
+                            'employer_contribution' => $employer,
+                            'allowance_name' => $eachAllowance['allowance_name'],
+                            'employee_contribution' => $eachAllowance['allowance_amount']
+                        ];
+                    }
+
                     // run this section if the request is allowance
-                    $stmt = $this->db->prepare("
-                        INSERT INTO 
-                            payslips_details
+                    $stmt = $this->db->prepare("INSERT INTO payslips_details
                         SET 
                             allowance_id = '{$eachAllowance['allowance_id']}', 
-                            employee_id = ?, amount = '{$eachAllowance['allowance_amount']}', 
+                            employee_id = ?, 
+                            amount = '{$eachAllowance['allowance_amount']}', 
                             detail_type = '{$eachAllowance['allowance_type']}', 
-                            client_id = ?, payslip_id = ?,
-                            payslip_month = ?, payslip_year = ?
+                            allowance_name = '{$eachAllowance['allowance_name']}',
+                            employer_contribution = '{$employer}',
+                            calculation_percentage = '{$percentage}',
+                            client_id = ?, 
+                            payslip_id = ?,
+                            payslip_month = ?, 
+                            payslip_year = ?
                     ");
                     $stmt->execute([$params->employee_id, $params->clientId, $payslip_id, $params->month_id, $params->year_id]);
+                }
+            }
+
+            // loop through the employer contributions and insert the records into the database
+            foreach($employerContributions as $employeeId => $irecord) {
+                foreach($irecord as $record) {
+                    $stmt = $this->db->prepare("INSERT INTO payslips_employer_payments SET 
+                        allowance_name = '{$record['allowance_name']}', 
+                        employee_id = '{$employeeId}', 
+                        employee_contribution = '{$record['employee_contribution']}', 
+                        employer_contribution = '{$record['employer_contribution']}', 
+                        client_id = '{$params->clientId}', 
+                        payslip_id = '{$record['payslip_id']}',
+                        payslip_month = '{$record['payslip_month']}', 
+                        payslip_year = '{$record['payslip_year']}'
+                    ");
+                    $stmt->execute();
                 }
             }
 
@@ -952,18 +1035,27 @@ class Payroll extends Myschoolgh {
                     'bypass_checks' => true
                 ];
 
-                // get the allowances of the employee
-                $allowances = $this->pushQuery("*", "payslips_employees_allowances", "employee_id='{$each['user_id']}' AND client_id='{$params->clientId}'");
-                if(!empty($allowances)) {
-                    foreach($allowances as $eachAllowance) {
+                // get the allowances of the user
+				$userAllowances = $this->pushQuery("a.*, at.name, at.calculation_method, at.calculation_value, at.pre_tax_deduction, at.subject_to_ssnit", 
+					"payslips_employees_allowances a LEFT JOIN payslips_allowance_types at ON at.id = a.allowance_id", 
+					"a.employee_id='{$each['user_id']}' AND a.client_id='{$params->clientId}'");
+
+                $allowanceContainer = [];
+                if(!empty($userAllowances)) {
+                    foreach($userAllowances as $eachAllowance) {
                         if($eachAllowance->type == 'Allowance') {
                             $payload->allowances[$eachAllowance->id] = $eachAllowance->amount;
                         } else {
                             $payload->deductions[$eachAllowance->id] = $eachAllowance->amount;
                         }
+                        $allowanceContainer[$eachAllowance->id] = $eachAllowance;
                     }
                 }
+
+                $payload->icontainer = $allowanceContainer;
+                
                 $this->generatepayslip($payload);
+
             }
 
             return [

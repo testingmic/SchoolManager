@@ -163,8 +163,8 @@ $response->html = '
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="text-right mb-2">
                     '.($generatePermission ? '
-                        <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'payslip-generate"><i class="fa fa-plus"></i> Generate Payslip</a>
-                        <a class="btn btn-sm btn-outline-success" href="'.$baseUrl.'payslip-bulkgenerate"><i class="fa fa-users"></i> Generate Multiple Payslip</a>
+                        <!-- <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'payslip-generate"><i class="fa fa-plus"></i> Generate Payslip</a> -->
+                        <a class="btn btn-sm btn-outline-success" href="'.$baseUrl.'payslip-bulkgenerate"><i class="fa fa-users"></i> Generate Multiple Payslips</a>
                     ' : null).'
                     '.($validatePayslip ? '
                         <a class="btn btn-sm btn-warning" onclick="return bulk_validate_payslip()"><i class="fa fa-check"></i> Validate Payslips</a>

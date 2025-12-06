@@ -263,14 +263,18 @@ var generate_payslips = () => {
                 }
             }).get();
             $.post(`${baseUrl}api/payroll/generatepayslips`, payload).then((response) => {
-                swal({
-                    text: response.data.result,
-                    icon: responseCode(response.code),
-                });
-                if(typeof response.data.additional !== "undefined") {
-                    setTimeout(() => {
-                        loadPage(response.data.additional.href);
-                    }, refresh_seconds);
+                if(response.code === 200) {
+                    swal({
+                        text: response.data.result,
+                        icon: responseCode(response.code),
+                    });
+                    if(typeof response.data.additional !== "undefined") {
+                        setTimeout(() => {
+                            loadPage(response.data.additional.href);
+                        }, refresh_seconds);
+                    }
+                } else {
+                    notify(response.data.result || 'Error processing request.', responseCode(response.code));
                 }
             });
         }

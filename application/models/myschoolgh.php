@@ -53,6 +53,7 @@ class Myschoolgh extends Models {
 	public $defaultPassword;
 
 	public $thisUser;
+	public $iclientData = [];
 	public $color_set = [
 		"#007bff", "#6610f2", "#6f42c1", "#e83e8c", "#dc3545", "#fd7e14", 
 		"#ffc107", "#28a745", "#20c997", "#17a2b8", "#6c757d", "#343a40", 
@@ -538,6 +539,12 @@ class Myschoolgh extends Models {
 
 		try {
 
+			if(empty($this->db)) return (object) [];
+
+			if(!empty($this->iclientData)) {
+				return $this->iclientData;
+			}
+
 			// prepare and execute the statement
 			$stmt = $this->db->prepare("
 				SELECT a.*, b.item_id AS default_account_id, b.balance AS default_account_balance
@@ -599,6 +606,8 @@ class Myschoolgh extends Models {
 				// convert to object
 				$result = (object) $result;
 			}
+
+			$this->iclientData = $result;
 			
 			return $result;
 			
@@ -1837,6 +1846,10 @@ class Myschoolgh extends Models {
 	
 		if (strpos($number, '.') !== false) {
 			list($number, $fraction) = explode('.', $number);
+			$number = (int) $number;
+			$fraction = $fraction; // Keep as string for processing
+		} else {
+			$number = (int) $number;
 		}
 		
 		try {
@@ -1853,7 +1866,7 @@ class Myschoolgh extends Models {
 					}
 					break;
 				case $number < 1000:
-					$hundreds  = $number / 100;
+					$hundreds  = (int) ($number / 100);
 					$remainder = $number % 100;
 					$string = $dictionary[$hundreds] . ' ' . $dictionary[100];
 					if ($remainder) {
@@ -1861,7 +1874,7 @@ class Myschoolgh extends Models {
 					}
 					break;
 				default:
-					$baseUnit = pow(1000, floor(log($number, 1000)));
+					$baseUnit = (int) pow(1000, floor(log($number, 1000)));
 					$numBaseUnits = (int) ($number / $baseUnit);
 					$remainder = $number % $baseUnit;
 					$string = $this->amount_to_words($numBaseUnits) . ' ' . ($dictionary[$baseUnit] ?? null);
@@ -1874,16 +1887,17 @@ class Myschoolgh extends Models {
 
 			if (null !== $fraction && is_numeric($fraction)) {
 				$string .= " Cedis";
+				$fractionInt = (int) $fraction;
 				// if the strlen is two
 				if(strlen($fraction) < 3) {
 					// confirm if the number is less than 21 then replace it directly
-					if($fraction < 21) {
-						$string .= " ".$dictionary[$fraction];
+					if($fractionInt < 21) {
+						$string .= " ".$dictionary[$fractionInt];
 						$string .= " Pesewas";
 					} else {
 						// clean the number
-						$tens   = ((int) ($fraction / 10)) * 10;
-						$units  = $fraction % 10;
+						$tens   = ((int) ($fractionInt / 10)) * 10;
+						$units  = $fractionInt % 10;
 						$string .= " ".($dictionary[$tens] ?? null);
 						if ($units) {
 							$string .= $hyphen . $dictionary[$units];
@@ -1894,8 +1908,8 @@ class Myschoolgh extends Models {
 					// split the numbers
 					$split = str_split($fraction);
 					// mention the numbers as a single integer
-					foreach($split as $number) {
-						$string .= " ".$dictionary[$number];
+					foreach($split as $digit) {
+						$string .= " ".$dictionary[(int) $digit];
 					}
 					$string .= " Pesewas";
 				}

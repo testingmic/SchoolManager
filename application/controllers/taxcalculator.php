@@ -14,7 +14,7 @@ class Taxcalculator
 
     // Pension rates
     private $TIER1_EMPLOYEE_RATE = 0;
-    private $TIER1_EMPLOYER_RATE = 0;
+    private $TIER1_EMPLOYER_RATE = 13.5;
     private $TIER2_RATE = 0;
     private $TIER3_MAX_RATE = 0;
 

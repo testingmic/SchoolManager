@@ -73,7 +73,7 @@ class Attendance extends Myschoolgh {
             $this->db->query("UPDATE users_attendance_log SET date_finalized = now(), finalize = '1', finalized_by='{$params->userId}' WHERE id='{$params->finalize}' LIMIT 1");
 
             // set a new message
-            $data = "Attendance log for {$params->date} was successfully finalized.";
+            $data = "Attendance log was successfully finalized.";
 
             return ["code" => 200, "data" => $data];
             
