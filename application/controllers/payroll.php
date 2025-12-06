@@ -1253,7 +1253,7 @@ class Payroll extends Myschoolgh {
                                 if(!empty($allowancesQuery) && is_array($allowancesQuery)) {
                                     foreach($allowancesQuery as $eachAllowance) {
                                         $result .= "<tr>
-                                            <td style='padding:10px;'>{$eachAllowance->allowance_type}</td>
+                                            <td style='padding:10px;'>{$eachAllowance->allowance_name}</td>
                                             <td align=\"right\">GH&cent;{$eachAllowance->amount}</td>
                                         </tr>";
                                     }
@@ -1276,7 +1276,7 @@ class Payroll extends Myschoolgh {
                                 if(!empty($deductionsQuery) && is_array($allowancesQuery)) {
                                     foreach($deductionsQuery as $eachAllowance) {
                                         $result .= "<tr>
-                                            <td style='padding:10px;'>{$eachAllowance->allowance_type}</td>
+                                            <td style='padding:10px;'>{$eachAllowance->allowance_name}</td>
                                             <td style='padding:10px;' align=\"right\">GH&cent;{$eachAllowance->amount}</td>
                                         </tr>";
                                     }
