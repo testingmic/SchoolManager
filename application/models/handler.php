@@ -173,7 +173,7 @@ class Handler {
             $data['data'] = $data['data']['result'] ?? $data['data'];
         }
 
-        if(isset($data['data']['code'])) {
+        if(is_array($data['data']) && isset($data['data']['code'])) {
             unset($data['data']['code']);
         }
 
