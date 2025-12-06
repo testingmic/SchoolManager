@@ -62,35 +62,60 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
         "teacher" => "warning"
     ];
 
-    $basic_salary = 0;
-    $allowances = 0;
-    $deductions = 0;
-    $net_salary = 0;
+    $taxCalculator = load_class("taxcalculator", "controllers");
 
-    foreach($api_staff_list["data"] as $key => $each) {
-        
-        $basic_salary += $each->basic_salary;
-        $allowances += $each->allowances;
-        $deductions += $each->deductions;
-        $net_salary += $each->net_salary;
+    if(!empty($api_staff_list["data"]) && is_array($api_staff_list["data"])) {
 
-        $action = "<a href='#' onclick='load(\"payroll-view/{$each->user_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+        $response->array_stream["salary_calculations"] = [];
+        foreach($api_staff_list["data"] as $key => $each) {
 
-        $staff_list .= "<tr data-row_id=\"{$each->user_id}\">";
-        $staff_list .= "<td>".($key+1)."</td>";
-        $staff_list .= "<td>
-            <div class='d-flex justify-content-start'>
-                <div class='mr-2'><img class='rounded-2xl author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"></div>
-                <div class='text-uppercase'><a href='#' onclick='return load(\"payroll-view/{$each->user_id}\");'>{$each->name}</a> <br><span class='p-1 badge badge-{$color[$each->user_type]}'>{$each->user_type}</span></div>
-            </div></td>";
-        $staff_list .= "<td>{$each->position}</td>";
-        $staff_list .= "<td>{$each->enrollment_date}</td>";
-        $staff_list .= "<td>{$each->basic_salary}</td>";
-        $staff_list .= "<td>{$each->allowances}</td>";
-        $staff_list .= "<td>{$each->deductions}</td>";
-        $staff_list .= "<td>{$each->net_salary}</td>";
-        $staff_list .= "<td class='text-center'>{$action}</td>";
-        $staff_list .= "</tr>";
+            $allowancesList = [];
+            foreach($each->_allowances as $ieach) {
+                $allowancesList[$ieach->name] = $ieach->amount;
+            }
+
+            $each->basic_salary = !empty($each->basic_salary) ? $each->basic_salary : 0;
+
+            $deductionsList = tax_ratings($each->_deductions)['deductions'];
+            $taxRatings = tax_ratings($each->_deductions)['taxes'];
+
+            /** Calculate the salary calculation */
+            $salaryCalculation = !empty($each->basic_salary) ? $taxCalculator->calculateWithPensions($each->basic_salary, 0, $allowancesList, $taxRatings) : [];
+
+            $response->array_stream["salary_calculations"][$each->name] = [
+                'deductions' => $deductionsList,
+                'taxes' => $taxRatings,
+                'salary_calculation' => $salaryCalculation
+            ];
+
+            $action = "<a href='#' onclick='load(\"payroll-view/{$each->user_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+
+            $netSalary = !empty($salaryCalculation['net_income']) ? $salaryCalculation['net_income'] : 0;
+            $allowances = !empty($salaryCalculation['total_allowances']) ? $salaryCalculation['total_allowances'] : 0;
+            $deductions = !empty($salaryCalculation['total_deductions']) ? $salaryCalculation['total_deductions'] : 0;
+
+
+            $staff_list .= "<tr data-row_id=\"{$each->user_id}\">";
+            $staff_list .= "<td>".($key+1)."</td>";
+            $staff_list .= "<td>
+                <div class='d-flex justify-content-start'>
+                    <div class='mr-2'><img class='rounded-2xl author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"></div>
+                    <div class='text-uppercase'>
+                        <a href='#' onclick='return load(\"payroll-view/{$each->user_id}\");'>{$each->name}</a> 
+                        <br><span class='p-1 badge badge-{$color[$each->user_type]}'>{$each->user_type}</span>
+                    </div>
+                </div></td>";
+            $staff_list .= "<td>{$each->position}</td>";
+            $staff_list .= "<td>{$each->enrollment_date}</td>";
+            $staff_list .= "<td>{$each->basic_salary}</td>";
+            $staff_list .= "<td>{$allowances}</td>";
+            $staff_list .= "<td>{$deductions}</td>";
+            $staff_list .= "<td>{$netSalary}</td>";
+            $staff_list .= "<td class='text-center'>{$action}</td>";
+            $staff_list .= "</tr>";
+
+        }
+
     }
 
     $response->html = '
@@ -145,8 +170,8 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                     <thead>
                                         <tr>
                                             <th width="5%" class="text-center">#</th>
-                                            <th>Staff Name</th>
-                                            <th>Staff Role</th>
+                                            <th width="20%">Staff Name</th>
+                                            <th width="15%">Staff Role</th>
                                             <th>Appointment Date</th>
                                             <th>Basic Salary</th>
                                             <th>Earnings</th>

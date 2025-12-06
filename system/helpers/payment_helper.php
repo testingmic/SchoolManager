@@ -30,6 +30,41 @@ function check_url($params) {
 }
 
 /**
+ * Prepare the tax ratings for the payroll
+ * 
+ * @param Array $data
+ * 
+ * @return Array
+ */
+function tax_ratings($data = []) {
+
+    // loop through the deductions
+    foreach($data as $each) {
+        // set the deductions list
+        $deductionsList[$each->name] = $each->amount;
+
+        // set the tax ratings
+        if($each->name == "SSNIT") {
+            $taxRatings["tier1"] = $each->calculation_value;
+        }
+
+        // set the tax ratings
+        if($each->name == "TIER 2") {
+            $taxRatings["tier2"] = $each->calculation_value;
+        }
+
+        if($each->name == "PAYE") {
+            $taxRatings["paye"] = 'calculate';
+        }
+    }
+
+    return [
+        "deductions" => $deductionsList ?? [],
+        "taxes" => $taxRatings ?? []
+    ];
+}
+
+/**
  * Prepare the payment form using the checkout url
  * 
  * @param String $getObject->checkout_url

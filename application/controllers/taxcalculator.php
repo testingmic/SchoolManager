@@ -185,13 +185,8 @@ class Taxcalculator
     public function calculateWithPensions(float $basicSalary, float $tier3Rate = 0, array $otherAllowances = [], array $taxRatings = []): array
     {
 
-        if(!empty($taxRatings['tier1'])) {
-            $this->TIER1_EMPLOYEE_RATE = (int)$taxRatings['tier1'];
-        }
-
-        if(!empty($taxRatings['tier2'])) {
-            $this->TIER2_RATE = (int)$taxRatings['tier2'];
-        }
+        $this->TIER1_EMPLOYEE_RATE = (int)($taxRatings['tier1'] ?? 0);
+        $this->TIER2_RATE = (int)($taxRatings['tier2'] ?? 0);
 
         // Calculate all pension contributions
         $pensions = $this->calculateAllPensions($basicSalary, $tier3Rate);
@@ -264,33 +259,3 @@ class Taxcalculator
         ];
     }
 }
-
-// // Usage examples:
-// $calculator = new Taxcalculator();
-
-// echo "=== PENSION CALCULATIONS ===\n\n";
-
-// // Example 1: Calculate Tier 1 only
-// $tier1 = $calculator->calculateTier1(5000);
-// echo "Tier 1 (SSNIT) for GHS 5,000 basic salary:\n";
-// echo "Employee: GHS " . number_format($tier1['employee_contribution'], 2) . " ({$tier1['employee_rate']}%)\n";
-// echo "Employer: GHS " . number_format($tier1['employer_contribution'], 2) . " ({$tier1['employer_rate']}%)\n";
-// echo "Total: GHS " . number_format($tier1['total_contribution'], 2) . "\n\n";
-
-// // Example 2: Calculate all pensions
-// $allPensions = $calculator->calculateAllPensions(5000, 10);
-// echo "All Pensions for GHS 5,000 basic salary (with 10% Tier 3):\n";
-// echo "Total Employee Contribution: GHS " . number_format($allPensions['total_employee_contribution'], 2) . "\n";
-// echo "Total Tax Deductible: GHS " . number_format($allPensions['total_tax_deductible'], 2) . "\n\n";
-
-// // Example 3: Complete calculation with pensions
-// $complete = $calculator->calculateWithPensions(5000, 10, ['transport' => 500, 'housing' => 1000]);
-// echo "=== COMPLETE SALARY BREAKDOWN ===\n";
-// echo "Basic Salary: GHS " . number_format($complete['basic_salary'], 2) . "\n";
-// echo "Allowances: GHS " . number_format($complete['total_allowances'], 2) . "\n";
-// echo "Gross Income: GHS " . number_format($complete['gross_income'], 2) . "\n";
-// echo "Pension Deductions: GHS " . number_format($complete['pensions']['total_employee_contribution'], 2) . "\n";
-// echo "Taxable Income: GHS " . number_format($complete['taxable_income'], 2) . "\n";
-// echo "PAYE Tax: GHS " . number_format($complete['paye_tax'], 2) . "\n";
-// echo "Net Income: GHS " . number_format($complete['net_income'], 2) . "\n";
-// echo "Take Home: " . $complete['take_home_percentage'] . "%\n";

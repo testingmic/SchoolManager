@@ -134,27 +134,9 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                 $allowancesList[$each->name] = $each->amount;
             }
 
-            $deductionsList = [];
-            $taxRatings = [];
-            // loop through the deductions
-            foreach($data->_deductions as $each) {
-                // set the deductions list
-                $deductionsList[$each->name] = $each->amount;
-
-                // set the tax ratings
-                if($each->name == "SSNIT") {
-                    $taxRatings["tier1"] = $each->calculation_value;
-                }
-
-                // set the tax ratings
-                if($each->name == "TIER 2") {
-                    $taxRatings["tier2"] = $each->calculation_value;
-                }
-
-                if($each->name == "PAYE") {
-                    $taxRatings["paye"] = 'calculate';
-                }
-            }
+            $deductionsList = tax_ratings($data->_deductions)['deductions'];
+            $taxRatings = tax_ratings($data->_deductions)['taxes'];
+            
 
             $salaryCalculation = $taxCalculator->calculateWithPensions($data->basic_salary, 0, $allowancesList, $taxRatings);
 

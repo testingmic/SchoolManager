@@ -30,6 +30,7 @@ $config = load_class('config', 'core');
 $session = load_class('Session', 'libraries/Session');
 
 load_helpers([
+	'payment_helper',
 	'array_helper',
 	'string_helper',
 	'email_helper',
