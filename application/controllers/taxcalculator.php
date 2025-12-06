@@ -81,21 +81,21 @@ class Taxcalculator
      * 
      * @return array The Tier 1 pension breakdown
      */
-    public function calculateTier1(float $basicSalary): array
+    public function calculateTier1($basicSalary = 0): array
     {
         $employeeContribution = ($basicSalary * $this->TIER1_EMPLOYEE_RATE) / 100;
         $employerContribution = ($basicSalary * $this->TIER1_EMPLOYER_RATE) / 100;
         $totalContribution = $employeeContribution + $employerContribution;
 
         return [
-            'basic_salary' => round($basicSalary, 2),
-            'employee_contribution' => round($employeeContribution, 2),
+            'basic_salary' => !empty($basicSalary) ? round($basicSalary, 2) : 0,
+            'employee_contribution' => !empty($employeeContribution) ? round($employeeContribution, 2) : 0,
             'employee_rate' => $this->TIER1_EMPLOYEE_RATE,
-            'employer_contribution' => round($employerContribution, 2),
+            'employer_contribution' => !empty($employerContribution) ? round($employerContribution, 2) : 0,
             'employer_rate' => $this->TIER1_EMPLOYER_RATE,
-            'total_contribution' => round($totalContribution, 2),
+            'total_contribution' => !empty($totalContribution) ? round($totalContribution, 2) : 0,
             'total_rate' => $this->TIER1_EMPLOYEE_RATE + $this->TIER1_EMPLOYER_RATE,
-            'tax_deductible' => round($employeeContribution, 2)
+            'tax_deductible' => !empty($employeeContribution) ? round($employeeContribution, 2) : 0
         ];
     }
 
@@ -106,15 +106,15 @@ class Taxcalculator
      * 
      * @return array The Tier 2 pension breakdown
      */
-    public function calculateTier2(float $basicSalary): array
+    public function calculateTier2($basicSalary = 0): array
     {
         $contribution = ($basicSalary * $this->TIER2_RATE) / 100;
 
         return [
-            'basic_salary' => round($basicSalary, 2),
-            'contribution' => round($contribution, 2),
+            'basic_salary' => !empty($basicSalary) ? round($basicSalary, 2) : 0,
+            'contribution' => !empty($contribution) ? round($contribution, 2) : 0,
             'rate' => $this->TIER2_RATE,
-            'tax_deductible' => round($contribution, 2)
+            'tax_deductible' => !empty($contribution) ? round($contribution, 2) : 0
         ];
     }
 
@@ -126,7 +126,7 @@ class Taxcalculator
      * 
      * @return array The Tier 3 pension breakdown
      */
-    public function calculateTier3(float $basicSalary, float $contributionRate = 0): array
+    public function calculateTier3($basicSalary = 0, float $contributionRate = 0): array
     {
         // Ensure contribution rate doesn't exceed maximum
         $actualRate = min($contributionRate, $this->TIER3_MAX_RATE);
@@ -134,12 +134,12 @@ class Taxcalculator
         $maxContribution = ($basicSalary * $this->TIER3_MAX_RATE) / 100;
 
         return [
-            'basic_salary' => round($basicSalary, 2),
-            'contribution' => round($contribution, 2),
+            'basic_salary' => !empty($basicSalary) ? round($basicSalary, 2) : 0,
+            'contribution' => !empty($contribution) ? round($contribution, 2) : 0,
             'rate' => $actualRate,
             'max_deductible_rate' => $this->TIER3_MAX_RATE,
-            'max_deductible_amount' => round($maxContribution, 2),
-            'tax_deductible' => round($contribution, 2),
+            'max_deductible_amount' => !empty($maxContribution) ? round($maxContribution, 2) : 0,
+            'tax_deductible' => !empty($contribution) ? round($contribution, 2) : 0,
             'is_at_max' => $actualRate >= $this->TIER3_MAX_RATE
         ];
     }
@@ -152,7 +152,7 @@ class Taxcalculator
      * 
      * @return array The pensions breakdown
      */
-    public function calculateAllPensions(float $basicSalary, float $tier3Rate = 0): array
+    public function calculateAllPensions($basicSalary = 0, float $tier3Rate = 0): array
     {
         $tier1 = $this->calculateTier1($basicSalary);
         $tier2 = $this->calculateTier2($basicSalary);
@@ -162,7 +162,7 @@ class Taxcalculator
         $totalTaxDeductible = $tier1['tax_deductible'] + $tier2['tax_deductible'] + $tier3['tax_deductible'];
 
         return [
-            'basic_salary' => round($basicSalary, 2),
+            'basic_salary' => !empty($basicSalary) ? round($basicSalary, 2) : 0,
             'tier1' => $tier1,
             'tier2' => $tier2,
             'tier3' => $tier3,
@@ -182,7 +182,7 @@ class Taxcalculator
      * 
      * @return array The PAYE tax breakdown
      */
-    public function calculateWithPensions(float $basicSalary, float $tier3Rate = 0, array $otherAllowances = [], array $taxRatings = []): array
+    public function calculateWithPensions($basicSalary = 0, float $tier3Rate = 0, array $otherAllowances = [], array $taxRatings = []): array
     {
 
         $this->TIER1_EMPLOYEE_RATE = (int)($taxRatings['tier1'] ?? 0);
@@ -215,10 +215,10 @@ class Taxcalculator
             'taxable_income' => round($taxableIncome, 2),
             'paye_tax' => round($taxResult['tax'], 2),
             'tax_breakdown' => $taxResult['breakdown'],
-            'effective_tax_rate' => round(($taxResult['tax'] / $grossIncome) * 100, 2),
+            'effective_tax_rate' => !empty($grossIncome) ? round(($taxResult['tax'] / $grossIncome) * 100, 2) : 0,
             'total_deductions' => round($pensions['total_employee_contribution'] + $taxResult['tax'], 2),
-            'net_income' => round($netIncome, 2),
-            'take_home_percentage' => round(($netIncome / $grossIncome) * 100, 2)
+            'net_income' => !empty($netIncome) ? round($netIncome, 2) : 0,
+            'take_home_percentage' => !empty($grossIncome) ? round(($netIncome / $grossIncome) * 100, 2) : 0
         ];
     }
 
