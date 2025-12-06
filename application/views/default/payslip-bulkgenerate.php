@@ -80,14 +80,29 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
 
     // payroll object
     $payrollObject = load_class("payroll", "controllers");
+    $taxCalculator = load_class("taxcalculator", "controllers");
 
     // loop through the users
     foreach($users_array_list as $each) {
 
+
+        // get the allowances of the user
+        $userAllowances = $myClass->pushQuery("a.*, at.name, at.calculation_method, at.calculation_value, at.pre_tax_deduction, at.subject_to_ssnit", 
+        "payslips_employees_allowances a LEFT JOIN payslips_allowance_types at ON at.id = a.allowance_id", 
+        "a.employee_id='{$each->item_id}' AND a.client_id='{$clientId}'");
+
+        // filter the allowances
+        $_allowances = array_filter($userAllowances, function($each) {
+            return $each->type == 'Allowance';
+        });
+
+        // get the deductions of the user
+        $_deductions = array_filter($userAllowances, function($each) {
+            return $each->type == 'Deduction';
+        });
+
         // set the user payload
         $basic_salary = !empty($each->basic_salary) ? $each->basic_salary : 0;
-        $allowances = !empty($each->allowances) ? $each->allowances : 0;
-        $deductions = !empty($each->deductions) ? $each->deductions : 0;
 
         $userPayload->employee_id = $each->item_id;
         $salaryInfo = $payrollObject->paysliplist($userPayload)["data"] ?? [];
@@ -96,10 +111,25 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
         $salaryCreated = false;
         $isDisabled = false;
 
+        foreach($_allowances as $ieach) {
+            $allowancesList[$ieach->name] = $ieach->amount;
+        }
+
+        /** Get the deductions list and tax ratings */
+        $deductionsList = tax_ratings($_deductions)['deductions'];
+        $taxRatings = tax_ratings($_deductions)['taxes'];
+
+        /** Calculate the salary calculation */
+        $salaryCalculation = !empty($basic_salary) ? $taxCalculator->calculateWithPensions($basic_salary, 0, ($allowancesList ?? []), $taxRatings) : [];
+
+        $netSalary = !empty($salaryCalculation['net_income']) ? $salaryCalculation['net_income'] : 0;
+        $allowances = !empty($salaryCalculation['total_allowances']) ? $salaryCalculation['total_allowances'] : 0;
+        $deductions = !empty($salaryCalculation['total_deductions']) ? $salaryCalculation['total_deductions'] : 0;
+
         $row_id = "data-staff_id='{$each->item_id}'";
         $append_color = "";
         $inputValue = "value='{$each->item_id}'";
-        $row_class = empty($each->basic_salary) ? "text-white bg-danger-light" : "";
+        $row_class = empty($basic_salary) ? "text-white bg-danger-light" : "";
 
         // if the salary info is not empty
         if(!empty($salaryInfo)) {
@@ -120,14 +150,14 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
             <td>
                 <div style='padding-left: 2.5rem;' class='custom-control cursor col-lg-12 ".($validatedSalary ? "" : "custom-switch switch-primary")."'>
                     ".(!$validatedSalary ? 
-                    "<input {$isDisabled} ".(empty($row_class) ? "checked='checked'" : "")." data-item='staff_checkbox' data-user_name='{$each->name}' type='checkbox' value='{$each->item_id}' name='user_ids[]' class='custom-control-input cursor' id='user_id_{$each->item_id}'>
+                    "<input {$isDisabled} ".(empty($row_class) ? "checked='checked'" : "disabled")." data-item='staff_checkbox' data-user_name='{$each->name}' type='checkbox' value='{$each->item_id}' name='user_ids[]' class='custom-control-input cursor' id='user_id_{$each->item_id}'>
                     <label class='custom-control-label {$append_color} cursor' for='user_id_{$each->item_id}'>{$each->name} 
                         <br><strong>{$each->unique_id}</strong>
                     </label>" : "<div>{$each->name}</div><div><strong>{$each->unique_id}</strong></div>")."
                 </div>
             </td>
             <td>
-                <input type='text' {$isDisabled} {$row_id} name='basic_salary' value='{$basic_salary}' class='form-control text-center font-20 w-[150px]'>
+                <input type='text' {$isDisabled} {$row_id} readonly name='basic_salary' value='{$basic_salary}' class='form-control text-center font-20 w-[150px]'>
             </td>
             <td class='text-center font-18'>
                 <span class='allowances'>{$allowances}</span>
@@ -136,7 +166,7 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                 <span class='deductions'>{$deductions}</span>
             </td>
             <td class='text-center font-20'>
-                <span class='net_salary'>".(!empty($each->net_salary) ? number_format($each->net_salary, 2) : "0.00")."</span>
+                <span class='net_salary'>".(!empty($netSalary) ? number_format($netSalary, 2) : "0.00")."</span>
             </td>
         </tr>";
     }
