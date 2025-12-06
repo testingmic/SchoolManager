@@ -52,6 +52,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
         ];
 
         $data = load_class("users", "controllers", $staff_param)->list($staff_param);
+        $taxCalculator = load_class("taxcalculator", "controllers");
 
         // if no record was found
         if(empty($data["data"])) {
@@ -88,6 +89,8 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
             $staff_param = (object) ["clientId" => $clientId, "employee_id" => $userId, "client_data" => $defaultUser->client];
             $payslips_list = load_class("payroll", "controllers", $staff_param)->paysliplist($staff_param)["data"];
             
+            $response->array_stream["dataset"] = $payroll_form["dataset"];
+
             // if the payslip information is not empty
             if(!empty($payslips_list)) {
                 $basic_salary = 0;
@@ -125,6 +128,37 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                     
                 }
             }
+
+            $allowancesList = [];
+            foreach($data->_allowances as $each) {
+                $allowancesList[$each->name] = $each->amount;
+            }
+
+            $deductionsList = [];
+            $taxRatings = [];
+            // loop through the deductions
+            foreach($data->_deductions as $each) {
+                // set the deductions list
+                $deductionsList[$each->name] = $each->amount;
+
+                // set the tax ratings
+                if($each->name == "SSNIT") {
+                    $taxRatings["tier1"] = $each->calculation_value;
+                }
+
+                // set the tax ratings
+                if($each->name == "TIER 2") {
+                    $taxRatings["tier2"] = $each->calculation_value;
+                }
+
+                if($each->name == "PAYE") {
+                    $taxRatings["paye"] = 'calculate';
+                }
+            }
+
+            $salaryCalculation = $taxCalculator->calculateWithPensions($data->basic_salary, 0, $allowancesList, $taxRatings);
+
+            $response->array_stream["salary_calculation"] = $salaryCalculation;
 
             // user  permission information
             $level_data = "<div class='row'>";
@@ -198,30 +232,45 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                         </div>
                         </div>
                         <div class="card">
-                            <div class="card-header">
-                                <h4>Salary Details</h4>
+                            <div class="card-header pb-0">
+                                <h4 class="pb-0">Salary Details</h4>
                             </div>
                             <div class="card-body pt-0 pb-0 mb-0">
                                 <div class="py-4">
-                                    <p class="clearfix">
+                                    <p class="clearfix font-weight-bold">
                                         <span class="float-left">Basic Salary</span>
-                                        <span class="float-right text-muted">'.$data->basic_salary.'</span>
+                                        <span class="float-right text-muted">'.$salaryCalculation['basic_salary'].'</span>
                                     </p>
                                     <p class="clearfix">
-                                        <span class="float-left">Allowances</span>
-                                        <span class="float-right text-muted">'.$data->allowances.'</span>
+                                        <span class="float-left">Earnings</span>
+                                        <span class="float-right text-muted">'.$salaryCalculation['total_allowances'].'</span>
                                     </p>
-                                    <p class="clearfix">
+                                    <p class="clearfix font-weight-bold">
                                         <span class="float-left">Gross Salary</span>
-                                        <span class="float-right text-muted">'.$data->gross_salary.'</span>
+                                        <span class="float-right text-muted">'.$salaryCalculation['gross_income'].'</span>
                                     </p>
+                                    '.(in_array("PAYE", array_keys($deductionsList)) ? '
+                                    <p class="clearfix">
+                                        <span class="float-left">--- PAYE Tax</span>
+                                        <span class="float-right text-muted">'.$salaryCalculation['paye_tax'].'</span>
+                                    </p>' : '').'
+                                    '.(in_array("SSNIT", array_keys($deductionsList)) ? '
+                                    <p class="clearfix">
+                                        <span class="float-left">--- Tier 1 Pension</span>
+                                        <span class="float-right text-muted">'.$salaryCalculation['pensions']['tier1']['employee_contribution'].'</span>
+                                    </p>' : '').'
+                                    '.(in_array("TIER 2", array_keys($deductionsList)) ? '
+                                    <p class="clearfix">
+                                        <span class="float-left">--- Tier 2 Pension</span>
+                                        <span class="float-right text-muted">'.$salaryCalculation['pensions']['tier2']['contribution'].'</span>
+                                    </p>' : '').'
                                     <p class="clearfix">
                                         <span class="float-left">Deductions</span>
-                                        <span class="float-right text-muted">'.$data->deductions.'</span>
+                                        <span class="float-right text-muted">'.$salaryCalculation['total_deductions'].'</span>
                                     </p>
-                                    <p class="clearfix">
+                                    <p class="clearfix font-weight-bold">
                                         <span class="float-left">Net Salary</span>
-                                        <span class="float-right text-muted">'.$data->net_salary.'</span>
+                                        <span class="float-right text-muted">'.$salaryCalculation['net_income'].'</span>
                                     </p>
                                 </div>
                             </div>

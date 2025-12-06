@@ -13,12 +13,19 @@ class Taxcalculator
     ];
 
     // Pension rates
-    private const TIER1_EMPLOYEE_RATE = 5.5;
-    private const TIER1_EMPLOYER_RATE = 13.5;
-    private const TIER2_RATE = 5.0;
-    private const TIER3_MAX_RATE = 16.5;
+    private $TIER1_EMPLOYEE_RATE = 0;
+    private $TIER1_EMPLOYER_RATE = 0;
+    private $TIER2_RATE = 0;
+    private $TIER3_MAX_RATE = 0;
 
-    public function calculate(float $monthlyIncome): array
+    /**
+     * Calculate the tax for a given monthly income
+     * 
+     * @param float $monthlyIncome The monthly income to calculate the tax for
+     * 
+     * @return array The tax breakdown
+     */
+    public function calculate(float $monthlyIncome, bool $calculate = false): array
     {
         if ($monthlyIncome <= 0) {
             return [
@@ -59,62 +66,92 @@ class Taxcalculator
         }
 
         return [
-            'gross_income' => round($monthlyIncome, 2),
-            'tax' => round($totalTax, 2),
-            'net_income' => round($monthlyIncome - $totalTax, 2),
-            'effective_rate' => round(($totalTax / $monthlyIncome) * 100, 2),
+            'gross_income' => $calculate ? round($monthlyIncome, 2) : 0,
+            'tax' => $calculate ? round($totalTax, 2) : 0,
+            'net_income' => $calculate ? round($monthlyIncome - $totalTax, 2) : 0,
+            'effective_rate' => $calculate ? round(($totalTax / $monthlyIncome) * 100, 2) : 0,
             'breakdown' => $breakdown
         ];
     }
 
+    /**
+     * Calculate the Tier 1 pension for a given basic salary
+     * 
+     * @param float $basicSalary The basic salary to calculate the Tier 1 pension for
+     * 
+     * @return array The Tier 1 pension breakdown
+     */
     public function calculateTier1(float $basicSalary): array
     {
-        $employeeContribution = ($basicSalary * self::TIER1_EMPLOYEE_RATE) / 100;
-        $employerContribution = ($basicSalary * self::TIER1_EMPLOYER_RATE) / 100;
+        $employeeContribution = ($basicSalary * $this->TIER1_EMPLOYEE_RATE) / 100;
+        $employerContribution = ($basicSalary * $this->TIER1_EMPLOYER_RATE) / 100;
         $totalContribution = $employeeContribution + $employerContribution;
 
         return [
             'basic_salary' => round($basicSalary, 2),
             'employee_contribution' => round($employeeContribution, 2),
-            'employee_rate' => self::TIER1_EMPLOYEE_RATE,
+            'employee_rate' => $this->TIER1_EMPLOYEE_RATE,
             'employer_contribution' => round($employerContribution, 2),
-            'employer_rate' => self::TIER1_EMPLOYER_RATE,
+            'employer_rate' => $this->TIER1_EMPLOYER_RATE,
             'total_contribution' => round($totalContribution, 2),
-            'total_rate' => self::TIER1_EMPLOYEE_RATE + self::TIER1_EMPLOYER_RATE,
+            'total_rate' => $this->TIER1_EMPLOYEE_RATE + $this->TIER1_EMPLOYER_RATE,
             'tax_deductible' => round($employeeContribution, 2)
         ];
     }
 
+    /**
+     * Calculate the Tier 2 pension for a given basic salary
+     * 
+     * @param float $basicSalary The basic salary to calculate the Tier 2 pension for
+     * 
+     * @return array The Tier 2 pension breakdown
+     */
     public function calculateTier2(float $basicSalary): array
     {
-        $contribution = ($basicSalary * self::TIER2_RATE) / 100;
+        $contribution = ($basicSalary * $this->TIER2_RATE) / 100;
 
         return [
             'basic_salary' => round($basicSalary, 2),
             'contribution' => round($contribution, 2),
-            'rate' => self::TIER2_RATE,
+            'rate' => $this->TIER2_RATE,
             'tax_deductible' => round($contribution, 2)
         ];
     }
 
+    /**
+     * Calculate the Tier 3 pension for a given basic salary
+     * 
+     * @param float $basicSalary The basic salary to calculate the Tier 3 pension for
+     * @param float $contributionRate The contribution rate to calculate the Tier 3 pension for
+     * 
+     * @return array The Tier 3 pension breakdown
+     */
     public function calculateTier3(float $basicSalary, float $contributionRate = 0): array
     {
         // Ensure contribution rate doesn't exceed maximum
-        $actualRate = min($contributionRate, self::TIER3_MAX_RATE);
+        $actualRate = min($contributionRate, $this->TIER3_MAX_RATE);
         $contribution = ($basicSalary * $actualRate) / 100;
-        $maxContribution = ($basicSalary * self::TIER3_MAX_RATE) / 100;
+        $maxContribution = ($basicSalary * $this->TIER3_MAX_RATE) / 100;
 
         return [
             'basic_salary' => round($basicSalary, 2),
             'contribution' => round($contribution, 2),
             'rate' => $actualRate,
-            'max_deductible_rate' => self::TIER3_MAX_RATE,
+            'max_deductible_rate' => $this->TIER3_MAX_RATE,
             'max_deductible_amount' => round($maxContribution, 2),
             'tax_deductible' => round($contribution, 2),
-            'is_at_max' => $actualRate >= self::TIER3_MAX_RATE
+            'is_at_max' => $actualRate >= $this->TIER3_MAX_RATE
         ];
     }
 
+    /**
+     * Calculate all the pensions for a given basic salary
+     * 
+     * @param float $basicSalary The basic salary to calculate the pensions for
+     * @param float $tier3Rate The contribution rate to calculate the Tier 3 pension for
+     * 
+     * @return array The pensions breakdown
+     */
     public function calculateAllPensions(float $basicSalary, float $tier3Rate = 0): array
     {
         $tier1 = $this->calculateTier1($basicSalary);
@@ -136,8 +173,26 @@ class Taxcalculator
         ];
     }
 
-    public function calculateWithPensions(float $basicSalary, float $tier3Rate = 0, array $otherAllowances = []): array
+    /**
+     * Calculate the PAYE tax for a given basic salary
+     * 
+     * @param float $basicSalary The basic salary to calculate the PAYE tax for
+     * @param float $tier3Rate The contribution rate to calculate the Tier 3 pension for
+     * @param array $otherAllowances The other allowances to calculate the PAYE tax for
+     * 
+     * @return array The PAYE tax breakdown
+     */
+    public function calculateWithPensions(float $basicSalary, float $tier3Rate = 0, array $otherAllowances = [], array $taxRatings = []): array
     {
+
+        if(!empty($taxRatings['tier1'])) {
+            $this->TIER1_EMPLOYEE_RATE = (int)$taxRatings['tier1'];
+        }
+
+        if(!empty($taxRatings['tier2'])) {
+            $this->TIER2_RATE = (int)$taxRatings['tier2'];
+        }
+
         // Calculate all pension contributions
         $pensions = $this->calculateAllPensions($basicSalary, $tier3Rate);
         
@@ -151,7 +206,7 @@ class Taxcalculator
         $taxableIncome = $grossIncome - $pensions['total_tax_deductible'];
         
         // Calculate PAYE on taxable income
-        $taxResult = $this->calculate($taxableIncome);
+        $taxResult = $this->calculate($taxableIncome, $taxRatings['paye'] ?? false);
         
         // Net income = gross income - employee pension contributions - tax
         $netIncome = $grossIncome - $pensions['total_employee_contribution'] - $taxResult['tax'];
@@ -172,6 +227,14 @@ class Taxcalculator
         ];
     }
 
+    /**
+     * Format the range for the tax breakdown
+     * 
+     * @param float $start The start of the range
+     * @param float $end The end of the range
+     * 
+     * @return string The formatted range
+     */
     private function formatRange(float $start, float $end): string
     {
         if ($end >= PHP_FLOAT_MAX) {
@@ -180,6 +243,13 @@ class Taxcalculator
         return "GHS " . number_format($start, 2) . " - GHS " . number_format($end, 2);
     }
 
+    /**
+     * Calculate the annual tax for a given annual income
+     * 
+     * @param float $annualIncome The annual income to calculate the annual tax for
+     * 
+     * @return array The annual tax breakdown
+     */
     public function calculateAnnual(float $annualIncome): array
     {
         $monthlyIncome = $annualIncome / 12;
@@ -195,32 +265,32 @@ class Taxcalculator
     }
 }
 
-// Usage examples:
-$calculator = new Taxcalculator();
+// // Usage examples:
+// $calculator = new Taxcalculator();
 
-echo "=== PENSION CALCULATIONS ===\n\n";
+// echo "=== PENSION CALCULATIONS ===\n\n";
 
-// Example 1: Calculate Tier 1 only
-$tier1 = $calculator->calculateTier1(5000);
-echo "Tier 1 (SSNIT) for GHS 5,000 basic salary:\n";
-echo "Employee: GHS " . number_format($tier1['employee_contribution'], 2) . " ({$tier1['employee_rate']}%)\n";
-echo "Employer: GHS " . number_format($tier1['employer_contribution'], 2) . " ({$tier1['employer_rate']}%)\n";
-echo "Total: GHS " . number_format($tier1['total_contribution'], 2) . "\n\n";
+// // Example 1: Calculate Tier 1 only
+// $tier1 = $calculator->calculateTier1(5000);
+// echo "Tier 1 (SSNIT) for GHS 5,000 basic salary:\n";
+// echo "Employee: GHS " . number_format($tier1['employee_contribution'], 2) . " ({$tier1['employee_rate']}%)\n";
+// echo "Employer: GHS " . number_format($tier1['employer_contribution'], 2) . " ({$tier1['employer_rate']}%)\n";
+// echo "Total: GHS " . number_format($tier1['total_contribution'], 2) . "\n\n";
 
-// Example 2: Calculate all pensions
-$allPensions = $calculator->calculateAllPensions(5000, 10);
-echo "All Pensions for GHS 5,000 basic salary (with 10% Tier 3):\n";
-echo "Total Employee Contribution: GHS " . number_format($allPensions['total_employee_contribution'], 2) . "\n";
-echo "Total Tax Deductible: GHS " . number_format($allPensions['total_tax_deductible'], 2) . "\n\n";
+// // Example 2: Calculate all pensions
+// $allPensions = $calculator->calculateAllPensions(5000, 10);
+// echo "All Pensions for GHS 5,000 basic salary (with 10% Tier 3):\n";
+// echo "Total Employee Contribution: GHS " . number_format($allPensions['total_employee_contribution'], 2) . "\n";
+// echo "Total Tax Deductible: GHS " . number_format($allPensions['total_tax_deductible'], 2) . "\n\n";
 
-// Example 3: Complete calculation with pensions
-$complete = $calculator->calculateWithPensions(5000, 10, ['transport' => 500, 'housing' => 1000]);
-echo "=== COMPLETE SALARY BREAKDOWN ===\n";
-echo "Basic Salary: GHS " . number_format($complete['basic_salary'], 2) . "\n";
-echo "Allowances: GHS " . number_format($complete['total_allowances'], 2) . "\n";
-echo "Gross Income: GHS " . number_format($complete['gross_income'], 2) . "\n";
-echo "Pension Deductions: GHS " . number_format($complete['pensions']['total_employee_contribution'], 2) . "\n";
-echo "Taxable Income: GHS " . number_format($complete['taxable_income'], 2) . "\n";
-echo "PAYE Tax: GHS " . number_format($complete['paye_tax'], 2) . "\n";
-echo "Net Income: GHS " . number_format($complete['net_income'], 2) . "\n";
-echo "Take Home: " . $complete['take_home_percentage'] . "%\n";
+// // Example 3: Complete calculation with pensions
+// $complete = $calculator->calculateWithPensions(5000, 10, ['transport' => 500, 'housing' => 1000]);
+// echo "=== COMPLETE SALARY BREAKDOWN ===\n";
+// echo "Basic Salary: GHS " . number_format($complete['basic_salary'], 2) . "\n";
+// echo "Allowances: GHS " . number_format($complete['total_allowances'], 2) . "\n";
+// echo "Gross Income: GHS " . number_format($complete['gross_income'], 2) . "\n";
+// echo "Pension Deductions: GHS " . number_format($complete['pensions']['total_employee_contribution'], 2) . "\n";
+// echo "Taxable Income: GHS " . number_format($complete['taxable_income'], 2) . "\n";
+// echo "PAYE Tax: GHS " . number_format($complete['paye_tax'], 2) . "\n";
+// echo "Net Income: GHS " . number_format($complete['net_income'], 2) . "\n";
+// echo "Take Home: " . $complete['take_home_percentage'] . "%\n";

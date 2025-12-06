@@ -701,9 +701,22 @@ class Users extends Myschoolgh {
 					$result->msg_id = strtoupper(random_string("alnum", RANDOM_STRING));
 				}
 
+				// if the left join is parsed
 				if($leftJoin) {
-					$result->_allowances = $this->pushQuery('*', "payslips_employees_allowances", "type='Allowance' AND employee_id='{$result->user_id}' AND client_id='{$result->client_id}'");
-					$result->_deductions = $this->pushQuery('*', "payslips_employees_allowances", "type='Deduction' AND employee_id='{$result->user_id}' AND client_id='{$result->client_id}'");
+					// get the allowances of the user
+					$userAllowances = $this->pushQuery("a.*, at.name, at.calculation_method, at.calculation_value, at.pre_tax_deduction, at.subject_to_ssnit", 
+					"payslips_employees_allowances a LEFT JOIN payslips_allowance_types at ON at.id = a.allowance_id", 
+					"a.employee_id='{$result->user_id}' AND a.client_id='{$result->client_id}'");
+
+					// filter the allowances
+					$result->_allowances = array_filter($userAllowances, function($each) {
+						return $each->type == 'Allowance';
+					});
+
+					// get the deductions of the user
+					$result->_deductions = array_filter($userAllowances, function($each) {
+						return $each->type == 'Deduction';
+					});
 				}
 
 				// if the user wants to load wards as well

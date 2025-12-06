@@ -4943,8 +4943,17 @@ class Forms extends Myschoolgh {
         $employeeDeductions = $data->_deductions;
         
         // fetch all allowances
-        $allowances = $this->pushQuery('*', "payslips_allowance_types", "type='Allowance' AND status='1' AND client_id='{$clientId}'");
-        $deductions = $this->pushQuery('*', "payslips_allowance_types", "type='Deduction' AND status='1' AND client_id='{$clientId}'");
+        $allowanceList = $this->pushQuery('*', "payslips_allowance_types", "status='1' AND client_id='{$clientId}'");
+
+        // filter the allowances and deductions
+        $allowances = array_filter($allowanceList, function($each) {
+            return $each->type == 'Allowance';
+        });
+
+        // filter the deductions
+        $deductions = array_filter($allowanceList, function($each) {
+            return $each->type == 'Deduction';
+        });
         
         // initializing
         $ii = 0;
@@ -4964,7 +4973,7 @@ class Forms extends Myschoolgh {
                 <div class="initial mb-2" data-row="'.$ii.'">
                     <div class="row">
                         <div class="col-lg-'.(($ii == 1) ? 7 : 6).' mb-2 col-md-'.(($ii == 1) ? 7 : 6).'">
-                            <select data-width="100%" name="allowance[]" id="allowance_'.$ii.'" class="form-control selectpicker">
+                            <select data-width="100%" name="allowance[]" onchange="return allowanceKeyChangeHandler(this)" data-row_id="'.$ii.'" data-type="allowance" id="allowance_'.$ii.'" class="form-control selectpicker">
                                 <option value="">Please Select</option>';
                                 foreach($allowances as $each) {
                                     $allowances_list .= "<option data-default_value='{$each->default_amount}' ".(($eachAllowance->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
@@ -4989,7 +4998,7 @@ class Forms extends Myschoolgh {
             <div class="initial mb-2" data-row="1">
                 <div class="row">
                     <div class="col-lg-7 mb-2 col-md-7">
-                        <select data-width="100%" name="allowance" id="allowance_1" class="form-control selectpicker">
+                        <select data-width="100%" onchange="return allowanceKeyChangeHandler(this)" name="allowance[]" data-type="allowance" data-row_id="1" id="allowance_1" class="form-control selectpicker">
                             <option value="">Please Select</option>';
                             foreach($allowances as $each) {
                                 $allowances_list .= "<option data-default_value='{$each->default_amount}' value=\"{$each->id}\">{$each->name}</option>";
@@ -5017,12 +5026,14 @@ class Forms extends Myschoolgh {
                 <div class="initial mb-2" data-row="'.$ii.'">
                     <div class="row">
                         <div class="col-lg-'.(($ii == 1) ? 7 : 6).' mb-2 col-md-'.(($ii == 1) ? 7 : 6).'">
-                            <select data-width="100%" name="deductions[]" id="deductions_'.$ii.'" class="form-control selectpicker">
+                            <select data-width="100%" name="deductions[]" onchange="return allowanceKeyChangeHandler(this)" data-type="deductions" data-row_id="'.$ii.'" id="deductions_'.$ii.'" class="form-control selectpicker">
                                 <option value="">Please Select</option>';
                                 // using foreach loop
                                 foreach($deductions as $each) {
                                     // print the list of countries
-                                    $deductions_list .= "<option data-default_value='{$each->default_amount}' ".(($eachDeduction->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
+                                    $deductions_list .= "<option data-default_value='{$each->default_amount}' ".(($eachDeduction->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">
+                                        {$each->name} ".(in_array($each->calculation_method, ["percentage_on_gross_total", "percentage_on_basic_salary"]) ? " (Percentage - {$each->calculation_value}%)" : null)."
+                                    </option>";
                                 }
                             $deductions_list .= '
                             </select>
@@ -5044,12 +5055,14 @@ class Forms extends Myschoolgh {
             <div class="initial mb-2" data-row="1">
                 <div class="row">
                     <div class="col-lg-7 mb-2 col-md-7">
-                        <select data-width="100%" name="deductions" id="deductions_1" class="form-control selectpicker">
+                        <select data-width="100%" name="deductions[]" onchange="return allowanceKeyChangeHandler(this)" data-type="deductions" data-row_id="1" id="deductions_1" class="form-control selectpicker">
                             <option value="">Please Select</option>';
                             // using foreach loop
                             foreach($deductions as $each) {
                                 // print the list of countries
-                                $deductions_list .= "<option data-default_value='{$each->default_amount}' value=\"{$each->id}\">{$each->name}</option>";
+                                $deductions_list .= "<option data-default_value='{$each->default_amount}' value=\"{$each->id}\">
+                                    {$each->name} ".(in_array($each->calculation_method, ["percentage_on_gross_total", "percentage_on_basic_salary"]) ? " (Percentage - {$each->calculation_value}%)" : null)."
+                                </option>";
                             }
                             $deductions_list .= '
                         </select>
@@ -5073,24 +5086,24 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
                 '.div_labels("ALLOWANCES").'
-                <div class="col-lg-11">
+                <div class="col-lg-12">
                     <div width="100%" class="text-right mb-2">
-                        <button type="button" class="btn btn-info add-allowance"><i class="fa fa-plus"></i></button>
+                        <button type="button" class="btn btn-info add-allowance"><i class="fa fa-plus"></i> Add Row</button>
                     </div>
                     <div class="allowance-div mb-4">
                         '.$allowances_list.'
                     </div>
                 </div>
                 '.div_labels("DEDUCTIONS").'
-                <div class="col-lg-11">
+                <div class="col-lg-12">
                     <div width="100%" class="text-right mb-2">
-                        <button type="button" class="btn btn-info add-deductions"><i class="fa fa-plus"></i></button>
+                        <button type="button" class="btn btn-info add-deductions"><i class="fa fa-plus"></i> Add Row</button>
                     </div>
                     <div class="deductions-div mb-4">
                         '.$deductions_list.'
                     </div>
                 </div>
-                <div class="col-md-11 text-right">
+                <div class="col-md-12 text-right">
                     <input type="hidden" value="'.$userId.'" id="employee_id" name="employee_id" readonly>
                     <button onclick="return save_staff_allowances(\''.$userId.'\')" type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
@@ -5098,6 +5111,10 @@ class Forms extends Myschoolgh {
         
         $forms["bank_detail"] = $bank;
         $forms["allowance_detail"] = $allowance;
+        $forms["dataset"] = [
+            "allowance" => $allowances,
+            "deductions" => $deductions
+        ];
 
         return $forms;
 
@@ -5132,7 +5149,7 @@ class Forms extends Myschoolgh {
                                     <input type="text" '.(!empty($idata) && !empty($idata->is_statutory) && $idata->is_statutory == 'Yes' ? 'readonly' : null).' maxlength="100" placeholder="Type name" name="name" id="name" class="form-control" value="'.($idata->name ?? null).'">
                                 </div>
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="allowance_type" class="font-weight-bold">Type <span class="required">*</span></label>
                                     <select name="allowance_type" data-width="100%" id="allowance_type" class="form-control selectpicker">
@@ -5142,7 +5159,7 @@ class Forms extends Myschoolgh {
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="is_statutory" class="font-weight-bold">Is Statutory</label>
                                     <select name="is_statutory" data-width="100%" id="is_statutory" class="form-control selectpicker">
@@ -5179,7 +5196,7 @@ class Forms extends Myschoolgh {
                                     <div class="text-muted text-italic">Deducted before tax calculation?</div>
                                 </div>
                             </div>
-                            <div class="col-md-12 '.(!empty($idata) && !empty($idata->type) && $idata->type == 'Deduction' ? '' : 'hidden').'" data-item_type="deduction">
+                            <div class="col-md-6 '.(!empty($idata) && !empty($idata->type) && $idata->type == 'Deduction' ? '' : 'hidden').'" data-item_type="deduction">
                                 <div class="form-group">
                                     <label for="calculation_method" class="font-weight-bold">Calculation Settings</label>
                                     <select name="calculation_method" data-width="100%" id="calculation_method" class="form-control selectpicker">
@@ -5189,7 +5206,7 @@ class Forms extends Myschoolgh {
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-12 '.(!empty($idata) && !empty($idata->type) && $idata->type == 'Deduction' ? '' : 'hidden').'" data-item_type="deduction">
+                            <div class="col-md-6 '.(!empty($idata) && !empty($idata->type) && $idata->type == 'Deduction' ? '' : 'hidden').'" data-item_type="deduction">
                                 <div class="form-group">
                                     <label for="calculation_value" class="font-weight-bold">Calculation Value</label>
                                     <input value="'.($idata->calculation_value ?? null).'" type="number" placeholder="Value" name="calculation_value" id="calculation_value" class="form-control">

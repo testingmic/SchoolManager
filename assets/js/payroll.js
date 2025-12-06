@@ -3,6 +3,33 @@ var removeRow = (type, rowId) => {
     triggerCalculator(type);
 }
 
+var allowanceKeyChangeHandler = (element) => {
+    let value = $(element).val();
+    let data = $(element).data();
+
+    let rowId = data.row_id || 0;
+    let rowType = data.type || '';
+
+    if(rowId == 0) {
+        return false;
+    }
+
+    let rowData = null;
+    $.array_stream['dataset'][rowType]?.map(each => {
+        if(each.id == parseInt(value)) {
+            rowData = each;
+        }
+    });
+
+    $(`input[id="${rowType}_amount_${rowId}"]`).val(rowData?.default_amount);
+    if(["percentage_on_gross_total", "percentage_on_basic_salary"].includes(rowData?.calculation_method)) {
+        $(`input[id="${rowType}_amount_${rowId}"]`).attr({'readonly': true});
+        $(`input[id="${rowType}_amount_${rowId}"]`).val(rowData?.calculation_value);
+    }
+
+    console.log({rowData, rowId, rowType, value, 'input': `input[name="${rowType}_amount_${rowId}"]`});
+}
+
 var addDeductions = () => {
     $(`button[class~="add-deductions"]`).on('click', function(e) {
         let htmlData = $('div[class~="deductions-div"] [data-row]:last select').html();
@@ -20,7 +47,9 @@ var addDeductions = () => {
             <div class="initial mb-2" data-row="${dlastRow}">
                 <div class="row">
                     <div class="col-lg-6 mb-2 col-md-6">
-                        <select name="deductions[]" id="deductions_${dlastRow}" class="form-control selectpicker">${htmlData}</select>
+                        <select name="deductions[]" data-width="100%" onchange="return allowanceKeyChangeHandler(this)" data-type="deductions" data-row_id="${dlastRow}" id="deductions_${dlastRow}" class="form-control selectpicker">
+                            ${htmlData}
+                        </select>
                     </div>
                     <div class="col-lg-5 mb-2 col-md-5">
                         <input placeholder="Amount" min="0" max="20000" class="form-control" type="text" name="deductions_amount[]" id="deductions_amount_${dlastRow}">
@@ -55,7 +84,9 @@ var addAllowance = () => {
             <div class="initial mb-2" data-row="${lastRowId}">
                 <div class="row">
                     <div class="col-lg-6 mb-2 col-md-6">
-                        <select name="allowance[]" id="allowance_${lastRowId}" class="form-control selectpicker">${htmlData}</select>
+                        <select name="allowance[]" data-width="100%" onchange="return allowanceKeyChangeHandler(this)" id="allowance_${lastRowId}" data-type="allowance" data-row_id="${lastRowId}" class="form-control selectpicker">
+                            ${htmlData}
+                        </select>
                     </div>
                     <div class="col-lg-5 mb-2 col-md-5">
                         <input placeholder="Amount" min="0" max="20000" class="form-control" type="text" name="allowance_amount[]" id="allowance_amount_${lastRowId}">

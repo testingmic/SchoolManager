@@ -149,7 +149,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                             <th>Staff Role</th>
                                             <th>Appointment Date</th>
                                             <th>Basic Salary</th>
-                                            <th>Allowances</th>
+                                            <th>Earnings</th>
                                             <th>Deductions</th>
                                             <th>Net Salary</th>
                                             <th width="5%" align="center"></th>

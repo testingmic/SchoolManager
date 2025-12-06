@@ -910,7 +910,7 @@ class Payroll extends Myschoolgh {
         try {
 
             // global variable
-            global $usersClass, $accessObject, $noticeClass;
+            global $accessObject;
 
             if(!$accessObject->hasAccess("generate", "payslip")) {
                 return ["code" => 400, "data" => "Sorry! You do not have the permissions to generate a payslip."];
