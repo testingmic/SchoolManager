@@ -51,6 +51,25 @@ class Crons {
 	}
 
 	/**
+	 * Push a query to the database
+	 * 
+	 * @param String $columns
+	 * @param String $table
+	 * @param String $where
+	 * 
+	 * @return Array
+	 */
+	private function pushQuery($columns, $table, $where) {
+		try {
+			$stmt = $this->db->prepare("SELECT {$columns} FROM {$table} WHERE {$where}");
+			$stmt->execute();
+			return $stmt->fetchAll(PDO::FETCH_OBJ);
+		} catch(PDOException $e) {
+			return [];
+		}
+	}
+
+	/**
 	 * account_status
 	 * 
 	 * @param String $clientId
@@ -133,6 +152,25 @@ class Crons {
 
 	            // execute the query
 	            $this->db->query($iqr);
+
+				// get the payroll settings
+				$settings = $this->pushQuery("*", "settings", "client_id = '{$clientId}' AND setting_name = 'payroll_settings'");
+				if(!empty($settings)) {
+					$settings = json_decode($settings[0]->setting_value, true);
+
+					if(!empty($settings['auto_validate_payslips'])) {
+						// get the payslip record
+						$payslip = $this->pushQuery("a.payslip_month, a.date_log, a.item_id, a.id, a.payslip_year, (SELECT b.name FROM users b WHERE b.item_id = a.employee_id ORDER BY b.id DESC LIMIT 1) AS employee_name, (SELECT b.name FROM users b WHERE b.item_id = a.created_by ORDER BY b.id DESC LIMIT 1) AS created_by", 
+						"payslips a", "a.client_id='{$clientId}' AND a.deleted='0' AND a.validated='0' AND a.status='0' AND a.date_log > (NOW() + INTERVAL - 24 HOUR) LIMIT 1");
+					
+						if(!empty($payslip)) {
+							foreach($payslip as $each) {
+								$this->db->query("UPDATE payslips SET validated='1', validated_date = now(), status='1' WHERE id='{$each->id}' LIMIT 1");
+								$this->db->query("UPDATE accounts_transaction SET state='Approved', validated_date = NOW() WHERE item_id='{$each->item_id}' AND state != 'Approved' LIMIT 3");
+							}
+						}
+					}
+				}
 			}
 			
 		} catch(PDOException $e) {
@@ -213,7 +251,7 @@ class Crons {
 				WHERE user_type='teacher' AND user_status='Active' 
 				AND LENGTH(course_ids) > 2 AND status='1' 
 				AND class_ids IS NULL
-				LIMIT 100
+				LIMIT 2000
 			");
 			$stmt->execute();
 

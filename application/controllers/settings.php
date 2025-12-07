@@ -77,7 +77,8 @@ class Settings extends Myschoolgh {
             'auto_calculate_ssnit' => $params->auto_calculate_ssnit ?? false,
             'auto_calculate_tier_2' => $params->auto_calculate_tier_2 ?? false,
             'payroll_frequency' => $params->payroll_frequency ?? 'Monthly',
-            'payment_day' => $params->payment_day ?? 0
+            'payment_day' => $params->payment_day ?? 0,
+            'auto_validate_payslips' => $params->auto_validate_payslips ?? false,
         ];
 
         // first delete the existing settings

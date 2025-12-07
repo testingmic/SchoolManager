@@ -363,7 +363,7 @@ class Records extends Myschoolgh {
 
             // loop through the array list
             foreach($records_id as $record_id) {
-                $payslip = $this->pushQuery("a.payslip_month, a.id, a.payslip_year, (SELECT b.name FROM users b WHERE b.item_id = a.employee_id ORDER BY b.id DESC LIMIT 1) AS employee_name", 
+                $payslip = $this->pushQuery("a.payslip_month, a.item_id, a.id, a.payslip_year, (SELECT b.name FROM users b WHERE b.item_id = a.employee_id ORDER BY b.id DESC LIMIT 1) AS employee_name", 
                 "payslips a", "a.client_id='{$params->clientId}' AND a.deleted='0' AND a.item_id='{$record_id}' AND a.validated='0' LIMIT 1");
                 if(empty($payslip)) {
                     return ["code" => 400, "data" => "Sorry! An invalid id was supplied or the payslip has already been validated."];

@@ -171,7 +171,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                             <div class="card-body text-center bg-gradient-to-br from-pink-500 to-pink-300 rounded-2xl shadow-lg text-white card-type-3">
                                 <div class="font-18 text-white">APPOINTMENT DATE</div>
                                 <div class="font-20 font-weight-bold text-uppercase text-white">
-                                    '.($data->enrollment_date ? $data->enrollment_date : '-' ).'
+                                    '.($data->enrollment_date ? format_date_of_birth($data->enrollment_date) : '-' ).'
                                 </div>
                             </div>
                         </div>

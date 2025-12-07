@@ -206,7 +206,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
 
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="card-title">Tax & SSNIT Calculation Settings</h5>
+                            <h5 class="card-title pb-0 mb-0">Tax & SSNIT Calculation Settings</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -227,6 +227,13 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                         <input '.(!empty($settings['auto_calculate_tier_2']) ? 'checked' : '').' type="checkbox" value="1" name="auto_calculate_tier_2" id="auto_calculate_tier_2" class="custom-control-input cursor">
                                         <label class="custom-control-label  cursor" for="auto_calculate_tier_2">Auto Calculate Tier 2</label>
                                     </div>
+                                </div>
+                                <div class="col-12  mb-3 col-sm-12 col-lg-12">
+                                    <div style="padding-left: 2.5rem;" class="custom-control cursor col-lg-12 custom-switch switch-primary">
+                                        <input '.(!empty($settings['auto_validate_payslips']) ? 'checked' : '').' type="checkbox" value="1" name="auto_validate_payslips" id="auto_validate_payslips" class="custom-control-input cursor">
+                                        <label class="custom-control-label  cursor" for="auto_validate_payslips">Auto Validate Pending Payslips</label>
+                                    </div>
+                                    <small class="text-danger"><em>This will automatically validate the pending payslips after 24 hours of generation.</em></small>
                                 </div>
                             </div>
                         </div>

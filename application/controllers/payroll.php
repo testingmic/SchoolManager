@@ -956,7 +956,7 @@ class Payroll extends Myschoolgh {
             foreach($params->payslip_ids as $record_id) {
 
                 // get the payslip record
-                $payslip = $this->pushQuery("a.payslip_month, a.id, a.payslip_year, (SELECT b.name FROM users b WHERE b.item_id = a.employee_id ORDER BY b.id DESC LIMIT 1) AS employee_name", 
+                $payslip = $this->pushQuery("a.payslip_month, a.id, a.payslip_year, a.item_id, (SELECT b.name FROM users b WHERE b.item_id = a.employee_id ORDER BY b.id DESC LIMIT 1) AS employee_name", 
                     "payslips a", "a.client_id='{$params->clientId}' AND a.deleted='0' AND a.id='{$record_id}' AND a.validated='0' LIMIT 1");
                 
                 // if the payslip record is empty
@@ -967,7 +967,7 @@ class Payroll extends Myschoolgh {
 
                 // change the state of the transaction to approved
                 $this->db->query("UPDATE accounts_transaction 
-                    SET state='Approved', validated_date = now(), validated_by = '{$params->userId}' WHERE id='{$record_id}' AND state != 'Approved' LIMIT 3
+                    SET state='Approved', validated_date = now(), validated_by = '{$params->userId}' WHERE item_id='{$payslip[0]->item_id}' AND state != 'Approved' LIMIT 3
                 ");
 
                 // log the user activity

@@ -141,6 +141,7 @@ var save_payroll_settings = () => {
         auto_calculate_paye: $(`input[name="auto_calculate_paye"]`).prop('checked'),
         auto_calculate_ssnit: $(`input[name="auto_calculate_ssnit"]`).prop('checked'),
         auto_calculate_tier_2: $(`input[name="auto_calculate_tier_2"]`).prop('checked'),
+        auto_validate_payslips: $(`input[name="auto_validate_payslips"]`).prop('checked'),
         payroll_frequency: $(`select[name="payroll_frequency"]`).val(),
         auto_generate_payslip: $(`input[name="auto_generate_payslip"]`).prop('checked'),
         payment_day: $(`input[name="payment_day"]`).val(),
