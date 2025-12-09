@@ -1100,10 +1100,14 @@ class Payroll extends Myschoolgh {
             return ["code" => 400, "data" => "Sorry! An invalid calculation method was parsed."];
         }
 
+        if(in_array(strtoupper(trim($params->name)), ["SSNIT", "TIER 2", "PAYE"])) {
+            $params->is_statutory = "Yes";
+        }
+
         if(!$found) {
 
             // if the name is reserved
-            if(in_array(strtoupper($params->name), ["SSNIT", "TIER 2", "PAYE"])) {
+            if(in_array(strtoupper(trim($params->name)), ["SSNIT", "TIER 2", "PAYE"])) {
                 return ["code" => 400, "data" => "Sorry! The name {$params->name} is reserved and cannot be used."];
             }
 

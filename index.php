@@ -172,8 +172,13 @@ if(!empty($session->userId) && empty($argv)) {
                     $defaultAcademics->year_ends = $session->is_readonly_year_ends;
                 }
 
-                // set the term ended variable
-                $defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));
+                // check if the term ends date is not 1970-01-01 or 1970-01-02
+                if(!empty($defaultUser->appPrefs->academics->term_ends)) {
+                    if(!in_array(date('Y-m-d', strtotime($defaultUser->appPrefs->academics->term_ends)), ['1970-01-01'])) {
+                        // set the term ended variable
+                        $defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));
+                    }
+                }
             }
         }
 
