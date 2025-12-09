@@ -760,17 +760,17 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                         <p class="font-16 p-0 m-0 text-primary text-uppercase">Academic Year</p>
                                         <h6 class="mt-1 pt-0">'.$defaultAcademics->academic_year.'</h6>
                                         <span class="font-16 font-bold text-black">
-                                            '.date("jS M, Y", strtotime($defaultAcademics->year_starts)).' 
+                                            '.(!empty($defaultAcademics->term_starts) ? date("jS M, Y", strtotime($defaultAcademics->year_starts)) : "N/A").' 
                                                 &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
-                                            '.date("jS M, Y", strtotime($defaultAcademics->year_ends)).'
+                                            '.(!empty($defaultAcademics->term_ends) ? date("jS M, Y", strtotime($defaultAcademics->year_ends)) : "N/A").'
                                         </span>
                                         <hr class="my-3">
                                         <p class="font-16 p-0 mt-2 text-uppercase text-primary">Academic '.($academicSession ?? null).'</p>
                                         <h6 class="pt-0 text-uppercase text-primary">'.($defaultAcademics->current_term_name ?? $defaultAcademics->academic_term).'</h6>
                                         <span class="font-16 font-bold text-black">
-                                            '.date("jS M, Y", strtotime($defaultAcademics->term_starts)).' 
+                                            '.(!empty($defaultAcademics->term_starts) ? date("jS M, Y", strtotime($defaultAcademics->term_starts)) : "N/A").' 
                                                 &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
-                                            '.date("jS M, Y", strtotime($defaultAcademics->term_ends)). '
+                                            '.(!empty($defaultAcademics->term_ends) ? date("jS M, Y", strtotime($defaultAcademics->term_ends)) : "N/A").'
                                         </span>
                                     </div>
                                     <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-400 to-purple-400 opacity-20 rounded-full -translate-y-16 translate-x-16 animate-pulse"></div>

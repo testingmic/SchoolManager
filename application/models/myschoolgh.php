@@ -115,7 +115,131 @@ class Myschoolgh extends Models {
 		if(empty($this->db) || $this->processedAlter) return true;
 		
 		// prepare and execute the statement
-		$fix[] = "";
+		$fix = [
+			// Housing Buildings Table
+			"CREATE TABLE IF NOT EXISTS `housing_buildings` (
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`item_id` VARCHAR(32) NOT NULL,
+				`client_id` VARCHAR(16) NOT NULL,
+				`created_by` VARCHAR(16) NOT NULL,
+				`name` VARCHAR(255) NOT NULL,
+				`code` VARCHAR(50) NOT NULL,
+				`building_type` VARCHAR(50) NOT NULL DEFAULT 'dormitory',
+				`address` TEXT NULL,
+				`description` TEXT NULL,
+				`facilities` TEXT NULL,
+				`gender_restriction` VARCHAR(20) NOT NULL DEFAULT 'mixed',
+				`capacity` INT(11) NULL DEFAULT NULL,
+				`status` VARCHAR(10) NOT NULL DEFAULT '1',
+				`deleted` TINYINT(1) NOT NULL DEFAULT '0',
+				`date_created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				`date_updated` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+				`date_deleted` DATETIME NULL DEFAULT NULL,
+				PRIMARY KEY (`id`),
+				UNIQUE KEY `item_id` (`item_id`),
+				INDEX `client_id` (`client_id`),
+				INDEX `created_by` (`created_by`),
+				INDEX `code` (`code`),
+				INDEX `building_type` (`building_type`),
+				INDEX `status` (`status`),
+				INDEX `deleted` (`deleted`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
+
+			// Housing Blocks Table
+			"CREATE TABLE IF NOT EXISTS `housing_blocks` (
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`item_id` VARCHAR(32) NOT NULL,
+				`client_id` VARCHAR(16) NOT NULL,
+				`building_id` VARCHAR(32) NOT NULL,
+				`created_by` VARCHAR(16) NOT NULL,
+				`name` VARCHAR(255) NOT NULL,
+				`code` VARCHAR(50) NOT NULL,
+				`floor_number` INT(11) NULL DEFAULT NULL,
+				`description` TEXT NULL,
+				`facilities` TEXT NULL,
+				`capacity` INT(11) NULL DEFAULT NULL,
+				`status` VARCHAR(10) NOT NULL DEFAULT '1',
+				`deleted` TINYINT(1) NOT NULL DEFAULT '0',
+				`date_created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				`date_updated` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+				`date_deleted` DATETIME NULL DEFAULT NULL,
+				PRIMARY KEY (`id`),
+				UNIQUE KEY `item_id` (`item_id`),
+				INDEX `client_id` (`client_id`),
+				INDEX `building_id` (`building_id`),
+				INDEX `created_by` (`created_by`),
+				INDEX `code` (`code`),
+				INDEX `status` (`status`),
+				INDEX `deleted` (`deleted`),
+				FOREIGN KEY (`building_id`) REFERENCES `housing_buildings`(`item_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
+
+			// Housing Rooms Table
+			"CREATE TABLE IF NOT EXISTS `housing_rooms` (
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`item_id` VARCHAR(32) NOT NULL,
+				`client_id` VARCHAR(16) NOT NULL,
+				`block_id` VARCHAR(32) NOT NULL,
+				`created_by` VARCHAR(16) NOT NULL,
+				`name` VARCHAR(255) NOT NULL,
+				`code` VARCHAR(50) NOT NULL,
+				`room_type` VARCHAR(20) NOT NULL DEFAULT 'single',
+				`room_condition` VARCHAR(20) NOT NULL DEFAULT 'good',
+				`description` TEXT NULL,
+				`facilities` TEXT NULL,
+				`capacity` INT(11) NOT NULL DEFAULT 1,
+				`occupied` TINYINT(1) NOT NULL DEFAULT '0',
+				`status` VARCHAR(10) NOT NULL DEFAULT '1',
+				`deleted` TINYINT(1) NOT NULL DEFAULT '0',
+				`date_created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				`date_updated` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+				`date_deleted` DATETIME NULL DEFAULT NULL,
+				PRIMARY KEY (`id`),
+				UNIQUE KEY `item_id` (`item_id`),
+				INDEX `client_id` (`client_id`),
+				INDEX `block_id` (`block_id`),
+				INDEX `created_by` (`created_by`),
+				INDEX `code` (`code`),
+				INDEX `room_type` (`room_type`),
+				INDEX `room_condition` (`room_condition`),
+				INDEX `occupied` (`occupied`),
+				INDEX `status` (`status`),
+				INDEX `deleted` (`deleted`),
+				FOREIGN KEY (`block_id`) REFERENCES `housing_blocks`(`item_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
+
+			// Housing Beds Table
+			"CREATE TABLE IF NOT EXISTS `housing_beds` (
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`item_id` VARCHAR(32) NOT NULL,
+				`client_id` VARCHAR(16) NOT NULL,
+				`room_id` VARCHAR(32) NOT NULL,
+				`created_by` VARCHAR(16) NOT NULL,
+				`name` VARCHAR(255) NULL,
+				`code` VARCHAR(50) NOT NULL,
+				`bed_number` VARCHAR(20) NULL DEFAULT NULL,
+				`description` TEXT NULL,
+				`student_id` VARCHAR(16) NULL DEFAULT NULL,
+				`occupied` TINYINT(1) NOT NULL DEFAULT '0',
+				`status` VARCHAR(10) NOT NULL DEFAULT '1',
+				`deleted` TINYINT(1) NOT NULL DEFAULT '0',
+				`date_created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				`date_updated` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+				`date_deleted` DATETIME NULL DEFAULT NULL,
+				PRIMARY KEY (`id`),
+				UNIQUE KEY `item_id` (`item_id`),
+				INDEX `client_id` (`client_id`),
+				INDEX `room_id` (`room_id`),
+				INDEX `created_by` (`created_by`),
+				INDEX `code` (`code`),
+				INDEX `student_id` (`student_id`),
+				INDEX `occupied` (`occupied`),
+				INDEX `status` (`status`),
+				INDEX `deleted` (`deleted`),
+				FOREIGN KEY (`room_id`) REFERENCES `housing_rooms`(`item_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+				FOREIGN KEY (`student_id`) REFERENCES `users`(`item_id`) ON DELETE SET NULL ON UPDATE CASCADE
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
+		];
 
 		if(empty($fix)) return true;
 		foreach($fix as $stmt) {

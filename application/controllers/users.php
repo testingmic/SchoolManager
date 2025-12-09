@@ -538,6 +538,11 @@ class Users extends Myschoolgh {
 				up.gross_salary, up.net_allowance, up.allowances, up.deductions, up.net_salary, up.basic_salary,
 				up.account_name, up.account_number, up.bank_name, up.bank_branch, up.ssnit_number, up.tin_number" : null;
 
+			// if the database connection is not established then return an empty array
+			if(empty($this->db)) {
+				return ['data' => [], 'code' => 200];
+			}
+
 			// prepare and execute the statement
 			$sql = $this->db->prepare("SELECT 
 				".((isset($params->columns) ? $params->columns : "
