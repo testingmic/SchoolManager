@@ -445,6 +445,28 @@ class Terminal_reports extends Myschoolgh {
     }
 
     /**
+     * Get the remark for the score
+     * 
+     * @param int $score
+     * @return string
+     */
+    public function get_the_remark($score) {
+
+        $grading_system = $this->client_data?->grading_system ?? [];
+
+        if($score == 0) return '';
+        
+        foreach($grading_system as $item) {
+            if($score >= $item->start && $score <= $item->end) {
+                return $item->interpretation;
+            }
+        }
+
+        return '';
+
+    }
+
+    /**
      * Upload CSV File
      * 
      * Upload the terminal report csv file and generate the table to display the data set
@@ -484,6 +506,7 @@ class Terminal_reports extends Myschoolgh {
 
         // get the client data
         $client_data = $defaultClientData;
+        $this->client_data = $client_data;
         $columns = json_encode($client_data->grading_structure ?? '[]');
         $columns = json_decode($columns, true);
 
@@ -647,12 +670,19 @@ class Terminal_reports extends Myschoolgh {
                     $appendMobileView .= "</div>";
 
                 } elseif($file_headers[$kkey] == "TEACHER REMARKS") {
-
+                    
                     $kvalue = $remarks_dataset[$result[1]] ?? '';
+
+                    if(isset($file_headers[8]) && isset($columns["columns"][$file_headers[8]])) {
+                        $m_kvalue = $preset_dataset[$result[1]]['marks'] ?? 0;
+                        $m_kvalue = $m_kvalue > 0 ? round(($m_kvalue / $columns["columns"][$file_headers[8]]['percentage']) * 100) : 0;
+                        $preset = $preset_dataset[$result[1]] ?? [];
+                        $kvalue = $this->get_the_remark($m_kvalue + ($preset['sba'] ?? 0));
+                    }
                 
-                    $report_table .= "<td><input placeholder=\"Teacher's remarks\" style='min-width:300px' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'></td>";
+                    $report_table .= "<td><input placeholder=\"Teacher's remarks\" style='min-width:300px' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control font-dark text-dark' value='{$kvalue}'></td>";
                 
-                    $appendMobileView .= "<input placeholder=\"Teacher's remarks\" style='width:100%' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'>";
+                    $appendMobileView .= "<input placeholder=\"Teacher's remarks\" style='width:100%' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control font-dark text-dark' value='{$kvalue}'>";
                 
                 } elseif($file_headers[$kkey] == "TEACHER ID") {
                     $report_table .= "<td><span style='font-weight-bold font-17'>".(empty($kvalue) ? $params->userData->unique_id : $kvalue)."</span></td>";                    
@@ -1622,7 +1652,7 @@ class Terminal_reports extends Myschoolgh {
                 // // get the results submitted by the teachers for each subject
                 foreach($student["sheet"] as $score) {
                     // only show the subject if approved
-                    if($score->status === "Approved") {
+                    // if($score->status === "Approved") {
                         // append to the table
                         $table .= "<tr>";
                         $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->course_name}</td>";
@@ -1636,7 +1666,7 @@ class Terminal_reports extends Myschoolgh {
                         $table .= "<td style=\"border: 1px solid #dee2e6;{$defaultFontSize}\">".strtoupper($score->teachers_name)."</td>";
                         $table .= "<td style=\"border: 1px solid #dee2e6;{$defaultFontSize}\">{$score->class_teacher_remarks}</td>";
                         $table .= "</tr>";
-                    }
+                    // }
                 }
                 $table .= "</table>";
 
@@ -1644,7 +1674,7 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "<table cellpadding=\"5px\" border=\"0\" width=\"100%\">";
                 $table .= "<tr>";
                 $table .= "<td align=\"center\" width=\"35%\" valign=\"top\">";
-                $table .= "<table style=\"{$defaultFontSize}\" align=\"left\" cellpadding=\"5px\" border=\"0\" width=\"100%\">";
+                $table .= "<table style=\"{$defaultFontSize}\" align=\"left\" cellpadding=\"5px\" border=\"1\" width=\"100%\">";
                 $table .= "<tr style=\"font-weight:bold\">";
                 $table .= "<td colspan=\"2\" align=\"center\">";
                 $table .= "<span style=\"font-weight:bold; font-size:15px\">GRADING SYSTEM</span>";
@@ -1652,12 +1682,14 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "</tr>";
                 $table .= "<tr style=\"font-weight:bold\">";
                 $table .= "<td>Marks in Percentage (%)</td>";
+                $table .= "<td>Grade</td>";
                 $table .= "<td>Interpretation</td>";
                 $table .= "</tr>\n";
                 // loop through the grading system
                 foreach($interpretation as $ikey => $ivalue) {
                     $table .= "<tr>";
                     $table .= "<td>{$ivalue->start} - {$ivalue->end}</td>";
+                    $table .= "<td>{$ikey}</td>";
                     $table .= "<td>{$ivalue->interpretation}</td>";
                     $table .= "</tr>";
                 }

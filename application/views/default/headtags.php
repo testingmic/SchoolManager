@@ -113,6 +113,8 @@ load_helpers(['menu_helper']);
         var myUName = "<?= $session->userName ?>",
             academicSession = "<?= $academicSession; ?>",
             myPrefs = <?= json_encode($userData->client->client_preferences) ?>;
+        var myGradingPrefs = <?= json_encode($userData->client?->grading_system ?? []) ?>,
+            myGradingSBA = <?= json_encode($userData->client?->grading_structure ?? []) ?>;
     </script>
     <?php if(!is_localhost()) { ?>
     <?= $myClass->google_analytics_code ?>

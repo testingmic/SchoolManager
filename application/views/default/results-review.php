@@ -48,6 +48,30 @@ if(empty($result_id)) {
         $response->html = page_not_found();
     } else {
 
+        /**
+         * Get the remark for the score
+         * 
+         * @param int $score
+         * @return string
+         */
+        function get_the_remark($score) {
+
+            global $defaultClientData;
+
+            $grading_system = $defaultClientData?->grading_system ?? [];
+
+            if($score == 0) return '';
+            
+            foreach($grading_system as $item) {
+                if($score >= $item->start && $score <= $item->end) {
+                    return $item->interpretation;
+                }
+            }
+
+            return '';
+
+        }
+
         // get the first item
         $data = $reports_list[0];
 
@@ -186,6 +210,8 @@ if(empty($result_id)) {
             $totalPercentage = ($sbaPercentage ?? 0) + ($examsPercentage ?? 0);
             $totalPercentage = $totalPercentage > 100 ? 100 : $totalPercentage;
 
+            $finalRemark = !empty($score->class_teacher_remarks) ? $score->class_teacher_remarks : get_the_remark($totalPercentage);
+
             // append to the scores
             $scores_list .= "
             <tr data-result_row_id='{$score->report_id}_{$score->student_row_id}' data-result_student_id='{$score->student_item_id}'>
@@ -206,8 +232,8 @@ if(empty($result_id)) {
                 </td>
                 <td>
                 ".(!$is_disabled ? 
-                    "<input {$is_disabled} type='text' data-input_method='remarks' data-input_type='score' style='width:13rem' data-input_row_id='{$score->student_row_id}' class='form-control' value='{$score->class_teacher_remarks}'>"
-                    : $score->class_teacher_remarks
+                    "<input {$is_disabled} type='text' data-input_method='remarks' data-input_type='score' style='width:13rem' data-input_row_id='{$score->student_row_id}' class='form-control' value='{$finalRemark}'>"
+                    : $finalRemark
                 )."
                 </td>";
                 // if the result has not yet been approved

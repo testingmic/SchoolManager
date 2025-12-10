@@ -60,6 +60,26 @@ var calculate_screen_width = () => {
     }
 }
 
+function get_the_exams_score(total_score) {
+    if(typeof myGradingSBA['columns'] !== 'undefined') {
+        if(typeof myGradingSBA['columns']['Examination'] !== 'undefined') {
+            total_score = Math.round((total_score / 100) * parseInt(myGradingSBA['columns']['Examination']['percentage']));
+        }
+    }
+    return total_score;
+}
+
+function get_the_remark(score) {
+    if(score == 0) return '';
+    for(let item in myGradingPrefs) {
+        let theitem = myGradingPrefs[item];
+        if(parseInt(theitem.start) <= score && parseInt(theitem.end) >= score) {
+            return theitem.interpretation;
+        }
+    }
+    return '';
+}
+
 var remove_report_column = (column_id) => {
     $(`div[class~="column_item"][data-column_id='${column_id}']`).remove();
 }
@@ -372,6 +392,24 @@ var total_score_checker = () => {
             $(`div[id="summary_report_sheet_content"] input[data-input_total_id="${unq_id}"]`).removeClass("bg-danger text-white").addClass("text-black");
         }
         $(`div[id="summary_report_sheet_content"] input[data-input_total_id="${unq_id}"]`).val(total_score);
+    });
+
+    $(`div[id="summary_report_sheet_content"] input[data-input_type="score"][name="examination"][data-input_type_q='marks']`).on("input", function(event) {
+        let input = $(this),
+            unq_id = input.attr("data-input_row_id"),
+            total_score = parseInt(input.val());
+
+        total_score = total_score > 100 ? 100 : total_score;
+        $(`div[id="summary_report_sheet_content"] input[name="examination"][data-input_row_id="${unq_id}"]`).val(total_score);
+
+        let getTheSbaValue = $(`div[id="summary_report_sheet_content"] input[name="school_based_assessment"][data-input_row_id="${unq_id}"]`).val();
+        getTheSbaValue = !isNaN(parseInt(getTheSbaValue)) ? parseInt(getTheSbaValue) : 0;
+
+        let finalScore = getTheSbaValue + get_the_exams_score(total_score);
+
+        console.log({finalScore, getTheSbaValue, total_score, remark: get_the_remark(finalScore)});
+        
+        $(`div[id="summary_report_sheet_content"] input[data-input_row_id="${unq_id}"][data-input_method="remarks"]`).val(get_the_remark(finalScore));
     });
 }
 
