@@ -16,7 +16,7 @@ $baseUrl = $config->base_url();
 jump_to_main($baseUrl);
 
 $response = (object) [];
-$response->title = "Update Book Stock : {$appName}";
+$response->title = "Update Book Stock ";
 $hasAdd = $accessObject->hasAccess("add", "library");
 
 // end query if the user has no permissions

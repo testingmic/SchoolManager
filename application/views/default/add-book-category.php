@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "Create Book Collection";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = "{$pageTitle} ";
 $response->scripts = [
     "assets/js/page/index.js"
 ];

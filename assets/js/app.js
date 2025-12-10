@@ -12,6 +12,8 @@ $.pageloader = $(".loader");
 
 var current_parent_menu = '';
 
+const iatoken = "mgh_access_token";
+
 $.most_recent_page = $(`div[class="last_visited_page"]`).attr("value");
 $form_modal = $(`div[id="formsModal"]`);
 $replies_modal = $(`div[id="repliesModal"]`);
@@ -707,6 +709,23 @@ var page_programming = (array_content) => {
             </div>
         </div>`;
     }
+}
+
+var reValidateSession = () => {
+    if(!localStorage.getItem(iatoken)) {
+        window.location.href = `${baseUrl}login`;
+        return false;
+    }
+    $.post(`${baseUrl}api/auth/validate_token`, { 
+        itoken: localStorage.getItem(iatoken),
+        action: "validate_token"
+     }, function(response) {
+        localStorage.setItem(iatoken, response.data.access_token);
+        window.location.reload();
+    }).catch((error) => {
+        localStorage.removeItem(iatoken);
+        window.location.href = `${baseUrl}login`;
+    });
 }
 
 var loadPage = (loc, pushstate) => {

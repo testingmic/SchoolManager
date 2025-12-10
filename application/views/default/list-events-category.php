@@ -18,7 +18,7 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "Events Category Management";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = "{$pageTitle} ";
 $response->timer = 0;
 
 // if the client information is not empty

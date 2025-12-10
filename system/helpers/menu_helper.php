@@ -279,7 +279,9 @@
                     <li><a class="nav-link" href="<?= $baseUrl ?>payroll">Staff Payroll List</a></li>
                     <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Payslip List</a></li>
                     <?php if($accessObject->hasAccess("reports", "payslip")) { ?>
-                    <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">Payroll Reports</a></li>
+                        <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">Payroll Reports</a></li>
+                        <li><a class="nav-link" href="<?= $baseUrl ?>payroll-ssnit">SSNIT Contributions</a></li>
+                        <li><a class="nav-link" href="<?= $baseUrl ?>payroll-taxes">Employee PAYE</a></li>
                     <?php } ?>
                 </ul>
             </li>

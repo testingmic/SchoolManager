@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) [];
-$response->title = "Assign Student Class : {$appName}";
+$response->title = "Assign Student Class ";
 
 // get the class list
 $class_list = $myClass->pushQuery("name, id", "classes", "client_id='{$clientId}' AND status='1'", false, "ASSOC");

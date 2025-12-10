@@ -238,7 +238,7 @@ class Myschoolgh extends Models {
 				INDEX `deleted` (`deleted`),
 				FOREIGN KEY (`room_id`) REFERENCES `housing_rooms`(`item_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
 				FOREIGN KEY (`student_id`) REFERENCES `users`(`item_id`) ON DELETE SET NULL ON UPDATE CASCADE
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
 		];
 
 		if(empty($fix)) return true;

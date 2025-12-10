@@ -18,7 +18,7 @@ jump_to_main($baseUrl);
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $filter = (object) array_map("xss_clean", $_POST);
 
-$response->title = "Staff Payslips: {$appName}";
+$response->title = "Staff Payslips";
 
 // end query if the user has no permissions
 if(!in_array("payroll", $clientFeatures)) {

@@ -18,7 +18,7 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "App Manager";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = "{$pageTitle} ";
 
 // staff id
 $user_id = $session->userId;

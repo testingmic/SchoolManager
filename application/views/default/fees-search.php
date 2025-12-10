@@ -19,7 +19,7 @@ $response = (object) [];
 $search_term = isset($_GET["term"]) ? xss_clean($_GET["term"]) : null;
 
 $pageTitle = "Fee Payment Log Search";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = "{$pageTitle} ";
 $response->scripts = ["assets/js/payments.js"];
 
 $the_form = "";

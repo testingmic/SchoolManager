@@ -304,6 +304,31 @@ var recalculateDeductions = () => {
     recalculateTotal();
 }
 
+var mark_contribution_as_paid = (contribution_id, log_transaction = false) => {
+    let payload = { payslip_ids: [] };
+    swal({
+        title: "Mark Contribution as Paid",
+        text: "Are you sure you want to mark the contribution as paid? This action cannot be undone.",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            let payload = { contribution_id, log_transaction };
+            $.post(`${baseUrl}api/payroll/markcontributionaspaid`, payload).then((response) => {
+                if(response.code === 200) {
+                    $(`tr[data-row_id="${contribution_id}"]`).find(`button[class~="mark_as_paid"]`).addClass("hidden");
+                    $(`tr[data-row_id="${contribution_id}"]`).find(`td[data-row_id_column="paid_status"]`).html("<span class='badge badge-success'>Paid</span>");
+                }
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
+            });
+        }
+    });
+}
+
 var bulk_validate_payslip_finalize = () => {
     let payload = { payslip_ids: [] };
     swal({

@@ -355,31 +355,29 @@ function propagating_data($clientData, $session = null) {
  * @return String
  */
 function session_logout() {
-    global $baseUrl, $_SERVER;
     return '
-        <div class="row">
-            <div class="col-lg-3 col-md-3"></div>
-            <div class="col-lg-6 col-md-6 col-sm-12">
-                <div class="card">
-                    <div class="card-header">
-                    <h4>Session Expired</h4>
-                    </div>
-                    <div class="card-body">
+    <div class="row">
+        <div class="col-lg-3 col-md-3"></div>
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Session Expired!</h4>
+                </div>
+                <div class="card-body">
                     <div class="empty-state" data-height="400">
                         <div class="empty-state-icon bg-danger">
-                        <i class="fas fa-lock"></i>
+                            <i class="fas fa-lock"></i>
                         </div>
                         <h2>Current Session Expired</h2>
                         <p class="lead">
-                            Sorry! You have been logged out of the system due to inactivity.
+                            Sorry! You have been locked out of the system due to inactivity.
                         </p>
-                        <a href="'.$baseUrl.'login" class="btn anchor btn-warning mt-4">Login</a>
-                    </div>
+                        <a onclick="return reValidateSession()" class="btn anchor btn-warning mt-4">Reactivate Session</a>
                     </div>
                 </div>
             </div>
         </div>
-    ';
+    </div>';
 }
 
 /**

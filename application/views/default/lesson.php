@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "Lesson Management";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = "{$pageTitle} ";
 
 // item id
 $course = null;

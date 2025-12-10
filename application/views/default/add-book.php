@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "Add Book";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = "{$pageTitle} ";
 $response->scripts = [];
 
 $params = (object) [

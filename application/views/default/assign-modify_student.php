@@ -18,7 +18,7 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "Modify Students Record";
-$response->title = $pageTitle." : {$appName}";
+$response->title = $pageTitle." ";
 
 // get the class list
 $students_list = "";

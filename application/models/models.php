@@ -43,6 +43,7 @@ class Models {
     public $data_maxdate;
     public $payment_methods;
     public $current_timestamp;
+    public $permission_denied_code;
     public $office_purpose;
     public $event_audience;
     public $fake_files;
@@ -303,6 +304,7 @@ class Models {
         $this->unexpected_error = ["code" => 400, "data" => "Sorry! An unexpected error occured.\nPlease contact the admin if problem persists"];
 
         $this->permission_denied = "Sorry! You do not have the required permission to perform this action.";
+        $this->permission_denied_code = ["code" => 403, "data" => $this->permission_denied];
 
         $this->swal_notification = [
             "ajax_error" => "Sorry! There is an error while processing the request.",

@@ -116,6 +116,115 @@ class Payroll extends Myschoolgh {
     }
 
     /**
+     * List Employer Payments
+     * 
+     * @return Array
+     */
+    public function employer_contributions($params = null) {
+
+        global $accessObject;
+
+        if(!$accessObject->hasAccess("reports", "payslip")) {
+            return $this->permission_denied_code;
+        }
+
+        $query = "1";
+        $query .= !empty($params->clientId) ? " AND a.client_id = '{$params->clientId}'" : null;
+        $query .= !empty($params->employee_id) ? " AND a.employee_id = '{$params->employee_id}'" : null;
+        $query .= !empty($params->payslip_id) ? " AND a.payslip_id = '{$params->payslip_id}'" : null;
+        $query .= !empty($params->payslip_month) ? " AND a.payslip_month = '{$params->payslip_month}'" : null;
+        $query .= !empty($params->payslip_year) ? " AND a.payslip_year = '{$params->payslip_year}'" : null;
+        $query .= !empty($params->payslip_year) ? " AND a.payslip_year = '{$params->payslip_year}'" : null;
+        $query .= !empty($params->allowance_name) ? " AND a.allowance_name IN ('".implode("','", $params->allowance_name)."')" : null;
+        $query .= !empty($params->contribution_id) ? " AND a.id = '{$params->contribution_id}'" : null;
+
+        /** Get the data */
+        $getData = $this->pushQuery(
+            "a.*, u.name AS employee_name", 
+            "payslips_employer_payments a LEFT JOIN users u ON u.item_id = a.employee_id",
+            "{$query} ORDER BY a.id DESC"
+        );
+
+        return [
+            "code" => 200,
+            "data" => $getData
+        ];
+
+    }
+
+    /**
+     * Mark Contribution as Paid
+     * 
+     * @return Array
+     */
+    public function markcontributionaspaid(stdClass $params) {
+
+        global $accessObject;
+
+        if(!$accessObject->hasAccess("reports", "payslip")) {
+            return $this->permission_denied_code;
+        }
+
+        // set the contribution id
+        $params->contribution_id = $params->contribution_id ?? null;
+
+        // check if the contribution id is valid
+        $check = $this->employer_contributions($params);
+        if($check["code"] !== 200) {
+            return $check;
+        }
+
+        $dataCheck = $check["data"][0];
+
+        // update the contribution status
+        $stmt = $this->db->prepare("UPDATE payslips_employer_payments SET status = ? WHERE id = ? LIMIT 1");
+        $stmt->execute(['Paid', $params->contribution_id]);
+
+        if(!empty($params->log_transaction) && !in_array($dataCheck->status, ['Paid'])) {
+
+            // generate a new item id
+            $item_id = random_string("alnum", RANDOM_STRING);
+
+            // log the data in the statement account
+            $accountCheck = $this->pushQuery("item_id, balance", "accounts", "client_id='{$params->clientId}' AND status='1' AND default_account='1' LIMIT 1");
+                
+            // if the account is not empty
+            if(!empty($accountCheck)) {
+
+                // set the total amount
+                $total_amount = $dataCheck->employee_contribution + $dataCheck->employer_contribution;
+
+                // get the account unique id
+                $account_id = $accountCheck[0]->item_id;
+                $payment_mode = isset($params->payment_mode) ? strtolower($params->payment_mode) : "cheque";
+                
+                // log the transaction record
+                $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
+                    item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
+                    reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
+                    description = ?, academic_year = ?, academic_term = ?, balance = ?
+                ");
+                $stmt->execute([
+                    $item_id, $params->clientId, $account_id, "payroll", "Expense", 
+                    "{$dataCheck->allowance_name}: Payment for {$dataCheck->employee_name} - {$dataCheck->payslip_month} {$dataCheck->payslip_year}", 
+                    $total_amount, $params->userId, date("Y-m-d"), $payment_mode, 
+                    "{$dataCheck->allowance_name}: Payment for {$dataCheck->employee_name} - {$dataCheck->payslip_month} {$dataCheck->payslip_year}",
+                    $this->academic_year ?? null, $this->academic_term ?? null, ($accountCheck[0]->balance - $total_amount)
+                ]);
+
+                // add up to the expense
+                $this->db->query("UPDATE accounts SET total_debit = (total_debit + {$total_amount}), balance = (balance - {$total_amount}) WHERE item_id = '{$account_id}' LIMIT 1");
+
+            }
+        }
+
+        return [
+            "code" => 200,
+            "data" => "The contribution was successfully marked as paid."
+        ];
+    }
+
+    /**
      * Payment Details
      * 
      * Save the payment allowances and deductions of the employee

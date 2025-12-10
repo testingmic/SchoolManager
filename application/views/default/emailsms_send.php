@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "Bulk SMS & Email";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = "{$pageTitle} ";
 
 // not found
 if(!$accessObject->hasAccess("send", "communication")) {

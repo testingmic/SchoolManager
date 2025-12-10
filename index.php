@@ -155,28 +155,31 @@ if(!empty($session->userId) && empty($argv)) {
             $isStudent = (bool) ($defaultUser->user_type == "student");
 
             // set this as init
-            $defaultUser->appPrefs->termEnded = false;
-            
-            // if academics is set
-            if(isset($defaultClientData->client_preferences->academics)) {
-                // set the default academics information
-                $defaultAcademics = $defaultClientData->client_preferences->academics;
+            if(!empty($defaultUser->appPrefs)) {
+                // set the term ended variable to false
+                $defaultUser->appPrefs->termEnded = false;
                 
-                // reset the academic year and term if the session variables are not empty
-                if(!empty($session->is_only_readable_app)) {
-                    $defaultAcademics->academic_year = $session->is_readonly_academic_year;
-                    $defaultAcademics->academic_term = $session->is_readonly_academic_term;
-                    $defaultAcademics->term_starts = $session->is_readonly_term_starts;
-                    $defaultAcademics->term_ends = $session->is_readonly_term_ends;
-                    $defaultAcademics->year_starts = $session->is_readonly_year_starts;
-                    $defaultAcademics->year_ends = $session->is_readonly_year_ends;
-                }
+                // if academics is set
+                if(isset($defaultClientData->client_preferences->academics)) {
+                    // set the default academics information
+                    $defaultAcademics = $defaultClientData->client_preferences->academics;
+                    
+                    // reset the academic year and term if the session variables are not empty
+                    if(!empty($session->is_only_readable_app)) {
+                        $defaultAcademics->academic_year = $session->is_readonly_academic_year;
+                        $defaultAcademics->academic_term = $session->is_readonly_academic_term;
+                        $defaultAcademics->term_starts = $session->is_readonly_term_starts;
+                        $defaultAcademics->term_ends = $session->is_readonly_term_ends;
+                        $defaultAcademics->year_starts = $session->is_readonly_year_starts;
+                        $defaultAcademics->year_ends = $session->is_readonly_year_ends;
+                    }
 
-                // check if the term ends date is not 1970-01-01 or 1970-01-02
-                if(!empty($defaultUser->appPrefs->academics->term_ends)) {
-                    if(!in_array(date('Y-m-d', strtotime($defaultUser->appPrefs->academics->term_ends)), ['1970-01-01'])) {
-                        // set the term ended variable
-                        $defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));
+                    // check if the term ends date is not 1970-01-01 or 1970-01-02
+                    if(!empty($defaultUser->appPrefs->academics->term_ends)) {
+                        if(!in_array(date('Y-m-d', strtotime($defaultUser->appPrefs->academics->term_ends)), ['1970-01-01'])) {
+                            // set the term ended variable
+                            $defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));
+                        }
                     }
                 }
             }
