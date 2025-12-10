@@ -29,6 +29,7 @@ $requestUri = $_SERVER["REQUEST_URI"];
 $link_url = $SITEURL[0];
 $inner_url = ( isset($SITEURL[1]) ) ? $SITEURL[1] : null;
 $outer_url = ( isset($SITEURL[2]) ) ? $SITEURL[2] : null;
+$request_action = ( isset($SITEURL[3]) ) ? $SITEURL[3] : null;
 
 //: create a new object
 $apisObject = load_class('api_validate', 'models');
@@ -58,7 +59,9 @@ $endpoint = "{$inner_url}/{$outer_url}/";
 $endpoint = trim($endpoint, "/");
 
 // move code to an initial handler
-$handler = load_class('handler', 'models', [$outer_url, $inner_url, $requestMethod, $params, $session, $userId, $clientId]);
+$handler = load_class('handler', 'models', [
+    $outer_url, $inner_url, $requestMethod, $params, $session, $userId, $clientId, 'request_action' => $request_action
+]);
 $handler->process();
 
 /**
@@ -105,6 +108,7 @@ if(($inner_url == "payment") && (in_array($outer_url, ["pay", "verify", "epay_va
     $Api->endpoints = $apisObject->apiEndpoint($endpoint, $requestMethod, $outer_url);
     $Api->inner_url = $inner_url;
     $Api->outer_url = $outer_url;
+    $Api->request_action = $request_action;
 
     // set the full endpoint url
     $Api->endpoint_url = "{$inner_url}/{$outer_url}";

@@ -122,7 +122,7 @@ class Accesslevel {
         if($this->session->previewMode && $isSupportPreviewMode) {
             return true;
         }
-        
+
         // user permissions
         if ($permits != false) {
 

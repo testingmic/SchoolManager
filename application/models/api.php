@@ -10,6 +10,7 @@ class Api {
     public $inner_url;
     public $outer_url;
     public $endpoint_url;
+    public $request_action;
 
     /* Allow the user to preset the the userId after instantiating the class */
     public $userId;
@@ -336,6 +337,7 @@ class Api {
         $params->userId = $this->userId;
         $params->clientId = $this->clientId;
         $params->requestMethod = $this->requestMethod;
+        $params->request_action = $this->request_action;
         $params->userData = !empty($this->userData) ? (object) $this->userData : $this->defaultUser;
 
         // if the user type is empty

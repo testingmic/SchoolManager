@@ -4,6 +4,7 @@ class Handler {
 
     private $outer_url;
     private $inner_url;
+    private $request_action;
     private $requestMethod;
     private $params;
     private $session;
@@ -47,6 +48,10 @@ class Handler {
         $this->session = $params[4];
         $this->userId = $this->session->userId;
         $this->clientId = $this->session->clientId;
+
+        if(!empty($params['request_action'])) {
+            $this->request_action = $params['request_action'];
+        }
 
         $this->db = $myschoolgh;
 
@@ -100,6 +105,8 @@ class Handler {
             $params['mobileapp'] = true;
         }
 
+        $Api->request_action = $this->request_action;
+
         // revert the params back into an array
         $param = (object) $params;
         $param->remote = $remote;
@@ -123,6 +130,8 @@ class Handler {
             $param->clientId = $session->previewClientId;
             $param->isPreviewMode = true;
         }
+
+        $param->request_action = $this->request_action;
 
         // run the request
         $ApiRequest = $Api->requestHandler($param, $this->requestMethod);
