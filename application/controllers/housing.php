@@ -75,6 +75,50 @@ class Housing extends Myschoolgh {
 	}
 
     /**
+     * Buildings
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function buildings($params = null) {
+        return $this->buildingsHandler($params, $params->request_action ?? "list");
+    }
+
+    /**
+     * Blocks
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function blocks($params = null) {
+        return $this->blocksHandler($params, $params->request_action ?? "list");
+    }
+
+    /**
+     * Rooms
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function rooms($params = null) {
+        return $this->roomsHandler($params, $params->request_action ?? "list");
+    }
+
+    /**
+     * Beds
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function beds($params = null) {
+        return $this->bedsHandler($params, $params->request_action ?? "list");
+    }
+
+    /**
      * Buildings Handler
      * 
      * @param stdClass $params
@@ -83,7 +127,7 @@ class Housing extends Myschoolgh {
      * @return Array
      */
     public function buildingsHandler($params, $action = "list") {
-        $this->buildingsObject = load_class("Buildings", "controllers/housing", $params);
+        $this->buildingsObject = load_class("buildings", "controllers/housing", $params);
         foreach(['list', 'create', 'update', 'delete'] as $method) {
             if($method !== $action) continue;
             if(method_exists($this->buildingsObject, $method)) {
@@ -102,7 +146,7 @@ class Housing extends Myschoolgh {
      * @return Array
      */
     public function blocksHandler($params, $action = "list") {
-        $this->blocksObject = load_class("Blocks", "controllers/housing", $params);
+        $this->blocksObject = load_class("blocks", "controllers/housing", $params);
         foreach(['list', 'create', 'update', 'delete'] as $method) {
             if($method !== $action) continue;
             if(method_exists($this->blocksObject, $method)) {
@@ -121,7 +165,7 @@ class Housing extends Myschoolgh {
      * @return Array
      */
     public function roomsHandler($params, $action = "list") {
-        $this->roomsObject = load_class("Rooms", "controllers/housing", $params);
+        $this->roomsObject = load_class("rooms", "controllers/housing", $params);
         foreach(['list', 'create', 'update', 'delete'] as $method) {
             if($method !== $action) continue;
             if(method_exists($this->roomsObject, $method)) {
@@ -140,7 +184,7 @@ class Housing extends Myschoolgh {
      * @return Array
      */
     public function bedsHandler($params, $action = "list") {
-        $this->bedsObject = load_class("Beds", "controllers/housing", $params);
+        $this->bedsObject = load_class("beds", "controllers/housing", $params);
         foreach(['list', 'create', 'update', 'delete'] as $method) {
             if($method !== $action) continue;
             if(method_exists($this->bedsObject, $method)) {

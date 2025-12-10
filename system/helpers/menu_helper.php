@@ -337,6 +337,29 @@
             </ul>
         </li>
     <?php } ?>
+    <?php if($accessObject->hasAccess("view", "housing")) { ?>
+        <li class="dropdown" data-parent_menu="housing">
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-building"></i><span>Housing Management</span></a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link" href="<?= $baseUrl ?>buildings">Buildings List</a></li>
+                <?php if($accessObject->hasAccess("create", "housing") && !$isReadOnly) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>add-building">Add Building</a></li>
+                <?php } ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>blocks">Blocks List</a></li>
+                <?php if($accessObject->hasAccess("create", "housing") && !$isReadOnly) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>add-block">Add Block</a></li>
+                <?php } ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>housing-rooms">Rooms List</a></li>
+                <?php if($accessObject->hasAccess("create", "housing") && !$isReadOnly) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>add-housing-room">Add Room</a></li>
+                <?php } ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>beds">Beds List</a></li>
+                <?php if($accessObject->hasAccess("create", "housing") && !$isReadOnly) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>add-bed">Add Bed</a></li>
+                <?php } ?>
+            </ul>
+        </li>
+    <?php } ?>
     <?php if($isAdmin && in_array("online_applications", $clientFeatures)) { ?>
         <li class="dropdown" data-parent_menu="online-applications">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-friends"></i><span>Online Applications</span></a>
