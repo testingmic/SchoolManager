@@ -230,6 +230,11 @@ class Terminal_reports extends Myschoolgh {
         }
 
         $record = $this->results_remarks($params);
+        if(empty($record['data'])) {
+            return ["code" => 404, "data" => "Sorry! The remarks record was not found."];
+        }
+
+        $this->db->query("DELETE FROM grading_terminal_remarks WHERE id='{$params->remarks_id}' LIMIT 1");
 
         return ["code" => 200, "data" => "Student remarks successfully deleted."];
     }
