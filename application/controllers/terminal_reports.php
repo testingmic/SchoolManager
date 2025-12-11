@@ -1579,7 +1579,7 @@ class Terminal_reports extends Myschoolgh {
                 $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
             }
 
-            $defaultFontSize = "font-size:11px";
+            $defaultFontSize = "font-size:13px";
             $increaseFontSize = "font-size:15px";
 
             // loop through the report set
@@ -1626,13 +1626,22 @@ class Terminal_reports extends Myschoolgh {
                             </tr>
                         </table>
                     </td>";
-                // <div style=\"padding:10px; color:#fff; background-color:{$bg_color};\">
-                //     Please visit app.myschoolgh.com/report/{$student["data"]["unique_id"]} for a graphical analysis of this report.
-                // </div>
+
+                $theTotal = 0;
+                $theCount = 0;
+                foreach($student["sheet"] as $score) {
+                    if($score->status === "Approved") {
+                        $theTotal += $score->total_percentage;
+                        $theCount++;
+                    }
+                }
+
+                $studentAverage = $theTotal > 0 ? round($theTotal / $theCount, 2) : 0;
+
                 $table .= "
                     <td style=\"padding:5px;\" align=\"center\" valign=\"top\" width=\"20%\">
                         <div style=\"padding:5px;\">
-                            <strong style=\"color:#6777ef\">CLASS AVERAGE: ".round($student["data"]["average_score"], 2)."</strong>
+                            <strong style=\"color:#6777ef\">STUDENT AVERAGE: ".round($studentAverage, 2)."</strong>
                         </div>
                         <div style=\"padding:5px; text-transform:uppercase;\">
                             <strong>SCHOOL RESUMES ON:<br>
@@ -1642,11 +1651,11 @@ class Terminal_reports extends Myschoolgh {
                     </td>
                     </tr>";
                 $table .= "</table>\n";
-                $table .= "<table style=\"font-size:10px\" cellpadding=\"5\" width=\"100%\" style=\"border: 1px solid #dee2e6;\">";
+                $table .= "<table cellpadding=\"5\" width=\"100%\" style=\"font-size:10px;border: 1px solid #dee2e6; min-height: 400px;\">";
                 $table .= "<tr style=\"font-weight:bold;font-size:15px;background-color:#050f58;color:#fff;\">";
                 $table .= "<td align=\"center\" colspan=\"".($column_count + 5)."\">END OF TERM REPORT CARD</td>";
                 $table .= "</tr>";
-                $table .= "<tr style=\"font-weight:bold;{$defaultFontSize}\">";
+                $table .= "<tr style=\"font-weight:bold;{$defaultFontSize};background-color:#d9d9d9;\">";
                 $table .= "<td style=\"{$defaultFontSize}\" width=\"25%\">SUBJECT</td>";
                 $table .= $grading_column;
                 $table .= "<td style=\"{$defaultFontSize}\" align=\"center\" width=\"10%\">TOTAL SCORE</td>";
@@ -1654,29 +1663,33 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "<td style=\"{$defaultFontSize}\">TEACHER'S COMMENT</td>";
                 $table .= "</tr>";
 
-                $theTotal = 0;
-                $theCount = 0;
-                foreach($student["sheet"] as $score) {
-                    $theTotal += $score->total_percentage;
-                }
+                // set the row
+                $irow = 0;
 
                 // // get the results submitted by the teachers for each subject
                 foreach($student["sheet"] as $score) {
                     // only show the subject if approved
                     if($score->status === "Approved") {
+
+                        $irow++;
+
+                        $bg_color = $irow % 2 === 0 ? "#cccccc" : "#ffffff";
+
+                        $background = "background-color:{$bg_color};";
+
                         // append to the table
                         $table .= "<tr>";
-                        $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->course_name}</td>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6; {$background} font-size:13px;\">{$score->course_name}</td>";
                         // get the scores
                         foreach($score->scores as $s_score) {
                             if(!in_array($s_score['item'], ["sba", "marks"])) continue;
                             $s_score = $s_score['score'] ?? 0;
-                            $table .= "<td style=\"border: 1px solid #dee2e6;{$increaseFontSize}\" align=\"center\">".round($s_score, 2)."</td>";
+                            $table .= "<td style=\"border: 1px solid #dee2e6;{$background}{$increaseFontSize}\" align=\"center\">".round($s_score, 2)."</td>";
                         }
-                        $table .= "<td style=\"border: 1px solid #dee2e6;{$increaseFontSize}\" align=\"center\">".round($score->average_score ?? 0, 2)."</td>";
-                        $table .= "<td style=\"border: 1px solid #dee2e6;{$increaseFontSize}\" align=\"center\">".round($score->total_percentage, 2)."</td>";
-                        $table .= "<td style=\"border: 1px solid #dee2e6;{$defaultFontSize}\">".strtoupper($score->teachers_name)."</td>";
-                        $table .= "<td style=\"border: 1px solid #dee2e6;{$defaultFontSize}\">{$score->class_teacher_remarks}</td>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6;{$background}{$increaseFontSize}\" align=\"center\">".round($score->average_score ?? 0, 2)."</td>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6;{$background}{$increaseFontSize}\" align=\"center\">".round($score->total_percentage, 2)."</td>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6;{$background} font-size:11px;\">".strtoupper($score->teachers_name)."</td>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6;{$background}{$defaultFontSize}\">{$score->class_teacher_remarks}</td>";
                         $table .= "</tr>";
                     }
                 }
@@ -1685,7 +1698,7 @@ class Terminal_reports extends Myschoolgh {
                 // set the grading system
                 $table .= "<table cellpadding=\"5px\" border=\"0\" width=\"100%\">";
                 $table .= "<tr>";
-                $table .= "<td align=\"center\" width=\"35%\" valign=\"top\">";
+                $table .= "<td align=\"center\" width=\"40%\" valign=\"top\">";
                 $table .= "<table style=\"{$defaultFontSize}\" align=\"left\" cellpadding=\"5px\" border=\"1\" width=\"100%\">";
                 $table .= "<tr style=\"font-weight:bold\">";
                 $table .= "<td colspan=\"2\" align=\"center\">";
@@ -1707,22 +1720,22 @@ class Terminal_reports extends Myschoolgh {
                 }
                 $table .= "</table>";
                 $table .= "</td>";
-                $table .= "<td width=\"33%\" valign=\"top\">\n";
+                $table .= "<td width=\"25%\" valign=\"top\">\n";
                 $table .= "<table width=\"100%\" cellpadding=\"5px\" style=\"border: 1px solid #dee2e6;\" border=\"0\">\n";
                 $table .= "<tr>";
                 $table .= "<td style=\"font-weight:bold\" align=\"center\" colspan=\"2\">ATTENDANCE</td>\n";
                 $table .= "</tr>\n";
                 $table .= "<tr>\n";
                 $table .= "<td style=\"font-weight:bold\">PRESENT</td>\n";
-                $table .= "<td style=\"font-weight:bold\">".($attendance_log["Present"] ?? 0)."</td>\n";
+                $table .= "<td style=\"font-weight:bold; text-align:right;\">".($attendance_log["Present"] ?? 0)."</td>\n";
                 $table .= "</tr>\n";
                 $table .= "<tr>\n";
                 $table .= "<td style=\"font-weight:bold\">ABSENT</td>\n";
-                $table .= "<td style=\"font-weight:bold\">".($attendance_log["Absent"] ?? 0)."</td>";
+                $table .= "<td style=\"font-weight:bold; text-align:right;\">".($attendance_log["Absent"] ?? 0)."</td>";
                 $table .= "</tr>";
                 $table .= "<tr>";
                 $table .= "<td style=\"font-weight:bold\">TERM DAYS</td>";
-                $table .= "<td style=\"font-weight:bold\">".($attendance_log["Term"] ?? 0)."</td>\n";
+                $table .= "<td style=\"font-weight:bold; text-align:right;\">".($attendance_log["Term"] ?? 0)."</td>\n";
                 $table .= "</tr>";
                 $table .= "</table>\n";
                 $table .= "</td>\n";
@@ -1735,6 +1748,35 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "</td>\n";
                 $table .= "</tr>\n";
                 $table .= "</table>\n";
+
+                $table .= "<table style=\"margin-top:20px;\" cellpadding=\"5px\" border=\"0\" width=\"100%\">
+                <tr style=\"padding:15px;\">
+                    <td width=\"50%\">
+                        <div style=\"font-size:17px; padding:10px; border: solid 1px #cccccc; text-align:center;\">
+                            <div>&nbsp;</div>
+                            <span style=\"font-weight:bold; font-size:15px\">TEACHER'S REMARKS</span>
+                            <div style=\"font-size:17px; padding:10px;text-align:center;\">
+                                Peniel, there's so much you can do if you sit up,
+                                focus and work harder, you will make it.
+                            </div>
+                            <div>&nbsp;</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style=\"font-size:17px; padding:10px; border: solid 1px #cccccc; text-align:center;\">
+                           <div>&nbsp;</div>
+                           <div>&nbsp;</div>
+                           PRINCIPAL: .........................................................
+                        </div>
+                        <div>&nbsp;</div>
+                        <div style=\"font-size:17px; padding:10px; border: solid 1px #cccccc; text-align:center;\">
+                           <div>&nbsp;</div>
+                           <div>&nbsp;</div>
+                           DIRECTOR: .........................................................
+                        </div>
+                    </td>
+                </tr>
+                </table>";
 
                 // append to the students list
                 $students[$key] = [

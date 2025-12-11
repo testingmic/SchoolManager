@@ -3,7 +3,23 @@
 global $defaultUser, $isSupport, $usersClass, $defaultClientData;
 
 // stylesheet
-$pages_content = "<style>@page { margin: 5px; } body { margin: 5px; } .page_break { page-break-before: always; } div.page_break+div.page_break { page-break-before: always; }</style>";
+$pages_content = "<style>@page { margin: 5px; } body { margin: 5px; } .page_break { page-break-before: always; } div.page_break+div.page_break { page-break-before: always; }
+.pdf-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    width: 500px;
+    height: 500px;
+    background-image: url('{$logo_base64}');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    opacity: 0.08;
+    z-index: 0;
+    pointer-events: none;
+}
+</style>";
 
 // set no memory limit
 error_reporting(0);
