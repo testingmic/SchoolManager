@@ -182,6 +182,7 @@
                 <?php if($accessObject->hasAccess("promote", "promotion")) { ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>promotions">Students Promotion</a></li>
                 <?php } ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>results-remarks">Students Remarks</a></li>
             </ul>
         </li>
         <?php } ?>
@@ -456,6 +457,7 @@
             <?php if($accessObject->hasAccess("promote", "promotion")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>promotions">Students Promotion</a></li>
             <?php } ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>results-remarks">Students Remarks</a></li>
         </ul>
     </li>
     <?php } ?>

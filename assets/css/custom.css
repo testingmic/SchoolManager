@@ -1360,7 +1360,7 @@ h4 {
 
 .border-left-solid, 
 .exams_bank .card {
-    border: solid 4px;
+    border: solid 1px;
     border-left-width: 4px !important;
 }
 

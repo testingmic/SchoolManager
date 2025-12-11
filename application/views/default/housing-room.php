@@ -106,11 +106,11 @@ if(empty($item_id)) {
                                 </tr>
                                 <tr>
                                     <td><strong>Block:</strong></td>
-                                    <td><a href="#" onclick="return load(\"block/".($data->block_info->block_id ?? '')."\");">".($data->block_info->name ?? '-')."</a></td>
+                                    <td><a href="#" onclick="return load(\'block/'.($data->block_info->block_id ?? '').'\');">'.($data->block_info->name ?? '-').'</a></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Building:</strong></td>
-                                    <td><a href="#" onclick="return load(\"building/".($data->building_info->building_id ?? '')."\");">".($data->building_info->name ?? '-')."</a></td>
+                                    <td><a href="#" onclick="return load(\'building/'.($data->building_info->building_id ?? '').'\');">'.($data->building_info->name ?? '-').'</a></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Type:</strong></td>
@@ -118,7 +118,7 @@ if(empty($item_id)) {
                                 </tr>
                                 <tr>
                                     <td><strong>Condition:</strong></td>
-                                    <td><span class='badge badge-".($data->room_condition == 'excellent' || $data->room_condition == 'good' ? 'success' : ($data->room_condition == 'fair' ? 'warning' : 'danger'))."'>".ucfirst(str_replace('_', ' ', $data->room_condition))."</span></td>
+                                    <td><span class=\'badge badge-'.($data->room_condition == 'excellent' || $data->room_condition == 'good' ? 'success' : ($data->room_condition == 'fair' ? 'warning' : 'danger')).'\'>'.ucfirst(str_replace('_', ' ', $data->room_condition)).'</span></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Capacity:</strong></td>
@@ -138,11 +138,11 @@ if(empty($item_id)) {
                                 </tr>
                                 <tr>
                                     <td><strong>Occupancy:</strong></td>
-                                    <td><span class='badge badge-".($data->occupancy_rate >= 100 ? 'danger' : ($data->occupancy_rate >= 75 ? 'warning' : 'success'))."'>{$data->occupancy_rate}%</span></td>
+                                    <td><span class=\'badge badge-'.($data->occupancy_rate >= 100 ? 'danger' : ($data->occupancy_rate >= 75 ? 'warning' : 'success')).'\'>{$data->occupancy_rate}%</span></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Status:</strong></td>
-                                    <td><span class='badge badge-".($data->status == '1' ? 'success' : 'danger')."'>".($data->status == '1' ? 'Active' : 'Inactive')."</span></td>
+                                    <td><span class=\'badge badge-'.($data->status == '1' ? 'success' : 'danger').'\'>'.($data->status == '1' ? 'Active' : 'Inactive').'</span></td>
                                 </tr>
                             </table>
                             <div class="text-center mt-3">
@@ -157,7 +157,7 @@ if(empty($item_id)) {
                             <h4>Description</h4>
                         </div>
                         <div class="card-body">
-                            <p>".nl2br(htmlspecialchars($data->description ?? 'No description provided'))."</p>
+                            <p>'.nl2br(htmlspecialchars($data->description ?? 'No description provided')).'</p>
                         </div>
                     </div>
                     <div class="card mt-3">
@@ -165,7 +165,7 @@ if(empty($item_id)) {
                             <h4>Room Facilities</h4>
                         </div>
                         <div class="card-body">
-                            ".($facilitiesList ? $facilitiesList : '<p class="text-muted">No facilities listed</p>')."
+                            '.($facilitiesList ? $facilitiesList : '<p class="text-muted">No facilities listed</p>').'
                         </div>
                     </div>
                 </div>

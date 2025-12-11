@@ -1010,7 +1010,7 @@ function fees_allocation_summary($totalDue, $totalPaid, $totalBalance, $defaultC
     foreach($summaryDetails as $label => $each) {
         $html .= '
         <div class="col-md-4">
-            <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid '.$each['border-color'].'">
+            <div class="card border-top-1 border-bottom-1 border-right-1 border-left-lg border-left-solid '.$each['border-color'].'">
                 <div class="card-body card-type-3">
                     <div class="row">
                         <div class="col pr-0">

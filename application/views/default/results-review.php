@@ -23,7 +23,7 @@ $response->title = $pageTitle;
 $result_id = $SITEURL[1] ?? null;
 
 // return error if the report id was not parsed
-if(empty($result_id)) {
+if(empty($result_id) || (!$isTeacher && !$isAdmin)) {
     $response->html = page_not_found();
 } else {
 

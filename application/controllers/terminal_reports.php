@@ -107,6 +107,134 @@ class Terminal_reports extends Myschoolgh {
     }
 
     /**
+     * Get the results remarks list
+     * 
+     * @param stdClass $params
+     * @return Array
+     */
+    public function results_remarks(stdClass $params) {
+
+        global $defaultUser, $isStudent, $isTeacher;
+
+        $whereClause = "";
+
+        // if the user is a teacher
+        if($isTeacher) {
+            $whereClause .= " AND a.created_by='{$defaultUser->user_id}'";
+        }
+        
+        if($isStudent) {
+            $whereClause .= " AND a.student_id='{$defaultUser->user_id}'";
+        }
+        
+        // class_id='{$params->remarks_class_id}' AND student_id='{$params->remarks_student_id}'
+        $whereClause = !empty($params->remarks_class_id) ? " AND a.class_id='{$params->remarks_class_id}'" : null;
+        $whereClause .= !empty($params->remarks_student_id) ? " AND a.student_id='{$params->remarks_student_id}'" : null;
+        $whereClause .= !empty($params->remarks_id) ? " AND a.id='{$params->remarks_id}'" : null;
+
+        // get the list of remarks
+        $listRemarks = $this->pushQuery(
+            "a.*, b.name AS class_name, c.name AS student_name", 
+            "grading_terminal_remarks a
+            LEFT JOIN classes b ON b.id = a.class_id
+            LEFT JOIN users c ON c.item_id = a.student_id", 
+            "a.client_id='{$params->clientId}' AND a.academic_year='{$this->academic_year}' AND a.academic_term='{$this->academic_term}' {$whereClause}"
+        );
+
+        // return the list of remarks
+        return [
+            "code" => 200,
+            "data" => $listRemarks
+        ];
+
+    }
+
+    /**
+     * Save the student remarks
+     * 
+     * @param stdClass $params
+     * @return Array
+     */
+    public function save_student_remarks(stdClass $params) {
+        
+        global $isAdmin, $isTeacher, $defaultUser;
+
+        if(!$isAdmin && !$isTeacher) {
+            return $this->permission_denied_code;
+        }
+
+        foreach(['remarks_class_id', 'remarks_student_id', 'remarks'] as $key) {
+            if(empty($params->{$key})) {
+                return ["code" => 400, "data" => "Sorry! The {$key} field is required."];
+            }
+        }
+
+        // check if a remark exists for this student in the class for the acadmic year
+        $checkExist = $this->pushQuery(
+            "id", 
+            "grading_terminal_remarks", 
+            "class_id='{$params->remarks_class_id}' AND student_id='{$params->remarks_student_id}' AND academic_year='{$this->academic_year}' AND academic_term='{$this->academic_term}' LIMIT 1"
+        );
+
+        $remarks_id = null;
+        if(!empty($checkExist)) {
+            
+            $this->db->query("UPDATE grading_terminal_remarks SET 
+                remarks='{$params->remarks}', updated_on = now()
+                WHERE id='{$checkExist[0]->id}' LIMIT 1"
+            );
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Student remarks successfully updated.", "refresh" => 2000];
+            $return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}results-remarks/{$checkExist[0]->id}"];
+
+            return $return;
+
+        } else {
+
+            // insert the new remark
+            $this->db->query("INSERT INTO grading_terminal_remarks SET 
+                client_id = '{$params->clientId}',
+                class_id = '{$params->remarks_class_id}', 
+                student_id = '{$params->remarks_student_id}', 
+                remarks = '{$params->remarks}', 
+                academic_year = '{$this->academic_year}', 
+                academic_term = '{$this->academic_term}',
+                created_by = '{$defaultUser->user_id}'
+            ");
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Student remarks successfully created.", "refresh" => 2000];
+            $return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}results-remarks"];
+
+            return $return;
+
+        }
+
+    }
+    
+    /**
+     * Delete the student remarks
+     * 
+     * @param stdClass $params
+     * @return Array
+     */
+    public function delete_student_remarks(stdClass $params) {
+        global $isAdmin, $isTeacher;
+        if(!$isAdmin && !$isTeacher) {
+            return $this->permission_denied_code;
+        }
+
+        if(empty($params->remarks_id)) {
+            return ["code" => 404, "data" => "Sorry! The remarks record was not found."];
+        }
+
+        $record = $this->results_remarks($params);
+
+        return ["code" => 200, "data" => "Student remarks successfully deleted."];
+    }
+
+    /**
      * Get the results
      * 
      * @param String $result_id
@@ -1756,8 +1884,7 @@ class Terminal_reports extends Myschoolgh {
                             <div>&nbsp;</div>
                             <span style=\"font-weight:bold; font-size:15px\">TEACHER'S REMARKS</span>
                             <div style=\"font-size:17px; padding:10px;text-align:center;\">
-                                Peniel, there's so much you can do if you sit up,
-                                focus and work harder, you will make it.
+                                N/A
                             </div>
                             <div>&nbsp;</div>
                         </div>

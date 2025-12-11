@@ -48,14 +48,17 @@ $hasFiltering = $accessObject->hasAccess("filters", "settings");
 $statistics = [
     'total' => [
         'count' => 0,
+        'color' => 'border-blue',
         'label' => 'TOTAL SUBJECTS'
     ],
     'with_tutors' => [
         'count' => 0,
+        'color' => 'border-green',
         'label' => 'SUBJECTS WITH TUTORS'
     ],
     'no_tutors' => [
         'count' => 0,
+        'color' => 'border-red',
         'label' => 'SUBJECTS WITH NO TUTORS'
     ],
 ];
@@ -141,7 +144,7 @@ $statistics_card = '';
 foreach($statistics as $key => $each) {
     $statistics_card .= '
     <div class="col-md-3">
-        <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-blue">
+        <div class="card border-top-1 border-bottom-1 border-right-1 border-left-lg border-left-solid '.$each['color'].'">
             <div class="card-body pt-3 pl-3 pr-3 card-type-3">
                 <div class="row">
                     <div class="col">

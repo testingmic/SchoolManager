@@ -109,23 +109,23 @@ if(empty($item_id)) {
                                 </tr>
                                 <tr>
                                     <td><strong>Room:</strong></td>
-                                    <td><a href="#" onclick="return load(\"housing-room/".($data->room_info->room_id ?? '')."\");">".($data->room_info->name ?? '-')."</a></td>
+                                    <td><a href="#" onclick="return load(\'housing-room/'.($data->room_info->room_id ?? '').'\');">'.($data->room_info->name ?? '-').'</a></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Block:</strong></td>
-                                    <td><a href="#" onclick="return load(\"block/".($data->block_info->block_id ?? '')."\");">".($data->block_info->name ?? '-')."</a></td>
+                                    <td><a href="#" onclick="return load(\'block/'.($data->block_info->block_id ?? '').'\');">'.($data->block_info->name ?? '-').'</a></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Building:</strong></td>
-                                    <td><a href="#" onclick="return load(\"building/".($data->building_info->building_id ?? '')."\");">".($data->building_info->name ?? '-')."</a></td>
+                                    <td><a href="#" onclick="return load(\'building/'.($data->building_info->building_id ?? '').'\');">'.($data->building_info->name ?? '-').'</a></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Status:</strong></td>
-                                    <td><span class='badge badge-".($data->occupied == '1' ? 'danger' : 'success')."'>".($data->occupied == '1' ? 'Occupied' : 'Available')."</span></td>
+                                    <td><span class=\'badge badge-'.($data->occupied == '1' ? 'danger' : 'success').'\'>'.($data->occupied == '1' ? 'Occupied' : 'Available').'</span></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Active:</strong></td>
-                                    <td><span class='badge badge-".($data->status == '1' ? 'success' : 'danger')."'>".($data->status == '1' ? 'Active' : 'Inactive')."</span></td>
+                                    <td><span class=\'badge badge-'.($data->status == '1' ? 'success' : 'danger').'\'>'.($data->status == '1' ? 'Active' : 'Inactive').'</span></td>
                                 </tr>
                             </table>
                             <div class="text-center mt-3">
@@ -150,7 +150,7 @@ if(empty($item_id)) {
                             <h4>Description</h4>
                         </div>
                         <div class="card-body">
-                            <p>".nl2br(htmlspecialchars($data->description ?? 'No description provided'))."</p>
+                            <p>'.nl2br(htmlspecialchars($data->description ?? 'No description provided')).'</p>
                         </div>
                     </div>
                 </div>

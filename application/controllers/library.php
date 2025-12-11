@@ -1352,6 +1352,7 @@ class Library extends Myschoolgh {
 	 * It finally loops through the books list and updates the count. It also inserts a log of the stock update
 	 * this is to help when the admin wants to reverse the action. 
 	 * 
+	 * @param StdClass $params
 	 * @param Array $params->stock_quantities
 	 * 
 	 * @return Array
@@ -1421,6 +1422,7 @@ class Library extends Myschoolgh {
 	/**
 	 * List the stock update history
 	 * 
+	 * @param StdClass $params
 	 * @param Int		$params->limit
 	 * @param String	$params->stock_id
 	 * 
