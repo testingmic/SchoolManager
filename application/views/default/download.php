@@ -27,9 +27,11 @@ if(!$isSupport) {
     
     // set the params
     $param = (object) [
-        "clientId" => $defaultUser->client_id,
-        "client_data" => $defaultUser->client
+        "clientId" => $defaultUser->client_id ?? 0,
+        "client_data" => $defaultUser->client ?? null
     ];
+
+    $_GET['clientId'] = $defaultUser->client_id ?? 0;
 
     // if the user is in preview mode
     if(!empty($defaultUser->isPreviewMode)) {
@@ -313,6 +315,8 @@ if(!$isSupport) {
         
         $start = 0;
         $count = count($data["data"]["sheets"]);
+
+        $orientation = "P";
 
         // loop through the data
         foreach(($data["data"]["sheets"] ?? []) as $key => $info) {

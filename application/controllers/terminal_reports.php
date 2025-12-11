@@ -1079,16 +1079,17 @@ class Terminal_reports extends Myschoolgh {
                 UPDATE grading_terminal_scores a SET 
                 a.student_item_id = (SELECT u.item_id FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
                 a.student_name = (SELECT u.name FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
-                a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1),
                 a.student_row_id = (SELECT u.id FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1)
-            WHERE a.report_id='{$report_id}' AND a.client_id = '{$clientId}' LIMIT 500");
+            WHERE a.client_id = '{$clientId}' LIMIT 500");
             $u_stmt->execute();
 
             // get the list of all users that was uploaded
-            $u_stmt = $this->db->prepare("UPDATE grading_terminal_logs a SET 
-                a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
-            WHERE a.report_id='{$report_id}' AND a.client_id='{$clientId}' LIMIT 1");
-            $u_stmt->execute();
+            $this->db->query("UPDATE grading_terminal_scores a SET 
+                a.teachers_name = (
+                    SELECT u.name 
+                    FROM users u 
+                    WHERE u.item_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1
+                ) WHERE a.report_id = '{$report_id}' AND a.client_id = '{$clientId}' LIMIT 5000");
 
         } catch(PDOException $e) {}
 
@@ -1487,10 +1488,11 @@ class Terminal_reports extends Myschoolgh {
     /**
      * Generate Report
      * 
-     * @param       $params->academic_term
-     * @param       $params->academic_year
-     * @param       $params->class_id
-     * @param       $params->student_id
+     * @param StdClass $params
+     * @param string $params->academic_term
+     * @param string $params->academic_year
+     * @param string $params->class_id
+     * @param string $params->student_id
      * 
      * @return Array
      */
@@ -1529,6 +1531,7 @@ class Terminal_reports extends Myschoolgh {
                 "academic_term" => $params->academic_term ?? $this->academic_term,
                 "student_item_id" => isset($params->student_id) && !empty($params->student_id) && ($params->student_id !== "null") ? $params->student_id : null,
             ];
+
             $report_data = $this->result_score_list(null, $param, true);
 
             // get the user attendance results
@@ -1562,9 +1565,12 @@ class Terminal_reports extends Myschoolgh {
             foreach($grading as $key => $value) {
                 // increment the count
                 $column_count++;
+                $key = strtoupper($key) === "SCHOOL BASED ASSESSMENT" ? "SBA" : $key;
+                $key = strtoupper($key) === "EXAMINATION" ? "EXAM SCORE" : $key;
                 // grading column
                 $grading_column .= "<td align=\"center\" width=\"11%\">".strtoupper($key)."</td>";
             }
+            $grading_column .= "<td align=\"center\" width=\"11%\">CLASS AVERAGE</td>";
 
             // get the client logo content
             if(!empty($this->iclient->client_logo)) {
@@ -1573,8 +1579,8 @@ class Terminal_reports extends Myschoolgh {
                 $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
             }
 
-            $defaultFontSize = "font-size:12px";
-            $increaseFontSize = "font-size:18px";
+            $defaultFontSize = "font-size:11px";
+            $increaseFontSize = "font-size:15px";
 
             // loop through the report set
             foreach($report_data as $key => $student) {
@@ -1597,7 +1603,7 @@ class Terminal_reports extends Myschoolgh {
                 // set the address and the other information
                 $table .= "<table cellpadding=\"5\" width=\"100%\">";
                 $table .= "<tr>
-                    <td valign=\"top\">
+                    <td valign=\"top\" width=\"80%\">
                         <table style=\"border: 1px solid #dee2e6;\" width='100%'>
                             <tr>
                                 <td style=\"border: 1px solid #dee2e6;\" align='center' width='110px'>
@@ -1620,26 +1626,25 @@ class Terminal_reports extends Myschoolgh {
                             </tr>
                         </table>
                     </td>";
-                $table .= "<td style=\"padding:5px;\" align=\"center\" valign=\"top\" width=\"30%\">
-                    <div style=\"padding:5px;\">
-                        <strong style=\"color:#6777ef\">CLASS AVERAGE: ".round($student["data"]["average_score"], 2)."</strong>
-                    </div>
-                    <div style=\"padding:5px; text-transform:uppercase;\">
-                        <strong>SCHOOL RESUMES ON:<br>
-                            <span style=\"color:#6777ef\">".date("jS M Y", strtotime($academics->next_term_starts))."</span>
-                        </strong>
-                    </div>
-
-                    <div style=\"padding:10px; color:#fff; background-color:{$bg_color};\">
-                        Please visit app.myschoolgh.com/report/{$student["data"]["unique_id"]} for a graphical analysis of this report.
-                    </div>
-
+                // <div style=\"padding:10px; color:#fff; background-color:{$bg_color};\">
+                //     Please visit app.myschoolgh.com/report/{$student["data"]["unique_id"]} for a graphical analysis of this report.
+                // </div>
+                $table .= "
+                    <td style=\"padding:5px;\" align=\"center\" valign=\"top\" width=\"20%\">
+                        <div style=\"padding:5px;\">
+                            <strong style=\"color:#6777ef\">CLASS AVERAGE: ".round($student["data"]["average_score"], 2)."</strong>
+                        </div>
+                        <div style=\"padding:5px; text-transform:uppercase;\">
+                            <strong>SCHOOL RESUMES ON:<br>
+                                <span style=\"color:#6777ef\">".date("jS M Y", strtotime($academics->next_term_starts))."</span>
+                            </strong>
+                        </div>
                     </td>
                     </tr>";
                 $table .= "</table>\n";
                 $table .= "<table style=\"font-size:10px\" cellpadding=\"5\" width=\"100%\" style=\"border: 1px solid #dee2e6;\">";
                 $table .= "<tr style=\"font-weight:bold;font-size:15px;background-color:#050f58;color:#fff;\">";
-                $table .= "<td align=\"center\" colspan=\"".($column_count + 4)."\">END OF TERM REPORT CARD</td>";
+                $table .= "<td align=\"center\" colspan=\"".($column_count + 5)."\">END OF TERM REPORT CARD</td>";
                 $table .= "</tr>";
                 $table .= "<tr style=\"font-weight:bold;{$defaultFontSize}\">";
                 $table .= "<td style=\"{$defaultFontSize}\" width=\"25%\">SUBJECT</td>";
@@ -1649,10 +1654,16 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "<td style=\"{$defaultFontSize}\">TEACHER'S COMMENT</td>";
                 $table .= "</tr>";
 
+                $theTotal = 0;
+                $theCount = 0;
+                foreach($student["sheet"] as $score) {
+                    $theTotal += $score->total_percentage;
+                }
+
                 // // get the results submitted by the teachers for each subject
                 foreach($student["sheet"] as $score) {
                     // only show the subject if approved
-                    // if($score->status === "Approved") {
+                    if($score->status === "Approved") {
                         // append to the table
                         $table .= "<tr>";
                         $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->course_name}</td>";
@@ -1662,11 +1673,12 @@ class Terminal_reports extends Myschoolgh {
                             $s_score = $s_score['score'] ?? 0;
                             $table .= "<td style=\"border: 1px solid #dee2e6;{$increaseFontSize}\" align=\"center\">".round($s_score, 2)."</td>";
                         }
+                        $table .= "<td style=\"border: 1px solid #dee2e6;{$increaseFontSize}\" align=\"center\">".round($score->average_score ?? 0, 2)."</td>";
                         $table .= "<td style=\"border: 1px solid #dee2e6;{$increaseFontSize}\" align=\"center\">".round($score->total_percentage, 2)."</td>";
                         $table .= "<td style=\"border: 1px solid #dee2e6;{$defaultFontSize}\">".strtoupper($score->teachers_name)."</td>";
                         $table .= "<td style=\"border: 1px solid #dee2e6;{$defaultFontSize}\">{$score->class_teacher_remarks}</td>";
                         $table .= "</tr>";
-                    // }
+                    }
                 }
                 $table .= "</table>";
 
