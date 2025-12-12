@@ -77,17 +77,23 @@ if(!$isTeacher && !$isAdmin) {
                             <div><strong>Acadmic Year:</strong> <span class='text-muted'>{$remark->academic_year}</span></div>
                             <div><strong>Acadmic Term:</strong> <span class='text-muted'>{$remark->academic_term}</span></div>
                             <div><strong>Date Created:</strong> <span class='text-muted'>{$remark->created_on}</span></div>
-                            <div><strong>Updated On:</strong> <span class='text-muted'>{$remark->updated_on}</span></div>
-                            <div><strong>Created By:</strong> <span class='text-muted'>{$remark->created_by}</span></div>
+                            <!-- <div><strong>Updated On:</strong> <span class='text-muted'>{$remark->updated_on}</span></div>
+                            <div><strong>Created By:</strong> <span class='text-muted'>{$remark->created_by}</span></div> -->
                         </div>
                     </div>
                     <div class='card-footer mt-0 pt-0 pl-3'>
-                        <a href=\"javascript:void(0)\" onclick=\"return edit_student_remarks({$remark->id})\" class='btn btn-outline-primary'>
-                            <i class='fas fa-edit'></i> Edit
-                        </a>
-                        <a href=\"javascript:void(0)\" onclick=\"return delete_student_remarks({$remark->id})\" class='btn btn-outline-danger'>
-                            <i class='fas fa-trash'></i> Delete
-                        </a>
+                        <div class='d-flex justify-content-between'>
+                            <div>
+                                <a href=\"javascript:void(0)\" onclick=\"return edit_student_remarks({$remark->id}, {$remark->class_id}, '{$remark->student_id}')\" class='btn btn-outline-primary'>
+                                    <i class='fas fa-edit'></i> Edit
+                                </a>
+                            </div>
+                            <div>
+                                <a href=\"javascript:void(0)\" onclick=\"return delete_student_remarks({$remark->id})\" class='btn btn-outline-danger'>
+                                    <i class='fas fa-trash'></i> Delete
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>";

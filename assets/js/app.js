@@ -830,12 +830,12 @@ var loadPage = (loc, pushstate) => {
         },
         complete: (result) => {
             current_parent_menu = result?.responseJSON?.parent_menu ?? '';
-            var prev = window.history.state === null ? null : window.history.state.current
-            if (pushstate !== false) window.history.pushState({ previous: prev, current: loc }, "", loc)
+            var prev = window?.history?.state === null ? null : window?.history?.state?.current
+            if (pushstate !== false) window?.history?.pushState({ previous: prev, current: loc }, "", loc)
 
-            if (window.history.state === null) {
+            if (window?.history?.state === null) {
                 $("#history-back, #history-forward").addClass("disabled");
-            } else if (window.history.state.previous === null) {
+            } else if (window?.history?.state?.previous === null) {
                 $("#history-back").addClass("disabled");
             } else {
                 $("#history-back").removeClass("disabled");

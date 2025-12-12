@@ -1,4 +1,4 @@
-var load_class_list = () => {
+var load_class_list = (class_id = 0, student_id = 0) => {
     let theClassSector = $(`select[name="remarks_class_id"]`);
     let theClassFilter = $(`select[name="filter_remarks_class_id"]`);
 
@@ -11,7 +11,8 @@ var load_class_list = () => {
                 theClassFilter.append(`<option value="0" selected="selected">Select Class to Filter</option>`);
             }
             $.each(response.data.result, (_, e) => {
-                theClassSector.append(`<option data-item_id="${e.item_id}" value='${e.id}'>${e.name.toUpperCase()}</option>'`);
+                let isSelected = class_id == parseInt(e.id) ? "selected" : "";
+                theClassSector.append(`<option data-item_id="${e.item_id}" value='${e.id}' ${isSelected}>${e.name.toUpperCase()}</option>'`);
                 theClassFilter.append(`<option data-item_id="${e.item_id}" value='${e.id}'>${e.name.toUpperCase()}</option>'`);
             });
             if(response.data.result.length == 1) {
@@ -20,6 +21,10 @@ var load_class_list = () => {
             }
         }
     });
+
+    if(class_id > 0) {
+        theClassSector.val(class_id).trigger("change");
+    }
 
     $(`select[name="remarks_class_id"]`).on("change", function() {
         let value = $(this).val();
@@ -31,13 +36,20 @@ var load_class_list = () => {
         $.get(`${baseUrl}api/users/minimal?class_id=${value}&user_type=student`).then((response) => {
             if (response.code == 200) {
                 $.each(response.data.result.users, (_, e) => {
-                    $(`select[name="remarks_student_id"]`).append(`<option value='${e.user_id}'>
-                        ${e.firstname.toUpperCase()} ${e.lastname.toUpperCase()} (${e.unique_id})
+                    let isSelected = student_id == parseInt(e.user_id) ? "selected" : "";
+                    $(`select[name="remarks_student_id"]`).append(`<option value='${e.user_id}' ${isSelected}>
+                        ${e.name.toUpperCase()} (${e.unique_id})
                     </option>'`);
                 });
             }
         });
     });
+
+    if(student_id !== 0) {
+        setTimeout(() => {
+            $(`select[name="remarks_student_id"]`).val(student_id).trigger("change");
+        }, 100);
+    }
 
     $(`select[id='filter_remarks_class_id']`).on("change", function() {
         let class_id = $(this).val();
@@ -73,6 +85,13 @@ var delete_student_remarks = (remarks_id) => {
             });
         }
     });
+}
+
+var edit_student_remarks = (remarks_id, class_id, student_id) => {
+    add_student_remarks(class_id, student_id);
+    setTimeout(() => {
+        load_class_list(class_id, student_id);
+    }, 100);
 }
 
 var search_remarks = () => {
