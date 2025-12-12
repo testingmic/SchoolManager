@@ -1971,9 +1971,9 @@ class Terminal_reports extends Myschoolgh {
             $stmt = $this->db->prepare("
                 SELECT result_key, result_value 
                 FROM preschool_results 
-                WHERE student_id = ? AND class_id = ? AND client_id = ?
+                WHERE student_id = ? AND class_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ?
             ");
-            $stmt->execute([$student_id, $class_id, $clientId]);
+            $stmt->execute([$student_id, $class_id, $clientId, $this->academic_year, $this->academic_term]);
             
             $results = [];
             while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -2027,11 +2027,11 @@ class Terminal_reports extends Myschoolgh {
         try {
             // Insert or update the result
             $stmt = $this->db->prepare("
-                INSERT INTO preschool_results (student_id, class_id, client_id, result_key, result_value)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO preschool_results (student_id, class_id, client_id, result_key, result_value, academic_year, academic_term)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE result_value = VALUES(result_value), updated_at = CURRENT_TIMESTAMP
             ");
-            $stmt->execute([$student_id, $class_id, $clientId, $result_key, $result_value]);
+            $stmt->execute([$student_id, $class_id, $clientId, $result_key, $result_value, $this->academic_year, $this->academic_term]);
             
             return [
                 "code" => 200,

@@ -125,7 +125,7 @@ class Myschoolgh extends Models {
 				result_value VARCHAR(10) NOT NULL,
 				created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 				updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-				UNIQUE KEY unique_result (student_id, class_id, client_id, result_key),
+				UNIQUE KEY unique_result (student_id, class_id, client_id, result_key, academic_year, academic_term),
 				INDEX idx_student_class (student_id, class_id, client_id)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
 		];
