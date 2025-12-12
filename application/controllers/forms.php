@@ -4727,7 +4727,7 @@ class Forms extends Myschoolgh {
         // append the form and display
         $the_form["general"] = "
             <div class='row' id='terminal_reports'>
-                <div class='col-lg-4 mb-2'>
+                <div class='col-lg-3 mb-2'>
                     <select data-width='100%' class='form-control selectpicker' name='class_id' id='class_id'>
                         <option value=''>Select the Class</option>";
                         foreach($classes_list as $class) {
@@ -4742,6 +4742,11 @@ class Forms extends Myschoolgh {
                     </div>
                     <div class='col-lg-3' data-item_option='file_upload' id='download_button' data-view_port='desktop'>
                         <button onclick='return download_report_csv()' disabled type='download_csv' class='btn btn-block btn-outline-primary'>Download Sample</button>
+                    </div>
+                    <div class='col-lg-2' data-item_option='file_upload' id='download_button' data-view_port='desktop'>
+                        <a class='btn btn-outline-success btn-block' href='{$this->baseUrl}results-preschool-upload'>
+                            <i class='fas fa-upload'></i> Preschool Upload
+                        </a>
                     </div>
                     <div class='col-lg-12 mt-1 text-center' id='notification'></div>
                     <div class='col-lg-12 text-center'>
