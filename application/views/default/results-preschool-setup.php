@@ -70,7 +70,7 @@ if(!$isEmployee && !$isAdmin) {
                     </div>
                 </div>
                 <div class="mb-2">
-                    <input type="text" class="form-control section-title-input" data-section_id="'.$section_id.'" value="'.$section_title.'" placeholder="Enter section title (e.g. Communication Skills)" maxlength="100">
+                    <input type="text" class="form-control text-uppercase section-title-input" data-section_id="'.$section_id.'" value="'.$section_title.'" placeholder="Enter section title (e.g. Communication Skills)" maxlength="100">
                 </div>
                 <div class="questionnaires-list" data-section_id="'.$section_id.'">';
             

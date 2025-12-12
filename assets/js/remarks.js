@@ -313,7 +313,7 @@ var add_reporting_section = () => {
             </div>
         </div>
         <div class="mb-2">
-            <input type="text" class="form-control section-title-input" data-section_id="${newSectionId}" value="" placeholder="Enter section title (e.g. Communication Skills)" maxlength="100">
+            <input type="text" class="form-control text-uppercase section-title-input" data-section_id="${newSectionId}" value="" placeholder="Enter section title (e.g. Communication Skills)" maxlength="100">
         </div>
         <div class="questionnaires-list" data-section_id="${newSectionId}">
         </div>
