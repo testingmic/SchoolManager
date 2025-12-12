@@ -59,7 +59,7 @@ if(!$isEmployee && !$isAdmin) {
             
             $reporting_content_html .= '<div class="mb-3 border rounded p-3" data-section_id="'.$section_id.'">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="mb-0 font-weight-bold text-primary">'.($section_title ?: 'Untitled Section').'</h6>
+                    <h6 class="mb-0 font-weight-bold text-uppercase text-primary">'.($section_title ?: 'Untitled Section').'</h6>
                     <div>
                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="return add_questionnaire('.$section_id.');" title="Add Questionnaire">
                             <i class="fas fa-plus"></i> Add Row

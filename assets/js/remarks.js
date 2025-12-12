@@ -302,7 +302,7 @@ var add_reporting_section = () => {
     let section_html = `
     <div class="mb-3 border rounded p-3" data-section_id="${newSectionId}">
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="mb-0 font-weight-bold text-primary">New Section</h6>
+            <h6 class="mb-0 font-weight-bold text-primary text-uppercase">New Section</h6>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="return add_questionnaire(${newSectionId});" title="Add Questionnaire">
                     <i class="fas fa-plus"></i> Add Row
