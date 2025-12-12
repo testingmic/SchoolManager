@@ -435,7 +435,7 @@ var load_preschool_students = (class_id) => {
                 options += `<option value="${student.user_id}">${student.name.toUpperCase()} (${student.unique_id})</option>`;
             });
             $(`#preschool_student_id`).html(options);
-            $(`#preschool_student_id`).selectpicker('refresh');
+            // $(`#preschool_student_id`).selectpicker('refresh');
         }
     });
 }
@@ -577,12 +577,12 @@ var display_student_reporting = (studentResults) => {
                 let selectedValue = studentResults[resultKey] || '';
                 
                 html += `
-                <div class="d-flex align-items-center mb-3 border-bottom pb-3" data-questionnaire_id="${qId}">
+                <div class="d-flex align-items-center mb-2 border-bottom" data-questionnaire_id="${qId}">
                     <div class="flex-grow-1 mr-3">
                         <div class="font-weight-medium">${qText}</div>
                     </div>
                     <div class="legend-options">
-                        <div class="btn-group" role="group">`;
+                        <div class="btn-group gap-1" role="group">`;
                 
                 // Display legend options
                 $.each(reportingLegend.legend, (legendKey, legendItem) => {
@@ -656,7 +656,7 @@ var navigate_student = (direction) => {
     
     // Update dropdown
     $(`#preschool_student_id`).val(student.user_id);
-    $(`#preschool_student_id`).selectpicker('refresh');
+    // $(`#preschool_student_id`).selectpicker('refresh');
     
     // Load student data
     load_student_results(student.user_id, currentClassId);

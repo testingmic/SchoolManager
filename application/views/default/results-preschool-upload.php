@@ -115,17 +115,17 @@ if(!$isEmployee && !$isAdmin) {
                     <div class="card">
                         <div class="card-header">
                             <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="card-title text-primary mb-0 pb-0">
+                                <h5 class="card-title text-primary mb-0 pb-0 mr-2">
                                     <i class="fas fa-user"></i> <span id="student_name_display"></span>
                                 </h5>
-                                <div>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="return navigate_student(-1);" id="prev_student_btn">
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="return navigate_student(-1);" id="prev_student_btn">
                                         <i class="fas fa-chevron-left"></i> Previous
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary ml-2" onclick="return navigate_student(1);" id="next_student_btn">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="return navigate_student(1);" id="next_student_btn">
                                         Next <i class="fas fa-chevron-right"></i>
                                     </button>
-                                    <span class="ml-3 text-muted">
+                                    <span class="text-muted ml-2">
                                         <span id="student_counter">0</span> of <span id="total_students">0</span>
                                     </span>
                                 </div>
