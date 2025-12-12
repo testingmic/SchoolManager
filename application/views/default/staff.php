@@ -230,7 +230,7 @@ if(empty($user_id)) {
             $role_permission = !empty($role_permission) ? json_decode($role_permission, true) : [];
 
             // convert to an array
-            $user_permission = !empty($data->user_permissions) && !is_array($data->user_permissions) ? json_decode($data->user_permissions, true)["permissions"] : $data->user_permissions["permissions"];
+            $user_permission = !empty($data->user_permissions) && !is_array($data->user_permissions) ? (json_decode($data->user_permissions, true)["permissions"] ?? []) : ($data->user_permissions["permissions"] ?? []);
             
             // disable the input field if the current user is also logged in
             $isDisabled = ($session->userId == $user_id) ? "disabled='disabled'" : null;
@@ -242,7 +242,7 @@ if(empty($user_id)) {
                 $atLeastOnePermission = false;
 
                 // loop through the list
-                foreach ($role_permission["permissions"] as $key => $value) {
+                foreach (($role_permission["permissions"] ?? []) as $key => $value) {
                     $header = ucwords(str_replace("_", " ", $key));
                     $level_data .= "<div class='col-lg-12 mb-2 border-bottom border-default'><h6 style='font-weight:bolder'>".$header."</h6>";
 

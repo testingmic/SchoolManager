@@ -390,11 +390,12 @@ class Payroll extends Myschoolgh {
             } else {
                 /** Insert a new record */
                 $stmt = $this->db->prepare("UPDATE  payslips_employees_payroll SET 
-                account_name = ?, account_number = ?, bank_name = ?, bank_branch = ?, ssnit_number = ?, tin_number = ?
+                account_name = ?, account_number = ?, bank_name = ?, bank_branch = ?, ssnit_number = ?
+                ".(!empty($params->tin_number) ? ", tin_number = '{$params->tin_number}'" : null)." 
                 WHERE client_id = ? AND employee_id = ? LIMIT 1");
                 
                 $stmt->execute([$params->account_name,  $params->account_number, $params->bank_name, 
-                    $params->bank_branch, $params->ssnit_number, $params->tin_number, $params->clientId, $params->employee_id]);
+                    $params->bank_branch, $params->ssnit_number, $params->clientId, $params->employee_id]);
                 
                 /** Data to save */
                 $log = "
@@ -403,7 +404,7 @@ class Payroll extends Myschoolgh {
                 <p class='mb-0 pb-0'><strong>Bank Name:</strong> {$the_user->bank_name} => {$params->bank_name}</p>
                 <p class='mb-0 pb-0'><strong>Branch:</strong> {$the_user->bank_branch} => {$params->bank_branch}</p>
                 <p class='mb-0 pb-0'><strong>SSNIT No.:</strong> {$the_user->ssnit_number} => {$params->ssnit_number}</p>
-                <p class='mb-0 pb-0'><strong>Tin No.:</strong> {$the_user->tin_number} => {$params->tin_number}</p>";
+                <p class='mb-0 pb-0'><strong>Tin No.:</strong> ".(!empty($the_user->tin_number) ? $the_user->tin_number : "")." => ".(!empty($params->tin_number) ? $params->tin_number : "")."</p>";
             
                 // log the user activity
                 $this->userLogs("bank_details", $params->employee_id, $log, "<strong>{$params->userData->name}</strong> updated the Bank Details of: <strong>{$the_user->name}</strong>", $params->userId);

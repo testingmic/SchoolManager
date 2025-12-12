@@ -217,7 +217,7 @@ if(empty($result_id) || (!$isTeacher && !$isAdmin)) {
             <tr data-result_row_id='{$score->report_id}_{$score->student_row_id}' data-result_student_id='{$score->student_item_id}'>
                 <td width='5%'>".($key+1)."</td>
                 <td>
-                    ".strtoupper($score->student_name)." <br>
+                    ".(!empty($score->student_name) ? strtoupper($score->student_name) : "")." <br>
                     <strong class='text-primary'>{$score->student_unique_id}</strong>
                 </td>
                 ".$marks_list."

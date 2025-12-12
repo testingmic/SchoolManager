@@ -1147,7 +1147,7 @@ class Fees extends Myschoolgh {
             }
 
              /** Check if the class id is valid */
-            $class_check = $this->pushQuery("a.id, (SELECT b.name FROM fees_category b WHERE b.id = '{$params->category_id}' LIMIT 1) AS category_name", "classes a", 
+            $class_check = $this->pushQuery("a.id, (SELECT b.name FROM fees_category b WHERE b.id = '".($params->category_id ?? 0)."' LIMIT 1) AS category_name", "classes a", 
                 "a.id='{$params->class_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1");
 
             if(empty($class_check)) {
@@ -1172,7 +1172,7 @@ class Fees extends Myschoolgh {
                 /** Execute the prepared statement */
                 $stmt->execute([
                     $params->amount, $params->payment_module, $params->payment_month ?? null, 
-                    $params->category_id, $params->clientId, $params->academic_year, 
+                    $params->category_id ?? 0, $params->clientId, $params->academic_year, 
                     $params->academic_term, $params->class_id, 1
                 ]);
 
@@ -1190,7 +1190,7 @@ class Fees extends Myschoolgh {
 
                 /** Execute the prepared statement */
                 $stmt->execute([
-                    $params->amount, $params->category_id, $params->clientId, 
+                    $params->amount, $params->category_id ?? 0, $params->clientId, 
                     $params->academic_year, $params->payment_module, $params->payment_month ?? null, 
                     $params->academic_term, $params->class_id, $params->userId, $params->currency
                 ]);

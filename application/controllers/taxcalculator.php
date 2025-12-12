@@ -207,13 +207,13 @@ class Taxcalculator
         $netIncome = $grossIncome - $pensions['total_employee_contribution'] - $taxResult['tax'];
 
         return [
-            'basic_salary' => round($basicSalary, 2),
+            'basic_salary' => !empty($basicSalary) ? round($basicSalary, 2) : 0,
             'allowances' => $otherAllowances,
-            'total_allowances' => round($totalAllowances, 2),
-            'gross_income' => round($grossIncome, 2),
+            'total_allowances' => !empty($totalAllowances) ? round($totalAllowances, 2) : 0,
+            'gross_income' => !empty($grossIncome) ? round($grossIncome, 2) : 0,
             'pensions' => $pensions,
-            'taxable_income' => round($taxableIncome, 2),
-            'paye_tax' => round($taxResult['tax'], 2),
+            'taxable_income' => !empty($taxableIncome) ? round($taxableIncome, 2) : 0,
+            'paye_tax' => !empty($taxResult['tax']) ? round($taxResult['tax'], 2) : 0,
             'tax_breakdown' => $taxResult['breakdown'],
             'effective_tax_rate' => !empty($grossIncome) ? round(($taxResult['tax'] / $grossIncome) * 100, 2) : 0,
             'total_deductions' => round($pensions['total_employee_contribution'] + $taxResult['tax'], 2),
