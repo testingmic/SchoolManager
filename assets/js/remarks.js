@@ -411,5 +411,282 @@ var save_reporting_classes = () => {
     $.post(`${baseUrl}api/settings/savesettings`, { classes, setting_name: "preschool_reporting_classes" });
 }
 
+// ==================== PRESCHOOL RESULTS UPLOAD FUNCTIONS ====================
+
+var preschoolStudentsList = [];
+var currentStudentIndex = -1;
+var currentClassId = null;
+var reportingTemplate = null;
+var reportingLegend = null;
+
+var load_preschool_students = (class_id) => {
+    if(!class_id || class_id === '') {
+        $(`#preschool_student_id`).html('<option value="">Select Class First</option>');
+        return;
+    }
+    
+    currentClassId = class_id;
+    
+    $.get(`${baseUrl}api/users/minimal?class_id=${class_id}&user_type=student`).then((response) => {
+        if (response.code == 200) {
+            preschoolStudentsList = response.data.result.users || [];
+            let options = '<option value="">Select Student</option>';
+            $.each(preschoolStudentsList, (index, student) => {
+                options += `<option value="${student.user_id}">${student.name.toUpperCase()} (${student.unique_id})</option>`;
+            });
+            $(`#preschool_student_id`).html(options);
+            $(`#preschool_student_id`).selectpicker('refresh');
+        }
+    });
+}
+
+var load_student_reporting = () => {
+    let classId = $(`#preschool_class_id`).val();
+    let studentId = $(`#preschool_student_id`).val();
+    
+    if(!classId) {
+        notify("Please select a class first.");
+        return;
+    }
+    
+    if(!studentId) {
+        notify("Please select a student.");
+        return;
+    }
+    
+    // Find student index
+    currentStudentIndex = preschoolStudentsList.findIndex(s => s.user_id == studentId);
+    if(currentStudentIndex === -1) {
+        notify("Student not found in list.");
+        return;
+    }
+    
+    // Load reporting template and legend
+    load_reporting_template_and_legend().then(() => {
+        // Load student's existing results
+        load_student_results(studentId, classId);
+    });
+}
+
+var load_reporting_template_and_legend = () => {
+    return new Promise((resolve) => {
+        // Load template and legend from the setup page's stored data or via API
+        // Try to get from a global variable first (if available), otherwise use API
+        if(typeof window.preschoolReportingTemplate !== 'undefined' && typeof window.preschoolReportingLegend !== 'undefined') {
+            reportingTemplate = window.preschoolReportingTemplate;
+            reportingLegend = window.preschoolReportingLegend;
+            validate_template_and_legend(resolve);
+            return;
+        }
+        
+        // Load via API - using POST with proper format
+        $.post(`${baseUrl}api/settings/getsettings`, {
+            clientId: typeof clientId !== 'undefined' ? clientId : '',
+            setting_name: ["preschool_reporting_content", "preschool_reporting_legend"]
+        }).then((response) => {
+            if(response.code == 200) {
+                // If multiple settings, data is an object with setting names as keys
+                reportingTemplate = response.data.result.preschool_reporting_content || null;
+                reportingLegend = response.data.result.preschool_reporting_legend || null;
+                validate_template_and_legend(resolve);
+            } else {
+                notify("Failed to load reporting template.");
+                resolve();
+            }
+        }).catch(() => {
+            // If API fails, try loading from localStorage as fallback
+            try {
+                let storedTemplate = localStorage.getItem('preschool_reporting_template');
+                let storedLegend = localStorage.getItem('preschool_reporting_legend');
+                if(storedTemplate) reportingTemplate = JSON.parse(storedTemplate);
+                if(storedLegend) reportingLegend = JSON.parse(storedLegend);
+                validate_template_and_legend(resolve);
+            } catch(e) {
+                notify("Failed to load reporting template.");
+                resolve();
+            }
+        });
+    });
+}
+
+var validate_template_and_legend = (resolve) => {
+    if(!reportingTemplate || !reportingTemplate.sections || reportingTemplate.sections.length === 0) {
+        notify("Reporting template has not been configured. Please set it up first.");
+        resolve();
+        return;
+    }
+    
+    if(!reportingLegend || !reportingLegend.legend || Object.keys(reportingLegend.legend).length === 0) {
+        notify("Reporting legend has not been configured. Please set it up first.");
+        resolve();
+        return;
+    }
+    
+    resolve();
+}
+
+var load_student_results = (studentId, classId) => {
+    let params = {
+        student_id: studentId,
+        class_id: classId
+    };
+    
+    $.post(`${baseUrl}api/terminal_reports/get_preschool_results`, params).then((response) => {
+        let studentResults = {};
+        if(response.code == 200 && response.data && response.data.result) {
+            studentResults = response.data.result;
+        }
+        
+        display_student_reporting(studentResults);
+        update_student_navigation();
+    }).catch(() => {
+        // If endpoint doesn't exist yet, just display empty form
+        display_student_reporting({});
+        update_student_navigation();
+    });
+}
+
+var display_student_reporting = (studentResults) => {
+    if(!reportingTemplate || !reportingLegend) {
+        return;
+    }
+    
+    let currentStudent = preschoolStudentsList[currentStudentIndex];
+    $(`#student_name_display`).text(`${currentStudent.name.toUpperCase()} (${currentStudent.unique_id})`);
+    $(`#student_reporting_container`).show();
+    
+    let html = '';
+    
+    $.each(reportingTemplate.sections, (sectionIndex, section) => {
+        let sectionId = section.id;
+        let sectionTitle = section.title || 'Untitled Section';
+        let questionnaires = section.questionnaires || [];
+        
+        html += `
+        <div class="mb-4 border rounded p-3" data-section_id="${sectionId}">
+            <h6 class="mb-3 font-weight-bold text-uppercase text-primary">${sectionTitle}</h6>
+            <div class="questionnaires-section">`;
+        
+        if(questionnaires.length === 0) {
+            html += '<div class="text-muted">No questionnaires added for this section.</div>';
+        } else {
+            $.each(questionnaires, (qIndex, questionnaire) => {
+                let qId = questionnaire.id;
+                let qText = questionnaire.text || '';
+                let resultKey = `${sectionId}_${qId}`;
+                let selectedValue = studentResults[resultKey] || '';
+                
+                html += `
+                <div class="d-flex align-items-center mb-3 border-bottom pb-3" data-questionnaire_id="${qId}">
+                    <div class="flex-grow-1 mr-3">
+                        <div class="font-weight-medium">${qText}</div>
+                    </div>
+                    <div class="legend-options">
+                        <div class="btn-group" role="group">`;
+                
+                // Display legend options
+                $.each(reportingLegend.legend, (legendKey, legendItem) => {
+                    let legendValue = legendItem.key || '';
+                    let isChecked = selectedValue === legendValue ? 'checked' : '';
+                    html += `
+                            <input type="radio" class="btn-check" name="result_${resultKey}" id="result_${resultKey}_${legendValue}" value="${legendValue}" ${isChecked} onchange="return save_student_result('${resultKey}', '${legendValue}');">
+                            <label class="btn btn-outline-primary" for="result_${resultKey}_${legendValue}">${legendValue}</label>`;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                </div>`;
+            });
+        }
+        
+        html += `
+            </div>
+        </div>`;
+    });
+    
+    $(`#student_reporting_content`).html(html);
+}
+
+var save_student_result = (resultKey, value) => {
+    let studentId = $(`#preschool_student_id`).val();
+    let classId = $(`#preschool_class_id`).val();
+    
+    if(!studentId || !classId) {
+        return;
+    }
+    
+    let data = {
+        student_id: studentId,
+        class_id: classId,
+        result_key: resultKey,
+        result_value: value
+    };
+    
+    $.post(`${baseUrl}api/terminal_reports/save_preschool_result`, data).then((response) => {
+        if(response.code == 200) {
+            // Success - could show a subtle notification
+        } else {
+            console.error("Error saving result:", response.data);
+        }
+    }).catch((error) => {
+        console.error("Error saving result:", error);
+    });
+}
+
+var navigate_student = (direction) => {
+    if(preschoolStudentsList.length === 0) {
+        return;
+    }
+    
+    let newIndex = currentStudentIndex + direction;
+    
+    if(newIndex < 0) {
+        notify("This is the first student.");
+        return;
+    }
+    
+    if(newIndex >= preschoolStudentsList.length) {
+        notify("This is the last student.");
+        return;
+    }
+    
+    currentStudentIndex = newIndex;
+    let student = preschoolStudentsList[currentStudentIndex];
+    
+    // Update dropdown
+    $(`#preschool_student_id`).val(student.user_id);
+    $(`#preschool_student_id`).selectpicker('refresh');
+    
+    // Load student data
+    load_student_results(student.user_id, currentClassId);
+    update_student_navigation();
+}
+
+var update_student_navigation = () => {
+    let total = preschoolStudentsList.length;
+    let current = currentStudentIndex + 1;
+    
+    $(`#student_counter`).text(current);
+    $(`#total_students`).text(total);
+    
+    // Disable/enable navigation buttons
+    $(`#prev_student_btn`).prop('disabled', currentStudentIndex === 0);
+    $(`#next_student_btn`).prop('disabled', currentStudentIndex >= total - 1);
+}
+
+// Initialize class change handler
+$(document).ready(function() {
+    $(`#preschool_class_id`).on('change', function() {
+        let classId = $(this).val();
+        load_preschool_students(classId);
+        $(`#student_reporting_container`).hide();
+    });
+    
+    $(`#preschool_student_id`).on('change', function() {
+        $(`#student_reporting_container`).hide();
+    });
+});
+
 // Initialize the event listener on page load
 track_reporting_content_changes();

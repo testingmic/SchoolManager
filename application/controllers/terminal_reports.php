@@ -1940,4 +1940,128 @@ class Terminal_reports extends Myschoolgh {
 
     }
 
+    /**
+     * Get Preschool Results
+     * 
+     * Retrieves preschool reporting results for a specific student
+     * 
+     * @param stdClass $params
+     * @return Array
+     */
+    public function get_preschool_results(stdClass $params) {
+        
+        global $isTeacher, $isAdmin, $isEmployee;
+        
+        // Check permissions
+        if(!$isTeacher && !$isAdmin && !$isEmployee) {
+            return ["code" => 403, "data" => "Sorry! You do not have the permissions to view preschool results."];
+        }
+        
+        // Validate required parameters
+        if(empty($params->student_id) || empty($params->class_id)) {
+            return ["code" => 400, "data" => "Student ID and Class ID are required."];
+        }
+        
+        $student_id = xss_clean($params->student_id);
+        $class_id = xss_clean($params->class_id);
+        $clientId = $params->clientId ?? $params->clientId;
+        
+        try {
+            // Check if results table exists, if not return empty results
+            $stmt = $this->db->prepare("
+                SELECT result_key, result_value 
+                FROM preschool_results 
+                WHERE student_id = ? AND class_id = ? AND client_id = ?
+            ");
+            $stmt->execute([$student_id, $class_id, $clientId]);
+            
+            $results = [];
+            while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $results[$row['result_key']] = $row['result_value'];
+            }
+            
+            return [
+                "code" => 200,
+                "data" => [
+                    "result" => $results
+                ]
+            ];
+            
+        } catch(PDOException $e) {
+            // If table doesn't exist, return empty results
+            return [
+                "code" => 200,
+                "data" => [
+                    "result" => []
+                ]
+            ];
+        }
+    }
+
+    /**
+     * Save Preschool Result
+     * 
+     * Saves a single preschool reporting result for a student
+     * 
+     * @param stdClass $params
+     * @return Array
+     */
+    public function save_preschool_result(stdClass $params) {
+        
+        global $isTeacher, $isAdmin, $isEmployee;
+        
+        // Check permissions
+        if(!$isTeacher && !$isAdmin && !$isEmployee) {
+            return ["code" => 403, "data" => "Sorry! You do not have the permissions to save preschool results."];
+        }
+        
+        // Validate required parameters
+        if(empty($params->student_id) || empty($params->class_id) || empty($params->result_key)) {
+            return ["code" => 400, "data" => "Student ID, Class ID, and Result Key are required."];
+        }
+        
+        $student_id = xss_clean($params->student_id);
+        $class_id = xss_clean($params->class_id);
+        $result_key = xss_clean($params->result_key);
+        $result_value = isset($params->result_value) ? xss_clean($params->result_value) : '';
+        $clientId = $params->clientId ?? $params->clientId;
+        
+        try {
+            // Create table if it doesn't exist
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS preschool_results (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    student_id VARCHAR(255) NOT NULL,
+                    class_id VARCHAR(255) NOT NULL,
+                    client_id VARCHAR(255) NOT NULL,
+                    result_key VARCHAR(255) NOT NULL,
+                    result_value VARCHAR(10) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    UNIQUE KEY unique_result (student_id, class_id, client_id, result_key),
+                    INDEX idx_student_class (student_id, class_id, client_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            ");
+            
+            // Insert or update the result
+            $stmt = $this->db->prepare("
+                INSERT INTO preschool_results (student_id, class_id, client_id, result_key, result_value)
+                VALUES (?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE result_value = VALUES(result_value), updated_at = CURRENT_TIMESTAMP
+            ");
+            $stmt->execute([$student_id, $class_id, $clientId, $result_key, $result_value]);
+            
+            return [
+                "code" => 200,
+                "data" => "Result saved successfully."
+            ];
+            
+        } catch(PDOException $e) {
+            return [
+                "code" => 500,
+                "data" => "An error occurred while saving the result."
+            ];
+        }
+    }
+
 }

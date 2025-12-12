@@ -198,6 +198,9 @@ if(!$isEmployee && !$isAdmin) {
                                 <a class="btn btn-outline-success" href="#" onclick="return add_preschool_reporting();">
                                     <i class="fas fa-plus"></i> Add New Legend
                                 </a>
+                                <a class="btn btn-outline-primary" href="'.$baseUrl.'results-preschool-upload">
+                                    <i class="fas fa-upload"></i> Upload Report
+                                </a>
                             </div>
                         </div>
                         <div class="card">

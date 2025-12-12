@@ -115,22 +115,7 @@ class Myschoolgh extends Models {
 		if(empty($this->db) || $this->processedAlter) return true;
 		
 		// prepare and execute the statement
-		$fix = [
-			"CREATE TABLE IF NOT EXISTS `grading_terminal_remarks` (
-				`id` int(11) NOT NULL AUTO_INCREMENT,
-				`client_id` VARCHAR(32) NOT NULL,
-				`class_id` VARCHAR(32) NOT NULL,
-				`student_id` VARCHAR(32) NOT NULL,
-				`remarks` text NOT NULL,
-				`academic_year` varchar(10) NOT NULL,
-				`academic_term` varchar(10) NOT NULL,
-				`created_by` VARCHAR(32) NOT NULL,
-				`created_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-				`updated_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-				PRIMARY KEY (`id`),
-				UNIQUE KEY `class_student_year_term` (`class_id`, `student_id`, `academic_year`, `academic_term`)
-			)",
-		];
+		$fix = [];
 
 		if(empty($fix)) return true;
 		foreach($fix as $stmt) {
