@@ -305,7 +305,7 @@ var add_reporting_section = () => {
             <h6 class="mb-0 font-weight-bold text-primary">New Section</h6>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="return add_questionnaire(${newSectionId});" title="Add Questionnaire">
-                    <i class="fas fa-plus"></i>
+                    <i class="fas fa-plus"></i> Add Row
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-danger" onclick="return delete_reporting_section(${newSectionId});" title="Delete Section">
                     <i class="fas fa-trash"></i>

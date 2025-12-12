@@ -62,7 +62,7 @@ if(!$isEmployee && !$isAdmin) {
                     <h6 class="mb-0 font-weight-bold text-primary">'.($section_title ?: 'Untitled Section').'</h6>
                     <div>
                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="return add_questionnaire('.$section_id.');" title="Add Questionnaire">
-                            <i class="fas fa-plus"></i>
+                            <i class="fas fa-plus"></i> Add Row
                         </button>
                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="return delete_reporting_section('.$section_id.');" title="Delete Section">
                             <i class="fas fa-trash"></i>
