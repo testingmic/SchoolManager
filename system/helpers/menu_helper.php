@@ -459,7 +459,6 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>promotions">Students Promotion</a></li>
             <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>results-remarks">Students Remarks</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>results-preschool-setup">Preschool Reporting</a></li>
         </ul>
     </li>
     <?php } ?>

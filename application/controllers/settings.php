@@ -17,6 +17,9 @@ class Settings extends Myschoolgh {
         ],
         "preschool_reporting_content" => [
             "sections"
+        ],
+        "preschool_reporting_classes" => [
+            "classes"
         ]
     ];
 
@@ -55,12 +58,26 @@ class Settings extends Myschoolgh {
         }
 
         // get the payroll settings
-        $settings = $this->pushQuery("*", "settings", "client_id = '{$params->clientId}' AND setting_name = '{$params->setting_name}'");
+        $settings = $this->pushQuery(
+            "*", 
+            "settings", 
+            "client_id = '{$params->clientId}' AND setting_name IN ('".implode("', '", stringToArray($params->setting_name))."')"
+        );
 
         if(empty($settings)) {
             return ["code" => 400, "data" => []];
         }
-        $settings = json_decode($settings[0]->setting_value, true);
+
+        // if the setting name is an array, then loop through the settings and set the data
+        if(count(stringToArray($params->setting_name)) > 1) {
+            $resultSet = [];
+            foreach($settings as $setting) {
+                $resultSet[$setting->setting_name] = json_decode($setting->setting_value, true);
+            }
+            $settings = $resultSet;
+        } else {
+            $settings = json_decode($settings[0]->setting_value, true);
+        }
 
         return [
             "code" => 200, 

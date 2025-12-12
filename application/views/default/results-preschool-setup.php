@@ -6,7 +6,8 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $defaultClientData, $isPayableStaff, $clientFeatures, $isTeacher, $isAdmin;
+global $myClass, $accessObject, $defaultUser, $defaultClientData, 
+    $isPayableStaff, $clientFeatures, $isEmployee, $isAdmin;
 
 // initial variables
 $appName = $myClass->appName;
@@ -21,7 +22,7 @@ $filter = (object) array_map("xss_clean", $_GET);
 $response->title = "Preschool Reporting Setup";
 
 // access permissions check
-if(!$isTeacher && !$isAdmin) {
+if(!$isEmployee && !$isAdmin) {
     $response->html = page_not_found("permission_denied");
 } else {
 
@@ -31,15 +32,20 @@ if(!$isTeacher && !$isAdmin) {
     $filter->clientId = $session->clientId;
     $filter->client_data = $defaultClientData;
 
-    // load the form
-    $settings = load_class("settings", "controllers")->getsettings((object) [
-        "clientId" => $session->clientId, "setting_name" => "preschool_reporting_legend"
+    $getSettingsValues = load_class("settings", "controllers")->getsettings((object) [
+        "clientId" => $session->clientId, "setting_name" => [
+            "preschool_reporting_legend", "preschool_reporting_content", "preschool_reporting_classes"
+        ]
     ])["data"] ?? [];
 
-    // load the reporting content template
-    $reporting_content = load_class("settings", "controllers")->getsettings((object) [
-        "clientId" => $session->clientId, "setting_name" => "preschool_reporting_content"
-    ])["data"] ?? [];
+    // load the form
+    $settings = $getSettingsValues["preschool_reporting_legend"] ?? [];
+
+    // load the reporting content
+    $reporting_content = $getSettingsValues["preschool_reporting_content"] ?? [];
+
+    // load the reporting classes
+    $reporting_classes = $getSettingsValues["preschool_reporting_classes"] ?? [];
 
     // build the reporting content HTML
     $reporting_content_html = '';
@@ -143,6 +149,14 @@ if(!$isTeacher && !$isAdmin) {
         }
     }
 
+    $classes_array = $myClass->pushQuery("id, name", "classes", "client_id='{$session->clientId}' AND status='1'");
+
+    $classes_list = "";
+    $reporting_classes = $reporting_classes['classes'] ?? [];
+    foreach($classes_array as $each) {
+        $selected = in_array($each->id, $reporting_classes) ? "selected" : null;
+        $classes_list .= "<option value='{$each->id}' {$selected}>{$each->name}</option>";
+    }
     // set the parent menu
     $response->parent_menu = "reports-promotion";
 
@@ -193,6 +207,18 @@ if(!$isTeacher && !$isAdmin) {
                         </div>
                         <div class="card-body pt-2 pb-2" id="preschool_reporting_legend">
                             '.$legend_html.'
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title text-primary mb-0 pb-0">
+                                <i class="fas fa-info-circle"></i> CLASSES TO APPLY
+                            </h5>
+                        </div>
+                        <div class="card-body pt-2 pb-2" id="preschool_reporting_classes">
+                            <select name="reporting_classes[]" id="reporting_classes[]" onchange="return save_reporting_classes();" class="form-control selectpicker" multiple data-width="100%">
+                                '.$classes_list.'
+                            </select>
                         </div>
                     </div>
                 </div>

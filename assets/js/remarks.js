@@ -406,5 +406,10 @@ var track_reporting_content_changes = () => {
     });
 }
 
+var save_reporting_classes = () => {
+    let classes = $(`select[name="reporting_classes[]"]`).val();
+    $.post(`${baseUrl}api/settings/savesettings`, { classes, setting_name: "preschool_reporting_classes" });
+}
+
 // Initialize the event listener on page load
 track_reporting_content_changes();
