@@ -16,7 +16,7 @@ $baseUrl = $myClass->baseUrl;
 jump_to_main($baseUrl);
 
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
-$filter = (object) array_map("xss_clean", $_POST);
+$filter = (object) array_map("xss_clean", $_GET);
 
 $response->title = "Student Remarks";
 
@@ -24,8 +24,6 @@ $response->title = "Student Remarks";
 if(!$isTeacher && !$isAdmin) {
     $response->html = page_not_found("permission_denied");
 } else {
-
-    $results_remarks_list = "";
 
     $response->scripts = ["assets/js/remarks.js"];
 
@@ -36,10 +34,27 @@ if(!$isTeacher && !$isAdmin) {
     // get the results remarks list
     $results_remarks_array = load_class("terminal_reports", "controllers", $filter)->results_remarks($filter);
 
+    $classes_list = '';
+
+    $results_remarks_list = "
+        <div class='col-md-12'>
+            <div class='row border-bottom border-gray mb-2'>
+                <div class='col-md-4 mb-2'>
+                <select name='filter_remarks_class_id' id='filter_remarks_class_id' class='form-control selectpicker' data-width='100%'>
+                    <option value=''>Select Class to Filter</option>
+                    '.$classes_list.'
+                </select>
+                </div>
+                <div class='col-md-8 mb-2' data-input_item='search'>
+                    <input type='text' class='form-control' placeholder='Search remarks' id='search_remarks' onkeyup='return search_remarks()'>
+                </div>
+            </div>
+        </div>";
+
     if(empty($results_remarks_array['data'])) {
-        $results_remarks_list = no_record_found(
+        $results_remarks_list .= no_record_found(
             "No student remarks recorded", 
-            "No student remarks have been recorded for this student yet. You can add new remarks by clicking the button below.", 
+            "No student remarks have been recorded for the selected class yet. You can add new remarks by clicking the button below.", 
             null, 
             "Student Remarks", 
             false, 
@@ -51,7 +66,7 @@ if(!$isTeacher && !$isAdmin) {
     else {
         foreach($results_remarks_array['data'] as $key => $remark) {
             $results_remarks_list .= "
-            <div class='col-md-4' data-remarks_id='{$remark->id}'>
+            <div class='col-md-6 col-lg-4 remarks_item' data-remarks_id='{$remark->id}' data-student_name='{$remark->student_name}'>
                 <div class='card'>
                     <div class='card-header'>
                         <h5 class='card-title mb-0 pb-0'>{$remark->class_name} - {$remark->student_name}</h5>
@@ -68,18 +83,16 @@ if(!$isTeacher && !$isAdmin) {
                     </div>
                     <div class='card-footer mt-0 pt-0 pl-3'>
                         <a href=\"javascript:void(0)\" onclick=\"return edit_student_remarks({$remark->id})\" class='btn btn-outline-primary'>
-                            <i class='fas fa-edit'></i> Edit Details
+                            <i class='fas fa-edit'></i> Edit
                         </a>
                         <a href=\"javascript:void(0)\" onclick=\"return delete_student_remarks({$remark->id})\" class='btn btn-outline-danger'>
-                            <i class='fas fa-trash'></i> Delete Record
+                            <i class='fas fa-trash'></i> Delete
                         </a>
                     </div>
                 </div>
             </div>";
         }
     }
-
-    $classes_list = '';
 
     // set the parent menu
     $response->parent_menu = "reports-promotion";

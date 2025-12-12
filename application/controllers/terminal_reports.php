@@ -128,7 +128,7 @@ class Terminal_reports extends Myschoolgh {
         }
         
         // class_id='{$params->remarks_class_id}' AND student_id='{$params->remarks_student_id}'
-        $whereClause = !empty($params->remarks_class_id) ? " AND a.class_id='{$params->remarks_class_id}'" : null;
+        $whereClause = !empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : null;
         $whereClause .= !empty($params->remarks_student_id) ? " AND a.student_id='{$params->remarks_student_id}'" : null;
         $whereClause .= !empty($params->remarks_id) ? " AND a.id='{$params->remarks_id}'" : null;
 
