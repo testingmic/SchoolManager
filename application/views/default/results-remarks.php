@@ -130,7 +130,7 @@ if(!$isTeacher && !$isAdmin) {
                                     </div>
                                     <div class="form-group">
                                         <label for="remarks">Remarks <span class="required">*</span></label>
-                                        <textarea name="remarks" id="remarks" class="form-control" rows="5"></textarea>
+                                        <textarea name="remarks" maxlength="260" id="remarks" class="form-control" rows="5"></textarea>
                                     </div>
                                 </div>
                                 <div class="col-md-7">

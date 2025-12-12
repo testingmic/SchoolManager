@@ -1715,6 +1715,18 @@ class Terminal_reports extends Myschoolgh {
             $defaultFontSize = "font-size:13px";
             $increaseFontSize = "font-size:15px";
 
+            // get the class id using the item_id
+            $classInfo = $this->pushQuery("id, item_id, name", "classes", "item_id='{$params->class_id}' AND client_id='{$this->clientId}' LIMIT 1");
+
+            $teacherRemarks = [];
+            // load the remarks information
+            if(!empty($classInfo)) {
+                $remarksInfo = $this->pushQuery("remarks, student_id", "grading_terminal_remarks", "class_id='{$classInfo[0]->id}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' AND client_id='{$this->clientId}'");
+                foreach($remarksInfo as $remark) {
+                    $teacherRemarks[$remark->student_id] = $remark->remarks;
+                }
+            }
+
             // loop through the report set
             foreach($report_data as $key => $student) {
 
@@ -1889,7 +1901,7 @@ class Terminal_reports extends Myschoolgh {
                             <div>&nbsp;</div>
                             <span style=\"font-weight:bold; font-size:15px\">TEACHER'S REMARKS</span>
                             <div style=\"font-size:17px; padding:10px;text-align:center;\">
-                                N/A
+                                ".limit_words($teacherRemarks[$key] ?? "N/A", 45)."
                             </div>
                             <div>&nbsp;</div>
                         </div>
