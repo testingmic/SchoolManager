@@ -577,7 +577,7 @@ var display_student_reporting = (studentResults) => {
                 let selectedValue = studentResults[resultKey] || '';
                 
                 html += `
-                <div class="d-flex align-items-center mb-2 border-bottom" data-questionnaire_id="${qId}">
+                <div class="d-flex align-items-center mb-2 border-bottom" data-questionnaire_id="${qId}" data-result_key="${resultKey}">
                     <div class="flex-grow-1 mr-3">
                         <div class="font-weight-medium">${qText}</div>
                     </div>
@@ -589,7 +589,7 @@ var display_student_reporting = (studentResults) => {
                     let legendValue = legendItem.key || '';
                     let isChecked = selectedValue === legendValue ? 'checked' : '';
                     html += `
-                            <input type="radio" class="btn-check" name="result_${resultKey}" id="result_${resultKey}_${legendValue}" value="${legendValue}" ${isChecked} onchange="return save_student_result('${resultKey}', '${legendValue}');">
+                            <input type="radio" class="btn-check questionnaire-radio" name="result_${resultKey}" id="result_${resultKey}_${legendValue}" value="${legendValue}" ${isChecked} onchange="return handle_questionnaire_selection('${resultKey}', '${legendValue}');">
                             <label class="btn btn-outline-primary" for="result_${resultKey}_${legendValue}">${legendValue}</label>`;
                 });
                 
@@ -606,6 +606,14 @@ var display_student_reporting = (studentResults) => {
     });
     
     $(`#student_reporting_content`).html(html);
+}
+
+var handle_questionnaire_selection = (resultKey, value) => {
+    // The CSS will automatically highlight the selected label button
+    // No need to manually add classes since we're using :checked + label selector
+    
+    // Save the result
+    save_student_result(resultKey, value);
 }
 
 var save_student_result = (resultKey, value) => {

@@ -75,6 +75,7 @@ if(!$isEmployee && !$isAdmin) {
                 <h1>'.$response->title.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
+                    <div class="breadcrumb-item"><a href="'.$baseUrl.'results-preschool-setup">Results Setup</a></div>
                     <div class="breadcrumb-item">'.$response->title.'</div>
                 </div>
             </div>
@@ -114,7 +115,7 @@ if(!$isEmployee && !$isAdmin) {
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
                                 <h5 class="card-title text-primary mb-0 pb-0 mr-2">
                                     <i class="fas fa-user"></i> <span id="student_name_display"></span>
                                 </h5>

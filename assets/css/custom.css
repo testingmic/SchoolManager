@@ -1468,6 +1468,17 @@ h4 {
     padding: 10px;
 }
 
+.questionnaire-radio:checked + .btn-outline-primary {
+    background-color: #8bc34a !important;
+    border-color: #8bc34a !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+.btn-outline-primary {
+    transition: all 0.2s ease;
+}
+
 .bus-img-container {
     min-height: 220px;
     max-height: 220px;

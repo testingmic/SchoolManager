@@ -1982,9 +1982,7 @@ class Terminal_reports extends Myschoolgh {
             
             return [
                 "code" => 200,
-                "data" => [
-                    "result" => $results
-                ]
+                "data" => $results
             ];
             
         } catch(PDOException $e) {
@@ -2027,22 +2025,6 @@ class Terminal_reports extends Myschoolgh {
         $clientId = $params->clientId ?? $params->clientId;
         
         try {
-            // Create table if it doesn't exist
-            $this->db->exec("
-                CREATE TABLE IF NOT EXISTS preschool_results (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    student_id VARCHAR(255) NOT NULL,
-                    class_id VARCHAR(255) NOT NULL,
-                    client_id VARCHAR(255) NOT NULL,
-                    result_key VARCHAR(255) NOT NULL,
-                    result_value VARCHAR(10) NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    UNIQUE KEY unique_result (student_id, class_id, client_id, result_key),
-                    INDEX idx_student_class (student_id, class_id, client_id)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-            ");
-            
             // Insert or update the result
             $stmt = $this->db->prepare("
                 INSERT INTO preschool_results (student_id, class_id, client_id, result_key, result_value)

@@ -115,7 +115,20 @@ class Myschoolgh extends Models {
 		if(empty($this->db) || $this->processedAlter) return true;
 		
 		// prepare and execute the statement
-		$fix = [];
+		$fix = [
+			"CREATE TABLE IF NOT EXISTS preschool_results (
+				id INT AUTO_INCREMENT PRIMARY KEY,
+				student_id VARCHAR(255) NOT NULL,
+				class_id VARCHAR(255) NOT NULL,
+				client_id VARCHAR(255) NOT NULL,
+				result_key VARCHAR(255) NOT NULL,
+				result_value VARCHAR(10) NOT NULL,
+				created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+				updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+				UNIQUE KEY unique_result (student_id, class_id, client_id, result_key),
+				INDEX idx_student_class (student_id, class_id, client_id)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+		];
 
 		if(empty($fix)) return true;
 		foreach($fix as $stmt) {
