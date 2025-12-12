@@ -14,6 +14,9 @@ class Settings extends Myschoolgh {
         ],
         "preschool_reporting_legend" => [
             "legend"
+        ],
+        "preschool_reporting_content" => [
+            "sections"
         ]
     ];
 

@@ -171,7 +171,13 @@ var track_legend_value_entry = () => {
 // Initialize the event listener on page load
 track_legend_value_entry();
 
-$(`input[name="legend_key[1]"]`).focus();
+// Focus on first legend input if it exists
+setTimeout(() => {
+    let firstLegendInput = $(`input[name="legend_key[1]"]`);
+    if(firstLegendInput.length) {
+        firstLegendInput.focus();
+    }
+}, 100);
 
 var add_preschool_reporting = () => {
     let last_item = $(`div[id="preschool_reporting_legend"] div[data-legend_item]:last`).attr("data-legend_item");
@@ -226,3 +232,179 @@ var add_preschool_reporting = () => {
 }
 
 load_class_list();
+
+// ==================== REPORTING TEMPLATE FUNCTIONS ====================
+
+var save_reporting_content = () => {
+    let sections = [];
+    let sectionCounter = 1;
+    
+    $.each($(`div[data-section_id]`), function() {
+        let $section = $(this);
+        let sectionId = parseInt($section.attr("data-section_id")) || Date.now();
+        let sectionTitleInput = $section.find(`input.section-title-input`);
+        let sectionTitle = sectionTitleInput.length ? (sectionTitleInput.val() || '').trim() : '';
+        
+        if(!sectionTitle.length) {
+            return; // Skip sections without titles
+        }
+        
+        let questionnaires = [];
+        $section.find(`div.questionnaires-list input.questionnaire-input`).each(function() {
+            let qText = ($(this).val() || '').trim();
+            if(qText.length) {
+                let qId = parseInt($(this).attr("data-questionnaire_id")) || (sectionId * 1000 + Date.now());
+                questionnaires.push({
+                    id: qId,
+                    text: qText
+                });
+            }
+        });
+        
+        sections.push({
+            id: sectionId,
+            title: sectionTitle,
+            questionnaires: questionnaires
+        });
+        sectionCounter++;
+    });
+    
+    $.post(`${baseUrl}api/settings/savesettings`, { 
+        sections, 
+        setting_name: "preschool_reporting_content" 
+    }).then((response) => {
+        if(response.code == 200) {
+            // Optional: Show success notification
+            // notify("Reporting template saved successfully");
+        }
+    }).catch((error) => {
+        console.error("Error saving reporting content:", error);
+    });
+}
+
+// Create a debounced version of save_reporting_content
+var debouncedSaveReportingContent = debounce(save_reporting_content, 1000);
+
+var add_reporting_section = () => {
+    let existingSections = $(`div[data-section_id]`);
+    let maxSectionId = 0;
+    
+    existingSections.each(function() {
+        let sectionId = parseInt($(this).attr("data-section_id")) || 0;
+        if(sectionId > maxSectionId) {
+            maxSectionId = sectionId;
+        }
+    });
+    
+    // Generate new ID: use max + 1, or timestamp if no sections exist
+    let newSectionId = maxSectionId > 0 ? maxSectionId + 1 : Date.now();
+    
+    let section_html = `
+    <div class="mb-3 border rounded p-3" data-section_id="${newSectionId}">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0 font-weight-bold text-primary">New Section</h6>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="return add_questionnaire(${newSectionId});" title="Add Questionnaire">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="return delete_reporting_section(${newSectionId});" title="Delete Section">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        <div class="mb-2">
+            <input type="text" class="form-control form-control-sm section-title-input" data-section_id="${newSectionId}" value="" placeholder="Enter section title (e.g. Communication Skills)" maxlength="100">
+        </div>
+        <div class="questionnaires-list" data-section_id="${newSectionId}">
+        </div>
+    </div>`;
+    
+    // Remove the "no sections" message if it exists
+    $(`#preschool_reporting_content .text-muted.text-center`).remove();
+    
+    $(`#preschool_reporting_content`).append(section_html);
+    
+    // Focus on the section title input
+    $(`input.section-title-input[data-section_id="${newSectionId}"]`).focus();
+    
+    // Initialize event listeners for this section
+    track_reporting_content_changes();
+}
+
+var delete_reporting_section = (section_id) => {
+    swal({
+        title: "Delete Section",
+        text: "Are you sure you want to delete this section and all its questionnaires?",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $(`div[data-section_id="${section_id}"]`).remove();
+            
+            // Show "no sections" message if no sections remain
+            if($(`div[data-section_id]`).length === 0) {
+                $(`#preschool_reporting_content`).html('<div class="text-muted text-center py-3">No sections added yet. Click "Add New Section" to get started.</div>');
+            }
+            
+            debouncedSaveReportingContent();
+        }
+    });
+}
+
+var add_questionnaire = (section_id) => {
+    let questionnairesList = $(`div.questionnaires-list[data-section_id="${section_id}"]`);
+    let existingQuestionnaires = questionnairesList.find(`input.questionnaire-input`);
+    let maxQId = 0;
+    
+    existingQuestionnaires.each(function() {
+        let qId = parseInt($(this).attr("data-questionnaire_id")) || 0;
+        if(qId > maxQId) {
+            maxQId = qId;
+        }
+    });
+    
+    // Generate new ID: use max + 1, or timestamp-based if no questionnaires exist
+    let newQId = maxQId > 0 ? maxQId + 1 : (parseInt(section_id) * 1000 + Date.now());
+    
+    let questionnaire_html = `
+    <div class="d-flex align-items-center mb-2" data-questionnaire_id="${newQId}">
+        <div class="flex-grow-1 mr-2">
+            <input type="text" class="form-control questionnaire-input" data-section_id="${section_id}" data-questionnaire_id="${newQId}" value="" placeholder="Enter questionnaire item" maxlength="200">
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="return delete_questionnaire(${section_id}, ${newQId});" title="Delete">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>`;
+    
+    questionnairesList.append(questionnaire_html);
+    
+    // Focus on the new questionnaire input
+    $(`input.questionnaire-input[data-section_id="${section_id}"][data-questionnaire_id="${newQId}"]`).focus();
+    
+    // Initialize event listeners
+    track_reporting_content_changes();
+}
+
+var delete_questionnaire = (section_id, questionnaire_id) => {
+    $(`div[data-section_id="${section_id}"] div[data-questionnaire_id="${questionnaire_id}"]`).remove();
+    debouncedSaveReportingContent();
+}
+
+var track_reporting_content_changes = () => {
+    // Use event delegation to handle dynamically added inputs
+    $(`#preschool_reporting_content`).off("input", `input.section-title-input`).on("input", `input.section-title-input`, function() {
+        let sectionId = $(this).attr("data-section_id");
+        let sectionTitle = $(this).val().trim();
+        // Update the displayed section title
+        $(this).closest(`div[data-section_id="${sectionId}"]`).find(`h6`).text(sectionTitle || "New Section");
+        debouncedSaveReportingContent();
+    });
+    
+    $(`#preschool_reporting_content`).off("input", `input.questionnaire-input`).on("input", `input.questionnaire-input`, function() {
+        debouncedSaveReportingContent();
+    });
+}
+
+// Initialize the event listener on page load
+track_reporting_content_changes();

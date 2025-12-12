@@ -18,7 +18,7 @@ jump_to_main($baseUrl);
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $filter = (object) array_map("xss_clean", $_GET);
 
-$response->title = "Student Remarks";
+$response->title = "Preschool Reporting Setup";
 
 // access permissions check
 if(!$isTeacher && !$isAdmin) {
@@ -35,6 +35,62 @@ if(!$isTeacher && !$isAdmin) {
     $settings = load_class("settings", "controllers")->getsettings((object) [
         "clientId" => $session->clientId, "setting_name" => "preschool_reporting_legend"
     ])["data"] ?? [];
+
+    // load the reporting content template
+    $reporting_content = load_class("settings", "controllers")->getsettings((object) [
+        "clientId" => $session->clientId, "setting_name" => "preschool_reporting_content"
+    ])["data"] ?? [];
+
+    // build the reporting content HTML
+    $reporting_content_html = '';
+    if(!empty($reporting_content) && !empty($reporting_content['sections'])) {
+        $section_counter = 1;
+        foreach($reporting_content['sections'] as $section_index => $section) {
+            // Ensure we have a valid section ID
+            $section_id = !empty($section['id']) ? intval($section['id']) : (time() + $section_counter);
+            $section_title = htmlspecialchars($section['title'] ?? '', ENT_QUOTES, 'UTF-8');
+            $questionnaires = $section['questionnaires'] ?? [];
+            
+            $reporting_content_html .= '<div class="mb-3 border rounded p-3" data-section_id="'.$section_id.'">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0 font-weight-bold text-primary">'.($section_title ?: 'Untitled Section').'</h6>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="return add_questionnaire('.$section_id.');" title="Add Questionnaire">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="return delete_reporting_section('.$section_id.');" title="Delete Section">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <input type="text" class="form-control section-title-input" data-section_id="'.$section_id.'" value="'.$section_title.'" placeholder="Enter section title (e.g. Communication Skills)" maxlength="100">
+                </div>
+                <div class="questionnaires-list" data-section_id="'.$section_id.'">';
+            
+            if(!empty($questionnaires)) {
+                $q_counter = 1;
+                foreach($questionnaires as $q_index => $questionnaire) {
+                    // Ensure we have a valid questionnaire ID
+                    $q_id = !empty($questionnaire['id']) ? intval($questionnaire['id']) : ($section_id * 1000 + $q_counter);
+                    $q_text = htmlspecialchars($questionnaire['text'] ?? '', ENT_QUOTES, 'UTF-8');
+                    $reporting_content_html .= '<div class="d-flex align-items-center mb-2" data-questionnaire_id="'.$q_id.'">
+                        <div class="flex-grow-1 mr-2">
+                            <input type="text" class="form-control form-control-sm questionnaire-input" data-section_id="'.$section_id.'" data-questionnaire_id="'.$q_id.'" value="'.$q_text.'" placeholder="Enter questionnaire item" maxlength="200">
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="return delete_questionnaire('.$section_id.', '.$q_id.');" title="Delete">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>';
+                    $q_counter++;
+                }
+            }
+            
+            $reporting_content_html .= '</div>
+            </div>';
+            $section_counter++;
+        }
+    }
 
     $legend_html = '<div class="d-flex gap-2 justify-content-between mb-2" data-legend_item="1">
         <div class="w-[5%] font-20 text-danger">
@@ -102,6 +158,25 @@ if(!$isTeacher && !$isAdmin) {
                 </div>
             </div>
             <div class="row">
+                <div class="col-lg-7 col-md-6">
+                    <div class="row">
+                        <div class="col-md-12 text-right mb-2">
+                            <a class="btn btn-outline-success" href="#" onclick="return add_reporting_section();">
+                                <i class="fas fa-plus"></i> Add New Section
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title text-primary mb-0 pb-0">
+                                <i class="fas fa-file-alt"></i> REPORTING TEMPLATE
+                            </h5>
+                        </div>
+                        <div class="card-body pt-2 pb-2" id="preschool_reporting_content">
+                            '.($reporting_content_html ?: '<div class="text-muted text-center py-3">No sections added yet. Click "Add New Section" to get started.</div>').'
+                        </div>
+                    </div>
+                </div>
                 <div class="col-lg-5 col-md-6">
                     <div class="row">
                         <div class="col-md-12 text-right mb-2">
