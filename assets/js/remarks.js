@@ -123,7 +123,7 @@ var search_remarks = () => {
     }
 }
 
-var get_legend_values = () => {
+var save_legend_values = () => {
     let legend = {};
     $.each($(`div[data-legend_item]`), function(key, value) {
         let theRow = $(this).data();
@@ -140,7 +140,7 @@ var get_legend_values = () => {
 
 var delete_legend_item = (legend_item) => {
     $(`div[data-legend_item="${legend_item}"]`).remove();
-    get_legend_values();
+    save_legend_values();
 }
 
 var debounce = (func, wait) => {
@@ -155,8 +155,8 @@ var debounce = (func, wait) => {
     };
 };
 
-// Create a debounced version of get_legend_values
-var debouncedGetLegendValues = debounce(get_legend_values, 1000);
+// Create a debounced version of save_legend_values
+var debouncedGetLegendValues = debounce(save_legend_values, 1000);
 
 var track_legend_value_entry = () => {
     // Use event delegation to handle dynamically added inputs
@@ -184,7 +184,7 @@ var add_preschool_reporting = () => {
     let prevKey = $(`input[name="legend_key[${last_item}]"]`).val();
     let prevValue = $(`input[name="legend_value[${last_item}]"]`).val();
 
-    get_legend_values();
+    save_legend_values();
 
     if(!prevKey.length) {
         notify(`You have not entered the key item for item ${last_item}. Please ensure that is set`);

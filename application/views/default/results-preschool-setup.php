@@ -31,21 +31,6 @@ if(!$isTeacher && !$isAdmin) {
     $filter->clientId = $session->clientId;
     $filter->client_data = $defaultClientData;
 
-    $results_remarks_list = "
-    <div class='col-md-12'>
-        <div class='row border-bottom border-gray mb-2'>
-            <div class='col-md-4 mb-2'>
-            <select name='filter_remarks_class_id' id='filter_remarks_class_id' class='form-control selectpicker' data-width='100%'>
-                <option value=''>Select Class to Filter</option>
-                '.$classes_list.'
-            </select>
-            </div>
-            <div class='col-md-8 mb-2' data-input_item='search'>
-                <input type='text' class='form-control' placeholder='Search remarks' id='search_remarks' onkeyup='return search_remarks()'>
-            </div>
-        </div>
-    </div>";
-
     // load the form
     $settings = load_class("settings", "controllers")->getsettings((object) [
         "clientId" => $session->clientId, "setting_name" => "preschool_reporting_legend"

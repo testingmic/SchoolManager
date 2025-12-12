@@ -98,7 +98,24 @@ class Settings extends Myschoolgh {
         // loop through the settings array and set the data
         foreach($this->settingsArray[$params->setting_name] as $item) {
             if(isset($params->{$item})) {
-                $data[$item] = $params->{$item};
+                if($item == "legend") {
+                    if(!is_array($params->{$item})) {
+                        return ["code" => 400, "data" => "Sorry! The legend must be an array."];
+                    }
+                    // loop through the legend array and set the data
+                    foreach($params->{$item} as $key => $value) {
+                        // confirm that the key and value are set
+                        if(!isset($value['key']) || !isset($value['value'])) {
+                            return ["code" => 400, "data" => "Sorry! The legend must be an array of objects with key and value properties."];
+                        }
+                        $data[$item][$key] = [
+                            'key' => xss_clean(substr($value['key'], 0, 5)),
+                            'value' => xss_clean(substr($value['value'], 0, 32)),
+                        ];
+                    }
+                } else {
+                    $data[$item] = $params->{$item};
+                }
             }
         }
 
