@@ -180,9 +180,10 @@
                 <li><a class="nav-link" href="<?= $baseUrl ?>results-upload">Upload / Manage Results</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>results-generate">Generate Report</a></li>
                 <?php if($accessObject->hasAccess("promote", "promotion")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>promotions">Students Promotion</a></li>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>promotions">Students Promotion</a></li>
                 <?php } ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>results-remarks">Students Remarks</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>results-preschool-setup">Preschool Reporting</a></li>
             </ul>
         </li>
         <?php } ?>
@@ -458,6 +459,7 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>promotions">Students Promotion</a></li>
             <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>results-remarks">Students Remarks</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>results-preschool-setup">Preschool Reporting</a></li>
         </ul>
     </li>
     <?php } ?>

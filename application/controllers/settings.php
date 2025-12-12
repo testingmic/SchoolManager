@@ -2,6 +2,25 @@
 
 class Settings extends Myschoolgh {
 
+    private $settingsArray = [
+        "payroll_settings" => [
+            "auto_generate_payslip", 
+            "auto_calculate_paye", 
+            "auto_calculate_ssnit", 
+            "auto_calculate_tier_2", 
+            "payroll_frequency", 
+            "payment_day", 
+            "auto_validate_payslips"
+        ],
+        "preschool_reporting_legend" => [
+            "legend"
+        ]
+    ];
+
+    private $preschool_reporting_legend_list = [
+        "legend_key", "legend_value"
+    ];
+
     public function __construct() {
 		parent::__construct();
 	}
@@ -71,15 +90,17 @@ class Settings extends Myschoolgh {
             return ["code" => 400, "data" => "Sorry! An invalid setting name was parsed."];
         }
 
-        $data = [
-            'auto_generate_payslip' => $params->auto_generate_payslip ?? false,
-            'auto_calculate_paye' => $params->auto_calculate_paye ?? false,
-            'auto_calculate_ssnit' => $params->auto_calculate_ssnit ?? false,
-            'auto_calculate_tier_2' => $params->auto_calculate_tier_2 ?? false,
-            'payroll_frequency' => $params->payroll_frequency ?? 'Monthly',
-            'payment_day' => $params->payment_day ?? 0,
-            'auto_validate_payslips' => $params->auto_validate_payslips ?? false,
-        ];
+        // confirm that the setting name is valid
+        if(empty($this->settingsArray[$params->setting_name])) {
+            return ["code" => 400, "data" => "Sorry! An invalid setting name was parsed."];
+        }
+
+        // loop through the settings array and set the data
+        foreach($this->settingsArray[$params->setting_name] as $item) {
+            if(isset($params->{$item})) {
+                $data[$item] = $params->{$item};
+            }
+        }
 
         // first delete the existing settings
         $this->db->query("DELETE FROM settings WHERE client_id = '{$params->clientId}' AND setting_name = '{$params->setting_name}'");
@@ -88,10 +109,9 @@ class Settings extends Myschoolgh {
         $stmt = $this->db->prepare("INSERT INTO settings SET client_id = ?, setting_name = ?, setting_value = ?");
         $stmt->execute([$params->clientId, $params->setting_name, json_encode($data)]);
         
-
         return [
             "code" => 200,
-            "data" => "The payroll settings were successfully saved."
+            "data" => "The {$params->setting_name} settings were successfully saved."
         ];
     }
 }
