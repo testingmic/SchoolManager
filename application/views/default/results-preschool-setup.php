@@ -192,33 +192,35 @@ if(!$isEmployee && !$isAdmin) {
                     </div>
                 </div>
                 <div class="col-lg-5 col-md-6">
-                    <div class="row">
-                        <div class="col-md-12 text-right mb-2">
-                            <a class="btn btn-outline-success" href="#" onclick="return add_preschool_reporting();">
-                                <i class="fas fa-plus"></i> Add New Legend
-                            </a>
+                    <div class="stick_to_top">
+                        <div class="row">
+                            <div class="col-md-12 text-right mb-2">
+                                <a class="btn btn-outline-success" href="#" onclick="return add_preschool_reporting();">
+                                    <i class="fas fa-plus"></i> Add New Legend
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title text-primary mb-0 pb-0">
-                                <i class="fas fa-info-circle"></i> REPORTING LEGEND
-                            </h5>
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title text-primary mb-0 pb-0">
+                                    <i class="fas fa-info-circle"></i> REPORTING LEGEND
+                                </h5>
+                            </div>
+                            <div class="card-body pt-2 pb-2" id="preschool_reporting_legend">
+                                '.$legend_html.'
+                            </div>
                         </div>
-                        <div class="card-body pt-2 pb-2" id="preschool_reporting_legend">
-                            '.$legend_html.'
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title text-primary mb-0 pb-0">
-                                <i class="fas fa-info-circle"></i> CLASSES TO APPLY
-                            </h5>
-                        </div>
-                        <div class="card-body pt-2 pb-2" id="preschool_reporting_classes">
-                            <select name="reporting_classes[]" id="reporting_classes[]" onchange="return save_reporting_classes();" class="form-control selectpicker" multiple data-width="100%">
-                                '.$classes_list.'
-                            </select>
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title text-primary mb-0 pb-0">
+                                    <i class="fas fa-info-circle"></i> CLASSES TO APPLY
+                                </h5>
+                            </div>
+                            <div class="card-body pt-2 pb-2" id="preschool_reporting_classes">
+                                <select name="reporting_classes[]" id="reporting_classes[]" onchange="return save_reporting_classes();" class="form-control selectpicker" multiple data-width="100%">
+                                    '.$classes_list.'
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
