@@ -54,6 +54,34 @@ if(!$isEmployee && !$isAdmin) {
         $classes_list .= "<option value='{$each['id']}'>{$each['name']}</option>";
     }
 
+    // Build legend reference HTML
+    $legend_reference_html = '';
+    if(!empty($reporting_legend) && !empty($reporting_legend['legend'])) {
+        $legend_reference_html = '<div class="row mb-3" id="grading_legend_reference">
+            <div class="col-12">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0"><i class="fas fa-info-circle"></i> GRADING SYSTEM REFERENCE</h6>
+                        <button type="button" class="btn btn-sm btn-light" onclick="toggle_legend_reference();">
+                            <i class="fas fa-chevron-up" id="legend_toggle_icon"></i>
+                        </button>
+                    </div>
+                    <div class="card-body p-2" id="legend_reference_body">';
+        
+        foreach($reporting_legend['legend'] as $key => $legend_item) {
+            $legend_key = htmlspecialchars($legend_item['key'] ?? '', ENT_QUOTES, 'UTF-8');
+            $legend_value = htmlspecialchars($legend_item['value'] ?? '', ENT_QUOTES, 'UTF-8');
+            $legend_reference_html .= '<span class="badge badge-primary p-2 mr-2 mb-2">
+                <strong>'.$legend_key.'</strong> = '.$legend_value.'
+            </span>';
+        }
+        
+        $legend_reference_html .= '</div>
+                </div>
+            </div>
+        </div>';
+    }
+
     // set the parent menu
     $response->parent_menu = "reports-promotion";
 
@@ -89,20 +117,20 @@ if(!$isEmployee && !$isAdmin) {
                         </div>
                         <div class="card-body">
                             <div class="row mb-3">
-                                <div class="col-md-4">
+                                <div class="col-12 col-md-4 mb-2 mb-md-0">
                                     <label>Select Class</label>
                                     <select name="preschool_class_id" id="preschool_class_id" class="form-control selectpicker" data-width="100%">
                                         '.$classes_list.'
                                     </select>
                                 </div>
-                                <div class="col-md-5">
+                                <div class="col-12 col-md-5 mb-2 mb-md-0">
                                     <label>Select Student</label>
                                     <select name="preschool_student_id" id="preschool_student_id" class="form-control selectpicker" data-width="100%">
                                         <option value="">Select Class First</option>
                                     </select>
                                 </div>
-                                <div class="col-md-3 d-flex align-items-end">
-                                    <button type="button" class="btn btn-primary" onclick="return load_student_reporting();">
+                                <div class="col-12 col-md-3 d-flex align-items-end">
+                                    <button type="button" class="btn btn-primary w-100 w-md-auto" onclick="return load_student_reporting();">
                                         <i class="fas fa-search"></i> Load Student Data
                                     </button>
                                 </div>
@@ -111,6 +139,7 @@ if(!$isEmployee && !$isAdmin) {
                     </div>
                 </div>
             </div>
+            '.$legend_reference_html.'
             <div class="row mt-3" id="student_reporting_container" style="display: none;">
                 <div class="col-12">
                     <div class="card">

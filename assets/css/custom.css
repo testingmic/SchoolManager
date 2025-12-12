@@ -1468,15 +1468,46 @@ h4 {
     padding: 10px;
 }
 
+@media (max-width: 768px) {
+    .questionnaire-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+    .questionnaire-row .legend-options {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+    .legend-options .btn-group {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    .legend-options .btn {
+        flex: 1 1 auto;
+        min-width: calc(14% - 0.25rem);
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+/* Highlight only the selected legend label button */
 .questionnaire-radio:checked + .btn-outline-primary {
     background-color: #8bc34a !important;
     border-color: #8bc34a !important;
     color: #ffffff !important;
     font-weight: 600;
 }
-
 .btn-outline-primary {
     transition: all 0.2s ease;
+}
+#grading_legend_reference {
+    position: sticky;
+    top: 70px;
+    z-index: 10;
+}
+@media (max-width: 768px) {
+    #grading_legend_reference {
+        position: relative;
+        top: 0;
+    }
 }
 
 .bus-img-container {

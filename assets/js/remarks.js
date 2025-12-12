@@ -577,8 +577,8 @@ var display_student_reporting = (studentResults) => {
                 let selectedValue = studentResults[resultKey] || '';
                 
                 html += `
-                <div class="d-flex align-items-center mb-2 border-bottom" data-questionnaire_id="${qId}" data-result_key="${resultKey}">
-                    <div class="flex-grow-1 mr-3">
+                <div class="d-flex align-items-center mb-2 border-bottom questionnaire-row" data-questionnaire_id="${qId}" data-result_key="${resultKey}">
+                    <div class="flex-grow-1 mr-3 questionnaire-text-wrapper">
                         <div class="font-weight-medium">${qText}</div>
                     </div>
                     <div class="legend-options">
@@ -695,6 +695,20 @@ $(document).ready(function() {
         $(`#student_reporting_container`).hide();
     });
 });
+
+// Toggle legend reference visibility
+var toggle_legend_reference = () => {
+    let legendBody = $(`#legend_reference_body`);
+    let toggleIcon = $(`#legend_toggle_icon`);
+    
+    if(legendBody.is(':visible')) {
+        legendBody.slideUp();
+        toggleIcon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+    } else {
+        legendBody.slideDown();
+        toggleIcon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+    }
+}
 
 // Initialize the event listener on page load
 track_reporting_content_changes();
