@@ -41,9 +41,9 @@ class Settings extends Myschoolgh {
     public function getsettings(stdClass $params) {
 
         // global variables
-        global $isAdminAccountant;
+        global $isAdminAccountant, $isTeacher;
 
-        if(!$isAdminAccountant) {
+        if(!$isAdminAccountant && !$isTeacher) {
             return ["code" => 400, "data" => "Sorry! You do not have the permissions to get the settings."];
         }
 
