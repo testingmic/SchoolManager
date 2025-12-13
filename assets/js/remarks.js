@@ -1,33 +1,4 @@
-var load_class_list = (class_id = 0, student_id = 0) => {
-    let theClassSector = $(`select[name="remarks_class_id"]`);
-    let theClassFilter = $(`select[name="filter_remarks_class_id"]`);
-    if(!theClassFilter || !theClassSector) {
-        return;
-    }
-    $.get(`${baseUrl}api/classes/list?columns=a.id,a.item_id,a.name`).then((response) => {
-        if (response.code == 200) {
-            theClassSector.find('option').remove().end();
-            theClassFilter.find('option').remove().end();
-            if(response.data.result.length > 1) {
-                theClassSector.append(`<option value="0" selected="selected">Select Class</option>`);
-                theClassFilter.append(`<option value="0" selected="selected">Select Class to Filter</option>`);
-            }
-            $.each(response.data.result, (_, e) => {
-                let isSelected = class_id == parseInt(e.id) ? "selected" : "";
-                theClassSector.append(`<option data-item_id="${e.item_id}" value='${e.id}' ${isSelected}>${e.name.toUpperCase()}</option>'`);
-                theClassFilter.append(`<option data-item_id="${e.item_id}" value='${e.id}'>${e.name.toUpperCase()}</option>'`);
-            });
-            if(response.data.result.length == 1) {
-                theClassSector.trigger("change");
-                theClassFilter.trigger("change");
-            }
-        }
-    });
-
-    if(class_id > 0) {
-        theClassSector.val(class_id).trigger("change");
-    }
-
+var load_class_list = (student_id = 0) => {
     $(`select[name="remarks_class_id"]`).on("change", function() {
         let value = $(this).val();
         if(value == "0") {
@@ -92,7 +63,7 @@ var delete_student_remarks = (remarks_id) => {
 var edit_student_remarks = (remarks_id, class_id, student_id) => {
     add_student_remarks(class_id, student_id);
     setTimeout(() => {
-        load_class_list(class_id, student_id);
+        load_class_list(student_id);
     }, 100);
 }
 

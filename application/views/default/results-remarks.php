@@ -34,7 +34,23 @@ if(!$isTeacher && !$isAdmin) {
     // get the results remarks list
     $results_remarks_array = load_class("terminal_reports", "controllers", $filter)->results_remarks($filter);
 
-    $classes_list = '';
+    // selected class id
+    $selectedClass = 0;
+
+    // if the class id is set, set the selected class id
+    if(!empty($filter->class_id)) {
+        $selectedClass = $filter->class_id;
+        unset($filter->class_id);
+    }
+
+    // get the classes list
+    $filter->columns = "a.id, a.item_id, a.name";
+    $classes_array = load_class("classes", "controllers", $filter)->list($filter);
+
+    // build the classes list
+    foreach($classes_array['data'] as $key => $each) {
+        $classes_list .= "<option value='{$each->id}' ".($selectedClass == $each->id ? "selected" : null).">{$each->name}</option>";
+    }
 
     $results_remarks_list = "
         <div class='col-md-12'>
