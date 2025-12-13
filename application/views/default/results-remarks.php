@@ -94,7 +94,7 @@ if(!$isTeacher && !$isAdmin) {
                         <h5 class='card-title mb-0 pb-0'>{$remark->class_name} - {$remark->student_name}</h5>
                     </div>
                     <div class='card-body p-3'>
-                        <p>".limit_words($remark->remarks, 20)."...</p>
+                        <p>".limit_words($remark->remarks, 35)."</p>
                         <div class='mt-1 border-top pt-2'>
                             <div><strong>Acadmic Year:</strong> <span class='text-muted'>{$remark->academic_year}</span></div>
                             <div><strong>Acadmic Term:</strong> <span class='text-muted'>{$remark->academic_term}</span></div>
