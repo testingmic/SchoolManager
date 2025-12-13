@@ -33,6 +33,11 @@ if(!$isTeacher && !$isAdmin) {
 
     // get the classes list
     $filter->columns = "a.id, a.item_id, a.name";
+    // if the class id is set, set the selected class id
+    if(!empty($filter->class_id)) {
+        $selectedClass = $filter->class_id;
+        unset($filter->class_id);
+    }
     $classes_array = load_class("classes", "controllers", $filter)->list($filter);
 
     // get the id list from the classes array
@@ -43,12 +48,6 @@ if(!$isTeacher && !$isAdmin) {
 
     // selected class id
     $selectedClass = 0;
-
-    // if the class id is set, set the selected class id
-    if(!empty($filter->class_id)) {
-        $selectedClass = $filter->class_id;
-        unset($filter->class_id);
-    }
 
     $classes_list = "";
     $classes_list1 = "";
