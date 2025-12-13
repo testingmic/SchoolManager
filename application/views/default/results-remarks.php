@@ -33,6 +33,10 @@ if(!$isTeacher && !$isAdmin) {
 
     // get the classes list
     $filter->columns = "a.id, a.item_id, a.name";
+
+    // selected class id
+    $selectedClass = 0;
+    
     // if the class id is set, set the selected class id
     if(!empty($filter->class_id)) {
         $selectedClass = $filter->class_id;
@@ -45,9 +49,6 @@ if(!$isTeacher && !$isAdmin) {
 
     // get the results remarks list
     $results_remarks_array = load_class("terminal_reports", "controllers", $filter)->results_remarks($filter);
-
-    // selected class id
-    $selectedClass = 0;
 
     $classes_list = "";
     $classes_list1 = "";
