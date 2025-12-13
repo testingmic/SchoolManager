@@ -7,7 +7,7 @@ header("Access-Control-Allow-Max-Age: 3600");
 
 // global 
 global $myClass, $accessObject, $defaultUser, $defaultClientData, 
-    $isPayableStaff, $clientFeatures, $isEmployee, $isAdmin;
+    $isPayableStaff, $clientFeatures, $isTeacher, $isAdmin;
 
 // initial variables
 $appName = $myClass->appName;
@@ -22,7 +22,7 @@ $filter = (object) array_map("xss_clean", $_GET);
 $response->title = "Preschool Results Upload";
 
 // access permissions check
-if(!$isEmployee && !$isAdmin) {
+if(!$isTeacher && !$isAdmin) {
     $response->html = page_not_found("permission_denied");
 } else {
 
