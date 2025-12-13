@@ -1907,25 +1907,96 @@ class Terminal_reports extends Myschoolgh {
                 // // get the results submitted by the teachers for each subject
                 if($preshoolReport) {
 
-                    foreach(($reporting_template['sections'] ?? []) as $section) {
-
+                    $sections = $reporting_template['sections'] ?? [];
+                    $section_count = count($sections);
+                    
+                    // Loop through sections in pairs (2 per row)
+                    for($i = 0; $i < $section_count; $i += 2) {
                         $table .= "<tr>";
                         
-                        $table .= "<td>";
-                        $table .= "<strong>".strtoupper($section['title'])."</strong>";
-
-                        $table .= "<table border=\"1\" width=\"100%\">";
-                        foreach($section['questionnaires'] as $questionnaire) {
-                            $table .= "<td>";
-                            $table .= "<strong>".strtoupper($questionnaire['text'])."</strong>";
+                        // First section in the pair
+                        if(isset($sections[$i])) {
+                            $section1 = $sections[$i];
+                            $table .= "<td style=\"border: 1px solid #dee2e6; vertical-align: top; width: 50%;\">";
+                            $table .= "<div style=\"font-weight: bold; font-size: 13px; margin-bottom: 10px; padding: 5px; background-color: #f0f0f0;\">".strtoupper($section1['title'])."</div>";
+                            
+                            // Get student results for this section
+                            $section_results = $student["sheet"][$section1['id']] ?? [];
+                            
+                            // Display questionnaires with their results
+                            if(!empty($section1['questionnaires'])) {
+                                $table .= "<table border=\"0\" width=\"100%\" style=\"font-size: 11px;\">";
+                                foreach($section1['questionnaires'] as $questionnaire) {
+                                    $table .= "<tr>";
+                                    $table .= "<td style=\"padding: 5px; border: 1px solid #dee2e6; font-size: 14px;\">";
+                                    $table .= "<span>{$questionnaire['text']}</span>";
+                                    
+                                    // Find the result for this questionnaire
+                                    $result_value = '';
+                                    foreach($section_results as $result) {
+                                        if(isset($result['question_key']) && $result['question_key'] == $questionnaire['id']) {
+                                            $result_value = $result['ikey'] ?? '';
+                                            break;
+                                        }
+                                    }
+                                    
+                                    if($result_value) {
+                                        $table .= "<span style=\"color: #007bff; font-weight: bold; float: right;\">[{$result_value}]</span>";
+                                    }
+                                    
+                                    $table .= "</td>";
+                                    $table .= "</tr>";
+                                }
+                                $table .= "</table>";
+                            }
+                            
                             $table .= "</td>";
+                        } else {
+                            $table .= "<td style=\"border: 1px solid #dee2e6; width: 50%;\"></td>";
                         }
-                        $table .= "</table>";
-
-                        $table .= "</td>";
-
+                        
+                        // Second section in the pair
+                        if(isset($sections[$i + 1])) {
+                            $section2 = $sections[$i + 1];
+                            $table .= "<td style=\"border: 1px solid #dee2e6; vertical-align: top; width: 50%;\">";
+                            $table .= "<div style=\"font-weight: bold; font-size: 13px; margin-bottom: 10px; padding: 5px; background-color: #f0f0f0;\">".strtoupper($section2['title'])."</div>";
+                            
+                            // Get student results for this section
+                            $section_results = $student["sheet"][$section2['id']] ?? [];
+                            
+                            // Display questionnaires with their results
+                            if(!empty($section2['questionnaires'])) {
+                                $table .= "<table border=\"0\" width=\"100%\" style=\"font-size: 11px;\">";
+                                foreach($section2['questionnaires'] as $questionnaire) {
+                                    $table .= "<tr>";
+                                    $table .= "<td style=\"padding: 5px; border: 1px solid #dee2e6; font-size: 14px;\">";
+                                    $table .= "<span>{$questionnaire['text']}</span>";
+                                    
+                                    // Find the result for this questionnaire
+                                    $result_value = '';
+                                    foreach($section_results as $result) {
+                                        if(isset($result['question_key']) && $result['question_key'] == $questionnaire['id']) {
+                                            $result_value = $result['ikey'] ?? '';
+                                            break;
+                                        }
+                                    }
+                                    
+                                    if($result_value) {
+                                        $table .= "<span style=\"color: #007bff; font-weight: bold; float: right;\">[{$result_value}]</span>";
+                                    }
+                                    
+                                    $table .= "</td>";
+                                    $table .= "</tr>";
+                                }
+                                $table .= "</table>";
+                            }
+                            
+                            $table .= "</td>";
+                        } else {
+                            $table .= "<td style=\"border: 1px solid #dee2e6; width: 50%;\"></td>";
+                        }
+                        
                         $table .= "</tr>";
-
                     }
 
                 } else {
