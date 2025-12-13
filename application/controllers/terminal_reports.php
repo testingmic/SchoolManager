@@ -131,6 +131,7 @@ class Terminal_reports extends Myschoolgh {
         $whereClause = !empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : null;
         $whereClause .= !empty($params->remarks_student_id) ? " AND a.student_id='{$params->remarks_student_id}'" : null;
         $whereClause .= !empty($params->remarks_id) ? " AND a.id='{$params->remarks_id}'" : null;
+        $whereClause .= !empty($params->class_ids) ? " AND a.class_id IN {$this->inList($params->class_ids)}" : null;
 
         // get the list of remarks
         $listRemarks = $this->pushQuery(

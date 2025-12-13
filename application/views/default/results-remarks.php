@@ -31,6 +31,13 @@ if(!$isTeacher && !$isAdmin) {
     $filter->clientId = $session->clientId;
     $filter->client_data = $defaultClientData;
 
+    // get the classes list
+    $filter->columns = "a.id, a.item_id, a.name";
+    $classes_array = load_class("classes", "controllers", $filter)->list($filter);
+
+    // get the id list from the classes array
+    $filter->class_ids = array_column(($classes_array['data'] ?? []), 'id');
+
     // get the results remarks list
     $results_remarks_array = load_class("terminal_reports", "controllers", $filter)->results_remarks($filter);
 
@@ -42,10 +49,6 @@ if(!$isTeacher && !$isAdmin) {
         $selectedClass = $filter->class_id;
         unset($filter->class_id);
     }
-
-    // get the classes list
-    $filter->columns = "a.id, a.item_id, a.name";
-    $classes_array = load_class("classes", "controllers", $filter)->list($filter);
 
     $classes_list = "";
     $classes_list1 = "";
