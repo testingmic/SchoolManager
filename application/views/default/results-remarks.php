@@ -47,9 +47,12 @@ if(!$isTeacher && !$isAdmin) {
     $filter->columns = "a.id, a.item_id, a.name";
     $classes_array = load_class("classes", "controllers", $filter)->list($filter);
 
+    $classes_list = "";
+    $classes_list1 = "";
     // build the classes list
     foreach($classes_array['data'] as $key => $each) {
         $classes_list .= "<option value='{$each->id}' ".($selectedClass == $each->id ? "selected" : null).">{$each->name}</option>";
+        $classes_list1 .= "<option value='{$each->id}'>{$each->name}</option>";
     }
 
     $results_remarks_list = "
@@ -154,7 +157,7 @@ if(!$isTeacher && !$isAdmin) {
                                         <label for="class_id">Select Class <span class="required">*</span></label>
                                         <select name="remarks_class_id" id="remarks_class_id" class="form-control selectpicker" data-width="100%">
                                             <option value="">Select Class</option>
-                                            '.$classes_list.'
+                                            '.$classes_list1.'
                                         </select>
                                     </div>
                                     <div class="form-group">
