@@ -4718,6 +4718,15 @@ class Forms extends Myschoolgh {
             return $the_form;
         }
 
+        // Load reporting classes setting
+        $getSettingsValues = load_class("settings", "controllers")->getsettings((object) [
+            "clientId" => $clientId, "setting_name" => ["preschool_reporting_classes"]
+        ])["data"] ?? [];
+
+        // get the reporting classes
+        $reporting_classes = $getSettingsValues["classes"] ?? [];
+        $excludedClasses = !empty($reporting_classes) ? array_map('intval', $reporting_classes) : [];
+
         // if the grading structure columsn is empty then end the query
         if(!isset($client_data->grading_structure->columns) || empty($client_data->grading_structure->columns)) {
             $the_form["general"] = "<div class='text-center alert alert-warning'>Sorry! The <strong>Grading Structure</strong> has not yet been set. Please Visit <strong>Settings > Examination Grading > Terminal Report Structure</strong> section to set this up.</div>";
@@ -4731,6 +4740,7 @@ class Forms extends Myschoolgh {
                     <select data-width='100%' class='form-control selectpicker' name='class_id' id='class_id'>
                         <option value=''>Select the Class</option>";
                         foreach($classes_list as $class) {
+                            if(in_array($class->id, $excludedClasses)) continue;
                             $the_form["general"] .= "<option data-payment_module='{$class->payment_module}' value='{$class->item_id}'>".strtoupper($class->name)."</option>";
                         }
         $the_form["general"] .= "</select>

@@ -208,6 +208,14 @@ function get_month($initial_info, $month, $year) {
 
 }
 
+/**
+ * Convert the date to days
+ * 
+ * @param string $dateToBeginQuery
+ * @param string $dateToEndQuery
+ * 
+ * @return string
+ */
 function convert_to_days($dateToBeginQuery, $dateToEndQuery) {
     if(strtotime($dateToEndQuery) > strtotime($dateToBeginQuery)) {
         $datetime1 = new DateTime($dateToBeginQuery);
@@ -219,7 +227,22 @@ function convert_to_days($dateToBeginQuery, $dateToEndQuery) {
     }
 }
 
+/**
+ * Convert the date to years
+ * 
+ * @param string $dateToBeginQuery
+ * @param string $dateToEndQuery
+ * 
+ * @return string
+ */
 function convert_to_years($dateToBeginQuery, $dateToEndQuery) {
+
+    // if the end date is not set
+    if($dateToEndQuery == "1970-01-01") {
+        return "N/A";
+    }
+
+    // if the end date is greater than the start date
     if(strtotime($dateToEndQuery) > strtotime($dateToBeginQuery)) {
         $datetime1 = new DateTime($dateToBeginQuery);
         $datetime2 = new DateTime($dateToEndQuery);

@@ -19,12 +19,12 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "Upload Results";
 $response->title = $pageTitle;
 
-// confirm that the user has the required permissions
-$the_form = load_class("forms", "controllers")->terminal_reports($clientId);
-
 if(!$isTeacher && !$isAdmin) {
     $response->html = page_not_found("permission_denied");
 } else {
+
+    // confirm that the user has the required permissions
+    $the_form = load_class("forms", "controllers")->terminal_reports($clientId);
 
     // add the scripts to load
     $response->scripts = ["assets/js/grading.js", "assets/js/results.js"];

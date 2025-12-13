@@ -1666,7 +1666,18 @@ class Terminal_reports extends Myschoolgh {
                 "student_item_id" => isset($params->student_id) && !empty($params->student_id) && ($params->student_id !== "null") ? $params->student_id : null,
             ];
 
-            $report_data = $this->result_score_list(null, $param, true);
+            // Load reporting classes setting
+            $getSettingsValues = load_class("settings", "controllers")->getsettings((object) [
+                "clientId" => $params->clientId, "setting_name" => [
+                    "preschool_reporting_legend", "preschool_reporting_content", "preschool_reporting_classes"
+                ]
+            ])["data"] ?? [];
+
+            $reporting_classes = $getSettingsValues["preschool_reporting_classes"]["classes"] ?? [];
+            $reporting_template = $getSettingsValues["preschool_reporting_content"] ?? null;
+            $reporting_legend = $getSettingsValues["preschool_reporting_legend"] ?? [ 'legend' => [] ];
+
+            $report_data = !in_array($params->class_id, $reporting_classes) ? $this->result_score_list(null, $param, true) : [];
 
             // get the user attendance results
             $attendance_param = (object) [
@@ -1719,13 +1730,89 @@ class Terminal_reports extends Myschoolgh {
             // get the class id using the item_id
             $classInfo = $this->pushQuery("id, item_id, name", "classes", "item_id='{$params->class_id}' AND client_id='{$this->clientId}' LIMIT 1");
 
+            // set the teacher remarks
             $teacherRemarks = [];
+
             // load the remarks information
             if(!empty($classInfo)) {
                 $remarksInfo = $this->pushQuery("remarks, student_id", "grading_terminal_remarks", "class_id='{$classInfo[0]->id}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' AND client_id='{$this->clientId}'");
                 foreach($remarksInfo as $remark) {
                     $teacherRemarks[$remark->student_id] = $remark->remarks;
                 }
+            }
+
+            function get_legend_value($key, $legend) {
+                foreach($legend['legend'] as $item) {
+                    if($item['key'] == $key) {
+                        return $item['value'];
+                    }
+                }
+                return null;
+            }
+
+            function get_question_text($key, $template) {
+                foreach($template['sections'] as $section) {
+                    foreach($section['questionnaires'] as $questionnaire) {
+                        if($questionnaire['id'] == $key) {
+                            return $questionnaire['text'];
+                        }
+                    }
+                }
+            }
+
+            $preshoolReport = false;
+
+            // if the class is in the reporting classes
+            if(in_array($classInfo[0]->id, $reporting_classes)) {
+                $preschool_results = $this->pushQuery(
+                    "a.*, u.name AS student_name, u.date_of_birth", 
+                    "preschool_results a
+                    LEFT JOIN users u ON u.item_id = a.student_id", 
+                    "a.class_id='{$classInfo[0]->id}' AND a.academic_year='{$params->academic_year}' AND a.academic_term='{$params->academic_term}' AND a.client_id='{$params->clientId}'");
+
+                // group the results by id
+                $report_data = [];
+                foreach($preschool_results as $result) {
+
+                    $studentId = $result->student_id;
+                    $result->ikey = $result->result_value;
+
+                    // get the legend value
+                    $result->ivalue = get_legend_value($result->result_value, $reporting_legend);
+
+                    // unset the student id
+                    unset($result->student_id);
+                    unset($result->updated_at);
+                    unset($result->result_value);
+                    
+                    $split_key = explode("_", $result->result_key);
+                    
+                    $result->question_key = $split_key[1];
+                    
+                    unset($result->result_key);
+                    
+                    $result->question = get_question_text($split_key[1], $reporting_template);
+
+                    $result->data = [
+                        "student_name" => $result->student_name,
+                        "academic_year" => $result->academic_year,
+                        "academic_term" => $result->academic_term,
+                        "class_name" => $classInfo[0]->name,
+                        "student_age" => convert_to_years($result->date_of_birth, date("Y-m-d")),
+                    ];
+
+                    // add the result to the report data
+                    $report_data[$studentId]["data"] = $result->data;
+                    unset($result->data);
+                    $report_data[$studentId]["sheet"][$split_key[0]][] = $result;
+                }
+
+                $preshoolReport = true;
+
+                $report_data = json_decode(json_encode($report_data), true);
+
+                $interpretation = $reporting_legend['legend'];
+
             }
 
             // loop through the report set
@@ -1737,6 +1824,7 @@ class Terminal_reports extends Myschoolgh {
 
                 // set the information
                 $table = "<table width=\"100%\" cellspacing=\"5px\" cellpadding=\"5px\" style=\"background-color:#050f58; color:#fff\">\n";
+                
                 // get the student information
                 $table .= "<tr>";
                 $table .= "<td><strong>".strtoupper($student["data"]["student_name"])."</strong></td>\n";
@@ -1775,7 +1863,7 @@ class Terminal_reports extends Myschoolgh {
 
                 $theTotal = 0;
                 $theCount = 0;
-                foreach($student["sheet"] as $score) {
+                foreach(($student["sheet"] ?? []) as $score) {
                     if($score->status === "Approved") {
                         $theTotal += $score->total_percentage;
                         $theCount++;
@@ -1786,9 +1874,10 @@ class Terminal_reports extends Myschoolgh {
 
                 $table .= "
                     <td style=\"padding:5px;\" align=\"center\" valign=\"top\" width=\"20%\">
+                        ".($preshoolReport ? null : "
                         <div style=\"padding:5px;\">
                             <strong style=\"color:#6777ef\">STUDENT AVERAGE: ".round($studentAverage, 2)."</strong>
-                        </div>
+                        </div>")."
                         <div style=\"padding:5px; text-transform:uppercase;\">
                             <strong>SCHOOL RESUMES ON:<br>
                                 <span style=\"color:#6777ef\">".date("jS M Y", strtotime($academics->next_term_starts))."</span>
@@ -1797,46 +1886,74 @@ class Terminal_reports extends Myschoolgh {
                     </td>
                     </tr>";
                 $table .= "</table>\n";
-                $table .= "<table cellpadding=\"5\" width=\"100%\" style=\"font-size:10px;border: 1px solid #dee2e6; min-height: 400px;\">";
+                $table .= "<table cellpadding=\"5\" border=\"1\" width=\"100%\" style=\"font-size:10px;border: 1px solid #dee2e6; min-height: 400px;\">";
                 $table .= "<tr style=\"font-weight:bold;font-size:15px;background-color:#050f58;color:#fff;\">";
                 $table .= "<td align=\"center\" colspan=\"".($column_count + 5)."\">END OF TERM REPORT CARD</td>";
                 $table .= "</tr>";
-                $table .= "<tr style=\"font-weight:bold;{$defaultFontSize};background-color:#d9d9d9;\">";
-                $table .= "<td style=\"{$defaultFontSize}\" width=\"25%\">SUBJECT</td>";
-                $table .= $grading_column;
-                $table .= "<td style=\"{$defaultFontSize}\" align=\"center\" width=\"10%\">TOTAL SCORE</td>";
-                $table .= "<td style=\"{$defaultFontSize}\" width=\"15%\">TEACHER</td>";
-                $table .= "<td style=\"{$defaultFontSize}\">TEACHER'S COMMENT</td>";
-                $table .= "</tr>";
+
+                if(!$preshoolReport) {
+                    $table .= "<tr style=\"font-weight:bold;{$defaultFontSize};background-color:#d9d9d9;\">";
+                    $table .= "<td style=\"{$defaultFontSize}\" width=\"25%\">SUBJECT</td>";
+                    $table .= $grading_column;
+                    $table .= "<td style=\"{$defaultFontSize}\" align=\"center\" width=\"10%\">TOTAL SCORE</td>";
+                    $table .= "<td style=\"{$defaultFontSize}\" width=\"15%\">TEACHER</td>";
+                    $table .= "<td style=\"{$defaultFontSize}\">TEACHER'S COMMENT</td>";
+                    $table .= "</tr>";
+                }
 
                 // set the row
                 $irow = 0;
 
                 // // get the results submitted by the teachers for each subject
-                foreach($student["sheet"] as $score) {
-                    // only show the subject if approved
-                    if($score->status === "Approved") {
+                if($preshoolReport) {
 
-                        $irow++;
+                    foreach(($reporting_template['sections'] ?? []) as $section) {
 
-                        $bg_color = $irow % 2 === 0 ? "#cccccc" : "#ffffff";
-
-                        $background = "background-color:{$bg_color};";
-
-                        // append to the table
                         $table .= "<tr>";
-                        $table .= "<td style=\"border: 1px solid #dee2e6; {$background} font-size:13px;\">{$score->course_name}</td>";
-                        // get the scores
-                        foreach($score->scores as $s_score) {
-                            if(!in_array($s_score['item'], ["sba", "marks"])) continue;
-                            $s_score = $s_score['score'] ?? 0;
-                            $table .= "<td style=\"border: 1px solid #dee2e6;{$background}{$increaseFontSize}\" align=\"center\">".round($s_score, 2)."</td>";
+                        
+                        $table .= "<td>";
+                        $table .= "<strong>".strtoupper($section['title'])."</strong>";
+
+                        $table .= "<table border=\"1\" width=\"100%\">";
+                        foreach($section['questionnaires'] as $questionnaire) {
+                            $table .= "<td>";
+                            $table .= "<strong>".strtoupper($questionnaire['text'])."</strong>";
+                            $table .= "</td>";
                         }
-                        $table .= "<td style=\"border: 1px solid #dee2e6;{$background}{$increaseFontSize}\" align=\"center\">".round($score->average_score ?? 0, 2)."</td>";
-                        $table .= "<td style=\"border: 1px solid #dee2e6;{$background}{$increaseFontSize}\" align=\"center\">".round($score->total_percentage, 2)."</td>";
-                        $table .= "<td style=\"border: 1px solid #dee2e6;{$background} font-size:11px;\">".strtoupper($score->teachers_name)."</td>";
-                        $table .= "<td style=\"border: 1px solid #dee2e6;{$background}{$defaultFontSize}\">{$score->class_teacher_remarks}</td>";
+                        $table .= "</table>";
+
+                        $table .= "</td>";
+
                         $table .= "</tr>";
+
+                    }
+
+                } else {
+                    foreach(($student["sheet"] ?? []) as $score) {
+                        // only show the subject if approved
+                        if($score->status === "Approved") {
+
+                            $irow++;
+
+                            $bg_color = $irow % 2 === 0 ? "#cccccc" : "#ffffff";
+
+                            $background = "background-color:{$bg_color};";
+
+                            // append to the table
+                            $table .= "<tr>";
+                            $table .= "<td style=\"border: 1px solid #dee2e6; {$background} font-size:13px;\">{$score->course_name}</td>";
+                            // get the scores
+                            foreach($score->scores as $s_score) {
+                                if(!in_array($s_score['item'], ["sba", "marks"])) continue;
+                                $s_score = $s_score['score'] ?? 0;
+                                $table .= "<td style=\"border: 1px solid #dee2e6;{$background}{$increaseFontSize}\" align=\"center\">".round($s_score, 2)."</td>";
+                            }
+                            $table .= "<td style=\"border: 1px solid #dee2e6;{$background}{$increaseFontSize}\" align=\"center\">".round($score->average_score ?? 0, 2)."</td>";
+                            $table .= "<td style=\"border: 1px solid #dee2e6;{$background}{$increaseFontSize}\" align=\"center\">".round($score->total_percentage, 2)."</td>";
+                            $table .= "<td style=\"border: 1px solid #dee2e6;{$background} font-size:11px;\">".strtoupper($score->teachers_name)."</td>";
+                            $table .= "<td style=\"border: 1px solid #dee2e6;{$background}{$defaultFontSize}\">{$score->class_teacher_remarks}</td>";
+                            $table .= "</tr>";
+                        }
                     }
                 }
                 $table .= "</table>";
@@ -1847,21 +1964,22 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "<td align=\"center\" width=\"40%\" valign=\"top\">";
                 $table .= "<table style=\"{$defaultFontSize}\" align=\"left\" cellpadding=\"5px\" border=\"1\" width=\"100%\">";
                 $table .= "<tr style=\"font-weight:bold\">";
-                $table .= "<td colspan=\"2\" align=\"center\">";
+                $table .= "<td colspan=\"2\">";
                 $table .= "<span style=\"font-weight:bold; font-size:15px\">GRADING SYSTEM</span>";
                 $table .= "</td>";
                 $table .= "</tr>";
                 $table .= "<tr style=\"font-weight:bold\">";
-                $table .= "<td>Marks in Percentage (%)</td>";
+                $table .= "<td>".($preshoolReport ? "Key" : "Marks in Percentage (%)")."</td>";
                 $table .= "<td>Grade</td>";
                 $table .= "<td>Interpretation</td>";
                 $table .= "</tr>\n";
+
                 // loop through the grading system
                 foreach($interpretation as $ikey => $ivalue) {
                     $table .= "<tr>";
-                    $table .= "<td>{$ivalue->start} - {$ivalue->end}</td>";
+                    $table .= $preshoolReport ? "<td>{$ivalue['key']}</td>" : "<td>{$ivalue->start} - {$ivalue->end}</td>";
                     $table .= "<td>{$ikey}</td>";
-                    $table .= "<td>{$ivalue->interpretation}</td>";
+                    $table .= $preshoolReport ? "<td>{$ivalue['value']}</td>" : "<td>{$ivalue->interpretation}</td>";
                     $table .= "</tr>";
                 }
                 $table .= "</table>";
@@ -1929,6 +2047,7 @@ class Terminal_reports extends Myschoolgh {
                     "attendance" => $attendance_log,
                     "term_fees" => $next_term_fees
                 ];
+
             }
 
             return [
