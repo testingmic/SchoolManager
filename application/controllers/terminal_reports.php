@@ -1908,15 +1908,41 @@ class Terminal_reports extends Myschoolgh {
                 if($preshoolReport) {
 
                     $sections = $reporting_template['sections'] ?? [];
-                    $section_count = count($sections);
+                    
+                    // Helper function to check if a section has at least one result
+                    $hasSectionResults = function($section, $student_sheet) {
+                        $section_results = $student_sheet[$section['id']] ?? [];
+                        if(empty($section_results)) {
+                            return false;
+                        }
+                        // Check if any questionnaire has a result
+                        foreach($section['questionnaires'] ?? [] as $questionnaire) {
+                            foreach($section_results as $result) {
+                                if(isset($result['question_key']) && $result['question_key'] == $questionnaire['id'] && !empty($result['ikey'])) {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    };
+                    
+                    // Filter sections to only include those with results
+                    $sections_with_results = [];
+                    foreach($sections as $section) {
+                        if($hasSectionResults($section, $student["sheet"])) {
+                            $sections_with_results[] = $section;
+                        }
+                    }
+                    
+                    $section_count = count($sections_with_results);
                     
                     // Loop through sections in pairs (2 per row)
                     for($i = 0; $i < $section_count; $i += 2) {
                         $table .= "<tr>";
                         
                         // First section in the pair
-                        if(isset($sections[$i])) {
-                            $section1 = $sections[$i];
+                        if(isset($sections_with_results[$i])) {
+                            $section1 = $sections_with_results[$i];
                             $table .= "<td style=\"border: 1px solid #dee2e6; vertical-align: top; width: 50%;\">";
                             $table .= "<div style=\"font-weight: bold; font-size: 13px; margin-bottom: 10px; padding: 5px; background-color: #f0f0f0;\">".strtoupper($section1['title'])."</div>";
                             
@@ -1927,10 +1953,6 @@ class Terminal_reports extends Myschoolgh {
                             if(!empty($section1['questionnaires'])) {
                                 $table .= "<table border=\"0\" width=\"100%\" style=\"font-size: 11px;\">";
                                 foreach($section1['questionnaires'] as $questionnaire) {
-                                    $table .= "<tr>";
-                                    $table .= "<td style=\"padding: 5px; border: 1px solid #dee2e6; font-size: 14px;\">";
-                                    $table .= "<span>{$questionnaire['text']}</span>";
-                                    
                                     // Find the result for this questionnaire
                                     $result_value = '';
                                     foreach($section_results as $result) {
@@ -1940,12 +1962,15 @@ class Terminal_reports extends Myschoolgh {
                                         }
                                     }
                                     
+                                    // Only show questionnaire if it has a result
                                     if($result_value) {
+                                        $table .= "<tr>";
+                                        $table .= "<td style=\"padding: 5px; border: 0px solid #dee2e6; font-size: 14px;\">";
+                                        $table .= "<span>{$questionnaire['text']}</span>";
                                         $table .= "<span style=\"color: #007bff; font-weight: bold; float: right;\">[{$result_value}]</span>";
+                                        $table .= "</td>";
+                                        $table .= "</tr>";
                                     }
-                                    
-                                    $table .= "</td>";
-                                    $table .= "</tr>";
                                 }
                                 $table .= "</table>";
                             }
@@ -1956,8 +1981,8 @@ class Terminal_reports extends Myschoolgh {
                         }
                         
                         // Second section in the pair
-                        if(isset($sections[$i + 1])) {
-                            $section2 = $sections[$i + 1];
+                        if(isset($sections_with_results[$i + 1])) {
+                            $section2 = $sections_with_results[$i + 1];
                             $table .= "<td style=\"border: 1px solid #dee2e6; vertical-align: top; width: 50%;\">";
                             $table .= "<div style=\"font-weight: bold; font-size: 13px; margin-bottom: 10px; padding: 5px; background-color: #f0f0f0;\">".strtoupper($section2['title'])."</div>";
                             
@@ -1968,10 +1993,6 @@ class Terminal_reports extends Myschoolgh {
                             if(!empty($section2['questionnaires'])) {
                                 $table .= "<table border=\"0\" width=\"100%\" style=\"font-size: 11px;\">";
                                 foreach($section2['questionnaires'] as $questionnaire) {
-                                    $table .= "<tr>";
-                                    $table .= "<td style=\"padding: 5px; border: 1px solid #dee2e6; font-size: 14px;\">";
-                                    $table .= "<span>{$questionnaire['text']}</span>";
-                                    
                                     // Find the result for this questionnaire
                                     $result_value = '';
                                     foreach($section_results as $result) {
@@ -1981,12 +2002,15 @@ class Terminal_reports extends Myschoolgh {
                                         }
                                     }
                                     
+                                    // Only show questionnaire if it has a result
                                     if($result_value) {
+                                        $table .= "<tr>";
+                                        $table .= "<td style=\"padding: 5px; border: 0px solid #dee2e6; font-size: 14px;\">";
+                                        $table .= "<span>{$questionnaire['text']}</span>";
                                         $table .= "<span style=\"color: #007bff; font-weight: bold; float: right;\">[{$result_value}]</span>";
+                                        $table .= "</td>";
+                                        $table .= "</tr>";
                                     }
-                                    
-                                    $table .= "</td>";
-                                    $table .= "</tr>";
                                 }
                                 $table .= "</table>";
                             }
@@ -2030,7 +2054,7 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "</table>";
 
                 // set the grading system
-                $table .= "<table cellpadding=\"5px\" border=\"0\" width=\"100%\">";
+                $table .= "<table ".($preshoolReport ? "style=\"margin-top:30px;\"" : null)." cellpadding=\"5px\" border=\"0\" width=\"100%\">";
                 $table .= "<tr>";
                 $table .= "<td align=\"center\" width=\"40%\" valign=\"top\">";
                 $table .= "<table style=\"{$defaultFontSize}\" align=\"left\" cellpadding=\"5px\" border=\"1\" width=\"100%\">";
